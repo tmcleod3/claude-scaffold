@@ -34,7 +34,7 @@ Six lead agents, each commanding a themed roster of sub-agents. Every character 
 | QA | **Batman** | DC Comics | Bug hunting, regression testing, hardening, observability |
 | Security | **Kenobi** | Star Wars | Auth, injection, secrets, headers, PII, encryption, OWASP |
 | Architecture | **Picard** | Star Trek | Schema design, scaling strategy, tech debt, failure modes, ADRs |
-| DevOps | **Motoko** | Anime | Provisioning, deployment, monitoring, backups, disaster recovery |
+| DevOps | **Kusanagi** | Anime | Provisioning, deployment, monitoring, backups, disaster recovery |
 
 ### Sub-Agent Highlights
 
@@ -77,7 +77,7 @@ claude-scaffold/
 │       ├── QA_ENGINEER.md                 ← Batman's QA & bug hunting protocol
 │       ├── SECURITY_AUDITOR.md            ← Kenobi's security audit protocol
 │       ├── SYSTEMS_ARCHITECT.md           ← Picard's architecture review protocol
-│       ├── DEVOPS_ENGINEER.md             ← Motoko's DevOps & infrastructure protocol
+│       ├── DEVOPS_ENGINEER.md             ← Kusanagi's DevOps & infrastructure protocol
 │       └── SUB_AGENTS.md                  ← Orchestration protocol for parallel sessions
 │
 └── scripts/
@@ -132,8 +132,8 @@ The `BUILD_PROTOCOL.md` defines a 13-phase sequence from PRD to production:
 | Phase | Lead Agent | What Happens |
 |-------|-----------|-------------|
 | 0. Orient | Picard | Reads entire PRD, extracts architecture, produces ADRs |
-| 1. Scaffold | Stark + Motoko | Framework, configs, schema, directory structure |
-| 2. Infrastructure | Motoko | Database, Redis, environment, verify everything boots |
+| 1. Scaffold | Stark + Kusanagi | Framework, configs, schema, directory structure |
+| 2. Infrastructure | Kusanagi | Database, Redis, environment, verify everything boots |
 | 3. Auth | Stark + Galadriel | Login, signup, OAuth, sessions, roles. Kenobi reviews. |
 | 4. Core Feature | Stark + Galadriel | Single most important user flow, end-to-end |
 | 5. Supporting Features | Stark + Galadriel | Remaining PRD features in dependency order |
@@ -143,7 +143,7 @@ The `BUILD_PROTOCOL.md` defines a 13-phase sequence from PRD to production:
 | 9. QA Pass | Batman | Oracle scans. Red Hood breaks. Nightwing verifies. |
 | 10. UX/UI Pass | Galadriel | Elrond maps flows. Samwise checks a11y. Gandalf breaks edges. |
 | 11. Security Pass | Kenobi | Yoda audits auth. Windu tests injection. Leia checks secrets. |
-| 12. Deploy | Motoko | Senku provisions. Levi deploys. L monitors. Bulma backs up. |
+| 12. Deploy | Kusanagi | Senku provisions. Levi deploys. L monitors. Bulma backs up. |
 | 13. Launch | All | Full checklist: SSL, email, payments, analytics, monitoring |
 
 ### Agent Cross-References
@@ -153,7 +153,7 @@ Every agent knows when to hand off work to another agent. For example:
 - Galadriel finds a backend API returning bad data → hands off to **Stark**
 - Stark finds a security vulnerability → hands off to **Kenobi**
 - Batman finds an architectural problem → hands off to **Picard**
-- Kenobi's fix requires infrastructure changes → hands off to **Motoko**
+- Kenobi's fix requires infrastructure changes → hands off to **Kusanagi**
 
 These handoff tables are defined in every method doc.
 
@@ -197,7 +197,7 @@ A 7-agent security audit: auth (Yoda), injection (Windu), access control (Ahsoka
 ### SYSTEMS_ARCHITECT.md (Picard)
 A 5-agent architecture review: data architecture (Spock), infrastructure strategy (Scotty), integrations (Uhura), reliability (La Forge), tech debt (Data). Produces ADRs, scaling plans, failure mode catalogs, and tech debt inventories.
 
-### DEVOPS_ENGINEER.md (Motoko)
+### DEVOPS_ENGINEER.md (Kusanagi)
 A 6-agent infrastructure protocol: provisioning (Senku), deployment (Levi), networking (Spike), monitoring (L), backup (Bulma), cost analysis (Holo). Produces deploy scripts, backup automation, runbooks, and monitoring setup.
 
 ### SUB_AGENTS.md

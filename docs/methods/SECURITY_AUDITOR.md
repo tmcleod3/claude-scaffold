@@ -34,7 +34,7 @@ OWASP Top 10 evaluation. Find misconfigurations, missing protections, insecure d
 | Fix requires backend refactoring | **Stark** (Backend) |
 | Fix requires UI changes | **Galadriel** (Frontend) |
 | Architectural security concern | **Picard** (Architecture) |
-| Infrastructure changes needed | **Motoko** (DevOps) |
+| Infrastructure changes needed | **Kusanagi** (DevOps) |
 | Need to verify fix didn't break things | **Batman** (QA) |
 
 ## Operating Rules

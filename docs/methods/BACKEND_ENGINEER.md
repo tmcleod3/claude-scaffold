@@ -34,7 +34,7 @@ Audit and improve all backend code. Ensure data integrity, error handling, consi
 | Frontend bug or UX issue | **Galadriel** (Frontend) |
 | Security vulnerability | **Kenobi** (Security) |
 | Architecture fundamentally wrong | **Picard** (Architecture) |
-| Infrastructure/deployment issue | **Motoko** (DevOps) |
+| Infrastructure/deployment issue | **Kusanagi** (DevOps) |
 | Need QA verification | **Batman** (QA) |
 
 ## Operating Rules

@@ -32,7 +32,7 @@ Find, reproduce, and fix real bugs (not theoretical). Improve reliability, error
 | UI/UX issue (not a code bug) | **Galadriel** (Frontend) |
 | Security vulnerability | **Kenobi** (Security) |
 | Architectural problem | **Picard** (Architecture) |
-| Infrastructure/deployment issue | **Motoko** (DevOps) |
+| Infrastructure/deployment issue | **Kusanagi** (DevOps) |
 | Backend API fundamentally wrong | **Stark** (Backend) |
 
 ## Operating Rules

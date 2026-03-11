@@ -8,8 +8,8 @@
 | Phase | Lead | Supporting |
 |-------|------|-----------|
 | 0. Orient | **Picard** | All read PRD |
-| 1. Scaffold | **Stark** + **Motoko** | — |
-| 2. Infrastructure | **Motoko** | **Stark** (DB) |
+| 1. Scaffold | **Stark** + **Kusanagi** | — |
+| 2. Infrastructure | **Kusanagi** | **Stark** (DB) |
 | 3. Auth | **Stark** + **Galadriel** | **Kenobi** (review) |
 | 4. Core Feature | **Stark** + **Galadriel** | — |
 | 5. Supporting Features | **Stark** + **Galadriel** | **Batman** (regression) |
@@ -19,7 +19,7 @@
 | 9. QA Pass | **Batman** | All |
 | 10. UX/UI Pass | **Galadriel** | All |
 | 11. Security Pass | **Kenobi** | All |
-| 12. Deploy | **Motoko** | **Batman** (smoke) |
+| 12. Deploy | **Kusanagi** | **Batman** (smoke) |
 | 13. Launch | All | — |
 
 Full character pools: `/docs/NAMING_REGISTRY.md`
@@ -28,9 +28,9 @@ Full character pools: `/docs/NAMING_REGISTRY.md`
 
 **Step 0 — Picard Ingests PRD.** Extract: identity, stack, architecture, data model, routes, flows, tiers, integrations, env vars, deployment. Flag missing items. Produce initial ADRs.
 
-**Step 1 — Stark + Motoko Scaffold.** Framework, configs, schema, directory structure, types, utils, root layout. Every placeholder references its PRD section.
+**Step 1 — Stark + Kusanagi Scaffold.** Framework, configs, schema, directory structure, types, utils, root layout. Every placeholder references its PRD section.
 
-**Step 2 — Motoko Infrastructure.** Database (Banner assists) → Redis → Environment → Verify (dev, build, lint, typecheck all pass).
+**Step 2 — Kusanagi Infrastructure.** Database (Banner assists) → Redis → Environment → Verify (dev, build, lint, typecheck all pass).
 
 **Step 3 — Auth (Kenobi Reviews).** Providers, login, signup, password reset, sessions, middleware, roles. Password manager compatible.
 
@@ -50,7 +50,7 @@ Full character pools: `/docs/NAMING_REGISTRY.md`
 
 **Step 11 — Kenobi's Security Pass.** Yoda audits auth. Windu tests injection. Ahsoka checks access. Leia audits secrets. Rex reviews headers. Padmé checks data. Chewie scans deps.
 
-**Step 12 — Motoko Deploys.** Senku provisions. Spike configures DNS/SSL. Levi builds pipeline. L sets up monitoring. Bulma configures backups.
+**Step 12 — Kusanagi Deploys.** Senku provisions. Spike configures DNS/SSL. Levi builds pipeline. L sets up monitoring. Bulma configures backups.
 
 **Step 13 — Launch Checklist.** All flows in production ✓ SSL ✓ Email ✓ Payments ✓ Analytics ✓ Monitoring ✓ Backups ✓ Security headers ✓ Legal ✓ Performance ✓ Mobile ✓ Accessibility ✓
 

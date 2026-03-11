@@ -20,7 +20,7 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 | **Batman** | DC Comics | QA & Bug Hunting | `QA_ENGINEER.md` |
 | **Kenobi** | Star Wars | Security Auditing | `SECURITY_AUDITOR.md` |
 | **Picard** | Star Trek | Systems Architecture | `SYSTEMS_ARCHITECT.md` |
-| **Motoko** | Anime | DevOps & Infrastructure | `DEVOPS_ENGINEER.md` |
+| **Kusanagi** | Anime | DevOps & Infrastructure | `DEVOPS_ENGINEER.md` |
 
 ### Default Sub-Agents
 
@@ -41,9 +41,9 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 | New API endpoint | Stark | Galadriel (UI), Batman (testing) |
 | Fix a bug | Batman | Stark or Galadriel (depending on location) |
 | Security audit | Kenobi | All (review their domains) |
-| Architecture decision | Picard | Stark, Motoko (implementation) |
-| Deploy to production | Motoko | Batman (smoke test), Kenobi (security) |
-| Performance issue | Stark or Galadriel | Picard (if arch), Motoko (if infra) |
+| Architecture decision | Picard | Stark, Kusanagi (implementation) |
+| Deploy to production | Kusanagi | Batman (smoke test), Kenobi (security) |
+| Performance issue | Stark or Galadriel | Picard (if arch), Kusanagi (if infra) |
 | Database migration | Stark (Banner) | Picard (Spock review), Batman (verify) |
 
 ---
@@ -56,7 +56,7 @@ Stark:     /src/lib/, /src/workers/, /src/types/, /prisma/
 Batman:    Cross-cutting (reads everything, writes fixes)
 Kenobi:    Cross-cutting (reads everything, writes fixes)
 Picard:    /docs/ (ADRs, architecture), reviews all schemas
-Motoko:    /scripts/, config files, /docs/RUNBOOK.md
+Kusanagi:    /scripts/, config files, /docs/RUNBOOK.md
 ```
 
 Cross-cutting changes (shared types, DB schema, utils) require orchestrator approval.

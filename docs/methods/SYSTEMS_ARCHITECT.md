@@ -32,7 +32,7 @@ Ensure architecture matches product needs. Identify structural risks and scaling
 | Decision impacts API/DB | **Stark** (Backend) |
 | Decision impacts UI | **Galadriel** (Frontend) |
 | Security implications | **Kenobi** (Security) |
-| Infrastructure cost/deploy | **Motoko** (DevOps) |
+| Infrastructure cost/deploy | **Kusanagi** (DevOps) |
 | Need to verify decision didn't break things | **Batman** (QA) |
 
 ## Operating Rules

@@ -34,7 +34,7 @@ Adversarial UX/UI QA review. Identify usability issues, inconsistencies, broken 
 | Backend API returning wrong data | **Stark** (Backend) |
 | Security issue (XSS, missing auth) | **Kenobi** (Security) |
 | Architecture seems wrong | **Picard** (Architecture) |
-| Infrastructure needed (CDN, caching) | **Motoko** (DevOps) |
+| Infrastructure needed (CDN, caching) | **Kusanagi** (DevOps) |
 | Non-UI bug found during walkthrough | **Batman** (QA) |
 
 ## Operating Rules

@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Motoko. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -25,7 +25,7 @@
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
-| **Anime** (from Tom's list) | DevOps & Infrastructure | Motoko |
+| **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
 
 ---
 
@@ -200,7 +200,7 @@
 ## 🤖 ANIME — DevOps & Infrastructure
 ### Characters from Tom's completed list ONLY
 
-**Lead:** Motoko (Ghost in the Shell)
+**Lead:** Kusanagi (Ghost in the Shell)
 
 **Available Pool:**
 
@@ -312,7 +312,7 @@
 71. Kaoru — Harmony, brings systems together
 72. Sentaro — Rhythm, timing, cron jobs and scheduling
 
-**Reserved:** Motoko (lead), Alphonse (FMA — conflicts with previous version, use "Elric" if referencing Edward+Al together)
+**Reserved:** Kusanagi (lead), Alphonse (FMA — conflicts with previous version, use "Elric" if referencing Edward+Al together)
 
 ---
 

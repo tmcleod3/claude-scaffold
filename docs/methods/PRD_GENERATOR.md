@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Use this prompt with Claude to generate a comprehensive PRD from a rough product idea. The output PRD can then be dropped into `/docs/PRD.md` and built by the team (Galadriel, Stark, Batman, Kenobi, Picard, Motoko) using the Build Protocol.
+Use this prompt with Claude to generate a comprehensive PRD from a rough product idea. The output PRD can then be dropped into `/docs/PRD.md` and built by the team (Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi) using the Build Protocol.
 
 ---
 

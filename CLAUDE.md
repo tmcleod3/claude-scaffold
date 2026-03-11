@@ -47,7 +47,7 @@ npm run dev
 | **QA** | `/docs/methods/QA_ENGINEER.md` | **Batman** (DC Comics). Bug hunting, hardening, regression checklists. |
 | **Security** | `/docs/methods/SECURITY_AUDITOR.md` | **Kenobi** (Star Wars). OWASP, auth, secrets, headers, PII, encryption. |
 | **Architecture** | `/docs/methods/SYSTEMS_ARCHITECT.md` | **Picard** (Star Trek). Architecture decisions, scaling, tech debt, failure modes. |
-| **DevOps** | `/docs/methods/DEVOPS_ENGINEER.md` | **Motoko** (Anime). Provisioning, deploy, monitoring, backups, disaster recovery. |
+| **DevOps** | `/docs/methods/DEVOPS_ENGINEER.md` | **Kusanagi** (Anime). Provisioning, deploy, monitoring, backups, disaster recovery. |
 | **Orchestrator** | `/docs/methods/SUB_AGENTS.md` | How to parallelize across Claude Code sessions. Full roster + delegation protocol. |
 | **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Prompt for creating PRDs from rough product ideas. |
 | **QA State** | `/docs/qa-prompt.md` | Auto-maintained. Stack info, known issues, regression checklist. |
@@ -64,7 +64,7 @@ npm run dev
 | QA | **Batman** | DC Comics | Bugs, hardening, regression | Oracle, Red Hood, Alfred, Lucius, Nightwing |
 | Security | **Kenobi** | Star Wars | Auth, injection, secrets, data | Yoda, Windu, Ahsoka, Leia, Rex, Padmé, Chewie |
 | Architecture | **Picard** | Star Trek | Schema, scaling, decisions | Spock, Scotty, Uhura, La Forge, Data |
-| DevOps | **Motoko** | Anime | Deploy, monitor, backup | Senku, Levi, Spike, L, Bulma, Holo |
+| DevOps | **Kusanagi** | Anime | Deploy, monitor, backup | Senku, Levi, Spike, L, Bulma, Holo |
 
 **150+ named characters** across all universes. See `/docs/NAMING_REGISTRY.md` for the full pool. No duplicate names across active sessions — first claim wins, pick the next from your pool.
 
