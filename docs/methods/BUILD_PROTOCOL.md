@@ -3,65 +3,248 @@
 
 > *This is the playbook. Every other method doc is a tool this playbook invokes at the right moment.*
 
-## The Team
+## Phase Roster
 
-| Phase | Lead | Supporting |
-|-------|------|-----------|
-| 0. Orient | **Picard** | All read PRD |
-| 1. Scaffold | **Stark** + **Kusanagi** | — |
-| 2. Infrastructure | **Kusanagi** | **Stark** (DB) |
-| 3. Auth | **Stark** + **Galadriel** | **Kenobi** (review) |
-| 4. Core Feature | **Stark** + **Galadriel** | — |
-| 5. Supporting Features | **Stark** + **Galadriel** | **Batman** (regression) |
-| 6. Integrations | **Stark** (Romanoff) | **Kenobi** (security) |
-| 7. Admin & Ops | **Stark** + **Galadriel** | **Picard** (review) |
-| 8. Marketing Pages | **Galadriel** | — |
-| 9. QA Pass | **Batman** | All |
-| 10. UX/UI Pass | **Galadriel** | All |
-| 11. Security Pass | **Kenobi** | All |
-| 12. Deploy | **Kusanagi** | **Batman** (smoke) |
-| 13. Launch | All | — |
+| Phase | Lead | Supporting | Parallelizable |
+|-------|------|-----------|---------------|
+| 0. Orient | **Picard** | All read PRD | No — must complete first |
+| 1. Scaffold | **Stark** + **Kusanagi** | — | No — foundation for everything |
+| 2. Infrastructure | **Kusanagi** | **Stark** (DB) | No — must boot before features |
+| 3. Auth | **Stark** + **Galadriel** | **Kenobi** (review) | No — gates all user features |
+| 4. Core Feature | **Stark** + **Galadriel** | — | No — first vertical slice |
+| 5. Supporting Features | **Stark** + **Galadriel** | **Batman** (regression) | Yes — features can be built in parallel sessions if they don't share schema |
+| 6. Integrations | **Stark** (Romanoff) | **Kenobi** (security) | Yes — independent integrations can be parallel |
+| 7. Admin & Ops | **Stark** + **Galadriel** | **Picard** (review) | Yes — parallel with Phase 8 |
+| 8. Marketing Pages | **Galadriel** | — | Yes — parallel with Phase 7 |
+| 9. QA Pass | **Batman** | All | No — needs complete codebase |
+| 10. UX/UI Pass | **Galadriel** | All | Yes — parallel with Phase 11 |
+| 11. Security Pass | **Kenobi** | All | Yes — parallel with Phase 10 |
+| 12. Deploy | **Kusanagi** | **Batman** (smoke) | No — sequential, high risk |
+| 13. Launch | All | — | No — final verification |
 
 Full character pools: `/docs/NAMING_REGISTRY.md`
 
 ---
 
-**Step 0 — Picard Ingests PRD.** Extract: identity, stack, architecture, data model, routes, flows, tiers, integrations, env vars, deployment. Flag missing items. Produce initial ADRs.
+## Project Sizing — Read BEFORE Starting
 
-**Step 1 — Stark + Kusanagi Scaffold.** Framework, configs, schema, directory structure, types, utils, root layout. Every placeholder references its PRD section.
+Not every project needs all 13 phases. Read the PRD frontmatter (the YAML block at the top of `/docs/PRD.md`) to determine which phases apply.
 
-**Step 2 — Kusanagi Infrastructure.** Database (Banner assists) → Redis → Environment → Verify (dev, build, lint, typecheck all pass).
+### Frontmatter Validation (Phase 0, first action)
 
-**Step 3 — Auth (Kenobi Reviews).** Providers, login, signup, password reset, sessions, middleware, roles. Password manager compatible.
+Check these values exist and are valid:
 
-**Step 4 — Core Feature.** Single most important user journey, end-to-end. Vertical slice. Rough UI fine, full pipeline must work.
+| Field | Valid Values | Default if Missing |
+|-------|-------------|-------------------|
+| `type` | full-stack, api-only, static-site, prototype | full-stack |
+| `auth` | yes, no | yes |
+| `payments` | stripe, lemonsqueezy, none | none |
+| `workers` | yes, no | no |
+| `admin` | yes, no | no |
+| `marketing` | yes, no | no |
+| `email` | resend, sendgrid, ses, none | none |
+| `deploy` | vps, vercel, railway, cloudflare, static, docker | vps |
 
-**Step 5 — Supporting Features.** Dependency order. Data model → API → UI → Wire up → Verify. After each batch: builds, previous flows work, new flow works.
+If a value is missing or invalid, log it and use the default. If the entire frontmatter block is missing, flag it as a Phase 0 gap and use all defaults.
 
-**Step 6 — Integrations.** Payments, email, storage, analytics, AI, DNS APIs. Kenobi reviews each.
+### Conditional Skip Rules
 
-**Step 7 — Admin & Operations.** Dashboard, user management, analytics views, billing, audit logging.
+| PRD Frontmatter | Phase to Skip | Reason |
+|-----------------|---------------|--------|
+| `auth: no` | Phase 3 | No authentication needed |
+| `payments: none` | Phase 6 payment section | No payment integration |
+| `admin: no` | Phase 7 | No admin dashboard |
+| `marketing: no` | Phase 8 | No marketing/landing pages |
+| `workers: no` | Phase 6 queue section | No background jobs |
+| `deploy: static` | Phase 2 (partial), Phase 12 (simplified) | Static hosting |
+| `type: api-only` | Phase 8, Phase 10 | No frontend |
 
-**Step 8 — Marketing Pages.** Homepage, features, pricing, legal, SEO.
+When skipping a phase, log it to `/logs/build-state.md`: "Skipping Phase X — PRD indicates [reason]."
 
-**Step 9 — Batman's QA Pass.** Oracle scans. Red Hood breaks. Alfred reviews deps. Lucius checks config. Nightwing builds regression checklist.
+---
 
-**Step 10 — Galadriel's UX/UI Pass.** Elrond maps flows. Arwen audits visuals. Samwise checks a11y. Bilbo reviews copy. Gimli tests perf. Gandalf breaks edges.
+## Build Journal — Log Everything
 
-**Step 11 — Kenobi's Security Pass.** Yoda audits auth. Windu tests injection. Ahsoka checks access. Leia audits secrets. Rex reviews headers. Padmé checks data. Chewie scans deps.
+Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md` for the full protocol.
 
-**Step 12 — Kusanagi Deploys.** Senku provisions. Spike configures DNS/SSL. Levi builds pipeline. L sets up monitoring. Bulma configures backups.
+**Minimum logging per phase:**
+1. Update `/logs/build-state.md` when starting and completing each phase
+2. Write phase-specific log (`/logs/phase-XX-*.md`) with decisions, changes, test results
+3. Log non-obvious decisions to `/logs/decisions.md`
+4. Log agent handoffs to `/logs/handoffs.md`
 
-**Step 13 — Launch Checklist.** All flows in production ✓ SSL ✓ Email ✓ Payments ✓ Analytics ✓ Monitoring ✓ Backups ✓ Security headers ✓ Legal ✓ Performance ✓ Mobile ✓ Accessibility ✓
+**Why:** When context compresses or a new session starts, agents read journal files to recover state. The journal is your persistent memory.
+
+---
+
+## The Sequence
+
+**Phase 0 — Picard Orients.**
+1. Validate PRD frontmatter (see table above)
+2. Read entire PRD — extract: identity, stack, architecture, data model, routes, flows, tiers, integrations, env vars, deployment target
+3. Determine project profile and skip rules
+4. Flag missing items — list each gap explicitly with "inferred [assumption]" or "BLOCKED — needs answer"
+5. Produce initial ADRs in `/docs/adrs/`
+6. Create `/logs/build-state.md` and `/logs/phase-00-orient.md`
+7. If PRD has critical gaps (no schema, no stack, no features defined): **STOP. Flag to user. Do not proceed.**
+
+**Phase 1 — Stark + Kusanagi Scaffold.**
+1. Initialize framework, configs, schema, directory structure, types, utils, root layout
+2. Set up test runner per `/docs/methods/TESTING.md`
+3. Every placeholder references its PRD section
+4. Log to `/logs/phase-01-scaffold.md`
+
+**Phase 2 — Kusanagi Infrastructure.**
+1. Database (Banner assists) -> Redis -> Environment
+2. Verify: dev server starts, build passes, lint passes, typecheck passes, `npm test` passes
+3. Log to `/logs/phase-02-infrastructure.md`
+
+**Phase 3 — Auth (Kenobi Reviews).**
+1. Providers, login, signup, password reset, sessions, middleware, roles
+2. Password manager compatible
+3. Write auth integration tests — all paths including failures
+4. Kenobi reviews session config, password hashing, CSRF
+5. Log to `/logs/phase-03-auth.md`
+
+**Phase 4 — Core Feature.**
+1. Single most important user journey, end-to-end vertical slice
+2. Follow patterns: `/docs/patterns/api-route.ts`, `/docs/patterns/service.ts`, `/docs/patterns/component.tsx`
+3. Write unit tests for core service logic + integration tests for API routes
+4. Log to `/logs/phase-04-core.md`
+
+**Phase 5 — Supporting Features.**
+1. Build in dependency order: schema -> API -> UI -> wire up -> verify
+2. One batch = one feature or tightly coupled feature group (max ~200 lines changed per batch)
+3. After each batch: build passes, previous flows work, new flow works, all tests pass
+4. If a batch breaks a previous flow: revert the batch, isolate the conflict, fix, re-verify (see Rollback below)
+5. Log each batch to `/logs/phase-05-features.md`
+
+**Phase 6 — Integrations.**
+1. Each integration: client wrapper, env vars, test mode, error handling, retry logic
+2. For async work, follow `/docs/patterns/job-queue.ts`
+3. Kenobi reviews each integration
+4. Log to `/logs/phase-06-integrations.md`
+
+**Phase 7 — Admin & Operations.**
+1. Dashboard, user management, analytics views, billing, audit logging
+2. Log to `/logs/phase-07-admin.md`
+
+**Phase 8 — Marketing Pages.**
+1. Homepage, features, pricing, legal, SEO meta
+2. Log to `/logs/phase-08-marketing.md`
+
+**Phase 9 — Batman's QA Pass.**
+1. Execute `/docs/methods/QA_ENGINEER.md` full sequence
+2. Oracle scans, Red Hood breaks, Alfred reviews deps, Lucius checks config
+3. Nightwing runs full test suite, builds regression checklist
+4. Log to `/logs/phase-09-qa-audit.md`
+
+**Phase 10 — Galadriel's UX/UI Pass.**
+1. Execute `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` full sequence
+2. Log to `/logs/phase-10-ux-audit.md`
+
+**Phase 11 — Kenobi's Security Pass.**
+1. Execute `/docs/methods/SECURITY_AUDITOR.md` full sequence
+2. Log to `/logs/phase-11-security-audit.md`
+
+**Phase 12 — Kusanagi Deploys.**
+1. Execute `/docs/methods/DEVOPS_ENGINEER.md` full sequence
+2. Complete first-deploy pre-flight checklist (see `/devops` command)
+3. Log to `/logs/phase-12-deploy.md`
+
+**Phase 13 — Launch Checklist.**
+All flows in production. SSL. Email. Payments. Analytics. Monitoring. Backups. Security headers. Legal. Performance. Mobile. Accessibility. Tests passing. Log final status to `/logs/phase-13-launch.md`.
+
+---
+
+## Phase Verification Gates
+
+Every phase must pass its gate before proceeding. Each gate requires BOTH manual verification AND automated checks where applicable.
+
+| Phase | Manual Verification | Automated Check | Fail = |
+|-------|-------------------|----------------|--------|
+| 0 | All PRD sections accounted for | Frontmatter validates | STOP — fix PRD |
+| 1 | Directory structure looks right | `npm run build` passes, test runner works | Fix before proceeding |
+| 2 | Dev server starts in browser | `npm test` passes, DB connects | Fix infra |
+| 3 | Login/signup/logout flow works in browser | Auth integration tests pass | Fix auth |
+| 4 | Walk through core journey end-to-end | Core service tests pass (>80% coverage) | Fix before adding features |
+| 5 | Each new feature works, previous flows still work | All tests pass, no regressions | Revert batch, fix |
+| 6 | Each integration works in test mode | Integration tests pass | Fix integration |
+| 7 | Admin views show real data, audit log works | Tests pass | Fix |
+| 8 | Pages render on mobile + desktop | Build passes | Fix |
+| 9 | All critical/high bugs fixed | Full test suite green | Fix remaining bugs |
+| 10 | Keyboard nav works, no broken states | A11y checks pass | Fix a11y issues |
+| 11 | No critical/high security findings | Security checklist passes | Fix security issues |
+| 12 | App loads in production, health check passes | Monitoring receives data, backup runs | Rollback + fix |
+| 13 | All checklist items verified | All tests pass in production | Fix before launch |
+
+**Gate failure protocol:** Log the failure in the phase log and `/logs/errors.md`. Do not advance to the next phase. Fix the issue, re-verify, then proceed.
+
+---
+
+## Test Execution Timeline
+
+Tests are written alongside features, not bolted on later. This is the authoritative timeline:
+
+| Phase | Test Activity | Breaking Gate? |
+|-------|-------------|---------------|
+| 1 | Test runner set up, first smoke test | Yes — runner must work |
+| 2 | Infrastructure verified via test commands | Yes — `npm test` must pass |
+| 3 | Auth integration tests written | Yes — auth tests must pass |
+| 4 | Core service unit tests + API integration tests | Yes — >80% core service coverage |
+| 5 | Tests for each feature batch | Yes — all tests must pass before next batch |
+| 6 | Integration tests for each external service | Yes — test mode must work |
+| 9 | Nightwing runs full suite, writes missing tests | Yes — suite must be green |
+| 12 | Smoke tests in production | Yes — health check must pass |
+
+"Breaking gate" = failing tests prevent phase advancement. No exceptions.
+
+---
+
+## Phase Rollback Strategy
+
+When a batch or phase introduces a regression:
+
+1. **Identify:** Which batch/commit introduced the regression?
+2. **Revert:** `git revert <commit>` or `git stash` the batch changes
+3. **Verify:** Confirm the regression is gone — run tests, walk through affected flow
+4. **Isolate:** In the reverted code, identify the specific change that caused the break
+5. **Fix:** Apply the fix in isolation, test it against the affected flow
+6. **Re-apply:** Re-introduce the original batch with the fix included
+7. **Log:** Document in `/logs/errors.md`: what broke, why, how it was fixed
+
+**Never:** Force through a failing gate. Stack untested changes. Proceed hoping the next phase will fix it.
+
+---
+
+## Small Batches — Definition
+
+A "small batch" means:
+- **One user flow or component cluster** per batch
+- **Max ~200 lines of production code changed** (tests don't count toward this limit)
+- **One clear sentence** describes what the batch does
+- **Independently verifiable** — you can test this batch without building the next one
+
+Examples of good batches:
+- "Add project creation: schema + API route + service + basic form"
+- "Add project list page with pagination and empty state"
+- "Add Stripe webhook handler for subscription events"
+
+Examples of batches that are too big:
+- "Add all CRUD operations for projects, teams, and billing"
+- "Implement the entire dashboard"
 
 ---
 
 ## Principles
 
-1. PRD is source of truth.
-2. Build vertically.
-3. Verify at every step.
-4. Small diffs.
-5. Flag unknowns early.
-6. Infrastructure before features.
-7. Method docs are tools, not bureaucracy.
+1. PRD is source of truth. Agents don't override product decisions. If the PRD is ambiguous, flag it and present options — don't decide product direction.
+2. Build vertically. Complete one flow before starting the next.
+3. Verify at every step. Run the app. Click through. Prove it works.
+4. Small diffs. Each change explainable in one sentence. Max ~200 lines per batch.
+5. Flag unknowns early. Ambiguity gets flagged, not guessed.
+6. Infrastructure before features. A feature on broken infra is useless.
+7. Method docs are tools, not bureaucracy. Follow the spirit, not just the letter.
+8. Test as you build. Write tests alongside features. Tests are a breaking gate.
+9. Skip what doesn't apply. Not every project needs every phase.
+10. Log everything. Decisions, test results, failures, handoffs. The journal is your memory.

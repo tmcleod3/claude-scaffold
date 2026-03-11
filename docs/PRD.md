@@ -6,6 +6,35 @@
 
 ---
 
+## Frontmatter
+
+Fill this out first. The Build Protocol reads these values to determine which phases apply and which can be skipped. Delete any line that doesn't apply to your project.
+
+```yaml
+# Project identity
+name: "[PROJECT_NAME]"
+type: "full-stack"  # full-stack | api-only | static-site | prototype
+
+# Stack
+framework: ""       # next.js | django | rails | express | etc.
+database: ""        # postgres | mysql | sqlite | mongodb | none
+cache: ""           # redis | none
+styling: ""         # tailwind | css-modules | styled-components | etc.
+
+# Feature flags — controls which build phases run
+auth: yes           # yes | no — Phase 3
+payments: none      # stripe | lemonsqueezy | none — Phase 6
+workers: no         # yes | no — Phase 6 queue section
+admin: no           # yes | no — Phase 7
+marketing: no       # yes | no — Phase 8
+email: none         # resend | sendgrid | ses | none — Phase 6
+
+# Deployment
+deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker
+```
+
+---
+
 ## 1. Product Vision
 
 - **Name:**

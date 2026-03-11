@@ -8,22 +8,29 @@ A reusable methodology framework for building full-stack applications with Claud
 
 ## What This Is
 
-This is a git repository containing methodology documents, naming conventions, and orchestration protocols that make Claude Code dramatically more effective at building applications from scratch. It is not a code template — it's a *process* template. It works with any tech stack, any framework, any language.
+A git repository containing methodology documents, naming conventions, and orchestration protocols that make Claude Code dramatically more effective at building applications from scratch. Not a code template — a *process* template. Works with any tech stack, any framework, any language.
 
 The scaffold provides:
 
-- **A root context file** (`CLAUDE.md`) that orients Claude Code on any project in seconds
-- **A 13-phase build protocol** that takes a PRD from "read this" to "launched in production"
-- **6 specialist agent protocols** — each with a named lead, themed sub-agents, and a specific methodology
-- **A naming registry** of 150+ characters from Tolkien, Marvel, DC Comics, Star Wars, Star Trek, and Anime — so every agent and sub-agent has a distinct identity
-- **Cross-referencing** between all agents so they know when to hand off work
-- **A PRD template** and a prompt for generating PRDs from rough ideas
+- **A root context file** (`CLAUDE.md`) — dense operational instructions loaded at session start
+- **6 self-contained slash commands** — `/build`, `/qa`, `/security`, `/ux`, `/devops`, `/architect` with inline execution steps
+- **A 13-phase build protocol** — PRD to production with conditional skipping, specific verification gates, and rollback strategy
+- **A build journal system** — persistent logging so agents recover state across sessions without re-deriving context
+- **Context window management** — session scoping, load-on-demand, checkpointing to stay fast
+- **6 specialist agent protocols** — each with named lead, themed sub-agents, and behavioral directives
+- **An automated testing protocol** — framework-agnostic testing pyramid with authoritative timeline
+- **7 code patterns** — API routes, services, components, middleware, error handling, job queues, multi-tenancy — all with framework adaptations (Next.js, Express, Django, Rails)
+- **A troubleshooting guide** — error recovery for every build phase including rollback protocol
+- **Multi-agent conflict resolution** — tiebreaker protocol for disputes between agents
+- **A feedback loop** — `LESSONS.md` for capturing cross-project intelligence
+- **Claude Code integration** — settings, hooks, and MCP server guidance
+- **150+ named characters** from Tolkien, Marvel, DC Comics, Star Wars, Star Trek, and Anime
 
 ---
 
 ## The Team
 
-Six lead agents, each commanding a themed roster of sub-agents. Every character is drawn from a specific fictional universe and assigned a role that matches their personality.
+Six lead agents, each commanding a themed roster of sub-agents.
 
 ### Leads
 
@@ -31,7 +38,7 @@ Six lead agents, each commanding a themed roster of sub-agents. Every character 
 |-------|------|----------|--------|
 | Frontend & UX | **Galadriel** | Lord of the Rings | UI, UX, accessibility, design systems, responsiveness |
 | Backend | **Stark** | Marvel | APIs, databases, services, queues, integrations, error handling |
-| QA | **Batman** | DC Comics | Bug hunting, regression testing, hardening, observability |
+| QA | **Batman** | DC Comics | Bug hunting, automated testing, hardening, observability |
 | Security | **Kenobi** | Star Wars | Auth, injection, secrets, headers, PII, encryption, OWASP |
 | Architecture | **Picard** | Star Trek | Schema design, scaling strategy, tech debt, failure modes, ADRs |
 | DevOps | **Kusanagi** | Anime | Provisioning, deployment, monitoring, backups, disaster recovery |
@@ -48,11 +55,9 @@ Six lead agents, each commanding a themed roster of sub-agents. Every character 
 
 **Star Trek** — Spock brings logical precision to data architecture. Scotty knows the infrastructure limits. La Forge keeps the engines running.
 
-**Anime** — Levi deploys with zero wasted motion. Senku builds infrastructure from scratch. Calcifer is the server daemon. Vegeta optimizes relentlessly.
+**Anime** — Levi deploys with zero wasted motion. Senku builds infrastructure from scratch. L observes everything. Vegeta optimizes relentlessly.
 
-The anime roster draws exclusively from: Dragon Ball Z, Neon Genesis Evangelion, Attack on Titan, Studio Ghibli, Chainsaw Man, Jujutsu Kaisen, Mob Psycho 100, Cowboy Bebop, Demon Slayer, Dr. Stone, Fullmetal Alchemist Brotherhood, Frieren, Kids on the Slope, Gundam Wing, Samurai Champloo, Solo Leveling, That Time I Got Reincarnated as a Slime, and Code Geass.
-
-See `docs/NAMING_REGISTRY.md` for the complete roster of 150+ characters with role descriptions and deduplication rules.
+See `docs/NAMING_REGISTRY.md` for the complete roster of 150+ characters.
 
 ---
 
@@ -60,25 +65,56 @@ See `docs/NAMING_REGISTRY.md` for the complete roster of 150+ characters with ro
 
 ```
 claude-scaffold/
-├── CLAUDE.md                              ← Root context — Claude Code reads this first
+├── CLAUDE.md                              ← Root context — operational instructions
 ├── README.md                              ← You are here
+├── VERSION.md                             ← Semantic versioning
+├── CHANGELOG.md                           ← Version history
 ├── .gitignore
 │
+├── .claude/
+│   ├── settings.json                      ← Claude Code settings, permissions, hooks
+│   └── commands/                          ← Self-contained slash commands
+│       ├── build.md                       ← /build — full build protocol with inline steps
+│       ├── qa.md                          ← /qa — Batman's QA pass with parallel analysis
+│       ├── security.md                    ← /security — Kenobi's audit with phased execution
+│       ├── ux.md                          ← /ux — Galadriel's UX/UI review
+│       ├── devops.md                      ← /devops — adapts to deploy target
+│       └── architect.md                   ← /architect — with conflict resolution
+│
+├── logs/                                  ← Build journal (created per-project)
+│   └── build-state.md                     ← Master state file — read at every session start
+│
 ├── docs/
-│   ├── PRD.md                             ← PRD template (replace with your actual PRD)
-│   ├── NAMING_REGISTRY.md                 ← 150+ named characters, 6 universes, dedup rules
-│   ├── qa-prompt.md                       ← QA state file (auto-maintained during builds)
+│   ├── PRD.md                             ← PRD template with YAML frontmatter
+│   ├── NAMING_REGISTRY.md                 ← 150+ characters, 6 universes, dedup rules
+│   ├── LESSONS.md                         ← Cross-project learnings
+│   ├── qa-prompt.md                       ← QA state + regression checklist
 │   │
-│   └── methods/                           ← The methodology library
-│       ├── BUILD_PROTOCOL.md              ← Master 13-phase build sequence
-│       ├── PRD_GENERATOR.md               ← Prompt for creating PRDs from rough ideas
+│   ├── patterns/                          ← Reference implementations (all with framework adaptations)
+│   │   ├── README.md                      ← Pattern index
+│   │   ├── api-route.ts                   ← API route (Next.js + Express/Django/Rails notes)
+│   │   ├── service.ts                     ← Service layer (Prisma + Django/Rails notes)
+│   │   ├── component.tsx                  ← Component with all 4 states (React + Vue/Svelte notes)
+│   │   ├── middleware.ts                  ← Auth, logging, rate limiting
+│   │   ├── error-handling.ts              ← Canonical error strategy (all frameworks)
+│   │   ├── job-queue.ts                   ← Background jobs (BullMQ + Celery + Sidekiq)
+│   │   └── multi-tenant.ts               ← Workspace scoping (Next.js + Django + Rails)
+│   │
+│   └── methods/                           ← Agent protocols
+│       ├── BUILD_PROTOCOL.md              ← Master 13-phase sequence with gates + rollback
+│       ├── BUILD_JOURNAL.md               ← Persistent logging protocol
+│       ├── CONTEXT_MANAGEMENT.md          ← Session scoping + context discipline
 │       ├── PRODUCT_DESIGN_FRONTEND.md     ← Galadriel's frontend & UX protocol
 │       ├── BACKEND_ENGINEER.md            ← Stark's backend engineering protocol
-│       ├── QA_ENGINEER.md                 ← Batman's QA & bug hunting protocol
+│       ├── QA_ENGINEER.md                 ← Batman's QA protocol + regression checklist
+│       ├── TESTING.md                     ← Testing pyramid with framework mapping
 │       ├── SECURITY_AUDITOR.md            ← Kenobi's security audit protocol
 │       ├── SYSTEMS_ARCHITECT.md           ← Picard's architecture review protocol
 │       ├── DEVOPS_ENGINEER.md             ← Kusanagi's DevOps & infrastructure protocol
-│       └── SUB_AGENTS.md                  ← Orchestration protocol for parallel sessions
+│       ├── SUB_AGENTS.md                  ← Orchestration + conflict resolution
+│       ├── TROUBLESHOOTING.md             ← Error recovery + rollback protocol
+│       ├── MCP_INTEGRATION.md             ← External tool connections
+│       └── PRD_GENERATOR.md               ← Prompt for auto-generating PRDs
 │
 └── scripts/
     └── new-project.sh                     ← One-command project initialization
@@ -96,9 +132,11 @@ cd my-project
 rm -rf .git && git init
 ```
 
-Replace `docs/PRD.md` with your actual PRD. Open Claude Code and say:
+Replace `docs/PRD.md` with your actual PRD. Open Claude Code and run:
 
-> "Read CLAUDE.md, then build this project from the PRD."
+```
+/build
+```
 
 ### Option 2: Use the init script
 
@@ -108,18 +146,26 @@ git clone https://github.com/YOUR_USER/claude-scaffold.git
 cd ~/my-app
 ```
 
-This copies the scaffold, updates the project name in `CLAUDE.md`, and leaves you ready to drop in a PRD.
-
 ### Option 3: Generate a PRD first
-
-If you only have a rough idea, use the PRD Generator:
 
 1. Open Claude (chat, not Code)
 2. Paste the prompt from `docs/methods/PRD_GENERATOR.md`
 3. Add your idea (as rough as 1-3 sentences)
-4. Claude produces a full PRD
-5. Save it as `docs/PRD.md` in your project
-6. Open Claude Code and build from it
+4. Save output as `docs/PRD.md`
+5. Open Claude Code and run `/build`
+
+---
+
+## Slash Commands
+
+| Command | Agent | What It Does |
+|---------|-------|-------------|
+| `/build` | All | Execute the 13-phase build protocol from PRD to production |
+| `/qa` | Batman | Full QA pass: static analysis, dynamic probing, automated tests, regression |
+| `/security` | Kenobi | OWASP security audit with prioritized findings and remediation |
+| `/ux` | Galadriel | Adversarial UX/UI review with accessibility audit |
+| `/devops` | Kusanagi | Infrastructure provisioning, deploy scripts, monitoring, backups |
+| `/architect` | Picard | Architecture review with ADRs, scaling plan, failure analysis |
 
 ---
 
@@ -127,121 +173,122 @@ If you only have a rough idea, use the PRD Generator:
 
 ### The Build Sequence
 
-The `BUILD_PROTOCOL.md` defines a 13-phase sequence from PRD to production:
+The `BUILD_PROTOCOL.md` defines a 13-phase sequence with conditional skip rules:
 
-| Phase | Lead Agent | What Happens |
-|-------|-----------|-------------|
-| 0. Orient | Picard | Reads entire PRD, extracts architecture, produces ADRs |
-| 1. Scaffold | Stark + Kusanagi | Framework, configs, schema, directory structure |
-| 2. Infrastructure | Kusanagi | Database, Redis, environment, verify everything boots |
-| 3. Auth | Stark + Galadriel | Login, signup, OAuth, sessions, roles. Kenobi reviews. |
-| 4. Core Feature | Stark + Galadriel | Single most important user flow, end-to-end |
-| 5. Supporting Features | Stark + Galadriel | Remaining PRD features in dependency order |
-| 6. Integrations | Stark (Romanoff) | Payments, email, storage, analytics, external APIs |
-| 7. Admin | Stark + Galadriel | Admin panel, dashboards, audit logging |
-| 8. Marketing | Galadriel | Homepage, pricing, features, legal, SEO |
-| 9. QA Pass | Batman | Oracle scans. Red Hood breaks. Nightwing verifies. |
-| 10. UX/UI Pass | Galadriel | Elrond maps flows. Samwise checks a11y. Gandalf breaks edges. |
-| 11. Security Pass | Kenobi | Yoda audits auth. Windu tests injection. Leia checks secrets. |
-| 12. Deploy | Kusanagi | Senku provisions. Levi deploys. L monitors. Bulma backs up. |
-| 13. Launch | All | Full checklist: SSL, email, payments, analytics, monitoring |
+| Phase | Lead Agent | What Happens | Skippable? |
+|-------|-----------|-------------|-----------|
+| 0. Orient | Picard | Reads PRD, extracts architecture, produces ADRs | No |
+| 1. Scaffold | Stark + Kusanagi | Framework, configs, schema, test runner | No |
+| 2. Infrastructure | Kusanagi | Database, Redis, environment, verify boot | Partial (static sites) |
+| 3. Auth | Stark + Galadriel | Login, signup, OAuth, sessions. Kenobi reviews. | Yes (if `auth: no`) |
+| 4. Core Feature | Stark + Galadriel | Most important user flow, end-to-end | No |
+| 5. Supporting | Stark + Galadriel | Remaining features in dependency order | No |
+| 6. Integrations | Stark (Romanoff) | Payments, email, storage, external APIs | Partial (per feature flag) |
+| 7. Admin | Stark + Galadriel | Admin panel, dashboards, audit logging | Yes (if `admin: no`) |
+| 8. Marketing | Galadriel | Homepage, pricing, legal, SEO | Yes (if `marketing: no`) |
+| 9. QA Pass | Batman | Oracle + Red Hood + Nightwing (tests) + Alfred + Lucius | No |
+| 10. UX/UI Pass | Galadriel | Full adversarial UX/UI + a11y review | Yes (if API-only) |
+| 11. Security Pass | Kenobi | Full OWASP audit | No |
+| 12. Deploy | Kusanagi | Provision, deploy, monitor, backup | No |
+| 13. Launch | All | Full checklist verified | No |
+
+### PRD Frontmatter
+
+The PRD includes a YAML frontmatter block that tells the build protocol which features exist:
+
+```yaml
+auth: yes
+payments: stripe
+workers: no
+admin: yes
+marketing: no
+deploy: vps
+```
+
+The build protocol reads these values and automatically skips irrelevant phases.
+
+### Build Journal
+
+Every agent produces persistent log files in `/logs/`. When context compresses or a new session starts, agents read journal files to recover state. See `BUILD_JOURNAL.md`.
+
+- `build-state.md` — master state file, read at every session start (under 50 lines)
+- `phase-XX-*.md` — per-phase logs with decisions, test results, findings
+- `decisions.md` — running log of all non-obvious decisions
+- `handoffs.md` — every agent-to-agent handoff with context
+
+### Context Management
+
+`CONTEXT_MANAGEMENT.md` keeps sessions fast:
+
+- Load method docs on demand, not all upfront
+- One phase or agent domain per session
+- Checkpoint to `/logs/build-state.md` before context fills
+- New sessions pick up from the journal, not from scratch
+
+### Code Patterns
+
+7 reference implementations in `docs/patterns/`, all with framework adaptations:
+
+- **api-route.ts** — Zod validation, auth check, service call (+ Express/Django/Rails notes)
+- **service.ts** — Business logic, ownership checks, typed errors (+ Django/Rails notes)
+- **component.tsx** — Loading/empty/error/success states, keyboard accessible (+ Vue/Svelte notes)
+- **middleware.ts** — Auth middleware, request logging, rate limiting (+ Express/Django/Rails notes)
+- **error-handling.ts** — Canonical error strategy: types, handler, response shape (all frameworks)
+- **job-queue.ts** — Background jobs: idempotency, retry, DLQ (BullMQ + Celery + Sidekiq)
+- **multi-tenant.ts** — Workspace scoping, tenant isolation, RBAC (Next.js + Django + Rails)
+
+### Testing
+
+Testing protocol with framework-agnostic principles and a framework-to-test-runner mapping:
+
+- Unit tests for business logic (vitest/jest/pytest/RSpec)
+- Integration tests for API routes
+- Tests are a **breaking gate** — failing tests prevent phase advancement
+- Authoritative timeline: which tests are written in which phase
+
+### Troubleshooting
+
+Error recovery for every build phase including a **rollback protocol** — identify, revert, verify, isolate, fix, re-apply, log.
 
 ### Agent Cross-References
 
-Every agent knows when to hand off work to another agent. For example:
+Every agent knows when to hand off:
 
-- Galadriel finds a backend API returning bad data → hands off to **Stark**
-- Stark finds a security vulnerability → hands off to **Kenobi**
-- Batman finds an architectural problem → hands off to **Picard**
-- Kenobi's fix requires infrastructure changes → hands off to **Kusanagi**
-
-These handoff tables are defined in every method doc.
-
-### Naming & Deduplication
-
-When Claude Code spins up multiple agents (especially during parallel sessions), the `NAMING_REGISTRY.md` prevents collisions:
-
-- Each universe has 20-72 named characters in a priority-ordered pool
-- Agents pick names in order, skipping any that are already active
-- No name may be used twice across any active session
-- Cross-universe conflicts are documented (e.g., "Stark" is owned by Marvel)
-
-This means you might see log output like:
-```
-[Legolas] Refactoring the card component grid layout
-[Banner] Optimizing the projects query — N+1 detected
-[Red Hood] Submitting empty form to /api/projects — got 500, expected 400
-[Yoda] Session cookie missing httpOnly flag
-[Spike] DNS propagation confirmed for app.example.com
-```
-
----
-
-## Method Docs In Detail
-
-### BUILD_PROTOCOL.md
-The master sequence. Coordinates all other agents through 13 phases. References specific sub-agents by name at each phase. This is what you point Claude Code at when you say "build from the PRD."
-
-### PRODUCT_DESIGN_FRONTEND.md (Galadriel)
-A 7-agent adversarial UX/UI review: UX heuristics (Elrond), visual design (Arwen), accessibility (Samwise), microcopy (Bilbo), frontend code (Legolas), performance (Gimli), edge cases (Gandalf). Produces an audit, regression checklist, and implemented fixes.
-
-### BACKEND_ENGINEER.md (Stark)
-A 7-agent backend review: API design (Rogers), database optimization (Banner), service architecture (Strange), error handling (Barton), integrations (Romanoff), queue/workers (Thor), performance (Fury). Covers HTTP semantics, N+1 prevention, connection pooling, idempotency, and more.
-
-### QA_ENGINEER.md (Batman)
-A 5-agent bug hunting protocol: static analysis (Oracle), dynamic breaking (Red Hood), dependency audit (Alfred), config review (Lucius), regression verification (Nightwing). Every bug must be reproduced before fixing. Every fix must be manually verified.
-
-### SECURITY_AUDITOR.md (Kenobi)
-A 7-agent security audit: auth (Yoda), injection (Windu), access control (Ahsoka), secrets (Leia), infrastructure (Rex), data protection (Padmé), dependencies (Chewie). Covers OWASP Top 10, PII handling, CSP/CORS, and incident response.
-
-### SYSTEMS_ARCHITECT.md (Picard)
-A 5-agent architecture review: data architecture (Spock), infrastructure strategy (Scotty), integrations (Uhura), reliability (La Forge), tech debt (Data). Produces ADRs, scaling plans, failure mode catalogs, and tech debt inventories.
-
-### DEVOPS_ENGINEER.md (Kusanagi)
-A 6-agent infrastructure protocol: provisioning (Senku), deployment (Levi), networking (Spike), monitoring (L), backup (Bulma), cost analysis (Holo). Produces deploy scripts, backup automation, runbooks, and monitoring setup.
-
-### SUB_AGENTS.md
-The orchestration protocol for running multiple agents in parallel across Claude Code sessions. Defines scope boundaries, delegation templates, response templates, conflict resolution rules, and anti-patterns.
-
-### PRD_GENERATOR.md
-A ready-to-paste prompt for generating comprehensive PRDs from rough product ideas. Produces all 16 sections a build protocol expects.
+- Galadriel finds bad API data → **Stark**
+- Stark finds a vulnerability → **Kenobi**
+- Batman finds an architecture problem → **Picard**
+- Kenobi's fix needs infra changes → **Kusanagi**
 
 ---
 
 ## Evolving the Scaffold
 
-The scaffold is designed to get smarter over time. When you discover a new pattern that works:
+The scaffold gets smarter over time:
 
-1. Write it as a method doc in `docs/methods/`
-2. Add it to the doc table in `CLAUDE.md`
-3. If it has a natural agent persona, add characters to `NAMING_REGISTRY.md`
-
-**Examples of method docs you might add:**
-
-| Doc | Purpose |
-|-----|---------|
-| `API_DESIGN.md` | REST/GraphQL conventions, error codes, pagination |
-| `DATABASE_PATTERNS.md` | Query patterns, indexing, migration safety |
-| `PERFORMANCE.md` | Load testing, profiling, optimization playbook |
-| `COPYWRITING.md` | Brand voice, microcopy patterns, tone rules |
-| `DEPLOYMENT.md` | CI/CD pipelines, blue-green deploys, rollback procedures |
-| `ANALYTICS.md` | Event taxonomy, funnel definitions, instrumentation |
-| `PROMPT_ENGINEERING.md` | AI prompt versioning, A/B testing, quality metrics |
-| `MOBILE.md` | React Native / Flutter specific patterns and review |
+1. **After each project:** Add entries to `docs/LESSONS.md`
+2. **When a pattern proves reliable:** Promote it from LESSONS.md into the relevant method doc
+3. **When you discover a new process:** Add a method doc to `docs/methods/`
+4. **When you write reusable code:** Add a pattern to `docs/patterns/`
 
 ---
 
 ## Philosophy
 
-**Methodology, not templates.** These docs teach Claude Code *how* to build, not *what* to build. The PRD handles the "what." This means the scaffold works for a Next.js SaaS, a Django API, a Rails monolith, or anything else — the process is stack-agnostic even though the agents adapt to whatever stack the PRD specifies.
+**Methodology, not templates.** Stack-agnostic process that works for Next.js, Django, Rails, or anything else.
 
-**Accumulate intelligence.** Every project makes the scaffold better. When you find something that works — a checklist, a pattern, a review process — add it as a method doc. The scaffold compounds.
+**Accumulate intelligence.** Every project makes the scaffold better through `LESSONS.md` and promoted patterns.
 
-**Named agents are not gimmicks.** They serve three real purposes: (1) they create clear scope boundaries so parallel work doesn't collide, (2) they make logs and handoffs immediately scannable ("Legolas" is faster to parse than "Frontend Sub-Agent #3"), and (3) they make development genuinely more fun, which matters when you're staring at logs at midnight.
+**Named agents are not gimmicks.** They create scope boundaries, make logs scannable, and make development more fun.
 
-**The PRD is sacred.** Method docs define process. The PRD defines product. Agents never override product requirements with architectural preferences or process opinions. When there's ambiguity, they flag it and present options — they don't decide product direction.
+**The PRD is sacred.** Agents never override product decisions with process opinions.
 
-**Verify everything.** Every method doc emphasizes manual verification, regression checklists, and "prove it works" culture. No agent marks anything done without demonstrating it.
+**Verify everything.** Manual verification, automated tests, and regression checklists. All three.
+
+**Skip what doesn't apply.** Not every project needs all 13 phases.
+
+**Log everything.** The build journal is your persistent memory across sessions. Decisions, test results, handoffs, failures — all on disk, all recoverable.
+
+**Stay fast.** Context management keeps sessions lean. Load on demand, checkpoint often, start fresh when needed.
 
 ---
 

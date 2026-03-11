@@ -1,13 +1,5 @@
 # CLAUDE.md
 
-## What This Is
-
-This is the root context file for Claude Code. It is read at the start of every session to orient the agent on the project, stack, conventions, and methodology.
-
-**This scaffold is PRD-driven.** Drop a product requirements document into `/docs/PRD.md` and Claude Code can build the entire application from it.
-
----
-
 ## Project
 
 - **Name:** [PROJECT_NAME]
@@ -15,138 +7,93 @@ This is the root context file for Claude Code. It is read at the start of every 
 - **Domain:** [DOMAIN]
 - **Repo:** [REPO_URL]
 
----
+## Coding Standards
 
-## Quick Start
+- **TypeScript strict mode.** No `any` unless unavoidable and commented.
+- **Small, focused files.** One component per file. Max ~300 lines per source file.
+- **Validate at boundaries.** Zod schemas on all API inputs. Never trust client data.
+- **Error handling:** Use `ApiError` types per `/docs/patterns/error-handling.ts`. Never leak internals.
+- **Logging:** Structured JSON. Include requestId, userId, action. Never log PII.
+- **Business logic in services, not routes.** Routes: validate -> service -> format response.
+- **Ownership checks on every user-scoped query.** No IDOR. Return 404, not 403.
+- **No new dependencies** without explicit justification.
+- **Accessibility is not optional.** Keyboard nav, focus management, contrast, ARIA.
+- **Small batches.** One flow per batch, max ~200 lines changed. Verify after each.
+- **Commits:** Small, explainable in one sentence.
 
-```bash
-# 1. Install dependencies
-npm install
+## Build Journal — Log Everything
 
-# 2. Copy environment template
-cp .env.example .env
+Every phase, decision, handoff, and failure gets logged to `/logs/`. See `/docs/methods/BUILD_JOURNAL.md`.
 
-# 3. Set up database (if applicable)
-npx prisma migrate dev
-npx prisma generate
+- **Start of session:** Read `/logs/build-state.md` to recover state
+- **During work:** Log decisions, test results, and findings to the active phase log
+- **End of session or context getting heavy:** Update `/logs/build-state.md` with current state
 
-# 4. Run development server
-npm run dev
-```
+## Context Management
 
----
+Load docs on demand, not all at once. See `/docs/methods/CONTEXT_MANAGEMENT.md`.
 
-## Critical Docs — READ BEFORE BUILDING
+- Read method docs when entering that agent's phase, not upfront
+- If 15+ files read or 30+ tool calls in one session, checkpoint and suggest a new session
+- Per-directory `CLAUDE.md` files for directory-specific conventions (keep under 50 lines each)
 
-| Doc | Location | When to Use |
+## Code Patterns
+
+Reference implementations in `/docs/patterns/`. Match these shapes when writing. All patterns include framework adaptations (Next.js, Express, Django, Rails).
+
+- `api-route.ts` — Validation, auth, service call, consistent response
+- `service.ts` — Business logic, ownership checks, typed errors
+- `component.tsx` — Loading, empty, error, success states. Keyboard accessible.
+- `middleware.ts` — Auth, request logging, rate limiting
+- `error-handling.ts` — Canonical error strategy (single source of truth)
+- `job-queue.ts` — Background jobs: idempotency, retry, dead letter queue
+- `multi-tenant.ts` — Workspace scoping, tenant isolation, role-based access
+
+## Slash Commands
+
+| Command | What It Does |
+|---------|-------------|
+| `/build` | Execute full build protocol — self-contained with inline steps per phase |
+| `/qa` | Batman's full QA pass with parallel analysis and regression checklist |
+| `/security` | Kenobi's OWASP audit with parallel + sequential phases |
+| `/ux` | Galadriel's adversarial UX/UI review with a11y audit |
+| `/devops` | Kusanagi's infrastructure — adapts based on deploy target |
+| `/architect` | Picard's architecture review with conflict resolution protocol |
+
+## Docs Reference
+
+| Doc | Location | When to Read |
 |-----|----------|-------------|
-| **PRD** | `/docs/PRD.md` | The product spec. Source of truth for what to build. Read first. |
-| **Build Protocol** | `/docs/methods/BUILD_PROTOCOL.md` | The master build sequence. Coordinates the full team from PRD to production. |
-| **Frontend & UX** | `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` | **Galadriel** (Tolkien). UX/UI audit, accessibility, responsiveness, design system. |
-| **Backend** | `/docs/methods/BACKEND_ENGINEER.md` | **Stark** (Marvel). API, database, services, error handling, queues, integrations. |
-| **QA** | `/docs/methods/QA_ENGINEER.md` | **Batman** (DC Comics). Bug hunting, hardening, regression checklists. |
-| **Security** | `/docs/methods/SECURITY_AUDITOR.md` | **Kenobi** (Star Wars). OWASP, auth, secrets, headers, PII, encryption. |
-| **Architecture** | `/docs/methods/SYSTEMS_ARCHITECT.md` | **Picard** (Star Trek). Architecture decisions, scaling, tech debt, failure modes. |
-| **DevOps** | `/docs/methods/DEVOPS_ENGINEER.md` | **Kusanagi** (Anime). Provisioning, deploy, monitoring, backups, disaster recovery. |
-| **Orchestrator** | `/docs/methods/SUB_AGENTS.md` | How to parallelize across Claude Code sessions. Full roster + delegation protocol. |
-| **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Prompt for creating PRDs from rough product ideas. |
-| **QA State** | `/docs/qa-prompt.md` | Auto-maintained. Stack info, known issues, regression checklist. |
-| **Naming Registry** | `/docs/NAMING_REGISTRY.md` | All 150+ character names by universe. Dedup rules. |
-
----
+| **PRD** | `/docs/PRD.md` | Source of truth for WHAT to build. Read first. |
+| **Build Protocol** | `/docs/methods/BUILD_PROTOCOL.md` | Master 13-phase sequence with gates and rollback |
+| **Build Journal** | `/docs/methods/BUILD_JOURNAL.md` | Logging protocol — read when starting any work |
+| **Context Management** | `/docs/methods/CONTEXT_MANAGEMENT.md` | Session scoping and context discipline |
+| **Frontend & UX** | `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` | Galadriel — when doing UX/UI work |
+| **Backend** | `/docs/methods/BACKEND_ENGINEER.md` | Stark — when doing API/DB work |
+| **QA** | `/docs/methods/QA_ENGINEER.md` | Batman — when doing QA or testing |
+| **Testing** | `/docs/methods/TESTING.md` | When writing tests (framework mapping inside) |
+| **Security** | `/docs/methods/SECURITY_AUDITOR.md` | Kenobi — when doing security review |
+| **Architecture** | `/docs/methods/SYSTEMS_ARCHITECT.md` | Picard — when making arch decisions |
+| **DevOps** | `/docs/methods/DEVOPS_ENGINEER.md` | Kusanagi — when doing infrastructure |
+| **Orchestrator** | `/docs/methods/SUB_AGENTS.md` | When coordinating multiple agents |
+| **Troubleshooting** | `/docs/methods/TROUBLESHOOTING.md` | When something fails |
+| **MCP Integration** | `/docs/methods/MCP_INTEGRATION.md` | When connecting external tools |
+| **Patterns** | `/docs/patterns/` | When writing code (7 reference implementations) |
+| **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team
 
-| Agent | Name | Universe | Domain | Default Sub-agents |
-|-------|------|----------|--------|-----------|
-| Frontend & UX | **Galadriel** | Tolkien | UI, UX, a11y, design system | Elrond, Arwen, Samwise, Bilbo, Legolas, Gimli, Gandalf |
-| Backend | **Stark** | Marvel | API, DB, services, queues | Rogers, Banner, Strange, Barton, Romanoff, Thor, Fury |
-| QA | **Batman** | DC Comics | Bugs, hardening, regression | Oracle, Red Hood, Alfred, Lucius, Nightwing |
-| Security | **Kenobi** | Star Wars | Auth, injection, secrets, data | Yoda, Windu, Ahsoka, Leia, Rex, Padmé, Chewie |
-| Architecture | **Picard** | Star Trek | Schema, scaling, decisions | Spock, Scotty, Uhura, La Forge, Data |
-| DevOps | **Kusanagi** | Anime | Deploy, monitor, backup | Senku, Levi, Spike, L, Bulma, Holo |
+| Agent | Name | Domain |
+|-------|------|--------|
+| Frontend & UX | **Galadriel** (Tolkien) | UI, UX, a11y, design system |
+| Backend | **Stark** (Marvel) | API, DB, services, queues |
+| QA | **Batman** (DC) | Bugs, testing, hardening — cross-cutting investigator + validator |
+| Security | **Kenobi** (Star Wars) | Auth, injection, secrets, data |
+| Architecture | **Picard** (Star Trek) | Schema, scaling, ADRs |
+| DevOps | **Kusanagi** (Anime) | Deploy, monitor, backup |
 
-**150+ named characters** across all universes. See `/docs/NAMING_REGISTRY.md` for the full pool. No duplicate names across active sessions — first claim wins, pick the next from your pool.
+150+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
 
----
+## How to Build
 
-## How to Build From the PRD
-
-When given a PRD at `/docs/PRD.md`, follow this sequence:
-
-### Phase 0: Orient
-1. Read the PRD completely
-2. Extract: tech stack, database schema, API routes, page routes, integrations
-3. Generate the project structure per the PRD's architecture section
-4. Set up infrastructure (database, cache, env vars, process management)
-
-### Phase 1: Foundation
-1. Scaffold the framework (Next.js, Django, Rails, etc. — whatever the PRD specifies)
-2. Database schema + migrations
-3. Authentication
-4. Basic layout/routing
-
-### Phase 2: Core Features
-1. Build the primary user flow end-to-end
-2. Integrate external services (AI, payments, email, storage)
-3. Background jobs/workers if needed
-
-### Phase 3: Secondary Features
-1. Dashboard, settings, admin
-2. Analytics, tracking
-3. Billing/subscription management
-
-### Phase 4: Polish
-1. Run full QA pass (`/docs/methods/QA_ENGINEER.md`)
-2. Run full UX/UI pass (`/docs/methods/PRODUCT_DESIGN_FRONTEND.md`)
-3. Performance optimization
-4. Security audit
-
-### Phase 5: Ship
-1. Deployment configuration
-2. DNS, SSL, CDN
-3. Monitoring, backups
-4. Launch checklist
-
----
-
-## Coding Standards (Defaults — Override in PRD)
-
-- **TypeScript strict mode.** No `any` unless unavoidable and commented.
-- **Small, focused files.** One component per file. Co-locate types with modules.
-- **Validate at boundaries.** Zod schemas on all API inputs.
-- **Error handling:** Catch at boundaries, structured responses, never leak stack traces.
-- **Logging:** Structured JSON. Include requestId, userId, action.
-- **Commits:** Small, explainable in one sentence.
-- **No new dependencies** without explicit justification.
-- **Accessibility is not optional.** Keyboard nav, focus management, contrast, ARIA.
-
----
-
-## What "Done" Looks Like
-
-Before marking any feature complete:
-
-1. Works on desktop AND mobile
-2. Works with keyboard-only navigation
-3. Has loading, empty, error, and success states
-4. Has been manually walked through end-to-end
-5. No console errors or warnings
-6. Passes lint and typecheck
-7. Copy matches the product's voice/tone
-8. Updated in regression checklist if it touches a critical flow
-
----
-
-## Adding New Method Docs
-
-Drop new `.md` files into `/docs/methods/`. Each should be a self-contained protocol that Claude Code can follow. Reference them in this file's doc table above. The more specific and actionable the method doc, the better the output.
-
-Examples of method docs you might add:
-- `API_DESIGN.md` — REST/GraphQL conventions, error codes, pagination
-- `DATABASE_PATTERNS.md` — Query patterns, indexing strategy, migration rules
-- `SECURITY_AUDIT.md` — Penetration testing checklist, OWASP top 10 review
-- `PERFORMANCE.md` — Load testing, profiling, optimization playbook
-- `COPYWRITING.md` — Brand voice guide, microcopy patterns, tone rules
-- `DEPLOYMENT.md` — CI/CD pipeline, blue-green deploys, rollback procedures
-- `ANALYTICS.md` — Event taxonomy, funnel definitions, instrumentation guide
+Read the PRD. Run `/build`. Or see `/docs/methods/BUILD_PROTOCOL.md`.

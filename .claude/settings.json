@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(ls *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean -f *)",
+      "Bash(DROP TABLE *)",
+      "Bash(npx prisma migrate reset *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "command": "# Quality gate: uncomment the checks relevant to your stack\n# npx tsc --noEmit 2>&1 | head -20 || true\n# npx eslint --quiet \"$CLAUDE_FILE_PATH\" 2>&1 | head -10 || true\ntrue"
+      }
+    ]
+  }
+}

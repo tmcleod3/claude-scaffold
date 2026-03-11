@@ -19,7 +19,24 @@ You are a senior product manager and systems architect. Your task is to take a r
 
 The PRD must be detailed enough that an AI coding agent can build the entire application from it without asking clarifying questions. Every section must be specific — no vague hand-waving.
 
-Produce the following sections:
+Produce the following sections. Start with a YAML frontmatter block, then the full PRD:
+
+## Frontmatter (REQUIRED — placed at top of document)
+```yaml
+name: "[project name]"
+type: "full-stack"  # full-stack | api-only | static-site | prototype
+framework: ""       # next.js | django | rails | express | etc.
+database: ""        # postgres | mysql | sqlite | mongodb | none
+cache: ""           # redis | none
+styling: ""         # tailwind | css-modules | styled-components | etc.
+auth: yes           # yes | no
+payments: none      # stripe | lemonsqueezy | none
+workers: no         # yes | no
+admin: no           # yes | no
+marketing: no       # yes | no
+email: none         # resend | sendgrid | ses | none
+deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker
+```
 
 ## 1. Product Vision
 - Name (suggest 2-3 if none given, pick the best)
