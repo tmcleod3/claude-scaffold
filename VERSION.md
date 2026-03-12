@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 2.4.0
+**Current:** 2.5.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 2.5.0 | 2026-03-12 | /git command — Coulson's version & release management with semver, changelog, and commit automation |
 | 2.4.0 | 2026-03-12 | Wizard cloud providers, deploy targets, security hardening, UI overhaul |
 | 2.3.0 | 2026-03-12 | Interactive setup wizard — browser-based onboarding with encrypted credential vault, PRD generation, project scaffolding |
 | 2.2.0 | 2026-03-12 | Rename project to VoidForge — "from nothing, everything" |

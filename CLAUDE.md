@@ -59,6 +59,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/ux` | Galadriel's adversarial UX/UI review with a11y audit |
 | `/devops` | Kusanagi's infrastructure — adapts based on deploy target |
 | `/architect` | Picard's architecture review with conflict resolution protocol |
+| `/git` | Coulson's version bump, changelog, commit — full release management |
 
 ## Docs Reference
 
@@ -78,6 +79,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **Orchestrator** | `/docs/methods/SUB_AGENTS.md` | When coordinating multiple agents |
 | **Troubleshooting** | `/docs/methods/TROUBLESHOOTING.md` | When something fails |
 | **MCP Integration** | `/docs/methods/MCP_INTEGRATION.md` | When connecting external tools |
+| **Release** | `/docs/methods/RELEASE_MANAGER.md` | Coulson — when versioning or releasing |
 | **Patterns** | `/docs/patterns/` | When writing code (7 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
@@ -91,6 +93,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Security | **Kenobi** (Star Wars) | Auth, injection, secrets, data |
 | Architecture | **Picard** (Star Trek) | Schema, scaling, ADRs |
 | DevOps | **Kusanagi** (Anime) | Deploy, monitor, backup |
+| Release | **Coulson** (Marvel) | Version, changelog, commit, release |
 
 150+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
 

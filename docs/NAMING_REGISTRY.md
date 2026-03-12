@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -22,6 +22,7 @@
 |----------|--------|-----------|
 | **Tolkien** | Frontend, UX, Design | Galadriel |
 | **Marvel** | Backend Engineering | Stark |
+| **Marvel** | Release Management | Coulson |
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
@@ -61,7 +62,7 @@
 
 ## 🦾 MARVEL — Backend Engineering
 
-**Lead:** Stark (Tony Stark)
+**Leads:** Stark (Tony Stark) — Backend Engineering, Coulson (Phil Coulson) — Release Management
 
 **Available Pool:**
 1. Rogers — API design, by the book, discipline
@@ -89,8 +90,10 @@
 23. Bucky — Legacy code expert, rehabilitation of old systems
 24. Lang — Tiny changes with big impact (Ant-Man)
 25. Okoye — Fierce protector, guards data integrity
+26. Friday — AI assistant, versioning and automation
+27. Coulson — Meticulous record-keeper, version and release management
 
-**Reserved:** Stark (lead)
+**Reserved:** Stark (lead — backend), Coulson (lead — release)
 
 ---
 

@@ -13,11 +13,11 @@ A git repository containing methodology documents, naming conventions, and orche
 VoidForge provides:
 
 - **A root context file** (`CLAUDE.md`) — dense operational instructions loaded at session start
-- **6 self-contained slash commands** — `/build`, `/qa`, `/security`, `/ux`, `/devops`, `/architect` with inline execution steps
+- **7 self-contained slash commands** — `/build`, `/qa`, `/security`, `/ux`, `/devops`, `/architect`, `/git` with inline execution steps
 - **A 13-phase build protocol** — PRD to production with conditional skipping, specific verification gates, and rollback strategy
 - **A build journal system** — persistent logging so agents recover state across sessions without re-deriving context
 - **Context window management** — session scoping, load-on-demand, checkpointing to stay fast
-- **6 specialist agent protocols** — each with named lead, themed sub-agents, and behavioral directives
+- **7 specialist agent protocols** — each with named lead, themed sub-agents, and behavioral directives
 - **An automated testing protocol** — framework-agnostic testing pyramid with authoritative timeline
 - **7 code patterns** — API routes, services, components, middleware, error handling, job queues, multi-tenancy — all with framework adaptations (Next.js, Express, Django, Rails)
 - **A troubleshooting guide** — error recovery for every build phase including rollback protocol
@@ -30,7 +30,7 @@ VoidForge provides:
 
 ## The Team
 
-Six lead agents, each commanding a themed roster of sub-agents.
+Seven lead agents, each commanding a themed roster of sub-agents.
 
 ### Leads
 
@@ -42,6 +42,7 @@ Six lead agents, each commanding a themed roster of sub-agents.
 | Security | **Kenobi** | Star Wars | Auth, injection, secrets, headers, PII, encryption, OWASP |
 | Architecture | **Picard** | Star Trek | Schema design, scaling strategy, tech debt, failure modes, ADRs |
 | DevOps | **Kusanagi** | Anime | Provisioning, deployment, monitoring, backups, disaster recovery |
+| Release | **Coulson** | Marvel | Version management, changelogs, commit messages, releases |
 
 ### Sub-Agent Highlights
 
@@ -79,7 +80,8 @@ voidforge/
 │       ├── security.md                    ← /security — Kenobi's audit with phased execution
 │       ├── ux.md                          ← /ux — Galadriel's UX/UI review
 │       ├── devops.md                      ← /devops — adapts to deploy target
-│       └── architect.md                   ← /architect — with conflict resolution
+│       ├── architect.md                   ← /architect — with conflict resolution
+│       └── git.md                         ← /git — Coulson's version & release management
 │
 ├── logs/                                  ← Build journal (created per-project)
 │   └── build-state.md                     ← Master state file — read at every session start
@@ -112,6 +114,7 @@ voidforge/
 │       ├── SYSTEMS_ARCHITECT.md           ← Picard's architecture review protocol
 │       ├── DEVOPS_ENGINEER.md             ← Kusanagi's DevOps & infrastructure protocol
 │       ├── SUB_AGENTS.md                  ← Orchestration + conflict resolution
+│       ├── RELEASE_MANAGER.md             ← Coulson's version & release protocol
 │       ├── TROUBLESHOOTING.md             ← Error recovery + rollback protocol
 │       ├── MCP_INTEGRATION.md             ← External tool connections
 │       └── PRD_GENERATOR.md               ← Prompt for auto-generating PRDs
@@ -173,6 +176,7 @@ cd ~/my-app
 | `/ux` | Galadriel | Adversarial UX/UI review with accessibility audit |
 | `/devops` | Kusanagi | Infrastructure provisioning, deploy scripts, monitoring, backups |
 | `/architect` | Picard | Architecture review with ADRs, scaling plan, failure analysis |
+| `/git` | Coulson | Version bump, changelog, commit message, release management |
 
 ---
 
