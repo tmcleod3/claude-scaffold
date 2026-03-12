@@ -1,5 +1,21 @@
 {
+  "name": "voidforge",
+  "version": "2.3.0",
+  "description": "From nothing, everything. A methodology framework for building with Claude Code.",
+  "type": "module",
+  "bin": {
+    "voidforge": "./scripts/voidforge.ts"
+  },
+  "scripts": {
+    "wizard": "npx tsx scripts/voidforge.ts init",
+    "typecheck": "npx tsc --noEmit"
+  },
   "dependencies": {
     "claude": "^0.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
   }
 }

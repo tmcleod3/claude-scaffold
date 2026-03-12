@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoidForge — Setup Wizard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="wizard" id="wizard">
+    <header class="wizard-header">
+      <div class="logo">VoidForge</div>
+      <div class="progress" id="progress">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="step-label" id="step-label">Step 1 of 5</div>
+    </header>
+
+    <main class="wizard-body" id="wizard-body">
+
+      <!-- Step 1: Welcome + API Key -->
+      <section class="step" id="step-1" data-step="1">
+        <h1>Welcome to VoidForge</h1>
+        <p class="subtitle">From nothing, everything. Let's set up your project.</p>
+
+        <div class="card" id="vault-card">
+          <h2>Credential Vault</h2>
+          <p>Your API keys are encrypted with a password you choose. The vault is stored at <code id="vault-path">~/.voidforge/vault.enc</code> — AES-256-GCM encrypted. You manage the password however you like (memory, 1Password, keychain, etc.).</p>
+
+          <div class="field">
+            <label for="vault-password" id="vault-password-label">Choose a Vault Password</label>
+            <div class="input-row">
+              <input type="password" id="vault-password" placeholder="Enter a password to encrypt your credentials" autocomplete="off">
+              <button class="btn btn-secondary" id="toggle-vault-visibility" type="button" aria-label="Toggle password visibility">Show</button>
+            </div>
+            <div class="field-hint" id="vault-hint">This password encrypts your credentials locally. It never leaves your machine.</div>
+          </div>
+
+          <div class="status-row" id="vault-status"></div>
+
+          <button class="btn btn-primary" id="unlock-vault" type="button">Unlock Vault</button>
+        </div>
+
+        <div class="card hidden" id="apikey-card">
+          <h2>Anthropic API Key</h2>
+          <p>Required for PRD generation with Claude.</p>
+
+          <div class="field">
+            <label for="anthropic-key">API Key</label>
+            <div class="input-row">
+              <input type="password" id="anthropic-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+              <button class="btn btn-secondary" id="toggle-key-visibility" type="button" aria-label="Toggle key visibility">Show</button>
+            </div>
+            <div class="field-hint">Get your key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a></div>
+          </div>
+
+          <div class="status-row" id="key-status"></div>
+
+          <button class="btn btn-primary" id="validate-key" type="button">Validate & Store</button>
+        </div>
+      </section>
+
+      <!-- Step 2: Project Setup -->
+      <section class="step hidden" id="step-2" data-step="2">
+        <h1>Project Setup</h1>
+        <p class="subtitle">Tell us about your project.</p>
+
+        <div class="card">
+          <div class="field">
+            <label for="project-name">Project Name</label>
+            <input type="text" id="project-name" placeholder="My Awesome App">
+          </div>
+
+          <div class="field">
+            <label for="project-dir">Project Directory</label>
+            <input type="text" id="project-dir" placeholder="/Users/you/Projects/my-app">
+            <div class="field-hint">Where the project files will be created</div>
+          </div>
+
+          <div class="field">
+            <label for="project-desc">One-Line Description <span class="optional">(optional)</span></label>
+            <input type="text" id="project-desc" placeholder="A tool for managing widget inventories">
+          </div>
+
+          <div class="field">
+            <label for="project-domain">Domain <span class="optional">(optional)</span></label>
+            <input type="text" id="project-domain" placeholder="SaaS, E-commerce, Developer Tools...">
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: PRD -->
+      <section class="step hidden" id="step-3" data-step="3">
+        <h1>Product Requirements</h1>
+        <p class="subtitle">Every great project starts with a PRD.</p>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="generate" type="button">Generate with Claude</button>
+          <button class="tab" data-tab="paste" type="button">Bring Your Own PRD</button>
+          <button class="tab" data-tab="skip" type="button">Skip for Now</button>
+        </div>
+
+        <div class="tab-panel active" id="tab-generate">
+          <div class="card">
+            <p>Describe your idea and Claude will generate a production-ready PRD.</p>
+
+            <div class="field">
+              <label for="prd-idea">Your Idea</label>
+              <textarea id="prd-idea" rows="4" placeholder="A marketplace where freelance developers can sell reusable code components..."></textarea>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="pref-framework">Framework <span class="optional">(optional)</span></label>
+                <select id="pref-framework">
+                  <option value="">Auto-detect</option>
+                  <option value="next.js">Next.js</option>
+                  <option value="express">Express</option>
+                  <option value="django">Django</option>
+                  <option value="rails">Rails</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pref-database">Database <span class="optional">(optional)</span></label>
+                <select id="pref-database">
+                  <option value="">Auto-detect</option>
+                  <option value="postgres">PostgreSQL</option>
+                  <option value="mysql">MySQL</option>
+                  <option value="sqlite">SQLite</option>
+                  <option value="mongodb">MongoDB</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pref-deploy">Deploy Target <span class="optional">(optional)</span></label>
+                <select id="pref-deploy">
+                  <option value="">Auto-detect</option>
+                  <option value="vps">VPS (EC2)</option>
+                  <option value="vercel">Vercel</option>
+                  <option value="railway">Railway</option>
+                  <option value="docker">Docker</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" id="generate-prd" type="button">Generate PRD with Claude</button>
+
+            <div class="generation-output hidden" id="generation-output">
+              <div class="generation-header">
+                <span>Generated PRD</span>
+                <button class="btn btn-small" id="copy-generated" type="button">Copy</button>
+              </div>
+              <pre id="generated-prd-content"></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-paste">
+          <div class="card">
+            <p>Already have a PRD, or prefer to generate one with a different AI? Paste the finished result below.</p>
+
+            <div class="field">
+              <label>PRD Generator Prompt</label>
+              <p class="field-hint" style="margin-bottom: 8px;">Copy this prompt into ChatGPT, Gemini, or any AI — then paste the output below.</p>
+              <button class="btn btn-secondary" id="copy-prd-prompt" type="button">Copy Generator Prompt to Clipboard</button>
+              <div class="status-row" id="prompt-copy-status"></div>
+            </div>
+
+            <div class="field">
+              <label for="prd-paste">Your PRD</label>
+              <textarea id="prd-paste" rows="16" placeholder="Paste your PRD here. Include the YAML frontmatter block:&#10;&#10;```yaml&#10;name: &quot;My Project&quot;&#10;type: &quot;full-stack&quot;&#10;framework: &quot;next.js&quot;&#10;...&#10;```"></textarea>
+            </div>
+            <button class="btn btn-secondary" id="validate-prd" type="button">Validate Frontmatter</button>
+            <div class="status-row" id="prd-status"></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-skip">
+          <div class="card">
+            <p>A blank PRD template will be included in your project at <code>docs/PRD.md</code>. You'll need to fill it out before running <code>/build</code>.</p>
+            <div class="status-row info">This is fine if you want to set up the project structure first and write the PRD later.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 4: Review -->
+      <section class="step hidden" id="step-4" data-step="4">
+        <h1>Review</h1>
+        <p class="subtitle">Confirm everything before we create your project.</p>
+
+        <div class="card">
+          <table class="review-table" id="review-table">
+            <tbody>
+              <tr><td class="review-label">Project</td><td id="review-name"></td></tr>
+              <tr><td class="review-label">Directory</td><td id="review-dir"></td></tr>
+              <tr><td class="review-label">Description</td><td id="review-desc"></td></tr>
+              <tr><td class="review-label">Domain</td><td id="review-domain"></td></tr>
+              <tr><td class="review-label">PRD</td><td id="review-prd"></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3>Files to be created</h3>
+          <ul class="file-list">
+            <li><code>CLAUDE.md</code> — Root context with project name</li>
+            <li><code>.claude/commands/</code> — Slash commands (/build, /qa, etc.)</li>
+            <li><code>.claude/settings.json</code> — Permissions and hooks</li>
+            <li><code>docs/PRD.md</code> — Your product requirements</li>
+            <li><code>docs/methods/</code> — 14 agent protocols</li>
+            <li><code>docs/patterns/</code> — 7 code reference implementations</li>
+            <li><code>logs/build-state.md</code> — Build journal</li>
+            <li><code>.env</code> — Environment variables (gitignored)</li>
+            <li><code>.gitignore</code> — Standard ignores</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Step 5: Creating / Done -->
+      <section class="step hidden" id="step-5" data-step="5">
+        <div id="creating-state">
+          <h1>Creating Your Project...</h1>
+          <div class="spinner"></div>
+          <p class="subtitle" id="create-status-text">Setting up project files...</p>
+        </div>
+
+        <div id="done-state" class="hidden">
+          <h1>Project Created!</h1>
+          <p class="subtitle">Your VoidForge project is ready.</p>
+
+          <div class="card success-card">
+            <div class="success-icon">&#10003;</div>
+            <div id="done-details"></div>
+          </div>
+
+          <div class="card">
+            <h3>Next Steps</h3>
+            <ol class="next-steps">
+              <li>Open a terminal in your project directory</li>
+              <li>Review <code>docs/PRD.md</code> — fill in any remaining sections</li>
+              <li>Open Claude Code and run <code>/build</code></li>
+            </ol>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="open-terminal" type="button">Open in Terminal</button>
+              <button class="btn btn-secondary" id="open-finder" type="button">Open in Finder</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="wizard-footer">
+      <button class="btn btn-secondary" id="btn-back" type="button" disabled>Back</button>
+      <button class="btn btn-primary" id="btn-next" type="button">Next</button>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -27,7 +27,7 @@ echo ""
 # Create project directory
 mkdir -p "$PROJECT_DIR"
 
-# Copy scaffold files
+# Copy scaffold files (excluding wizard/ — it's a creation tool, not part of created projects)
 cp -r "$SCAFFOLD_DIR/CLAUDE.md" "$PROJECT_DIR/"
 cp -r "$SCAFFOLD_DIR/docs" "$PROJECT_DIR/"
 cp "$SCAFFOLD_DIR/.gitignore" "$PROJECT_DIR/" 2>/dev/null || true

@@ -116,43 +116,50 @@ voidforge/
 │       ├── MCP_INTEGRATION.md             ← External tool connections
 │       └── PRD_GENERATOR.md               ← Prompt for auto-generating PRDs
 │
-└── scripts/
-    └── new-project.sh                     ← One-command project initialization
+├── scripts/
+│   ├── new-project.sh                     ← One-command project initialization
+│   └── voidforge.ts                       ← CLI entry point for wizard
+│
+└── wizard/                                ← Interactive setup wizard (Option 0)
+    ├── server.ts                          ← Local HTTP server
+    ├── router.ts                          ← API route registry
+    ├── api/                               ← API handlers (credentials, PRD, project)
+    ├── ui/                                ← Vanilla HTML/CSS/JS frontend
+    └── lib/                               ← Encrypted vault, frontmatter parser, utilities
 ```
 
 ---
 
 ## Quick Start
 
-### Option 1: Clone and go
+```bash
+git clone https://github.com/tmcleod3/voidforge.git
+cd voidforge
+npm install
+npm run wizard
+```
+
+The wizard walks you through everything:
+1. Credential vault (password-encrypted, works on any OS)
+2. Project setup (name, directory, domain)
+3. PRD generation with Claude (or paste one from any AI)
+4. Review and create
+
+Your project is scaffolded, git-initialized, and ready for `/build`.
+
+### Alternative: Manual setup
+
+If you prefer to skip the wizard:
 
 ```bash
-git clone https://github.com/YOUR_USER/voidforge.git my-project
-cd my-project
-rm -rf .git && git init
-```
-
-Replace `docs/PRD.md` with your actual PRD. Open Claude Code and run:
-
-```
-/build
-```
-
-### Option 2: Use the init script
-
-```bash
-git clone https://github.com/YOUR_USER/voidforge.git
+# Clone and scaffold directly
+git clone https://github.com/tmcleod3/voidforge.git
 ./voidforge/scripts/new-project.sh "My App" ~/my-app
 cd ~/my-app
+
+# Replace docs/PRD.md with your actual PRD, then:
+/build
 ```
-
-### Option 3: Generate a PRD first
-
-1. Open Claude (chat, not Code)
-2. Paste the prompt from `docs/methods/PRD_GENERATOR.md`
-3. Add your idea (as rough as 1-3 sentences)
-4. Save output as `docs/PRD.md`
-5. Open Claude Code and run `/build`
 
 ---
 

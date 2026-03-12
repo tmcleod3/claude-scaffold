@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 2.2.0
+**Current:** 2.3.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 2.3.0 | 2026-03-12 | Interactive setup wizard — browser-based onboarding with encrypted credential vault, PRD generation, project scaffolding |
 | 2.2.0 | 2026-03-12 | Rename project to VoidForge — "from nothing, everything" |
 | 2.1.1 | 2026-03-12 | Fix PostToolUse hook format — migrate from flat `command` to nested `hooks` array per Claude Code schema |
 | 2.1.0 | 2026-03-10 | Build journal, context management, enriched slash commands, specific verification gates, test timeline, framework adaptations, rollback strategy, conflict resolution, new patterns (job-queue, multi-tenant, error-handling), regression checklist template, first-deploy checklist, dedup CLAUDE.md/README, parallel phase marking, Batman scope clarification |
