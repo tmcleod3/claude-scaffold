@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [2.7.0] - 2026-03-12
+
+### Added
+- **Real API provisioning** for all deploy targets — Vercel creates projects, Railway creates projects with database/Redis services, Cloudflare creates Pages projects with D1 databases, Static S3 creates buckets with website hosting. All verified with live infrastructure.
+- **Shared HTTP client** for provisioner API calls with safe JSON parsing and slug generation
+- **Crash recovery cleanup** — orphaned resources from process crashes can now be cleaned up after server restart via disk-persisted manifests
+- **SSE keepalive** on provisioning and PRD generation streams — prevents proxy/VPN/browser timeouts with 15-second heartbeats and event IDs
+- **VoidForge favicon** — purple void portal icon
+
+### Changed
+- **Generated deploy scripts** use release-directory strategy with atomic symlink swap, post-deploy health check, and automatic rollback on failure. Keeps last 5 releases.
+- **Generated provision scripts** include fail2ban, SSH hardening (no root/password), unattended security updates, 2GB swap, and log rotation
+- **Generated Caddyfile** includes HSTS, Content-Security-Policy, and Permissions-Policy headers
+- **Generated Dockerfiles** include HEALTHCHECK instructions. Build errors no longer silenced.
+- **Generated docker-compose** uses env var DB passwords (not hardcoded), internal-only ports for DB/Redis, and app health checks
+- **Generated PM2 config** includes crash-loop protection and graceful reload timeouts
+- **Done page** shows target-specific deploy commands, human-readable labels, clickable URLs, and free tier/cost info
+- **Railway** terminology updated from "plugins" to "services"
+
+### Fixed
+- Safe JSON parsing on all external API responses — no more crashes on HTML error pages
+- S3 cleanup paginates object listing — handles buckets with more than 1000 objects
+- Slugify strips leading/trailing hyphens and provides fallback for empty slugs
+- Cloudflare D1 database only created for SQLite projects, not Postgres
+- Railway token validation works with API tokens (not just user sessions)
+- Help button now expands provider accordion when collapsed
+- Vercel and Cloudflare 409 (project exists) paths track resources for cleanup
+
+### Security
+- Generated Caddyfile: HSTS, CSP, Permissions-Policy headers
+- Generated provision.sh: fail2ban, SSH hardening, firewall lock-down-first
+- Generated docker-compose: DB passwords from environment variables, database/Redis ports internal-only
+- All 4 ADRs now implemented: provision manifest, atomic vault writes, API response validation, SSE keepalive
+
+---
+
 ## [2.6.0] - 2026-03-12
 
 ### Added
