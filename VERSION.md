@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 2.8.0
+**Current:** 2.9.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 2.9.0 | 2026-03-12 | The VoidForge Holocron, three-tier release strategy, README restructured to system reference |
 | 2.8.0 | 2026-03-12 | Merlin/Strange wizard split, architecture review docs, security audit with SG hardening |
 | 2.7.0 | 2026-03-12 | Real provisioning for all 6 targets, hardened infra scripts, SSE keepalive, crash recovery loop complete |
 | 2.6.0 | 2026-03-12 | Auto-provisioning — Docker, AWS VPS (EC2/RDS/ElastiCache), config stubs, crash recovery manifest, atomic vault writes |

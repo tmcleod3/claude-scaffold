@@ -65,6 +65,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 
 | Doc | Location | When to Read |
 |-----|----------|-------------|
+| **Holocron** | `/HOLOCRON.md` | Complete user guide — start here if new |
 | **PRD** | `/docs/PRD.md` | Source of truth for WHAT to build. Read first. |
 | **Build Protocol** | `/docs/methods/BUILD_PROTOCOL.md` | Master 13-phase sequence with gates and rollback |
 | **Build Journal** | `/docs/methods/BUILD_JOURNAL.md` | Logging protocol — read when starting any work |
@@ -96,6 +97,23 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Release | **Coulson** (Marvel) | Version, changelog, commit, release |
 
 150+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
+
+## Release Tiers
+
+VoidForge ships on three branches. Shared methodology files exist on all three.
+
+| Branch | What's Included | Use Case |
+|--------|----------------|----------|
+| `main` | Full — wizards, provisioners, AWS SDK, everything | `npx voidforge init` / `npx voidforge deploy` |
+| `scaffold` | Methodology only — CLAUDE.md, commands, methods, patterns, Holocron | `git clone --branch scaffold`, add PRD, `/build` |
+| `core` | Ultra-light — CLAUDE.md, commands, methods, patterns, naming registry | Point Claude Code at branch to absorb methodology |
+
+**Branch sync rule:** Changes to any shared file must propagate to all branches. Shared files:
+- `CLAUDE.md`, `.claude/commands/*`, `.claude/settings.json`
+- `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
+- `HOLOCRON.md`
+
+The agents, characters, and personality are VoidForge's identity — never strip them from any tier.
 
 ## How to Build
 

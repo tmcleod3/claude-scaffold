@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [2.9.0] - 2026-03-12
+
+### Added
+- **The VoidForge Holocron** (`HOLOCRON.md`) — comprehensive 9-chapter user guide covering setup, first project walkthrough, build protocol, agent system, slash commands, code patterns, build journal, troubleshooting, and evolution. Named after the Star Wars knowledge devices.
+- **Three-tier release strategy** — VoidForge now ships on three branches: `main` (full wizard), `scaffold` (methodology only), `core` (ultra-light). Branch sync rules in CLAUDE.md ensure shared methodology stays consistent across all tiers.
+
+### Changed
+- **README restructured** — stripped down to pure system reference (architecture, components, tables). All walkthrough and guide content moved to the Holocron. README now points to Holocron for new users.
+
+---
+
 ## [2.8.0] - 2026-03-12
 
 ### Added
