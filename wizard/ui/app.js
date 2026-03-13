@@ -917,10 +917,10 @@
     const descriptions = {
       docker: 'This will generate a Dockerfile, docker-compose.yml, and .dockerignore in your project directory. No cloud resources will be created.',
       vps: 'This will create AWS resources on your account: an EC2 instance (t3.micro), security group, and SSH key pair. Optional RDS database and ElastiCache may also be created. These resources will incur AWS charges.',
-      vercel: 'This will generate a vercel.json configuration file. No cloud resources will be created.',
-      railway: 'This will generate a railway.toml configuration file. No cloud resources will be created.',
-      cloudflare: 'This will generate a wrangler.toml configuration file. No cloud resources will be created.',
-      static: 'This will generate an S3 deploy script. No cloud resources will be created.',
+      vercel: 'This will create a new project on your Vercel account and generate a vercel.json configuration file. The project can be deleted via cleanup if needed.',
+      railway: 'This will create a new project on your Railway account with optional database and Redis plugins, and generate a railway.toml configuration file.',
+      cloudflare: 'This will create a Cloudflare Pages project on your account, optionally with a D1 database, and generate a wrangler.toml configuration file.',
+      static: 'This will create an S3 bucket on your AWS account configured for static website hosting, and generate a deploy script. The bucket will incur minimal AWS charges.',
     };
     $('#provision-confirm-desc').textContent = descriptions[deployTarget] || 'This will set up your deploy target.';
   }

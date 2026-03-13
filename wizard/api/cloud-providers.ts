@@ -131,41 +131,57 @@ async function validateVercel(token: string): Promise<{ valid: boolean; error?: 
 
 async function validateRailway(token: string): Promise<{ valid: boolean; error?: string; identity?: string }> {
   try {
-    // Railway uses GraphQL
-    const postData = JSON.stringify({ query: '{ me { name email } }' });
-    const result = await new Promise<{ status: number; body: string }>((resolve, reject) => {
-      const req = httpsRequest({
-        hostname: 'backboard.railway.com',
-        path: '/graphql/v2',
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData),
-        },
-        timeout: 10000,
-      }, (res) => {
-        let body = '';
-        res.on('data', (chunk: Buffer) => { body += chunk.toString(); });
-        res.on('end', () => resolve({ status: res.statusCode ?? 0, body }));
-      });
-      req.on('error', reject);
-      req.on('timeout', () => { req.destroy(); reject(new Error('Timed out')); });
-      req.write(postData);
-      req.end();
-    });
+    // Railway uses GraphQL — try multiple queries since schema evolves
+    // Team tokens may not have access to `me`, so fall back to listing projects
+    const queries = [
+      { query: '{ me { name email } }', extract: (d: Record<string, unknown>) => { const me = d.me as { name?: string; email?: string } | undefined; return me?.name || me?.email; } },
+      { query: '{ projects { edges { node { name } } } }', extract: () => 'authenticated' },
+    ];
 
-    if (result.status === 200) {
-      const data = JSON.parse(result.body) as { data?: { me?: { name?: string; email?: string } } };
-      if (data.data?.me) {
-        return { valid: true, identity: data.data.me.name || data.data.me.email };
+    for (const q of queries) {
+      const postData = JSON.stringify({ query: q.query });
+      const result = await new Promise<{ status: number; body: string }>((resolve, reject) => {
+        const req = httpsRequest({
+          hostname: 'backboard.railway.com',
+          path: '/graphql/v2',
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          },
+          timeout: 10000,
+        }, (res) => {
+          let body = '';
+          res.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+          res.on('end', () => resolve({ status: res.statusCode ?? 0, body }));
+        });
+        req.on('error', reject);
+        req.on('timeout', () => { req.destroy(); reject(new Error('Timed out')); });
+        req.write(postData);
+        req.end();
+      });
+
+      if (result.status === 401) {
+        return { valid: false, error: 'Invalid or expired token' };
       }
-      return { valid: false, error: 'Token valid but could not fetch user info' };
+
+      if (result.status === 200) {
+        const parsed = JSON.parse(result.body) as { data?: Record<string, unknown>; errors?: { message: string }[] };
+        // If the query succeeded with data (no errors, or errors but still got data)
+        if (parsed.data && !parsed.errors) {
+          const identity = q.extract(parsed.data);
+          if (identity) return { valid: true, identity };
+        }
+        // If this query errored, try the next one
+        continue;
+      }
+
+      return { valid: false, error: `Railway API returned ${result.status}` };
     }
-    if (result.status === 401) {
-      return { valid: false, error: 'Invalid or expired token' };
-    }
-    return { valid: false, error: `Railway API returned ${result.status}` };
+
+    // If we got here, all queries returned 200 but none yielded identity — token is likely valid
+    return { valid: true, identity: 'connected' };
   } catch (err) {
     return { valid: false, error: `Connection failed: ${(err as Error).message}` };
   }
