@@ -8,6 +8,7 @@ interface ProvisionScriptOptions {
   framework: string;
   database: string;
   cache: string;
+  instanceType?: string;
 }
 
 export function generateProvisionScript(opts: ProvisionScriptOptions): string {
@@ -140,16 +141,16 @@ if command -v firewall-cmd &>/dev/null; then
 fi
 
 # ==========================================
-# Swap (prevents OOM on t3.micro during builds)
+# Swap (prevents OOM during builds)
 # ==========================================
-if [ ! -f /swapfile ]; then
-  echo "Setting up 2GB swap..."
-  fallocate -l 2G /swapfile
+${opts.instanceType === 't3.large' ? '# Swap skipped — t3.large has 8 GiB RAM' : `if [ ! -f /swapfile ]; then
+  echo "Setting up ${opts.instanceType === 't3.medium' ? '1GB' : '2GB'} swap..."
+  fallocate -l ${opts.instanceType === 't3.medium' ? '1G' : '2G'} /swapfile
   chmod 600 /swapfile
   mkswap /swapfile
   swapon /swapfile
   echo '/swapfile none swap sw 0 0' >> /etc/fstab
-fi
+fi`}
 
 # ==========================================
 # Log Rotation

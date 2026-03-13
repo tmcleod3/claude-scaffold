@@ -152,7 +152,41 @@ export const railwayProvisioner: Provisioner = {
       emit({ step: 'railway-redis', status: 'skipped', message: 'No cache requested' });
     }
 
-    // Step 4: Generate railway.toml
+    // Step 4: Add custom domain if hostname provided
+    if (ctx.hostname && projectId) {
+      emit({ step: 'railway-domain', status: 'started', message: `Adding domain ${ctx.hostname} to Railway project` });
+      try {
+        const res = await gql(token, `
+          mutation($projectId: String!, $domain: String!) {
+            customDomainCreate(input: { projectId: $projectId, domain: $domain }) {
+              id
+              domain
+              status { dnsRecords { type hostlabel value } }
+            }
+          }
+        `, { projectId, domain: ctx.hostname });
+
+        if (res.status !== 200) throw new Error(`Railway API returned ${res.status}`);
+
+        const data = safeJsonParse(res.body) as {
+          data?: { customDomainCreate?: { id?: string; domain?: string } };
+          errors?: { message: string }[];
+        };
+
+        if (data?.errors && data.errors.length > 0) {
+          throw new Error(data.errors[0].message);
+        }
+
+        const domain = data?.data?.customDomainCreate?.domain ?? ctx.hostname;
+        outputs['RAILWAY_DOMAIN'] = domain;
+        emit({ step: 'railway-domain', status: 'done', message: `Domain "${domain}" added to Railway project` });
+      } catch (err) {
+        emit({ step: 'railway-domain', status: 'error', message: 'Failed to add domain to Railway', detail: (err as Error).message });
+        // Non-fatal
+      }
+    }
+
+    // Step 5: Generate railway.toml
     emit({ step: 'railway-config', status: 'started', message: 'Generating railway.toml' });
     try {
       const startCommand = framework === 'next.js'
@@ -187,7 +221,7 @@ restartPolicyMaxRetries = 3
       emit({ step: 'railway-config', status: 'error', message: 'Failed to write railway.toml', detail: (err as Error).message });
     }
 
-    // Step 5: Write .env
+    // Step 6: Write .env
     emit({ step: 'railway-env', status: 'started', message: 'Writing Railway config to .env' });
     try {
       const envLines = [

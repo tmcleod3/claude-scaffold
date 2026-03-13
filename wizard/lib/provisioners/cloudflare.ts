@@ -103,7 +103,36 @@ export const cloudflareProvisioner: Provisioner = {
       return { success: false, resources, outputs, files, error: (err as Error).message };
     }
 
-    // Step 3: Create D1 database if requested
+    // Step 3: Add custom domain if hostname provided
+    const projectName = outputs['CF_PROJECT_NAME'] || slug;
+    if (ctx.hostname && accountId) {
+      emit({ step: 'cf-domain', status: 'started', message: `Adding domain ${ctx.hostname} to Pages project` });
+      try {
+        const domainBody = JSON.stringify({ name: ctx.hostname });
+        const domainRes = await httpsPost(
+          'api.cloudflare.com',
+          `/client/v4/accounts/${accountId}/pages/projects/${projectName}/domains`,
+          headers,
+          domainBody,
+        );
+
+        if (domainRes.status === 200 || domainRes.status === 201) {
+          outputs['CF_CUSTOM_DOMAIN'] = ctx.hostname;
+          emit({ step: 'cf-domain', status: 'done', message: `Domain "${ctx.hostname}" added to Pages project` });
+        } else if (domainRes.status === 409) {
+          emit({ step: 'cf-domain', status: 'done', message: `Domain "${ctx.hostname}" already configured on Pages project` });
+          outputs['CF_CUSTOM_DOMAIN'] = ctx.hostname;
+        } else {
+          const errData = safeJsonParse(domainRes.body) as { errors?: { message: string }[] };
+          throw new Error(errData?.errors?.[0]?.message || `Pages domains API returned ${domainRes.status}`);
+        }
+      } catch (err) {
+        emit({ step: 'cf-domain', status: 'error', message: 'Failed to add domain to Pages project', detail: (err as Error).message });
+        // Non-fatal
+      }
+    }
+
+    // Step 4: Create D1 database if requested
     if (ctx.database === 'sqlite') {
       emit({ step: 'cf-d1', status: 'started', message: 'Creating D1 database' });
       try {
@@ -141,7 +170,7 @@ export const cloudflareProvisioner: Provisioner = {
       emit({ step: 'cf-d1', status: 'skipped', message: 'No database requested' });
     }
 
-    // Step 4: Generate wrangler.toml
+    // Step 5: Generate wrangler.toml
     emit({ step: 'cf-config', status: 'started', message: 'Generating wrangler.toml' });
     try {
       let config = `# wrangler.toml — Cloudflare Workers/Pages configuration
@@ -172,7 +201,7 @@ database_id = "${outputs['CF_D1_DATABASE_ID']}"
       emit({ step: 'cf-config', status: 'error', message: 'Failed to write wrangler.toml', detail: (err as Error).message });
     }
 
-    // Step 5: Write .env
+    // Step 6: Write .env
     emit({ step: 'cf-env', status: 'started', message: 'Writing Cloudflare config to .env' });
     try {
       const envLines = [

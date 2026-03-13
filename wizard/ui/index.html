@@ -134,6 +134,12 @@
             <label for="project-domain">Domain <span class="optional">(optional)</span></label>
             <input type="text" id="project-domain" placeholder="SaaS, E-commerce, Developer Tools...">
           </div>
+
+          <div class="field">
+            <label for="project-hostname">Hostname <span class="optional">(optional)</span></label>
+            <input type="text" id="project-hostname" placeholder="myapp.com">
+            <div class="field-hint">Your domain for DNS wiring (must be on Cloudflare)</div>
+          </div>
         </div>
       </section>
 
@@ -252,6 +258,7 @@
               <tr><td class="review-label">Directory</td><td id="review-dir"></td></tr>
               <tr><td class="review-label">Description</td><td id="review-desc"></td></tr>
               <tr><td class="review-label">Domain</td><td id="review-domain"></td></tr>
+              <tr><td class="review-label">Hostname</td><td id="review-hostname"></td></tr>
               <tr><td class="review-label">PRD</td><td id="review-prd"></td></tr>
               <tr><td class="review-label">Deploy</td><td id="review-deploy"></td></tr>
             </tbody>

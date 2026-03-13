@@ -76,7 +76,7 @@ export const PROVIDERS: ProviderInfo[] = [
     deployTargets: ['cloudflare'],
     description: 'Workers, Pages, D1, R2 — edge-first deployment',
     credentialUrl: 'https://dash.cloudflare.com/profile/api-tokens',
-    help: '<ol><li>Sign in to the <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare Dashboard</a></li><li>Go to <strong>My Profile &rarr; API Tokens</strong></li><li>Click <strong>Create Token</strong></li><li>Use the <strong>"Edit Cloudflare Workers"</strong> template for Workers/Pages, or create a custom token with the permissions you need</li><li>Copy the token — it won\'t be shown again</li></ol>',
+    help: '<ol><li>Sign in to the <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare Dashboard</a></li><li>Go to <strong>My Profile &rarr; API Tokens</strong></li><li>Click <strong>Create Token</strong></li><li>Use a <strong>custom token</strong> with permissions: <strong>Zone:DNS:Edit</strong> and <strong>Account:Cloudflare Pages:Edit</strong> (for Pages deployment + DNS wiring)</li><li>Copy the token — it won\'t be shown again</li></ol>',
   },
 ];
 

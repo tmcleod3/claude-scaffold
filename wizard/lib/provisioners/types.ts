@@ -10,6 +10,8 @@ export interface ProvisionContext {
   framework: string;
   database: string;    // postgres | mysql | sqlite | none
   cache: string;       // redis | none
+  instanceType: string; // t3.micro | t3.small | t3.medium | t3.large (VPS only)
+  hostname: string;     // DNS hostname for Cloudflare DNS wiring (optional)
   credentials: Record<string, string>;
 }
 

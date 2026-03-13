@@ -18,6 +18,7 @@
     projectDir: '',
     projectDesc: '',
     projectDomain: '',
+    projectHostname: '',
     prdMode: 'generate',  // 'generate' | 'paste' | 'skip'
     prdContent: '',
     generatedPrd: '',
@@ -80,6 +81,7 @@
       state.projectDir = $('#project-dir').value.trim();
       state.projectDesc = $('#project-desc').value.trim();
       state.projectDomain = $('#project-domain').value.trim();
+      state.projectHostname = $('#project-hostname').value.trim();
     }
     if (currentStep === 4) {
       if (state.prdMode === 'paste') {
@@ -761,6 +763,7 @@
     $('#review-dir').textContent = state.projectDir;
     $('#review-desc').textContent = state.projectDesc || '(not set)';
     $('#review-domain').textContent = state.projectDomain || '(not set)';
+    $('#review-hostname').textContent = state.projectHostname || '(not set)';
     const deployNames = { vps: 'VPS (AWS EC2)', vercel: 'Vercel', railway: 'Railway', cloudflare: 'Cloudflare Workers/Pages', static: 'Static (S3 + CloudFront)', docker: 'Docker (local)' };
     $('#review-deploy').textContent = deployNames[state.deployTarget] || state.deployTarget || 'Docker (local)';
 
@@ -795,6 +798,7 @@
           directory: state.projectDir,
           description: state.projectDesc || undefined,
           domain: state.projectDomain || undefined,
+          hostname: state.projectHostname || undefined,
           deploy: state.deployTarget || undefined,
           prd,
         }),

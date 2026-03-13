@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import type { Provisioner, ProvisionContext, ProvisionEmitter, ProvisionResult, CreatedResource } from './types.js';
 import type { IpPermission } from '@aws-sdk/client-ec2';
 import { recordResourcePending, recordResourceCreated } from '../provision-manifest.js';
+import { rdsInstanceClass, cacheNodeType, isValidInstanceType, type InstanceType } from '../instance-sizing.js';
 import { generateProvisionScript } from './scripts/provision-vps.js';
 import { generateDeployScript } from './scripts/deploy-vps.js';
 import { generateRollbackScript } from './scripts/rollback-vps.js';
@@ -33,6 +34,9 @@ export const awsVpsProvisioner: Provisioner = {
     if (!ctx.projectName) errors.push('Project name is required');
     if (!ctx.credentials['aws-access-key-id']) errors.push('AWS Access Key ID is required');
     if (!ctx.credentials['aws-secret-access-key']) errors.push('AWS Secret Access Key is required');
+    if (ctx.instanceType && !isValidInstanceType(ctx.instanceType)) {
+      errors.push(`Invalid instance type: "${ctx.instanceType}". Must be one of: t3.micro, t3.small, t3.medium, t3.large`);
+    }
     return errors;
   },
 
@@ -185,7 +189,8 @@ export const awsVpsProvisioner: Provisioner = {
     }
 
     // Step 5: Launch EC2 instance
-    emit({ step: 'launch-ec2', status: 'started', message: 'Launching EC2 instance (t3.micro)' });
+    const ec2InstanceType = (ctx.instanceType || 't3.micro') as InstanceType;
+    emit({ step: 'launch-ec2', status: 'started', message: `Launching EC2 instance (${ec2InstanceType})` });
     let instanceId: string;
     try {
       const userDataScript = `#!/bin/bash
@@ -195,7 +200,7 @@ dnf install -y git curl`;
       await recordResourcePending(ctx.runId, 'ec2-instance', 'pending', region);
       const runResult = await ec2.send(new ec2Commands.RunInstancesCommand({
         ImageId: amiId,
-        InstanceType: 't3.micro',
+        InstanceType: ec2InstanceType,
         MinCount: 1,
         MaxCount: 1,
         KeyName: keyName,
@@ -265,7 +270,7 @@ dnf install -y git curl`;
         await recordResourcePending(ctx.runId, 'rds-instance', dbInstanceId, region);
         await rds.send(new CreateDBInstanceCommand({
           DBInstanceIdentifier: dbInstanceId,
-          DBInstanceClass: 'db.t3.micro',
+          DBInstanceClass: rdsInstanceClass(ec2InstanceType),
           Engine: engine,
           MasterUsername: 'admin',
           MasterUserPassword: dbPassword,
@@ -304,7 +309,7 @@ dnf install -y git curl`;
         await recordResourcePending(ctx.runId, 'elasticache-cluster', clusterId, region);
         await elasticache.send(new CreateCacheClusterCommand({
           CacheClusterId: clusterId,
-          CacheNodeType: 'cache.t3.micro',
+          CacheNodeType: cacheNodeType(ec2InstanceType),
           Engine: 'redis',
           NumCacheNodes: 1,
           Tags: [
@@ -334,7 +339,7 @@ dnf install -y git curl`;
       const framework = ctx.framework || 'express';
 
       // provision.sh
-      const provisionSh = generateProvisionScript({ framework, database: ctx.database, cache: ctx.cache });
+      const provisionSh = generateProvisionScript({ framework, database: ctx.database, cache: ctx.cache, instanceType: ec2InstanceType });
       await writeFile(join(infraDir, 'provision.sh'), provisionSh, { mode: 0o755 });
       files.push('infra/provision.sh');
 
@@ -349,7 +354,7 @@ dnf install -y git curl`;
       files.push('infra/rollback.sh');
 
       // Caddyfile
-      const caddyfile = generateCaddyfile({ framework });
+      const caddyfile = generateCaddyfile({ framework, hostname: ctx.hostname || undefined });
       await writeFile(join(infraDir, 'Caddyfile'), caddyfile, 'utf-8');
       files.push('infra/Caddyfile');
 

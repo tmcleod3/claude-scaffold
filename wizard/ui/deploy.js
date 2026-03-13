@@ -16,6 +16,8 @@
     framework: '',
     database: 'none',
     cache: 'none',
+    instanceType: 't3.micro',
+    hostname: '',
     provisionResult: null,
     provisionRunId: '',
   };
@@ -125,6 +127,8 @@
         state.framework = data.framework || '';
         state.database = data.database || 'none';
         state.cache = data.cache || 'none';
+        state.instanceType = data.instanceType || 't3.micro';
+        state.hostname = data.hostname || '';
 
         showStatus(projectStatus, 'success', `Found: ${data.name} (${data.deploy || 'docker'})`);
         // Show continue button instead of auto-advancing
@@ -144,7 +148,7 @@
 
   const DEPLOY_DESCRIPTIONS = {
     docker: 'This will generate a Dockerfile, docker-compose.yml, and .dockerignore. No cloud resources will be created.',
-    vps: 'This will create AWS resources: EC2 instance (t3.micro), security group, SSH key pair. These resources will incur AWS charges.',
+    vps: 'This will create AWS resources: EC2 instance, security group, SSH key pair. These resources will incur AWS charges.',
     vercel: 'This will create a project on your Vercel account. Free tier covers most hobby projects.',
     railway: 'This will create a project on your Railway account with optional database/Redis services.',
     cloudflare: 'This will create a Cloudflare Pages project, optionally with a D1 database. Pages has a generous free tier.',
@@ -162,6 +166,10 @@
     deploySelect.value = state.deployTarget;
     updateDeployDescription();
 
+    // Set hostname and instance type
+    $('#summary-hostname').value = state.hostname;
+    $('#summary-instance-type').value = state.instanceType;
+
     showStep(2);
   }
 
@@ -169,9 +177,25 @@
     const target = $('#summary-deploy-select').value;
     state.deployTarget = target;
     $('#provision-confirm-desc').textContent = DEPLOY_DESCRIPTIONS[target] || 'This will provision your deploy target.';
+
+    // Show/hide instance type selector for VPS target
+    const instanceRow = $('#instance-type-row');
+    if (target === 'vps') {
+      instanceRow.classList.remove('hidden');
+    } else {
+      instanceRow.classList.add('hidden');
+    }
   }
 
   $('#summary-deploy-select').addEventListener('change', updateDeployDescription);
+
+  $('#summary-hostname').addEventListener('input', () => {
+    state.hostname = $('#summary-hostname').value.trim();
+  });
+
+  $('#summary-instance-type').addEventListener('change', () => {
+    state.instanceType = $('#summary-instance-type').value;
+  });
 
   // Back to step 1
   $('#back-to-project').addEventListener('click', () => {
@@ -241,6 +265,8 @@
           framework: state.framework,
           database: state.database,
           cache: state.cache,
+          instanceType: state.instanceType,
+          hostname: state.hostname || undefined,
         }),
       });
 
@@ -341,6 +367,9 @@
       'CF_PROJECT_URL': 'Site URL', 'CF_D1_DATABASE_ID': 'D1 Database ID',
       'CF_D1_DATABASE_NAME': 'D1 Database',
       'S3_BUCKET': 'S3 Bucket', 'S3_WEBSITE_URL': 'Website URL',
+      'DNS_HOSTNAME': 'Domain', 'DNS_ZONE_ID': 'DNS Zone ID',
+      'VERCEL_DOMAIN': 'Custom Domain', 'RAILWAY_DOMAIN': 'Custom Domain',
+      'CF_CUSTOM_DOMAIN': 'Custom Domain',
     };
     const sensitiveKeys = ['DB_PASSWORD'];
     const urlKeys = ['CF_PROJECT_URL', 'S3_WEBSITE_URL'];

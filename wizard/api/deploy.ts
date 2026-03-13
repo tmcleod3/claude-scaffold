@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { addRoute } from '../router.js';
 import { parseJsonBody } from '../lib/body-parser.js';
 import { parseFrontmatter } from '../lib/frontmatter.js';
+import { recommendInstanceType } from '../lib/instance-sizing.js';
 
 function sendJson(res: ServerResponse, status: number, data: unknown): void {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -66,14 +67,31 @@ addRoute('POST', '/api/deploy/scan', async (req: IncomingMessage, res: ServerRes
   let framework = '';
   let database = 'none';
   let cache = 'none';
+  let instanceType = '';
+  let hostname = '';
+  let prdFrontmatter: Record<string, string | undefined> = {};
   try {
     const prd = await readFile(join(dir, 'docs', 'PRD.md'), 'utf-8');
     const { frontmatter } = parseFrontmatter(prd);
+    prdFrontmatter = frontmatter;
     if (frontmatter.framework) framework = frontmatter.framework;
     if (frontmatter.database) database = frontmatter.database;
     if (frontmatter.cache) cache = frontmatter.cache;
     if (frontmatter.deploy && !deploy) deploy = frontmatter.deploy;
+    if (frontmatter.instance_type) instanceType = frontmatter.instance_type;
+    if (frontmatter.hostname) hostname = frontmatter.hostname;
   } catch { /* no PRD or no frontmatter */ }
+
+  // Also check .env for hostname if not in PRD
+  if (!hostname) {
+    try {
+      const envContent = await readFile(join(dir, '.env'), 'utf-8');
+      const hostnameMatch = envContent.match(/HOSTNAME=(.+)/);
+      if (hostnameMatch) {
+        hostname = hostnameMatch[1].trim().replace(/^["']|["']$/g, '').split('#')[0].trim();
+      }
+    } catch { /* no .env */ }
+  }
 
   // Auto-detect framework from files if not in PRD
   if (!framework) {
@@ -102,6 +120,18 @@ addRoute('POST', '/api/deploy/scan', async (req: IncomingMessage, res: ServerRes
     }
   }
 
+  // Auto-recommend instance type from PRD scope if not explicitly set
+  if (!instanceType && (deploy === 'vps' || !deploy)) {
+    instanceType = recommendInstanceType({
+      type: prdFrontmatter.type,
+      framework,
+      database,
+      cache,
+      workers: prdFrontmatter.workers,
+      payments: prdFrontmatter.payments,
+    });
+  }
+
   sendJson(res, 200, {
     valid: true,
     name,
@@ -109,5 +139,7 @@ addRoute('POST', '/api/deploy/scan', async (req: IncomingMessage, res: ServerRes
     framework,
     database,
     cache,
+    instanceType: instanceType || 't3.micro',
+    hostname: hostname || '',
   });
 });

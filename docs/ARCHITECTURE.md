@@ -33,7 +33,8 @@ Node.js HTTP Server (127.0.0.1:3141)
          ├─ Vercel ────── HTTPS API
          ├─ Railway ───── GraphQL API
          ├─ Cloudflare ── HTTPS API
-         └─ Static S3 ── @aws-sdk (S3)
+         ├─ Static S3 ── @aws-sdk (S3)
+         └─ DNS (post) ── Cloudflare DNS API (zone lookup + record CRUD)
 
 State:
   ~/.voidforge/vault.enc           Encrypted credentials
@@ -49,6 +50,9 @@ State:
 | Atomic vault writes | Prevents credential loss on crash | ADR-002 |
 | Boundary validation on API responses | Defensive coding against API drift | ADR-003 |
 | SSE keepalive for long operations | Survives proxies, VPNs, laptop sleep | ADR-004 |
+| PRD-driven instance type selection | Right-sized EC2/RDS/ElastiCache from project scope | ADR-005 |
+| DNS as post-provision step | Cross-cutting, needs provisioner outputs, non-fatal | ADR-006 |
+| "hostname" for DNS, "domain" for business | Avoids ambiguity between DNS hostname and business domain | ADR-007 |
 | Monolith (not microservices) | Single user, single machine, same lifecycle | — |
 | No frontend framework | Keeps bundle at zero, avoids dependency churn | — |
 

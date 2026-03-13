@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [3.1.0] - 2026-03-13
+
+### Added
+- **PRD-driven EC2 instance type selection** — PRD frontmatter `instance_type` field recommends t3.micro/small/medium/large based on project scope (database, cache, workers, payments, framework). Strange wizard shows the recommendation with cost estimates and allows override. RDS and ElastiCache sizes match automatically. (ADR-005)
+- **Cloudflare DNS wiring** — new `hostname` field in Merlin wizard and PRD frontmatter. After Strange provisions infrastructure, it auto-creates Cloudflare DNS records (A for VPS, CNAME for platforms) pointing your domain at the provisioned resource. Works with all deploy targets. Non-fatal — infrastructure still succeeds if DNS fails. (ADR-006)
+- **Platform custom domain registration** — Strange now registers your hostname directly with Vercel, Railway, and Cloudflare Pages via their APIs, so the platform expects traffic on your domain
+- **Caddyfile auto-HTTPS** — when hostname is set, generated Caddyfile uses the domain instead of `:80`, enabling automatic Let's Encrypt SSL via Caddy
+- **Instance sizing module** (`wizard/lib/instance-sizing.ts`) — scoring heuristic with `recommendInstanceType()`, RDS/ElastiCache size mapping, swap scaling
+- **DNS module** (`wizard/lib/dns/`) — Cloudflare zone lookup, record CRUD, post-provision orchestration, cleanup support
+- ADRs 005 (instance type selection), 006 (DNS as post-provision step), 007 (hostname vs domain naming)
+
+### Changed
+- **Provision script swap size** scales with instance type (2GB for micro/small, 1GB for medium, none for large)
+- **Cloudflare help text** updated to recommend Zone:DNS:Edit token permission for DNS wiring
+- **Architecture doc** updated with DNS in system diagram and new ADR references
+
+---
+
 ## [3.0.0] - 2026-03-12
 
 ### Added

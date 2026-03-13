@@ -78,6 +78,23 @@
                   </select>
                 </td>
               </tr>
+              <tr>
+                <td class="review-label">Hostname</td>
+                <td>
+                  <input type="text" id="summary-hostname" placeholder="myapp.com (optional — Cloudflare DNS)">
+                </td>
+              </tr>
+              <tr class="hidden" id="instance-type-row">
+                <td class="review-label">Instance Type</td>
+                <td>
+                  <select id="summary-instance-type">
+                    <option value="t3.micro">t3.micro — 2 vCPU, 1 GiB (~$8/mo)</option>
+                    <option value="t3.small">t3.small — 2 vCPU, 2 GiB (~$15/mo)</option>
+                    <option value="t3.medium">t3.medium — 2 vCPU, 4 GiB (~$30/mo)</option>
+                    <option value="t3.large">t3.large — 2 vCPU, 8 GiB (~$60/mo)</option>
+                  </select>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>

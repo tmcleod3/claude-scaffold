@@ -31,6 +31,8 @@ email: none         # resend | sendgrid | ses | none — Phase 6
 
 # Deployment
 deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker
+instance_type: ""   # t3.micro | t3.small | t3.medium | t3.large — auto-recommended if blank (VPS only)
+hostname: ""        # your-domain.com — Cloudflare DNS wiring (optional)
 ```
 
 ---

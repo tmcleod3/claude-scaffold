@@ -75,7 +75,37 @@ export const vercelProvisioner: Provisioner = {
       return { success: false, resources, outputs, files, error: (err as Error).message };
     }
 
-    // Step 2: Generate vercel.json
+    // Step 2: Add custom domain if hostname provided
+    if (ctx.hostname && projectId) {
+      emit({ step: 'vercel-domain', status: 'started', message: `Adding domain ${ctx.hostname} to Vercel project` });
+      try {
+        const domainBody = JSON.stringify({ name: ctx.hostname });
+        const domainRes = await httpsPost(
+          'api.vercel.com',
+          `/v10/projects/${projectId}/domains`,
+          headers,
+          domainBody,
+        );
+
+        if (domainRes.status === 200 || domainRes.status === 201) {
+          outputs['VERCEL_DOMAIN'] = ctx.hostname;
+          emit({ step: 'vercel-domain', status: 'done', message: `Domain "${ctx.hostname}" added to Vercel project` });
+        } else if (domainRes.status === 409) {
+          emit({ step: 'vercel-domain', status: 'done', message: `Domain "${ctx.hostname}" already configured on Vercel` });
+          outputs['VERCEL_DOMAIN'] = ctx.hostname;
+        } else {
+          const errBody = safeJsonParse(domainRes.body) as { error?: { message?: string } } | null;
+          throw new Error(errBody?.error?.message || `Vercel domains API returned ${domainRes.status}`);
+        }
+      } catch (err) {
+        emit({ step: 'vercel-domain', status: 'error', message: 'Failed to add domain to Vercel', detail: (err as Error).message });
+        // Non-fatal — DNS wiring will still work, user can add domain manually
+      }
+    } else if (ctx.hostname && !projectId) {
+      emit({ step: 'vercel-domain', status: 'skipped', message: 'Cannot add domain — no project ID (existing project)' });
+    }
+
+    // Step 3: Generate vercel.json
     emit({ step: 'vercel-config', status: 'started', message: 'Generating vercel.json' });
     try {
       const config: Record<string, unknown> = {
@@ -99,7 +129,7 @@ export const vercelProvisioner: Provisioner = {
       // Non-fatal — project was still created
     }
 
-    // Step 3: Write .env
+    // Step 4: Write .env
     emit({ step: 'vercel-env', status: 'started', message: 'Writing Vercel config to .env' });
     try {
       const envLines = [

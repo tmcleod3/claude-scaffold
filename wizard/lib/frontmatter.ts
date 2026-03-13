@@ -17,6 +17,8 @@ export interface PrdFrontmatter {
   marketing?: string;
   email?: string;
   deploy?: string;
+  instance_type?: string;
+  hostname?: string;
   [key: string]: string | undefined;
 }
 
@@ -75,6 +77,8 @@ export function generateFrontmatterBlock(fm: PrdFrontmatter): string {
   if (fm.email) lines.push(`email: ${fm.email}`);
   lines.push('');
   if (fm.deploy) lines.push(`deploy: "${fm.deploy}"`);
+  if (fm.instance_type) lines.push(`instance_type: "${fm.instance_type}"`);
+  if (fm.hostname) lines.push(`hostname: "${fm.hostname}"`);
 
   lines.push('```');
   return lines.join('\n');
@@ -82,6 +86,7 @@ export function generateFrontmatterBlock(fm: PrdFrontmatter): string {
 
 const VALID_TYPES = ['full-stack', 'api-only', 'static-site', 'prototype'];
 const VALID_DEPLOY = ['vps', 'vercel', 'railway', 'cloudflare', 'static', 'docker'];
+const VALID_INSTANCE_TYPES = ['t3.micro', 't3.small', 't3.medium', 't3.large'];
 
 export function validateFrontmatter(fm: PrdFrontmatter): string[] {
   const errors: string[] = [];
@@ -92,6 +97,9 @@ export function validateFrontmatter(fm: PrdFrontmatter): string[] {
   }
   if (fm.deploy && !VALID_DEPLOY.includes(fm.deploy)) {
     errors.push(`Invalid deploy: "${fm.deploy}". Must be one of: ${VALID_DEPLOY.join(', ')}`);
+  }
+  if (fm.instance_type && !VALID_INSTANCE_TYPES.includes(fm.instance_type)) {
+    errors.push(`Invalid instance_type: "${fm.instance_type}". Must be one of: ${VALID_INSTANCE_TYPES.join(', ')}`);
   }
 
   return errors;

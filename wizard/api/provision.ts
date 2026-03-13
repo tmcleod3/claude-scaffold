@@ -19,6 +19,7 @@ import {
   createManifest, updateManifestStatus, readManifest, deleteManifest,
   listIncompleteRuns, manifestToCreatedResources,
 } from '../lib/provision-manifest.js';
+import { provisionDns, cleanupDnsRecords } from '../lib/dns/cloudflare-dns.js';
 
 function sendJson(res: ServerResponse, status: number, data: unknown): void {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -67,6 +68,8 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
     framework?: string;
     database?: string;
     cache?: string;
+    instanceType?: string;
+    hostname?: string;
   };
 
   if (!body.projectDir || !body.projectName || !body.deployTarget) {
@@ -91,6 +94,8 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
     framework: body.framework || 'express',
     database: body.database || 'none',
     cache: body.cache || 'none',
+    instanceType: body.instanceType || 't3.micro',
+    hostname: body.hostname || '',
     credentials,
   };
 
@@ -143,6 +148,33 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
 
   try {
     const result = await provisioner.provision(ctx, emit);
+
+    // DNS post-provision step (non-fatal)
+    if (result.success && ctx.hostname && credentials['cloudflare-api-token']) {
+      const dnsResult = await provisionDns(
+        runId,
+        credentials['cloudflare-api-token'],
+        ctx.hostname,
+        body.deployTarget,
+        result.outputs,
+        emit,
+      );
+
+      // Add DNS records to resource list for cleanup tracking
+      if (dnsResult.records.length > 0) {
+        for (const record of dnsResult.records) {
+          result.resources.push({
+            type: 'dns-record',
+            id: `${dnsResult.zoneId}:${record.id}`,
+            region: 'global',
+          });
+        }
+        result.outputs['DNS_HOSTNAME'] = ctx.hostname;
+        result.outputs['DNS_ZONE_ID'] = dnsResult.zoneId;
+      }
+    } else if (result.success && ctx.hostname && !credentials['cloudflare-api-token']) {
+      emit({ step: 'dns-skip', status: 'skipped', message: `Hostname "${ctx.hostname}" set but no Cloudflare token in vault. Add Cloudflare credentials to enable DNS wiring.` });
+    }
 
     // Track for cleanup by run ID (in-memory for current session)
     if (result.resources.length > 0) {
@@ -224,7 +256,22 @@ addRoute('POST', '/api/provision/cleanup', async (req: IncomingMessage, res: Ser
   }
 
   try {
-    await provisioner.cleanup(resources, credentials);
+    // Clean up DNS records separately (they're not managed by the provisioner)
+    const dnsResources = resources.filter((r) => r.type === 'dns-record');
+    const infraResources = resources.filter((r) => r.type !== 'dns-record');
+
+    if (dnsResources.length > 0 && credentials['cloudflare-api-token']) {
+      await cleanupDnsRecords(
+        credentials['cloudflare-api-token'],
+        dnsResources.map((r) => r.id),
+      );
+    }
+
+    // Clean up infrastructure resources via the provisioner
+    if (infraResources.length > 0) {
+      await provisioner.cleanup(infraResources, credentials);
+    }
+
     const count = resources.length;
     provisionRuns.delete(runId);
     await updateManifestStatus(runId, 'cleaned');
