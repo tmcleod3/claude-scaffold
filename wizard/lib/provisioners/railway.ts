@@ -75,7 +75,7 @@ export const railwayProvisioner: Provisioner = {
     // Step 2: Add Postgres plugin if database requested
     if (ctx.database === 'postgres' || ctx.database === 'mysql') {
       const dbType = ctx.database === 'postgres' ? 'postgresql' : 'mysql';
-      emit({ step: 'railway-db', status: 'started', message: `Adding ${dbType} plugin to Railway project` });
+      emit({ step: 'railway-db', status: 'started', message: `Adding ${dbType} service to Railway project` });
       try {
         await recordResourcePending(ctx.runId, 'railway-plugin', `${projectId}-db`, 'global');
 
@@ -105,9 +105,9 @@ export const railwayProvisioner: Provisioner = {
           await recordResourceCreated(ctx.runId, 'railway-plugin', pluginId, 'global');
         }
         outputs['RAILWAY_DB_PLUGIN'] = dbType;
-        emit({ step: 'railway-db', status: 'done', message: `${dbType} plugin added — connection string available in Railway dashboard` });
+        emit({ step: 'railway-db', status: 'done', message: `${dbType} service added — connection string available in Railway dashboard` });
       } catch (err) {
-        emit({ step: 'railway-db', status: 'error', message: `Failed to add ${dbType} plugin`, detail: (err as Error).message });
+        emit({ step: 'railway-db', status: 'error', message: `Failed to add ${dbType} service`, detail: (err as Error).message });
         // Non-fatal
       }
     } else {
@@ -116,7 +116,7 @@ export const railwayProvisioner: Provisioner = {
 
     // Step 3: Add Redis plugin if cache requested
     if (ctx.cache === 'redis') {
-      emit({ step: 'railway-redis', status: 'started', message: 'Adding Redis plugin to Railway project' });
+      emit({ step: 'railway-redis', status: 'started', message: 'Adding Redis service to Railway project' });
       try {
         await recordResourcePending(ctx.runId, 'railway-plugin', `${projectId}-redis`, 'global');
 
@@ -144,9 +144,9 @@ export const railwayProvisioner: Provisioner = {
           resources.push({ type: 'railway-plugin', id: pluginId, region: 'global' });
           await recordResourceCreated(ctx.runId, 'railway-plugin', pluginId, 'global');
         }
-        emit({ step: 'railway-redis', status: 'done', message: 'Redis plugin added' });
+        emit({ step: 'railway-redis', status: 'done', message: 'Redis service added' });
       } catch (err) {
-        emit({ step: 'railway-redis', status: 'error', message: 'Failed to add Redis plugin', detail: (err as Error).message });
+        emit({ step: 'railway-redis', status: 'error', message: 'Failed to add Redis service', detail: (err as Error).message });
       }
     } else {
       emit({ step: 'railway-redis', status: 'skipped', message: 'No cache requested' });

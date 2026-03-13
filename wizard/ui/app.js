@@ -917,9 +917,9 @@
     const descriptions = {
       docker: 'This will generate a Dockerfile, docker-compose.yml, and .dockerignore in your project directory. No cloud resources will be created.',
       vps: 'This will create AWS resources on your account: an EC2 instance (t3.micro), security group, and SSH key pair. Optional RDS database and ElastiCache may also be created. These resources will incur AWS charges.',
-      vercel: 'This will create a new project on your Vercel account and generate a vercel.json configuration file. The project can be deleted via cleanup if needed.',
-      railway: 'This will create a new project on your Railway account with optional database and Redis plugins, and generate a railway.toml configuration file.',
-      cloudflare: 'This will create a Cloudflare Pages project on your account, optionally with a D1 database, and generate a wrangler.toml configuration file.',
+      vercel: 'This will create a new project on your Vercel account and generate a vercel.json configuration file. Free tier covers most hobby projects. The project can be deleted via cleanup if needed.',
+      railway: 'This will create a new project on your Railway account with optional database and Redis services, and generate a railway.toml configuration file. Railway includes a free trial tier. Database and Redis services may incur additional charges.',
+      cloudflare: 'This will create a Cloudflare Pages project on your account, optionally with a D1 database, and generate a wrangler.toml configuration file. Pages is free for unlimited static sites. D1 has a generous free tier.',
       static: 'This will create an S3 bucket on your AWS account configured for static website hosting, and generate a deploy script. The bucket will incur minimal AWS charges.',
     };
     $('#provision-confirm-desc').textContent = descriptions[deployTarget] || 'This will set up your deploy target.';
@@ -1072,14 +1072,38 @@
     const infraDetails = $('#infra-details');
     const result = state.provisionResult;
 
+    // Human-readable label mapping for infra outputs
+    const labelMap = {
+      'SSH_KEY_PATH': 'SSH Key', 'SSH_HOST': 'Server IP', 'SSH_USER': 'SSH User',
+      'DB_ENGINE': 'Database', 'DB_PORT': 'DB Port', 'DB_INSTANCE_ID': 'DB Instance',
+      'DB_USERNAME': 'DB Username', 'DB_PASSWORD': 'DB Password',
+      'REDIS_CLUSTER_ID': 'Redis Cluster',
+      'VERCEL_PROJECT_ID': 'Vercel Project ID', 'VERCEL_PROJECT_NAME': 'Project Name',
+      'RAILWAY_PROJECT_ID': 'Railway Project ID', 'RAILWAY_PROJECT_NAME': 'Project Name',
+      'RAILWAY_DB_PLUGIN': 'Database Service',
+      'CF_ACCOUNT_ID': 'Cloudflare Account', 'CF_PROJECT_NAME': 'Project Name',
+      'CF_PROJECT_URL': 'Site URL', 'CF_D1_DATABASE_ID': 'D1 Database ID',
+      'CF_D1_DATABASE_NAME': 'D1 Database',
+      'S3_BUCKET': 'S3 Bucket', 'S3_WEBSITE_URL': 'Website URL',
+    };
+    const sensitiveKeys = ['DB_PASSWORD'];
+    const urlKeys = ['CF_PROJECT_URL', 'S3_WEBSITE_URL'];
+
     if (result && result.success && Object.keys(result.outputs).length > 0) {
       infraCard.classList.remove('hidden');
       let html = '';
-      const sensitiveKeys = ['DB_PASSWORD'];
       for (const [key, value] of Object.entries(result.outputs)) {
-        const label = key.replace(/_/g, ' ');
+        const label = labelMap[key] || key.replace(/_/g, ' ');
         const isSensitive = sensitiveKeys.includes(key);
-        const displayValue = isSensitive ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : escapeHtml(value);
+        const isUrl = urlKeys.includes(key);
+        let displayValue;
+        if (isSensitive) {
+          displayValue = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+        } else if (isUrl) {
+          displayValue = `<a href="${escapeHtml(value)}" target="_blank" rel="noopener">${escapeHtml(value)}</a>`;
+        } else {
+          displayValue = escapeHtml(value);
+        }
         html += `<div class="infra-item"><span class="infra-label">${escapeHtml(label)}</span><span class="infra-value">${displayValue}</span></div>`;
       }
       if (result.files && result.files.length > 0) {
@@ -1090,14 +1114,37 @@
       infraCard.classList.add('hidden');
     }
 
-    // Dynamic next steps
+    // Dynamic next steps per deploy target
     const nextSteps = $('#next-steps-list');
     let stepsHtml = '<li>Open a terminal in your project directory</li>';
+    const deployTarget = state.deployTarget || 'docker';
 
-    if (result && result.outputs && result.outputs['SSH_HOST']) {
-      stepsHtml += `<li>SSH into your server: <code>ssh -i .ssh/deploy-key.pem ec2-user@${escapeHtml(result.outputs['SSH_HOST'])}</code></li>`;
-      stepsHtml += '<li>Run <code>infra/provision.sh</code> on the server to install dependencies</li>';
-      stepsHtml += '<li>Run <code>infra/deploy.sh</code> to deploy your app</li>';
+    if (result && result.success) {
+      if (result.outputs['SSH_HOST']) {
+        // AWS VPS
+        stepsHtml += `<li>SSH into your server: <code>ssh -i .ssh/deploy-key.pem ec2-user@${escapeHtml(result.outputs['SSH_HOST'])}</code></li>`;
+        stepsHtml += '<li>Run <code>infra/provision.sh</code> on the server to install dependencies</li>';
+        stepsHtml += '<li>Run <code>infra/deploy.sh</code> to deploy your app</li>';
+      } else if (deployTarget === 'vercel') {
+        stepsHtml += '<li>Link your project: <code>npx vercel link</code></li>';
+        stepsHtml += '<li>Deploy: <code>npx vercel deploy</code></li>';
+      } else if (deployTarget === 'railway') {
+        const railwayId = result.outputs['RAILWAY_PROJECT_ID'];
+        if (railwayId) stepsHtml += `<li>Link your project: <code>railway link ${escapeHtml(railwayId)}</code></li>`;
+        stepsHtml += '<li>Deploy: <code>railway up</code></li>';
+      } else if (deployTarget === 'cloudflare') {
+        stepsHtml += '<li>Deploy: <code>npx wrangler pages deploy ./dist</code></li>';
+        if (result.outputs['CF_PROJECT_URL']) {
+          stepsHtml += `<li>Visit your site: <a href="${escapeHtml(result.outputs['CF_PROJECT_URL'])}" target="_blank" rel="noopener">${escapeHtml(result.outputs['CF_PROJECT_URL'])}</a></li>`;
+        }
+      } else if (deployTarget === 'static') {
+        stepsHtml += '<li>Build your app, then deploy: <code>./infra/deploy-s3.sh</code></li>';
+        if (result.outputs['S3_WEBSITE_URL']) {
+          stepsHtml += `<li>Visit your site: <a href="${escapeHtml(result.outputs['S3_WEBSITE_URL'])}" target="_blank" rel="noopener">${escapeHtml(result.outputs['S3_WEBSITE_URL'])}</a></li>`;
+        }
+      } else if (deployTarget === 'docker') {
+        stepsHtml += '<li>Build and run: <code>docker compose up -d</code></li>';
+      }
     }
 
     if (state.provisionSkipped) {
