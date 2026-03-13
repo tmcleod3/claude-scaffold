@@ -1,6 +1,6 @@
 # ADR-004: SSE Keepalive and Reconnection
 
-## Status: Proposed
+## Status: Accepted (implemented)
 
 ## Context
 

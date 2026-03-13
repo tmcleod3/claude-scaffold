@@ -163,8 +163,14 @@ addRoute('POST', '/api/prd/generate', async (req: IncomingMessage, res: ServerRe
 
   req.on('close', () => {
     clientDisconnected = true;
+    clearInterval(keepaliveTimer);
     apiReq.destroy();
   });
+
+  // SSE keepalive — prevents proxy/VPN/browser timeout during generation
+  const keepaliveTimer = setInterval(() => {
+    sseWrite(': keepalive\n\n');
+  }, 15000);
 
   const apiReq = httpsRequest(
     {
@@ -184,6 +190,7 @@ addRoute('POST', '/api/prd/generate', async (req: IncomingMessage, res: ServerRe
         let errBody = '';
         apiRes.on('data', (chunk: Buffer) => { errBody += chunk.toString(); });
         apiRes.on('end', () => {
+          clearInterval(keepaliveTimer);
           sseWrite(`data: ${JSON.stringify({ error: `API error: ${apiRes.statusCode}` })}\n\n`);
           sseWrite('data: [DONE]\n\n');
           sseEnd();
@@ -217,6 +224,7 @@ addRoute('POST', '/api/prd/generate', async (req: IncomingMessage, res: ServerRe
       });
 
       apiRes.on('end', () => {
+        clearInterval(keepaliveTimer);
         sseWrite('data: [DONE]\n\n');
         sseEnd();
       });
@@ -224,6 +232,7 @@ addRoute('POST', '/api/prd/generate', async (req: IncomingMessage, res: ServerRe
   );
 
   apiReq.on('error', (err) => {
+    clearInterval(keepaliveTimer);
     sseWrite(`data: ${JSON.stringify({ error: 'Generation failed' })}\n\n`);
     sseWrite('data: [DONE]\n\n');
     sseEnd();

@@ -120,10 +120,20 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
     try { res.end(); } catch { /* already closed */ }
   }
 
-  req.on('close', () => { clientDisconnected = true; });
+  req.on('close', () => {
+    clientDisconnected = true;
+    clearInterval(keepaliveTimer);
+  });
 
+  // SSE keepalive — prevents proxy/VPN/browser timeout on idle connections
+  const keepaliveTimer = setInterval(() => {
+    sseWrite(': keepalive\n\n');
+  }, 15000);
+
+  let eventId = 0;
   const emit = (event: ProvisionEvent): void => {
-    sseWrite(`data: ${JSON.stringify(event)}\n\n`);
+    eventId++;
+    sseWrite(`id: ${eventId}\ndata: ${JSON.stringify(event)}\n\n`);
   };
 
   const region = credentials['aws-region'] || 'us-east-1';
@@ -152,6 +162,7 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
     sseWrite(`data: ${JSON.stringify({ step: 'fatal', status: 'error', message: (err as Error).message })}\n\n`);
   }
 
+  clearInterval(keepaliveTimer);
   sseWrite('data: [DONE]\n\n');
   sseEnd();
 });
