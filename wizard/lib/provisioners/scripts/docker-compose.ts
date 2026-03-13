@@ -26,6 +26,12 @@ export function generateDockerCompose(opts: ComposeOptions): string {
       - "\${PORT:-${appPort}}:${appPort}"
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:${appPort}/", "||", "exit", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     restart: unless-stopped`;
 
   if (depends.length > 0) {
@@ -36,15 +42,15 @@ export function generateDockerCompose(opts: ComposeOptions): string {
 
   // Database service
   if (opts.database === 'postgres') {
-    envVars.push('DATABASE_URL=postgresql://postgres:postgres@db:5432/${DB_NAME:-app}');
+    envVars.push('DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-app}');
     services.push(`  db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: \${DB_USER:-postgres}
+      POSTGRES_PASSWORD: \${DB_PASSWORD:-postgres}
       POSTGRES_DB: \${DB_NAME:-app}
-    ports:
-      - "\${DB_PORT:-5432}:5432"
+    expose:
+      - "5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -57,14 +63,14 @@ export function generateDockerCompose(opts: ComposeOptions): string {
   }
 
   if (opts.database === 'mysql') {
-    envVars.push('DATABASE_URL=mysql://root:mysql@db:3306/${DB_NAME:-app}');
+    envVars.push('DATABASE_URL=mysql://root:${DB_PASSWORD:-mysql}@db:3306/${DB_NAME:-app}');
     services.push(`  db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_ROOT_PASSWORD: \${DB_PASSWORD:-mysql}
       MYSQL_DATABASE: \${DB_NAME:-app}
-    ports:
-      - "\${DB_PORT:-3306}:3306"
+    expose:
+      - "3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -81,8 +87,8 @@ export function generateDockerCompose(opts: ComposeOptions): string {
     envVars.push('REDIS_URL=redis://redis:6379');
     services.push(`  redis:
     image: redis:7-alpine
-    ports:
-      - "\${REDIS_PORT:-6379}:6379"
+    expose:
+      - "6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

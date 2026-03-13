@@ -48,6 +48,9 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD ["wget", "--spider", "-q", "http://localhost:3000/", "||", "exit", "1"]
+
 CMD ["node", "server.js"]
 `;
 }
@@ -59,7 +62,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --ignore-scripts
 COPY . .
-RUN npm run build 2>/dev/null || true
+RUN npm run build
 
 # Stage 2: Production
 FROM node:20-alpine
@@ -72,10 +75,12 @@ RUN adduser --system --uid 1001 appuser
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src ./src
 
 USER appuser
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD ["wget", "--spider", "-q", "http://localhost:3000/", "||", "exit", "1"]
 
 CMD ["node", "dist/index.js"]
 `;
@@ -94,10 +99,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput 2>/dev/null || true
+RUN python manage.py collectstatic --noinput
 
 USER appuser
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
 `;
@@ -117,7 +125,7 @@ RUN bundle install --without development test
 
 COPY . .
 
-RUN bundle exec rails assets:precompile 2>/dev/null || true
+RUN bundle exec rails assets:precompile
 
 RUN addgroup --system --gid 1001 appgroup && \\
     adduser --system --uid 1001 --gid 1001 appuser && \\
@@ -125,6 +133,9 @@ RUN addgroup --system --gid 1001 appgroup && \\
 
 USER appuser
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD ["wget", "--spider", "-q", "http://localhost:3000/", "||", "exit", "1"]
 
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
 `;
@@ -137,7 +148,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --ignore-scripts
 COPY . .
-RUN npm run build 2>/dev/null || true
+RUN npm run build
 
 # Stage 2: Production
 FROM node:20-alpine
@@ -150,10 +161,12 @@ RUN adduser --system --uid 1001 appuser
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src ./src
 
 USER appuser
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \\
+  CMD ["wget", "--spider", "-q", "http://localhost:3000/", "||", "exit", "1"]
 
 CMD ["node", "dist/index.js"]
 `;

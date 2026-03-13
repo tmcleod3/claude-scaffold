@@ -1,5 +1,5 @@
 /**
- * Template: Caddyfile — reverse proxy + automatic HTTPS.
+ * Template: Caddyfile — reverse proxy + automatic HTTPS + security headers.
  * Written to projectDir/infra/Caddyfile
  */
 
@@ -18,16 +18,20 @@ export function generateCaddyfile(opts: CaddyfileOptions): string {
 #   2. Copy to server: scp Caddyfile user@host:/etc/caddy/Caddyfile
 #   3. Reload: sudo systemctl reload caddy
 #
-# Caddy auto-provisions HTTPS certificates via Let's Encrypt.
+# Caddy auto-provisions HTTPS certificates via Let's Encrypt
+# when you replace :80 with a real domain name.
 
 :80 {
     reverse_proxy localhost:${port}
 
     # Security headers
     header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
         X-Content-Type-Options nosniff
         X-Frame-Options DENY
         Referrer-Policy strict-origin-when-cross-origin
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'"
         -Server
     }
 
@@ -37,6 +41,7 @@ export function generateCaddyfile(opts: CaddyfileOptions): string {
     # Access logs
     log {
         output file /var/log/caddy/access.log
+        format json
     }
 }
 `;
