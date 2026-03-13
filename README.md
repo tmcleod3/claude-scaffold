@@ -58,7 +58,7 @@ For those, use the [`main` branch](https://github.com/tmcleod3/voidforge/tree/ma
 
 ---
 
-Read the **[Holocron](HOLOCRON.md)** for the full guide.
+Read the **[Holocron](HOLOCRON.md)** for the full guide. Read the **[Prophecy](PROPHECY.md)** for what's next.
 
 ## License
 
