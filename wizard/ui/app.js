@@ -411,7 +411,15 @@
         const helpBtn = e.target.closest('[data-help]');
         if (helpBtn) {
           e.stopPropagation();
-          $(`#help-${helpBtn.dataset.help}`).classList.toggle('hidden');
+          const providerId = helpBtn.dataset.help;
+          // Expand the accordion if it's collapsed so the help panel is visible
+          const body = $(`#body-${providerId}`);
+          const card = helpBtn.closest('.provider-card');
+          if (body.classList.contains('hidden')) {
+            body.classList.remove('hidden');
+            card.classList.add('open');
+          }
+          $(`#help-${providerId}`).classList.toggle('hidden');
           return;
         }
         const closeBtn = e.target.closest('[data-close-help]');
