@@ -202,7 +202,8 @@ ${deployLine}
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to create project';
-    sendJson(res, 500, { error: message });
+    console.error('Project creation error:', message);
+    sendJson(res, 500, { error: 'Failed to create project' });
   }
 });
 

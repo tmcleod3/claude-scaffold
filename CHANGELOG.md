@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [2.8.0] - 2026-03-12
+
+### Added
+- **Wizard split into Merlin (setup) and Strange (deploy)** — `npx voidforge init` launches the setup wizard, `npx voidforge deploy` launches the deploy wizard. Provisioning moved from Merlin to Strange for cleaner separation of concerns.
+- **Architecture docs** — `ARCHITECTURE.md` (system overview + diagram), `SCALING.md` (three-tier assessment), `TECH_DEBT.md` (prioritized catalog), `FAILURE_MODES.md` (component failure analysis with recovery procedures)
+- **Security checklist** — `SECURITY_CHECKLIST.md`, reusable pre-deploy verification list covering secrets, vault, server, AWS provisioning, generated infrastructure, input validation, and dependencies
+
+### Changed
+- **Merlin UI simplified** — removed provisioning steps (now in Strange). Merlin focuses on vault, credentials, project setup, PRD, and scaffold creation.
+
+### Fixed
+- **QA fixes** for Merlin/Strange restructure
+- **UX polish** for Strange deploy wizard
+
+### Security
+- **DB/Redis security group ports** restricted from `0.0.0.0/0` (internet-open) to self-referencing security group (SG-only). Prevents database and Redis exposure to the internet.
+- **Security headers** added to local server: `X-Frame-Options: DENY`, `Content-Security-Policy`, `Referrer-Policy`, `Permissions-Policy`
+- **Error message sanitization** — API error responses no longer leak internal details (file paths, stack traces). Real errors logged server-side only.
+
+---
+
 ## [2.7.0] - 2026-03-12
 
 ### Added

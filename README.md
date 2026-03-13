@@ -91,6 +91,12 @@ voidforge/
 │   ├── NAMING_REGISTRY.md                 ← 150+ characters, 6 universes, dedup rules
 │   ├── LESSONS.md                         ← Cross-project learnings
 │   ├── qa-prompt.md                       ← QA state + regression checklist
+│   ├── ARCHITECTURE.md                    ← System overview + data flow diagram
+│   ├── SCALING.md                         ← Three-tier scaling assessment
+│   ├── TECH_DEBT.md                       ← Prioritized tech debt catalog
+│   ├── FAILURE_MODES.md                   ← Component failure analysis + recovery
+│   ├── SECURITY_CHECKLIST.md              ← Reusable pre-deploy security checklist
+│   ├── adrs/                              ← Architecture Decision Records
 │   │
 │   ├── patterns/                          ← Reference implementations (all with framework adaptations)
 │   │   ├── README.md                      ← Pattern index
@@ -123,12 +129,15 @@ voidforge/
 │   ├── new-project.sh                     ← One-command project initialization
 │   └── voidforge.ts                       ← CLI entry point for wizard
 │
-└── wizard/                                ← Interactive setup wizard (Option 0)
-    ├── server.ts                          ← Local HTTP server
+└── wizard/                                ← Two browser-based wizards
+    ├── server.ts                          ← Local HTTP server (127.0.0.1)
     ├── router.ts                          ← API route registry
-    ├── api/                               ← API handlers (credentials, PRD, project)
+    ├── api/                               ← API handlers (credentials, cloud, PRD, project, provision, deploy)
     ├── ui/                                ← Vanilla HTML/CSS/JS frontend
-    └── lib/                               ← Encrypted vault, frontmatter parser, utilities
+    │   ├── index.html + app.js            ← Merlin (setup wizard)
+    │   └── deploy.html + deploy.js        ← Strange (deploy wizard)
+    └── lib/                               ← Encrypted vault, model resolution, provisioners
+        └── provisioners/                  ← 6 deploy targets (Docker, AWS VPS, Vercel, Railway, Cloudflare, S3)
 ```
 
 ---
@@ -142,13 +151,23 @@ npm install
 npm run wizard
 ```
 
-The wizard walks you through everything:
+**Merlin** (the setup wizard) walks you through:
 1. Credential vault (password-encrypted, works on any OS)
-2. Project setup (name, directory, domain)
-3. PRD generation with Claude (or paste one from any AI)
-4. Review and create
+2. Cloud provider credentials (AWS, Vercel, Railway, Cloudflare — optional)
+3. Project setup (name, directory, domain)
+4. PRD generation with Claude (or paste one from any AI)
+5. Deploy target selection
+6. Review and create
 
 Your project is scaffolded, git-initialized, and ready for `/build`.
+
+After building your app, deploy with **Strange** (the deploy wizard):
+
+```bash
+npm run deploy
+```
+
+Strange provisions infrastructure for your chosen target (Docker, AWS VPS, Vercel, Railway, Cloudflare, or S3 static hosting).
 
 ### Alternative: Manual setup
 

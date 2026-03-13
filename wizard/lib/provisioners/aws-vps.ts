@@ -7,6 +7,7 @@ import { writeFile, mkdir, chmod } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { join } from 'node:path';
 import type { Provisioner, ProvisionContext, ProvisionEmitter, ProvisionResult, CreatedResource } from './types.js';
+import type { IpPermission } from '@aws-sdk/client-ec2';
 import { recordResourcePending, recordResourceCreated } from '../provision-manifest.js';
 import { generateProvisionScript } from './scripts/provision-vps.js';
 import { generateDeployScript } from './scripts/deploy-vps.js';
@@ -126,21 +127,22 @@ export const awsVpsProvisioner: Provisioner = {
       await recordResourceCreated(ctx.runId, 'security-group', sgId, region);
 
       // Authorize inbound: SSH (22), HTTP (80), HTTPS (443)
-      const ingressRules = [
+      const ingressRules: IpPermission[] = [
         { IpProtocol: 'tcp', FromPort: 22, ToPort: 22, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'SSH' }] },
         { IpProtocol: 'tcp', FromPort: 80, ToPort: 80, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'HTTP' }] },
         { IpProtocol: 'tcp', FromPort: 443, ToPort: 443, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'HTTPS' }] },
       ];
 
       // Allow DB port within the SG (self-referencing) so EC2 can reach RDS
+      // Uses UserIdGroupPairs to restrict access to instances in the same SG only
       if (ctx.database === 'postgres') {
-        ingressRules.push({ IpProtocol: 'tcp', FromPort: 5432, ToPort: 5432, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'PostgreSQL' }] });
+        ingressRules.push({ IpProtocol: 'tcp', FromPort: 5432, ToPort: 5432, UserIdGroupPairs: [{ GroupId: sgId, Description: 'PostgreSQL (SG-only)' }] });
       } else if (ctx.database === 'mysql') {
-        ingressRules.push({ IpProtocol: 'tcp', FromPort: 3306, ToPort: 3306, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'MySQL' }] });
+        ingressRules.push({ IpProtocol: 'tcp', FromPort: 3306, ToPort: 3306, UserIdGroupPairs: [{ GroupId: sgId, Description: 'MySQL (SG-only)' }] });
       }
       // Allow Redis port if cache requested
       if (ctx.cache === 'redis') {
-        ingressRules.push({ IpProtocol: 'tcp', FromPort: 6379, ToPort: 6379, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'Redis' }] });
+        ingressRules.push({ IpProtocol: 'tcp', FromPort: 6379, ToPort: 6379, UserIdGroupPairs: [{ GroupId: sgId, Description: 'Redis (SG-only)' }] });
       }
 
       await ec2.send(new ec2Commands.AuthorizeSecurityGroupIngressCommand({

@@ -158,8 +158,10 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
 
     sseWrite(`data: ${JSON.stringify({ step: 'complete', status: result.success ? 'done' : 'error', message: result.success ? 'Provisioning complete' : result.error || 'Provisioning failed', result, runId })}\n\n`);
   } catch (err) {
+    const errMsg = (err as Error).message;
+    console.error('Provisioning fatal error:', errMsg);
     await updateManifestStatus(runId, 'failed');
-    sseWrite(`data: ${JSON.stringify({ step: 'fatal', status: 'error', message: (err as Error).message })}\n\n`);
+    sseWrite(`data: ${JSON.stringify({ step: 'fatal', status: 'error', message: 'Provisioning failed unexpectedly' })}\n\n`);
   }
 
   clearInterval(keepaliveTimer);

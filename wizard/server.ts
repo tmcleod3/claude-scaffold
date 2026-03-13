@@ -49,6 +49,10 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'");
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -64,7 +68,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Internal server error';
       console.error('API error:', message);
-      sendJson(res, 500, { error: message });
+      sendJson(res, 500, { error: 'Internal server error' });
     }
     return;
   }
