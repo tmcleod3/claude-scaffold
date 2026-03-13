@@ -8,6 +8,7 @@
   },
   "scripts": {
     "wizard": "npx tsx scripts/voidforge.ts init",
+    "deploy": "npx tsx scripts/voidforge.ts deploy",
     "typecheck": "npx tsc --noEmit"
   },
   "dependencies": {

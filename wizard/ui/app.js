@@ -1,12 +1,13 @@
 /**
  * VoidForge Wizard — Vanilla JS Step Machine
- * Steps: 1=Vault, 2=Cloud, 3=Project, 4=PRD, 5=Deploy, 6=Review, 7=Create, 8=Provision, 9=Done
+ * Merlin — Setup Wizard
+ * Steps: 1=Vault, 2=Cloud, 3=Project, 4=PRD, 5=Deploy, 6=Review, 7=Create/Done
  */
 
 (function () {
   'use strict';
 
-  const TOTAL_STEPS = 9;
+  const TOTAL_STEPS = 7;
   let currentStep = 1;
 
   // State
@@ -22,8 +23,6 @@
     generatedPrd: '',
     deployTarget: '',
     createdDir: '',
-    provisionResult: null,   // { success, resources, outputs, files }
-    provisionSkipped: false,
   };
 
   // DOM refs
@@ -46,8 +45,8 @@
 
     // Dynamic step count — simple mode skips steps 2(cloud) and 5(deploy)
     const visibleSteps = advancedMode
-      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
-      : [1, 2, 3, 4, 6, 7, 8, 9];
+      ? [1, 2, 3, 4, 5, 6, 7]
+      : [1, 2, 3, 4, 6, 7];
     const currentIdx = visibleSteps.indexOf(step);
     const totalVisible = visibleSteps.length;
     const displayNum = currentIdx >= 0 ? currentIdx + 1 : step;
@@ -61,8 +60,7 @@
 
     if (step === 6) {
       btnNext.textContent = 'Create Project';
-    } else if (step >= 7) {
-      // Steps 7 (creating), 8 (provisioning), 9 (done) — hide nav buttons
+    } else if (step === 7) {
       btnNext.style.display = 'none';
       btnBack.style.display = 'none';
     } else {
@@ -806,10 +804,15 @@
 
       if (res.ok && data.created) {
         state.createdDir = data.directory;
-        state.createdFileCount = data.files.length;
-        // Transition to provisioning step with confirmation gate
-        showStep(8);
-        showProvisionConfirm();
+        // Show done state
+        creatingState.classList.add('hidden');
+        $('#done-state').classList.remove('hidden');
+        $('#done-details').innerHTML = `
+          <p><strong>${escapeHtml(state.projectName)}</strong></p>
+          <p style="color: var(--text-dim); font-family: var(--mono); font-size: 13px;">${escapeHtml(data.directory)}</p>
+          <p style="color: var(--text-dim); margin-top: 8px;">${data.files.length} files created</p>
+        `;
+        setTimeout(() => { const h = $('#step-7-heading'); if (h) h.focus(); }, 100);
       } else {
         showCreateError('Error: ' + (data.error || 'Unknown error'));
       }
@@ -850,311 +853,7 @@
     }
   });
 
-  // =============================================
-  // Step 8: Provisioning
-  // =============================================
-
-  const provisionLog = $('#provision-log');
-  const provisionConfirm = $('#provision-confirm');
-  const provisionLogCard = $('#provision-log-card');
-  const provisionDoneActions = $('#provision-done-actions');
-  const provisionErrorActions = $('#provision-error-actions');
-  const provisionSrStatus = $('#provision-sr-status');
-
-  const STATUS_ICONS = {
-    started: '\u25CF',  // filled circle (spinning via CSS)
-    done: '\u2713',     // checkmark
-    error: '\u2717',    // X
-    skipped: '\u2014',  // em dash
-  };
-
-  let provisionEventCount = 0;
-  let provisionTotalSteps = 0;
-
-  function addProvisionEvent(event) {
-    // Remove empty state on first event
-    const emptyEl = $('#provision-empty');
-    if (emptyEl) emptyEl.remove();
-
-    // Update existing step row or create new one
-    let stepEl = provisionLog.querySelector(`[data-step="${event.step}"]`);
-
-    if (!stepEl) {
-      stepEl = document.createElement('div');
-      stepEl.dataset.step = event.step;
-      provisionLog.appendChild(stepEl);
-    }
-
-    stepEl.innerHTML = `
-      <div class="provision-step">
-        <span class="provision-icon ${event.status}">${STATUS_ICONS[event.status] || ''}</span>
-        <span class="provision-message">${escapeHtml(event.message)}</span>
-      </div>
-      ${event.detail ? `<div class="provision-detail">${escapeHtml(event.detail)}</div>` : ''}`;
-
-    provisionLog.scrollTop = provisionLog.scrollHeight;
-
-    // Update screen reader status (throttled via the event itself)
-    if (event.status === 'done') provisionEventCount++;
-    provisionSrStatus.textContent = `${provisionEventCount} steps completed`;
-  }
-
-  let provisionAbortController = null;
-
-  // Show confirmation gate when step 8 loads
-  function showProvisionConfirm() {
-    provisionConfirm.classList.remove('hidden');
-    provisionLogCard.classList.add('hidden');
-    provisionDoneActions.classList.add('hidden');
-    provisionErrorActions.classList.add('hidden');
-
-    const deployTarget = state.deployTarget || 'docker';
-    const deployNames = { vps: 'AWS VPS (EC2)', vercel: 'Vercel', railway: 'Railway', cloudflare: 'Cloudflare', static: 'Static (S3)', docker: 'Docker' };
-    const targetName = deployNames[deployTarget] || deployTarget;
-    $('#provision-subtitle').textContent = `Set up ${targetName} for your project`;
-
-    // Describe what will happen
-    const descriptions = {
-      docker: 'This will generate a Dockerfile, docker-compose.yml, and .dockerignore in your project directory. No cloud resources will be created.',
-      vps: 'This will create AWS resources on your account: an EC2 instance (t3.micro), security group, and SSH key pair. Optional RDS database and ElastiCache may also be created. These resources will incur AWS charges.',
-      vercel: 'This will create a new project on your Vercel account and generate a vercel.json configuration file. Free tier covers most hobby projects. The project can be deleted via cleanup if needed.',
-      railway: 'This will create a new project on your Railway account with optional database and Redis services, and generate a railway.toml configuration file. Railway includes a free trial tier. Database and Redis services may incur additional charges.',
-      cloudflare: 'This will create a Cloudflare Pages project on your account, optionally with a D1 database, and generate a wrangler.toml configuration file. Pages is free for unlimited static sites. D1 has a generous free tier.',
-      static: 'This will create an S3 bucket on your AWS account configured for static website hosting, and generate a deploy script. The bucket will incur minimal AWS charges.',
-    };
-    $('#provision-confirm-desc').textContent = descriptions[deployTarget] || 'This will set up your deploy target.';
-  }
-
-  async function runProvisioning() {
-    provisionConfirm.classList.add('hidden');
-    provisionLogCard.classList.remove('hidden');
-    provisionEventCount = 0;
-
-    provisionAbortController = new AbortController();
-
-    const deployTarget = state.deployTarget || 'docker';
-    const fm = state.prdContent ? parsePrdFrontmatter(state.prdContent) : {};
-
-    try {
-      const res = await fetch('/api/provision/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectDir: state.createdDir,
-          projectName: state.projectName,
-          deployTarget,
-          framework: fm.framework || '',
-          database: fm.database || 'none',
-          cache: fm.cache || 'none',
-        }),
-        signal: provisionAbortController.signal,
-      });
-
-      const contentType = res.headers.get('Content-Type') || '';
-      if (!contentType.includes('text/event-stream')) {
-        const data = await res.json();
-        addProvisionEvent({ step: 'error', status: 'error', message: data.error || 'Provisioning failed' });
-        provisionErrorActions.classList.remove('hidden');
-        return;
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        if (provisionAbortController && provisionAbortController.signal.aborted) break;
-
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const data = line.slice(6);
-          if (data === '[DONE]') continue;
-
-          try {
-            const event = JSON.parse(data);
-            if (event.result) state.provisionResult = event.result;
-            if (event.runId) state.provisionRunId = event.runId;
-            addProvisionEvent(event);
-          } catch { /* skip */ }
-        }
-      }
-
-      if (state.provisionSkipped) return;
-
-      if (state.provisionResult && state.provisionResult.success) {
-        // Show "Continue" button instead of auto-advancing
-        provisionDoneActions.classList.remove('hidden');
-        provisionSrStatus.textContent = 'Provisioning complete. Press Continue to finish.';
-      } else {
-        provisionErrorActions.classList.remove('hidden');
-      }
-
-    } catch (err) {
-      if (err.name === 'AbortError') return;
-      addProvisionEvent({ step: 'connection', status: 'error', message: 'Connection error: ' + err.message });
-      provisionErrorActions.classList.remove('hidden');
-    }
-  }
-
-  // Start provisioning button (from confirmation gate)
-  $('#start-provision').addEventListener('click', () => {
-    runProvisioning();
-  });
-
-  // Skip provisioning button
-  $('#skip-provision').addEventListener('click', () => {
-    state.provisionSkipped = true;
-    if (provisionAbortController) provisionAbortController.abort();
-    goToDone();
-  });
-
-  // Continue button (after successful provisioning)
-  $('#provision-next').addEventListener('click', () => {
-    goToDone();
-  });
-
-  // Clean up resources button
-  $('#provision-cleanup').addEventListener('click', async () => {
-    addProvisionEvent({ step: 'cleanup', status: 'started', message: 'Cleaning up resources...' });
-    try {
-      const res = await fetch('/api/provision/cleanup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runId: state.provisionRunId }),
-      });
-      const data = await res.json();
-      if (data.cleaned) {
-        addProvisionEvent({ step: 'cleanup', status: 'done', message: data.message });
-      } else {
-        addProvisionEvent({ step: 'cleanup', status: 'error', message: data.error || 'Cleanup failed' });
-      }
-    } catch (err) {
-      addProvisionEvent({ step: 'cleanup', status: 'error', message: 'Cleanup error: ' + err.message });
-    }
-  });
-
-  // Continue without infrastructure button
-  $('#provision-continue').addEventListener('click', () => {
-    goToDone();
-  });
-
-  function goToDone() {
-    showStep(9);
-    populateDone();
-    // Focus management: move focus to heading for screen readers
-    setTimeout(() => {
-      const heading = $('#step-9-heading');
-      if (heading) heading.focus();
-    }, 100);
-  }
-
-  // =============================================
-  // Step 9: Done
-  // =============================================
-
-  function populateDone() {
-    // Project summary
-    $('#done-details').innerHTML = `
-      <p><strong>${escapeHtml(state.projectName)}</strong></p>
-      <p style="color: var(--text-dim); font-family: var(--mono); font-size: 13px;">${escapeHtml(state.createdDir)}</p>
-      <p style="color: var(--text-dim); margin-top: 8px;">${state.createdFileCount || 0} files created</p>
-    `;
-
-    // Infrastructure details
-    const infraCard = $('#infra-details-card');
-    const infraDetails = $('#infra-details');
-    const result = state.provisionResult;
-
-    // Human-readable label mapping for infra outputs
-    const labelMap = {
-      'SSH_KEY_PATH': 'SSH Key', 'SSH_HOST': 'Server IP', 'SSH_USER': 'SSH User',
-      'DB_ENGINE': 'Database', 'DB_PORT': 'DB Port', 'DB_INSTANCE_ID': 'DB Instance',
-      'DB_USERNAME': 'DB Username', 'DB_PASSWORD': 'DB Password',
-      'REDIS_CLUSTER_ID': 'Redis Cluster',
-      'VERCEL_PROJECT_ID': 'Vercel Project ID', 'VERCEL_PROJECT_NAME': 'Project Name',
-      'RAILWAY_PROJECT_ID': 'Railway Project ID', 'RAILWAY_PROJECT_NAME': 'Project Name',
-      'RAILWAY_DB_PLUGIN': 'Database Service',
-      'CF_ACCOUNT_ID': 'Cloudflare Account', 'CF_PROJECT_NAME': 'Project Name',
-      'CF_PROJECT_URL': 'Site URL', 'CF_D1_DATABASE_ID': 'D1 Database ID',
-      'CF_D1_DATABASE_NAME': 'D1 Database',
-      'S3_BUCKET': 'S3 Bucket', 'S3_WEBSITE_URL': 'Website URL',
-    };
-    const sensitiveKeys = ['DB_PASSWORD'];
-    const urlKeys = ['CF_PROJECT_URL', 'S3_WEBSITE_URL'];
-
-    if (result && result.success && Object.keys(result.outputs).length > 0) {
-      infraCard.classList.remove('hidden');
-      let html = '';
-      for (const [key, value] of Object.entries(result.outputs)) {
-        const label = labelMap[key] || key.replace(/_/g, ' ');
-        const isSensitive = sensitiveKeys.includes(key);
-        const isUrl = urlKeys.includes(key);
-        let displayValue;
-        if (isSensitive) {
-          displayValue = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-        } else if (isUrl) {
-          displayValue = `<a href="${escapeHtml(value)}" target="_blank" rel="noopener">${escapeHtml(value)}</a>`;
-        } else {
-          displayValue = escapeHtml(value);
-        }
-        html += `<div class="infra-item"><span class="infra-label">${escapeHtml(label)}</span><span class="infra-value">${displayValue}</span></div>`;
-      }
-      if (result.files && result.files.length > 0) {
-        html += `<div class="infra-item"><span class="infra-label">Generated files</span><span class="infra-value">${result.files.length} files</span></div>`;
-      }
-      infraDetails.innerHTML = html;
-    } else {
-      infraCard.classList.add('hidden');
-    }
-
-    // Dynamic next steps per deploy target
-    const nextSteps = $('#next-steps-list');
-    let stepsHtml = '<li>Open a terminal in your project directory</li>';
-    const deployTarget = state.deployTarget || 'docker';
-
-    if (result && result.success) {
-      if (result.outputs['SSH_HOST']) {
-        // AWS VPS
-        stepsHtml += `<li>SSH into your server: <code>ssh -i .ssh/deploy-key.pem ec2-user@${escapeHtml(result.outputs['SSH_HOST'])}</code></li>`;
-        stepsHtml += '<li>Run <code>infra/provision.sh</code> on the server to install dependencies</li>';
-        stepsHtml += '<li>Run <code>infra/deploy.sh</code> to deploy your app</li>';
-      } else if (deployTarget === 'vercel') {
-        stepsHtml += '<li>Link your project: <code>npx vercel link</code></li>';
-        stepsHtml += '<li>Deploy: <code>npx vercel deploy</code></li>';
-      } else if (deployTarget === 'railway') {
-        const railwayId = result.outputs['RAILWAY_PROJECT_ID'];
-        if (railwayId) stepsHtml += `<li>Link your project: <code>railway link ${escapeHtml(railwayId)}</code></li>`;
-        stepsHtml += '<li>Deploy: <code>railway up</code></li>';
-      } else if (deployTarget === 'cloudflare') {
-        stepsHtml += '<li>Deploy: <code>npx wrangler pages deploy ./dist</code></li>';
-        if (result.outputs['CF_PROJECT_URL']) {
-          stepsHtml += `<li>Visit your site: <a href="${escapeHtml(result.outputs['CF_PROJECT_URL'])}" target="_blank" rel="noopener">${escapeHtml(result.outputs['CF_PROJECT_URL'])}</a></li>`;
-        }
-      } else if (deployTarget === 'static') {
-        stepsHtml += '<li>Build your app, then deploy: <code>./infra/deploy-s3.sh</code></li>';
-        if (result.outputs['S3_WEBSITE_URL']) {
-          stepsHtml += `<li>Visit your site: <a href="${escapeHtml(result.outputs['S3_WEBSITE_URL'])}" target="_blank" rel="noopener">${escapeHtml(result.outputs['S3_WEBSITE_URL'])}</a></li>`;
-        }
-      } else if (deployTarget === 'docker') {
-        stepsHtml += '<li>Build and run: <code>docker compose up -d</code></li>';
-      }
-    }
-
-    if (state.provisionSkipped) {
-      stepsHtml += '<li>Run the wizard again or manually set up infrastructure when ready</li>';
-    }
-
-    stepsHtml += '<li>Review <code>docs/PRD.md</code> — fill in any remaining sections</li>';
-    stepsHtml += '<li>Open Claude Code and run <code>/build</code></li>';
-    nextSteps.innerHTML = stepsHtml;
-  }
+  // Provisioning moved to Strange (deploy wizard) — launch with `npm run deploy`
 
   // =============================================
   // Utilities

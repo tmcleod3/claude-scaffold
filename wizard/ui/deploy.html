@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoidForge — Deploy Wizard</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="wizard" id="wizard">
+    <header class="wizard-header">
+      <div class="logo">Strange — VoidForge Deploy</div>
+      <div class="progress" id="progress">
+        <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Deploy progress"></div>
+      </div>
+      <div class="step-label" id="step-label">Step 1 of 4</div>
+    </header>
+
+    <main class="wizard-body" id="wizard-body">
+
+      <!-- Step 1: Unlock + Select Project -->
+      <section class="step" id="step-1" data-step="1">
+        <h1>Open a Portal</h1>
+        <p class="subtitle">Strange provisions infrastructure and deploys your built app.</p>
+
+        <div class="card" id="vault-card">
+          <h2>Unlock Vault</h2>
+          <p>Strange needs your credentials to provision and deploy.</p>
+
+          <div class="field">
+            <label for="vault-password">Vault Password</label>
+            <div class="input-row">
+              <input type="password" id="vault-password" placeholder="Enter your vault password" autocomplete="off">
+              <button class="btn btn-secondary" id="toggle-vault-visibility" type="button" aria-label="Toggle password visibility">Show</button>
+            </div>
+          </div>
+
+          <div class="status-row" id="vault-status" role="status" aria-live="polite"></div>
+          <button class="btn btn-primary" id="unlock-vault" type="button">Unlock Vault</button>
+        </div>
+
+        <div class="card hidden" id="project-card">
+          <h2>Project Directory</h2>
+          <p>Point Strange at a VoidForge project that has been built with <code>/build</code>.</p>
+
+          <div class="field">
+            <label for="project-dir">Project Path</label>
+            <input type="text" id="project-dir" placeholder="/Users/you/Projects/my-app">
+          </div>
+
+          <div class="status-row" id="project-status" role="status" aria-live="polite"></div>
+          <button class="btn btn-primary" id="scan-project" type="button">Scan Project</button>
+        </div>
+      </section>
+
+      <!-- Step 2: Confirm Provisioning -->
+      <section class="step hidden" id="step-2" data-step="2" aria-labelledby="step-2-heading">
+        <h1 id="step-2-heading">Provision Infrastructure</h1>
+        <p class="subtitle" id="provision-subtitle">Setting up your deploy target...</p>
+
+        <div class="card" id="project-summary">
+          <table class="review-table">
+            <tbody>
+              <tr><td class="review-label">Project</td><td id="summary-name"></td></tr>
+              <tr><td class="review-label">Framework</td><td id="summary-framework"></td></tr>
+              <tr><td class="review-label">Database</td><td id="summary-database"></td></tr>
+              <tr><td class="review-label">Deploy Target</td><td id="summary-deploy"></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" id="provision-confirm">
+          <p id="provision-confirm-desc"></p>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="start-provision" type="button">Start Provisioning</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Provisioning Log -->
+      <section class="step hidden" id="step-3" data-step="3" aria-labelledby="step-3-heading">
+        <h1 id="step-3-heading">Provisioning</h1>
+        <p class="subtitle" id="provision-log-subtitle">Creating resources...</p>
+
+        <div class="card">
+          <div class="provision-log" id="provision-log" role="log" aria-label="Provisioning progress">
+            <div class="provision-empty" id="provision-empty">Opening portal...</div>
+          </div>
+          <div class="sr-only" id="provision-sr-status" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="btn-row hidden" id="provision-done-actions">
+          <button class="btn btn-primary" id="provision-next" type="button">Continue</button>
+        </div>
+
+        <div class="btn-row hidden" id="provision-error-actions">
+          <button class="btn btn-primary" id="provision-cleanup" type="button">Clean Up Resources</button>
+          <button class="btn btn-secondary btn-danger-ghost" id="provision-continue" type="button">Continue Without Infrastructure</button>
+        </div>
+      </section>
+
+      <!-- Step 4: Done -->
+      <section class="step hidden" id="step-4" data-step="4" aria-labelledby="step-4-heading">
+        <h1 id="step-4-heading" tabindex="-1">Portal Open!</h1>
+        <p class="subtitle">Your infrastructure is provisioned and ready.</p>
+
+        <div class="card success-card">
+          <div class="success-icon" aria-hidden="true">&#10003;</div>
+          <div id="done-details"></div>
+        </div>
+
+        <div class="card hidden" id="infra-details-card">
+          <h3>Infrastructure</h3>
+          <div id="infra-details"></div>
+        </div>
+
+        <div class="card">
+          <h3>Deploy Your App</h3>
+          <ol class="next-steps" id="next-steps-list">
+          </ol>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="copy-deploy-cmd" type="button">Copy Deploy Command</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="wizard-footer">
+      <button class="btn btn-secondary" id="btn-back" type="button" disabled>Back</button>
+      <button class="btn btn-primary" id="btn-next" type="button">Next</button>
+    </footer>
+  </div>
+
+  <script src="deploy.js"></script>
+</body>
+</html>

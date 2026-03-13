@@ -8,6 +8,7 @@ import './api/cloud-providers.js';
 import './api/prd.js';
 import './api/project.js';
 import './api/provision.js';
+import './api/deploy.js';
 
 const UI_DIR = join(import.meta.dirname, 'ui');
 
