@@ -1,12 +1,12 @@
 /**
  * VoidForge Wizard — Vanilla JS Step Machine
- * Steps: 1=Vault, 2=Cloud, 3=Project, 4=PRD, 5=Deploy, 6=Review, 7=Create
+ * Steps: 1=Vault, 2=Cloud, 3=Project, 4=PRD, 5=Deploy, 6=Review, 7=Create, 8=Provision, 9=Done
  */
 
 (function () {
   'use strict';
 
-  const TOTAL_STEPS = 7;
+  const TOTAL_STEPS = 9;
   let currentStep = 1;
 
   // State
@@ -22,6 +22,8 @@
     generatedPrd: '',
     deployTarget: '',
     createdDir: '',
+    provisionResult: null,   // { success, resources, outputs, files }
+    provisionSkipped: false,
   };
 
   // DOM refs
@@ -44,8 +46,8 @@
 
     // Dynamic step count — simple mode skips steps 2(cloud) and 5(deploy)
     const visibleSteps = advancedMode
-      ? [1, 2, 3, 4, 5, 6, 7]
-      : [1, 2, 3, 4, 6, 7];
+      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      : [1, 2, 3, 4, 6, 7, 8, 9];
     const currentIdx = visibleSteps.indexOf(step);
     const totalVisible = visibleSteps.length;
     const displayNum = currentIdx >= 0 ? currentIdx + 1 : step;
@@ -59,7 +61,8 @@
 
     if (step === 6) {
       btnNext.textContent = 'Create Project';
-    } else if (step === 7) {
+    } else if (step >= 7) {
+      // Steps 7 (creating), 8 (provisioning), 9 (done) — hide nav buttons
       btnNext.style.display = 'none';
       btnBack.style.display = 'none';
     } else {
@@ -770,11 +773,9 @@
 
   async function createProject() {
     const creatingState = $('#creating-state');
-    const doneState = $('#done-state');
     const statusText = $('#create-status-text');
 
     creatingState.classList.remove('hidden');
-    doneState.classList.add('hidden');
 
     try {
       statusText.textContent = 'Creating project files...';
@@ -797,14 +798,10 @@
 
       if (res.ok && data.created) {
         state.createdDir = data.directory;
-        creatingState.classList.add('hidden');
-        doneState.classList.remove('hidden');
-
-        $('#done-details').innerHTML = `
-          <p><strong>${escapeHtml(state.projectName)}</strong></p>
-          <p style="color: var(--text-dim); font-family: var(--mono); font-size: 13px;">${escapeHtml(data.directory)}</p>
-          <p style="color: var(--text-dim); margin-top: 8px;">${data.files.length} files created</p>
-        `;
+        state.createdFileCount = data.files.length;
+        // Transition to provisioning step with confirmation gate
+        showStep(8);
+        showProvisionConfirm();
       } else {
         showCreateError('Error: ' + (data.error || 'Unknown error'));
       }
@@ -846,6 +843,265 @@
   });
 
   // =============================================
+  // Step 8: Provisioning
+  // =============================================
+
+  const provisionLog = $('#provision-log');
+  const provisionConfirm = $('#provision-confirm');
+  const provisionLogCard = $('#provision-log-card');
+  const provisionDoneActions = $('#provision-done-actions');
+  const provisionErrorActions = $('#provision-error-actions');
+  const provisionSrStatus = $('#provision-sr-status');
+
+  const STATUS_ICONS = {
+    started: '\u25CF',  // filled circle (spinning via CSS)
+    done: '\u2713',     // checkmark
+    error: '\u2717',    // X
+    skipped: '\u2014',  // em dash
+  };
+
+  let provisionEventCount = 0;
+  let provisionTotalSteps = 0;
+
+  function addProvisionEvent(event) {
+    // Remove empty state on first event
+    const emptyEl = $('#provision-empty');
+    if (emptyEl) emptyEl.remove();
+
+    // Update existing step row or create new one
+    let stepEl = provisionLog.querySelector(`[data-step="${event.step}"]`);
+
+    if (!stepEl) {
+      stepEl = document.createElement('div');
+      stepEl.dataset.step = event.step;
+      provisionLog.appendChild(stepEl);
+    }
+
+    stepEl.innerHTML = `
+      <div class="provision-step">
+        <span class="provision-icon ${event.status}">${STATUS_ICONS[event.status] || ''}</span>
+        <span class="provision-message">${escapeHtml(event.message)}</span>
+      </div>
+      ${event.detail ? `<div class="provision-detail">${escapeHtml(event.detail)}</div>` : ''}`;
+
+    provisionLog.scrollTop = provisionLog.scrollHeight;
+
+    // Update screen reader status (throttled via the event itself)
+    if (event.status === 'done') provisionEventCount++;
+    provisionSrStatus.textContent = `${provisionEventCount} steps completed`;
+  }
+
+  let provisionAbortController = null;
+
+  // Show confirmation gate when step 8 loads
+  function showProvisionConfirm() {
+    provisionConfirm.classList.remove('hidden');
+    provisionLogCard.classList.add('hidden');
+    provisionDoneActions.classList.add('hidden');
+    provisionErrorActions.classList.add('hidden');
+
+    const deployTarget = state.deployTarget || 'docker';
+    const deployNames = { vps: 'AWS VPS (EC2)', vercel: 'Vercel', railway: 'Railway', cloudflare: 'Cloudflare', static: 'Static (S3)', docker: 'Docker' };
+    const targetName = deployNames[deployTarget] || deployTarget;
+    $('#provision-subtitle').textContent = `Set up ${targetName} for your project`;
+
+    // Describe what will happen
+    const descriptions = {
+      docker: 'This will generate a Dockerfile, docker-compose.yml, and .dockerignore in your project directory. No cloud resources will be created.',
+      vps: 'This will create AWS resources on your account: an EC2 instance (t3.micro), security group, and SSH key pair. Optional RDS database and ElastiCache may also be created. These resources will incur AWS charges.',
+      vercel: 'This will generate a vercel.json configuration file. No cloud resources will be created.',
+      railway: 'This will generate a railway.toml configuration file. No cloud resources will be created.',
+      cloudflare: 'This will generate a wrangler.toml configuration file. No cloud resources will be created.',
+      static: 'This will generate an S3 deploy script. No cloud resources will be created.',
+    };
+    $('#provision-confirm-desc').textContent = descriptions[deployTarget] || 'This will set up your deploy target.';
+  }
+
+  async function runProvisioning() {
+    provisionConfirm.classList.add('hidden');
+    provisionLogCard.classList.remove('hidden');
+    provisionEventCount = 0;
+
+    provisionAbortController = new AbortController();
+
+    const deployTarget = state.deployTarget || 'docker';
+    const fm = state.prdContent ? parsePrdFrontmatter(state.prdContent) : {};
+
+    try {
+      const res = await fetch('/api/provision/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectDir: state.createdDir,
+          projectName: state.projectName,
+          deployTarget,
+          framework: fm.framework || '',
+          database: fm.database || 'none',
+          cache: fm.cache || 'none',
+        }),
+        signal: provisionAbortController.signal,
+      });
+
+      const contentType = res.headers.get('Content-Type') || '';
+      if (!contentType.includes('text/event-stream')) {
+        const data = await res.json();
+        addProvisionEvent({ step: 'error', status: 'error', message: data.error || 'Provisioning failed' });
+        provisionErrorActions.classList.remove('hidden');
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        if (provisionAbortController && provisionAbortController.signal.aborted) break;
+
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+
+          try {
+            const event = JSON.parse(data);
+            if (event.result) state.provisionResult = event.result;
+            if (event.runId) state.provisionRunId = event.runId;
+            addProvisionEvent(event);
+          } catch { /* skip */ }
+        }
+      }
+
+      if (state.provisionSkipped) return;
+
+      if (state.provisionResult && state.provisionResult.success) {
+        // Show "Continue" button instead of auto-advancing
+        provisionDoneActions.classList.remove('hidden');
+        provisionSrStatus.textContent = 'Provisioning complete. Press Continue to finish.';
+      } else {
+        provisionErrorActions.classList.remove('hidden');
+      }
+
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      addProvisionEvent({ step: 'connection', status: 'error', message: 'Connection error: ' + err.message });
+      provisionErrorActions.classList.remove('hidden');
+    }
+  }
+
+  // Start provisioning button (from confirmation gate)
+  $('#start-provision').addEventListener('click', () => {
+    runProvisioning();
+  });
+
+  // Skip provisioning button
+  $('#skip-provision').addEventListener('click', () => {
+    state.provisionSkipped = true;
+    if (provisionAbortController) provisionAbortController.abort();
+    goToDone();
+  });
+
+  // Continue button (after successful provisioning)
+  $('#provision-next').addEventListener('click', () => {
+    goToDone();
+  });
+
+  // Clean up resources button
+  $('#provision-cleanup').addEventListener('click', async () => {
+    addProvisionEvent({ step: 'cleanup', status: 'started', message: 'Cleaning up resources...' });
+    try {
+      const res = await fetch('/api/provision/cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runId: state.provisionRunId }),
+      });
+      const data = await res.json();
+      if (data.cleaned) {
+        addProvisionEvent({ step: 'cleanup', status: 'done', message: data.message });
+      } else {
+        addProvisionEvent({ step: 'cleanup', status: 'error', message: data.error || 'Cleanup failed' });
+      }
+    } catch (err) {
+      addProvisionEvent({ step: 'cleanup', status: 'error', message: 'Cleanup error: ' + err.message });
+    }
+  });
+
+  // Continue without infrastructure button
+  $('#provision-continue').addEventListener('click', () => {
+    goToDone();
+  });
+
+  function goToDone() {
+    showStep(9);
+    populateDone();
+    // Focus management: move focus to heading for screen readers
+    setTimeout(() => {
+      const heading = $('#step-9-heading');
+      if (heading) heading.focus();
+    }, 100);
+  }
+
+  // =============================================
+  // Step 9: Done
+  // =============================================
+
+  function populateDone() {
+    // Project summary
+    $('#done-details').innerHTML = `
+      <p><strong>${escapeHtml(state.projectName)}</strong></p>
+      <p style="color: var(--text-dim); font-family: var(--mono); font-size: 13px;">${escapeHtml(state.createdDir)}</p>
+      <p style="color: var(--text-dim); margin-top: 8px;">${state.createdFileCount || 0} files created</p>
+    `;
+
+    // Infrastructure details
+    const infraCard = $('#infra-details-card');
+    const infraDetails = $('#infra-details');
+    const result = state.provisionResult;
+
+    if (result && result.success && Object.keys(result.outputs).length > 0) {
+      infraCard.classList.remove('hidden');
+      let html = '';
+      const sensitiveKeys = ['DB_PASSWORD'];
+      for (const [key, value] of Object.entries(result.outputs)) {
+        const label = key.replace(/_/g, ' ');
+        const isSensitive = sensitiveKeys.includes(key);
+        const displayValue = isSensitive ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : escapeHtml(value);
+        html += `<div class="infra-item"><span class="infra-label">${escapeHtml(label)}</span><span class="infra-value">${displayValue}</span></div>`;
+      }
+      if (result.files && result.files.length > 0) {
+        html += `<div class="infra-item"><span class="infra-label">Generated files</span><span class="infra-value">${result.files.length} files</span></div>`;
+      }
+      infraDetails.innerHTML = html;
+    } else {
+      infraCard.classList.add('hidden');
+    }
+
+    // Dynamic next steps
+    const nextSteps = $('#next-steps-list');
+    let stepsHtml = '<li>Open a terminal in your project directory</li>';
+
+    if (result && result.outputs && result.outputs['SSH_HOST']) {
+      stepsHtml += `<li>SSH into your server: <code>ssh -i .ssh/deploy-key.pem ec2-user@${escapeHtml(result.outputs['SSH_HOST'])}</code></li>`;
+      stepsHtml += '<li>Run <code>infra/provision.sh</code> on the server to install dependencies</li>';
+      stepsHtml += '<li>Run <code>infra/deploy.sh</code> to deploy your app</li>';
+    }
+
+    if (state.provisionSkipped) {
+      stepsHtml += '<li>Run the wizard again or manually set up infrastructure when ready</li>';
+    }
+
+    stepsHtml += '<li>Review <code>docs/PRD.md</code> — fill in any remaining sections</li>';
+    stepsHtml += '<li>Open Claude Code and run <code>/build</code></li>';
+    nextSteps.innerHTML = stepsHtml;
+  }
+
+  // =============================================
   // Utilities
   // =============================================
 
@@ -881,6 +1137,24 @@
   function showStatus(el, type, message) {
     el.className = 'status-row ' + type;
     el.textContent = message;
+  }
+
+  /** Parse YAML frontmatter from PRD content to extract framework/database/cache. */
+  function parsePrdFrontmatter(content) {
+    const match = content.match(/```yaml\s*\n([\s\S]*?)```/);
+    if (!match) return {};
+    const fm = {};
+    for (const line of match[1].split('\n')) {
+      const m = line.trim().match(/^(\w+):\s*(.+)$/);
+      if (m) {
+        let val = m[2].trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        fm[m[1]] = val;
+      }
+    }
+    return fm;
   }
 
   function copyToClipboard(text) {

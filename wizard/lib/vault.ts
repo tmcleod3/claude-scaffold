@@ -10,7 +10,7 @@
  */
 
 import { createCipheriv, createDecipheriv, pbkdf2, randomBytes } from 'node:crypto';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, rename, mkdir, open } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -102,7 +102,18 @@ async function writeVault(password: string, data: VaultData): Promise<void> {
   await mkdir(VAULT_DIR, { recursive: true });
   const json = JSON.stringify(data);
   const encrypted = await encrypt(json, password);
-  await writeFile(VAULT_PATH, encrypted, { mode: 0o600 });
+
+  // Atomic write: write to temp file, fsync, then rename over the real file.
+  // This prevents corruption if the process crashes mid-write.
+  const tmpPath = VAULT_PATH + '.tmp';
+  const fh = await open(tmpPath, 'w', 0o600);
+  try {
+    await fh.writeFile(encrypted);
+    await fh.sync();
+  } finally {
+    await fh.close();
+  }
+  await rename(tmpPath, VAULT_PATH);
 
   sessionCache = { password, data };
 }

@@ -91,7 +91,7 @@
               <li>Everything in Simple, plus:</li>
               <li>Connect AWS, Vercel, Railway, or Cloudflare credentials</li>
               <li>Deploy target selection filtered by your available providers</li>
-              <li>Infrastructure provisioning in future phases</li>
+              <li>Automatic infrastructure provisioning</li>
             </ul>
           </div>
         </div>
@@ -273,16 +273,51 @@
         </div>
       </section>
 
-      <!-- Step 7: Creating / Done -->
+      <!-- Step 7: Creating -->
       <section class="step hidden" id="step-7" data-step="7">
         <div id="creating-state">
           <h1>Creating Your Project...</h1>
           <div class="spinner" role="status" aria-label="Creating project"></div>
           <p class="subtitle" id="create-status-text">Setting up project files...</p>
         </div>
+      </section>
 
-        <div id="done-state" class="hidden">
-          <h1>Project Created!</h1>
+      <!-- Step 8: Provisioning Infrastructure -->
+      <section class="step hidden" id="step-8" data-step="8" aria-labelledby="step-8-heading">
+        <h1 id="step-8-heading">Provisioning Infrastructure</h1>
+        <p class="subtitle" id="provision-subtitle">Setting up your deploy target...</p>
+
+        <!-- Pre-provisioning confirmation -->
+        <div class="card" id="provision-confirm">
+          <p id="provision-confirm-desc">This will generate configuration files for your deploy target.</p>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="start-provision" type="button">Start Provisioning</button>
+            <button class="btn btn-secondary" id="skip-provision" type="button">Skip for Now</button>
+          </div>
+        </div>
+
+        <!-- Provisioning log (hidden until started) -->
+        <div class="card hidden" id="provision-log-card">
+          <div class="provision-log" id="provision-log" role="log" aria-label="Provisioning progress">
+            <div class="provision-empty" id="provision-empty">Waiting for provisioning to start...</div>
+          </div>
+          <div class="sr-only" id="provision-sr-status" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="btn-row hidden" id="provision-done-actions">
+          <button class="btn btn-primary" id="provision-next" type="button">Continue</button>
+        </div>
+
+        <div class="btn-row hidden" id="provision-error-actions">
+          <button class="btn btn-primary" id="provision-cleanup" type="button">Clean Up Resources</button>
+          <button class="btn btn-secondary btn-danger-ghost" id="provision-continue" type="button">Continue Without Infrastructure</button>
+        </div>
+      </section>
+
+      <!-- Step 9: Done -->
+      <section class="step hidden" id="step-9" data-step="9" aria-labelledby="step-9-heading">
+        <div id="done-state">
+          <h1 id="step-9-heading" tabindex="-1">Project Created!</h1>
           <p class="subtitle">Your VoidForge project is ready.</p>
 
           <div class="card success-card">
@@ -290,9 +325,14 @@
             <div id="done-details"></div>
           </div>
 
+          <div class="card hidden" id="infra-details-card">
+            <h3>Infrastructure</h3>
+            <div id="infra-details"></div>
+          </div>
+
           <div class="card">
             <h3>Next Steps</h3>
-            <ol class="next-steps">
+            <ol class="next-steps" id="next-steps-list">
               <li>Open a terminal in your project directory</li>
               <li>Review <code>docs/PRD.md</code> — fill in any remaining sections</li>
               <li>Open Claude Code and run <code>/build</code></li>

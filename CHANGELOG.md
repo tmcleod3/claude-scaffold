@@ -6,6 +6,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [2.6.0] - 2026-03-12
+
+### Added
+- **Auto-provisioning system** — wizard steps 8 + 9. After project creation, provision infrastructure for your chosen deploy target with live SSE-streamed progress.
+- **Docker provisioner** — generates Dockerfile (multi-stage per framework), docker-compose.yml (with optional Postgres/MySQL/Redis services), and .dockerignore
+- **AWS VPS provisioner** — full EC2 + security group + SSH key pair provisioning, with optional RDS (Postgres/MySQL) and ElastiCache (Redis). Generates deploy scripts (provision.sh, deploy.sh, rollback.sh), Caddyfile, and PM2 ecosystem config.
+- **Config-only provisioners** — Vercel (vercel.json), Railway (railway.toml), Cloudflare (wrangler.toml), Static S3 (deploy-s3.sh)
+- **Provisioning API** — `POST /api/provision/start` (SSE-streamed), `POST /api/provision/cleanup`, `GET /api/provision/incomplete` for crash recovery
+- **Provision manifest** (ADR-001) — write-ahead resource tracking at `~/.voidforge/runs/` prevents orphaned AWS resources on crash
+- **Pre-provisioning confirmation gate** — users see what will be created (and AWS cost warning) before clicking "Start Provisioning"
+- **4 Architecture Decision Records** — provision manifest, atomic vault writes, API response validation, SSE keepalive
+- **QA regression checklist** — 24-item checklist covering all provisioning flows, a11y, and mobile
+
+### Changed
+- **Vault writes are now atomic** (ADR-002) — write-to-temp + fsync + rename prevents credential loss on crash
+- **Wizard expanded to 9 steps** — step 8 (provision with confirmation gate) and step 9 (done with infra details)
+- **User-controlled transitions** — replaced auto-advance with explicit "Continue" button for a11y
+- **Advanced setup card** — updated copy from "Infrastructure provisioning in future phases" to "Automatic infrastructure provisioning"
+
+### Fixed
+- **JS injection** in PM2 config via project names containing quotes — now uses `JSON.stringify`
+- **S3 deploy script** — added missing `--exclude '*'` before `--include` flags
+- **RDS/EC2 networking** — RDS instance now shares security group with EC2; DB/Redis ports added to SG
+- **RDS password** — generated with `crypto.randomBytes` instead of predictable slug-based derivation
+- **Skip provisioning** — now aborts in-flight fetch via AbortController
+- **Cleanup race condition** — resources tracked per run ID instead of global mutable state
+- **Security group cleanup** — retry loop with 10s intervals instead of insufficient 5s sleep
+- **Empty SSH key** — validates AWS returns key material before writing file
+- **Rollback script** — framework-aware restart commands (Django/Rails) instead of hardcoded npm/PM2
+
+### Security
+- **Atomic vault writes** prevent credential file corruption
+- **DB password masked** on wizard done page (shown as bullet characters)
+- **`.ssh/` added to .gitignore** — prevents accidental deploy key commits
+
+---
+
 ## [2.5.0] - 2026-03-12
 
 ### Added
