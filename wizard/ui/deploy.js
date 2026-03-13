@@ -41,14 +41,9 @@
     progressBar.setAttribute('aria-valuenow', String(pct));
     stepLabel.textContent = `Step ${step} of ${TOTAL_STEPS}`;
 
-    btnBack.disabled = step <= 1;
-    if (step >= 2) {
-      btnNext.style.display = 'none';
-      btnBack.style.display = 'none';
-    } else {
-      btnNext.style.display = '';
-      btnBack.style.display = '';
-    }
+    // Strange uses inline buttons per step — hide footer nav entirely
+    btnNext.style.display = 'none';
+    btnBack.style.display = 'none';
 
     const firstInput = target?.querySelector('input, textarea, select');
     if (firstInput) setTimeout(() => firstInput.focus(), 100);
@@ -334,7 +329,7 @@
     const sensitiveKeys = ['DB_PASSWORD'];
     const urlKeys = ['CF_PROJECT_URL', 'S3_WEBSITE_URL'];
 
-    if (result && result.success && Object.keys(result.outputs).length > 0) {
+    if (result?.success && result.outputs && Object.keys(result.outputs).length > 0) {
       infraCard.classList.remove('hidden');
       let html = '';
       for (const [key, value] of Object.entries(result.outputs)) {
@@ -395,16 +390,19 @@
 
     nextSteps.innerHTML = stepsHtml;
 
-    // Copy deploy command button
-    $('#copy-deploy-cmd').addEventListener('click', () => {
-      if (deployCmd) {
-        copyToClipboard(deployCmd).then(() => {
-          $('#copy-deploy-cmd').textContent = 'Copied!';
-          setTimeout(() => { $('#copy-deploy-cmd').textContent = 'Copy Deploy Command'; }, 2000);
-        });
-      }
-    });
+    // Store deploy command for the copy button
+    state.deployCmd = deployCmd;
   }
+
+  // Copy deploy command button — bound once, reads from state
+  $('#copy-deploy-cmd').addEventListener('click', () => {
+    if (state.deployCmd) {
+      copyToClipboard(state.deployCmd).then(() => {
+        $('#copy-deploy-cmd').textContent = 'Copied!';
+        setTimeout(() => { $('#copy-deploy-cmd').textContent = 'Copy Deploy Command'; }, 2000);
+      });
+    }
+  });
 
   // --- Utilities ---
 

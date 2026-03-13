@@ -46,7 +46,10 @@ addRoute('POST', '/api/deploy/scan', async (req: IncomingMessage, res: ServerRes
   try {
     const claudeMd = await readFile(join(dir, 'CLAUDE.md'), 'utf-8');
     const nameMatch = claudeMd.match(/\*\*Name:\*\*\s*(.+)/);
-    if (nameMatch) name = nameMatch[1].trim();
+    if (nameMatch) {
+      const extracted = nameMatch[1].trim();
+      if (!extracted.startsWith('[')) name = extracted;
+    }
   } catch { /* use default */ }
 
   // Read deploy target from .env
@@ -54,7 +57,9 @@ addRoute('POST', '/api/deploy/scan', async (req: IncomingMessage, res: ServerRes
   try {
     const envContent = await readFile(join(dir, '.env'), 'utf-8');
     const deployMatch = envContent.match(/DEPLOY_TARGET=(.+)/);
-    if (deployMatch) deploy = deployMatch[1].trim();
+    if (deployMatch) {
+      deploy = deployMatch[1].trim().replace(/^["']|["']$/g, '').split('#')[0].trim();
+    }
   } catch { /* no .env yet */ }
 
   // Read framework/database/cache from PRD frontmatter
@@ -82,8 +87,10 @@ addRoute('POST', '/api/deploy/scan', async (req: IncomingMessage, res: ServerRes
 
     if (!framework) {
       try {
-        await access(join(dir, 'requirements.txt'));
-        framework = 'django';
+        const reqs = await readFile(join(dir, 'requirements.txt'), 'utf-8');
+        const reqsLower = reqs.toLowerCase();
+        if (reqsLower.includes('django')) framework = 'django';
+        else framework = 'python';
       } catch { /* not Python */ }
     }
 

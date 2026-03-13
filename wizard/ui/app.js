@@ -893,24 +893,6 @@
     el.textContent = message;
   }
 
-  /** Parse YAML frontmatter from PRD content to extract framework/database/cache. */
-  function parsePrdFrontmatter(content) {
-    const match = content.match(/```yaml\s*\n([\s\S]*?)```/);
-    if (!match) return {};
-    const fm = {};
-    for (const line of match[1].split('\n')) {
-      const m = line.trim().match(/^(\w+):\s*(.+)$/);
-      if (m) {
-        let val = m[2].trim();
-        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-          val = val.slice(1, -1);
-        }
-        fm[m[1]] = val;
-      }
-    }
-    return fm;
-  }
-
   function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       return navigator.clipboard.writeText(text);
