@@ -1,0 +1,4 @@
+.DS_Store
+.env
+logs/*.md
+!logs/build-state.md
