@@ -47,7 +47,7 @@ npm run wizard
 **Best for:** Users who want the guided experience. Merlin walks you through setup, Strange handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 7 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 8 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -60,7 +60,7 @@ git clone --branch scaffold https://github.com/tmcleod3/voidforge.git .
 **Best for:** Developers who know what they're doing and want to skip the wizard. You manage your own infrastructure. VoidForge manages your build process.
 
 #### Core (`core` branch)
-The lightest possible version. CLAUDE.md, the 7 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
+The lightest possible version. CLAUDE.md, the 8 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
 
 ```bash
 # Option A: Drop into an existing project
@@ -77,7 +77,7 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **7 slash commands** — `/build`, `/qa`, `/security`, `/ux`, `/devops`, `/architect`, `/git`
+- **8 slash commands** — `/build`, `/qa`, `/security`, `/ux`, `/devops`, `/architect`, `/git`, `/void`
 - **13-phase build protocol** — PRD to production with verification gates
 - **7 specialist agent protocols** — Each with behavioral directives and sub-agent rosters
 - **150+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, and Anime
@@ -274,6 +274,7 @@ VoidForge uses 7 lead agents, each from a different fictional universe, each com
 | Architecture | **Picard** | Star Trek | Schema, scaling, ADRs, tech debt, failure modes | Measured decisions, diplomatic, "make it so" |
 | DevOps | **Kusanagi** | Anime | Deploy, monitor, backup, infrastructure | Ghost in the Shell precision, cybernetic efficiency |
 | Release | **Coulson** | Marvel | Versioning, changelogs, commits, releases | S.H.I.E.L.D.'s meticulous record-keeper, everything by the book |
+| Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream | Ancient, joyful, sings while he works, tends the forge itself |
 
 ### Sub-Agent Highlights
 
@@ -350,7 +351,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Seven commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Eight commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.
@@ -388,6 +389,11 @@ Full architecture review: schema analysis (Spock), service boundaries (Scotty), 
 **When:** After completing a set of changes you want to version.
 
 6-step release flow: analyze diffs (Vision), determine semver bump (Friday), write changelog (Wong), craft commit (Rogers), verify consistency (Barton), optional push (Coulson). Updates VERSION.md, CHANGELOG.md, and package.json atomically.
+
+#### `/void` — Bombadil's Forge Sync
+**When:** You want to update your VoidForge methodology to the latest version.
+
+Old Tom Bombadil tends the forge itself. He reaches upstream to the VoidForge scaffold branch, compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). Works regardless of which tier you installed (main, scaffold, or core). If you're already on the latest, Tom tells you so and goes back to singing.
 
 ---
 

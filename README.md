@@ -42,14 +42,15 @@ voidforge/
 │
 ├── .claude/
 │   ├── settings.json             ← Permissions, hooks
-│   └── commands/                 ← 7 slash commands
+│   └── commands/                 ← 8 slash commands
 │       ├── build.md              ← /build — 13-phase protocol
 │       ├── qa.md                 ← /qa — Batman's QA pass
 │       ├── security.md           ← /security — Kenobi's audit
 │       ├── ux.md                 ← /ux — Galadriel's review
 │       ├── devops.md             ← /devops — Kusanagi's infra
 │       ├── architect.md          ← /architect — Picard's review
-│       └── git.md                ← /git — Coulson's releases
+│       ├── git.md                ← /git — Coulson's releases
+│       └── void.md              ← /void — Bombadil's forge sync
 │
 ├── docs/
 │   ├── PRD.md                    ← PRD template with YAML frontmatter
@@ -75,6 +76,7 @@ voidforge/
 │   │   ├── SYSTEMS_ARCHITECT.md        ← Picard
 │   │   ├── DEVOPS_ENGINEER.md          ← Kusanagi
 │   │   ├── RELEASE_MANAGER.md          ← Coulson
+│   │   ├── FORGE_KEEPER.md            ← Bombadil
 │   │   ├── SUB_AGENTS.md              ← Orchestration + conflict resolution
 │   │   ├── TROUBLESHOOTING.md         ← Error recovery + rollback
 │   │   ├── MCP_INTEGRATION.md         ← External tool connections
@@ -116,6 +118,7 @@ voidforge/
 | Architecture | **Picard** | Star Trek | Schema, scaling, ADRs, failure modes |
 | DevOps | **Kusanagi** | Anime | Deploy, monitor, backup, infrastructure |
 | Release | **Coulson** | Marvel | Versioning, changelogs, releases |
+| Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream |
 
 150+ sub-agents across all 6 universes. See `docs/NAMING_REGISTRY.md`.
 
@@ -134,6 +137,7 @@ voidforge/
 | `/devops` | Kusanagi | Target-adaptive infrastructure |
 | `/architect` | Picard | Architecture review + ADRs |
 | `/git` | Coulson | Semver + changelog + commit |
+| `/void` | Bombadil | Sync VoidForge methodology from upstream |
 
 ### Wizards (Full Tier)
 

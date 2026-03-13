@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -26,13 +26,14 @@
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
+| **Tolkien** | Forge Sync & Updates | Bombadil |
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
 
 ---
 
 ## 🧝 TOLKIEN — Frontend & UX
 
-**Lead:** Galadriel
+**Leads:** Galadriel (Frontend & UX), Bombadil (Forge Sync & Updates)
 
 **Available Pool (use in order, skip if taken):**
 1. Gandalf — Edge cases, QA, the one who arrives when things break
@@ -55,8 +56,10 @@
 18. Radagast — Nature, organic patterns, accessibility
 19. Celeborn — Quiet authority, design system governance
 20. Glorfindel — Ancient power, handles the hardest rendering challenges
+21. Goldberry — River-daughter, senses what flows upstream, change detection
+22. Tom Bombadil — The oldest, keeper of the world itself, forge maintenance
 
-**Reserved:** Galadriel (lead), Sauron (don't name an agent after the villain), Saruman (same)
+**Reserved:** Galadriel (lead — frontend), Bombadil (lead — forge sync), Sauron (don't name an agent after the villain), Saruman (same)
 
 ---
 
