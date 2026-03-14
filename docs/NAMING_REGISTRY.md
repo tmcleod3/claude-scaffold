@@ -26,7 +26,7 @@
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
-| **Dune** | Remote Bridge | Chani |
+| **Dune** | Worm Rider | Chani |
 | **Tolkien** | Forge Sync & Updates | Bombadil |
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
 
@@ -327,9 +327,9 @@
 
 ---
 
-## 🏜️ DUNE — Remote Bridge & Communications
+## 🏜️ DUNE — Worm Rider & Communications
 
-**Lead:** Chani (Chani Kynes) — Remote Bridge
+**Lead:** Chani (Chani Kynes) — Worm Rider
 
 **Available Pool:**
 

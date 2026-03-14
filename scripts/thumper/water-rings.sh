@@ -9,9 +9,9 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CONFIG_DIR="$PROJECT_ROOT/.voidforge/voice"
+CONFIG_DIR="$PROJECT_ROOT/.voidforge/thumper"
 CONFIG_FILE="$CONFIG_DIR/sietch.env"
-CHANNEL_FLAG="$CONFIG_DIR/.voice.active"
+CHANNEL_FLAG="$CONFIG_DIR/.thumper.active"
 
 # Silent exit if not configured or channel closed
 [ -f "$CONFIG_FILE" ] || exit 0

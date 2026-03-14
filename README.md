@@ -2,7 +2,7 @@
 
 The ultra-light tier. All methodology, no infrastructure. Drop into any project.
 
-**What's inside:** 170+ named agents across 7 fictional universes, all 17 agent protocols, 11 slash commands, 7 code patterns, the full 13-phase build protocol, `/voice` Telegram bridge, and the Holocron.
+**What's inside:** 170+ named agents across 7 fictional universes, all 17 agent protocols, 11 slash commands, 7 code patterns, the full 13-phase build protocol, `/thumper` Telegram bridge, and the Holocron.
 
 ## Usage
 

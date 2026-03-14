@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CONFIG_DIR="$PROJECT_ROOT/.voidforge/voice"
+CONFIG_DIR="$PROJECT_ROOT/.voidforge/thumper"
 CONFIG_FILE="$CONFIG_DIR/sietch.env"
 
 if ! command -v curl >/dev/null 2>&1; then
@@ -196,7 +196,7 @@ detect_environment() {
             echo "   OSASCRIPT only works with Terminal.app and iTerm2."
             echo ""
             echo "   Recommended: install tmux and run Claude Code inside a tmux session."
-            echo "   Then re-run /voice setup — tmux will be auto-detected."
+            echo "   Then re-run /thumper setup — tmux will be auto-detected."
             echo ""
             # Don't return — fall through to manual selection
         fi
@@ -306,7 +306,7 @@ echo ""
 read -r -p "Speak The Voice now? (yes/no): " START_NOW
 
 if [[ "$START_NOW" == "yes" ]]; then
-    bash "$SCRIPT_DIR/voice.sh" on
+    bash "$SCRIPT_DIR/thumper.sh" on
 else
-    echo "Run /voice on when you're ready. The desert waits."
+    echo "Run /thumper on when you're ready. The desert waits."
 fi
