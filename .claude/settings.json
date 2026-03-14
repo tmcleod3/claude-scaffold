@@ -41,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/voice/water-rings.sh"
+            "command": "bash scripts/thumper/water-rings.sh"
           }
         ]
       }

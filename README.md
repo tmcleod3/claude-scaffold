@@ -53,7 +53,7 @@ voidforge/
 │       ├── architect.md          ← /architect — Picard's review (parallel analysis)
 │       ├── git.md                ← /git — Coulson's releases
 │       ├── void.md              ← /void — Bombadil's forge sync
-│       └── voice.md             ← /voice — Chani's remote bridge
+│       └── thumper.md           ← /thumper — Chani's worm rider
 │
 ├── docs/
 │   ├── PRD.md                    ← PRD template with YAML frontmatter
@@ -84,7 +84,7 @@ voidforge/
 │   │   ├── TROUBLESHOOTING.md         ← Error recovery + rollback
 │   │   ├── MCP_INTEGRATION.md         ← External tool connections
 │   │   ├── PRD_GENERATOR.md           ← PRD auto-generation prompt
-│   │   └── VOICE.md                  ← Chani — remote bridge (Dune)
+│   │   └── THUMPER.md                ← Chani — worm rider (Dune)
 │   │
 │   └── patterns/                 ← Reference implementations
 │       ├── api-route.ts          ← Validation, auth, service call
@@ -101,8 +101,8 @@ voidforge/
 ├── scripts/
 │   ├── new-project.sh            ← Manual project initialization
 │   ├── voidforge.ts              ← CLI entry point
-│   └── voice/                    ← /voice — Chani's remote bridge (Dune)
-│       ├── voice.sh              ← Main entrypoint (router)
+│   └── thumper/                  ← /thumper — Chani's worm rider (Dune)
+│       ├── thumper.sh            ← Main entrypoint (router)
 │       ├── scan.sh               ← Setup wizard (reading the sand)
 │       ├── relay.sh              ← Sandworm daemon
 │       ├── gom-jabbar.sh         ← Authentication protocol
@@ -129,7 +129,7 @@ voidforge/
 | DevOps | **Kusanagi** | Anime | Deploy, monitor, backup, infrastructure |
 | Release | **Coulson** | Marvel | Versioning, changelogs, releases |
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream |
-| Remote Bridge | **Chani** | Dune | The Voice, Gom Jabbar authentication, sandworm relay |
+| Worm Rider | **Chani** | Dune | The Voice, Gom Jabbar authentication, sandworm relay |
 
 170+ sub-agents across all 7 universes. See `docs/NAMING_REGISTRY.md`.
 
@@ -151,7 +151,7 @@ voidforge/
 | `/architect` | Picard | Architecture review with parallel analysis |
 | `/git` | Coulson | Semver + changelog + commit |
 | `/void` | Bombadil | Sync VoidForge methodology from upstream |
-| `/voice` | Chani | The Voice — Dune-themed Telegram bridge with Gom Jabbar auth |
+| `/thumper` | Chani | Worm rider — Dune-themed Telegram bridge with Gom Jabbar auth |
 
 ### Wizards (Full Tier)
 

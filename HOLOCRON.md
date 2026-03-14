@@ -77,7 +77,7 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **11 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/voice`
+- **11 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`
 - **13-phase build protocol** — PRD to production with verification gates
 - **9 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **170+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, and Anime
@@ -275,7 +275,7 @@ VoidForge uses 9 lead agents across 7 fictional universes, each commanding a ros
 | DevOps | **Kusanagi** | Anime | Deploy, monitor, backup, infrastructure | Ghost in the Shell precision, cybernetic efficiency |
 | Release | **Coulson** | Marvel | Versioning, changelogs, commits, releases | S.H.I.E.L.D.'s meticulous record-keeper, everything by the book |
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream | Ancient, joyful, sings while he works, tends the forge itself |
-| Remote Bridge | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
+| Worm Rider | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
 
 ### Sub-Agent Highlights
 
@@ -323,7 +323,7 @@ Each lead has a deep bench. Here are some standouts:
 - **L** observes everything (logging and observability)
 - **Spike** stays cool under pressure (incident response)
 
-**Dune (Remote Bridge)**
+**Dune (Worm Rider)**
 - **Stilgar** protects the channel — no outsider enters the sietch
 - **Mohiam** administers the Gom Jabbar — "put your hand in the box"
 - **Idaho** keeps the connection alive — the eternal ghola who always returns
@@ -412,18 +412,18 @@ Full architecture review with parallel analysis: Spock (schema) + Uhura (integra
 
 Old Tom Bombadil tends the forge itself. He reaches upstream to the VoidForge scaffold branch, compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). Works regardless of which tier you installed (main, scaffold, or core). If you're already on the latest, Tom tells you so and goes back to singing.
 
-#### `/voice` — Chani's Remote Bridge (The Voice)
+#### `/thumper` — Chani's Worm Rider
 **When:** You want to control Claude Code from your phone via Telegram.
 
 *"Tell me of your homeworld, Usul."*
 
-Chani opens a bidirectional Telegram bridge to your running Claude Code session. Send prompts from anywhere — a coffee shop, your phone, another machine. Claude's responses are sent back automatically via the Water Rings (stop hook).
+Plant a thumper in the sand and ride the worm. Chani opens a bidirectional Telegram bridge to your running Claude Code session. Send prompts from anywhere — a coffee shop, your phone, another machine. Claude's responses are sent back automatically via the Water Rings (stop hook).
 
 The Gom Jabbar protocol gates everything. On first activation, you choose a passphrase ("word of passage"). It's hashed with PBKDF2 and erased from your Telegram chat. After 60 minutes of idle, the Reverend Mother demands the test again — prove you're human. Three wrong attempts and The Voice is silenced for 5 minutes.
 
 The sandworm daemon auto-detects your environment: tmux (preferred, cross-platform), PTY injection (headless Linux), or osascript (macOS Terminal.app/iTerm2). For VS Code, Warp, Alacritty, or Kitty users on macOS, tmux is recommended.
 
-Setup: `/voice setup` (one-time). Control: `/voice on` / `/voice off` / `/voice status`.
+Setup: `/thumper setup` (one-time). Control: `/thumper on` / `/thumper off` / `/thumper status`.
 
 ---
 
