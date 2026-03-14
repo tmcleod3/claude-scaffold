@@ -11,7 +11,7 @@ Use the Agent tool to run these simultaneously — all are read-only analysis:
 - **Agent 1 (Leia — Secrets):** Scan source code for hardcoded secrets, check .env is gitignored, check git history for leaked keys (`git log -p --all -S 'password' -S 'secret' -S 'api_key'`), verify different secrets dev/prod
 - **Agent 2 (Chewie — Dependencies):** Run `npm audit`, check for critical/high vulns, verify lock file committed, check for deprecated packages
 - **Agent 3 (Rex — Infrastructure):** Check security headers (HSTS, CSP, X-Frame-Options, CORS), verify TLS config, check for exposed ports/debug endpoints
-- **Agent 4 (Maul — Red Team):** For each endpoint and flow, ask: "How would I exploit this?" Chain vulnerabilities. Test trust boundaries. Attempt privilege escalation.
+- **Agent 4 (Maul — Red Team):** For each endpoint and flow, ask: "How would I exploit this?" Chain vulnerabilities. Test trust boundaries. Attempt privilege escalation. **RUNTIME EXPLOITATION (mandatory):** When the server is running, Maul must execute actual attack requests via curl/fetch — not just theorize. Upload a file then fetch the URL. Submit conflicting data. Send requests with stolen/expired tokens. If the server isn't running, document what couldn't be runtime-tested.
 
 ### Phase 2 — Sequential audits (depend on understanding the codebase)
 These require full codebase context — run sequentially:
@@ -37,6 +37,7 @@ These require full codebase context — run sequentially:
 - Tier features verified server-side
 - Rate limiting per-user and per-IP
 - Reference `/docs/patterns/multi-tenant.ts` if multi-tenant
+- **AUTH CHAIN TRACING (mandatory):** Don't just verify each endpoint checks auth — trace the full chain: Is the auth middleware actually applied to this route? Is the user/tenant context carried from middleware → service → DB query? Are there routes that SHOULD have auth middleware but don't? Read the middleware registration and verify every protected route is covered.
 
 **Padme — Data:**
 - PII identified and cataloged
@@ -63,6 +64,7 @@ After remediations are applied, Maul re-probes:
 - Re-test all remediated vulnerabilities — verify fixes hold under adversarial conditions
 - Check that fixes didn't introduce new attack vectors
 - Attempt to bypass the remediations
+- **Execute actual HTTP requests against the running server** to verify fixes hold at runtime, not just in code
 
 If Maul finds new issues, fix and re-verify until clean.
 

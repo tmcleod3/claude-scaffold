@@ -41,20 +41,20 @@
 3. Follow patterns: `/docs/patterns/api-route.ts`, `/docs/patterns/service.ts`
 4. Write unit tests for core service logic, integration tests for API routes
 5. Log to `/logs/phase-04-core.md`
-6. **Gate:** Core journey works end-to-end manually AND service tests pass (>80% coverage for core service)
+6. **Gate:** Core journey works end-to-end manually AND service tests pass (>80% coverage for core service). **"Works manually" means:** execute the happy path AND at least one error path against the running server. For file uploads, fetch the returned URL and verify it serves. For forms, submit invalid data and verify the error message is specific. Verify cross-module paths (generated URLs are accepted by their consumers).
 
 ## Phase 5 — Supporting Features (Stark + Galadriel) [1-3 features per session]
 1. Build in dependency order: schema -> API -> UI -> verify per feature
 2. After each feature batch: build passes, previous flows still work, new flow works, all tests pass
 3. Log each feature batch to `/logs/phase-05-features.md`
-4. **Gate:** All features work, no regressions, all tests pass
+4. **Gate:** All features work, no regressions, all tests pass. For each new feature: verify the happy path AND the primary error path against the running server. Verify cross-module integration (uploaded files serve correctly, error messages display in UI, generated URLs resolve).
 
 ## Phase 6 — Integrations (Stark/Romanoff, Kenobi reviews) [SKIP sections per frontmatter]
 1. Each integration: client wrapper in /lib/, env vars, test mode, error handling
 2. Follow `/docs/patterns/service.ts` for wrappers, `/docs/patterns/job-queue.ts` for async work
 3. Kenobi reviews each integration's security
 4. Log to `/logs/phase-06-integrations.md`
-5. **Gate:** Each integration tested in test mode, webhook handling verified
+5. **Gate:** Each integration tested in test mode, webhook handling verified. For each integration: verify the full chain works (upload → URL → fetch, payment → webhook → state change, email → delivery confirmation). Submit data that triggers integration-specific errors and verify error messages are surfaced to the user.
 
 ## Phase 7 — Admin (Stark + Galadriel) [SKIP if `admin: no`]
 1. Dashboard, user management, analytics views, audit logging
