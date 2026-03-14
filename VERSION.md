@@ -15,7 +15,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 | Version | Date | Summary |
 |---------|------|---------|
 | 3.5.3 | 2026-03-14 | /thumper rename + cross-methodology hardening + Kongo.io lessons |
-| 3.5.0 | 2026-03-14 | Chani's Voice — /voice Telegram bridge with Gom Jabbar auth, Dune universe (9th lead), 170+ characters |
+| 3.5.0 | 2026-03-14 | Chani's Worm Rider — /thumper Telegram bridge with Gom Jabbar auth, Dune universe (9th lead), 170+ characters |
 | 3.4.0 | 2026-03-13 | 1M Context Adaptation — double-pass reviews, 3 new sub-agents, /test and /review commands, parallelized analysis |
 | 3.3.1 | 2026-03-13 | Fix silent PRD truncation — model-aware max tokens, truncation detection and UI warning |
 | 3.3.0 | 2026-03-13 | The Last Mile Complete — async resource polling, domain registration, security hardening (43 review findings resolved) |

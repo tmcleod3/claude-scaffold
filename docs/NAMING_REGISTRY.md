@@ -357,7 +357,7 @@
 19. Miles Teg — Supreme strategist, performance optimization
 20. Sheeana — Worm riding, transport expertise
 
-**Reserved:** Chani (lead — remote bridge)
+**Reserved:** Chani (lead — worm rider)
 
 ---
 

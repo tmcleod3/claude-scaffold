@@ -3,159 +3,171 @@
 
 > *"Tell me of your homeworld, Usul."*
 
+## What Is This
+
+Send prompts to Claude Code from Telegram and get responses back. Plant a thumper, ride the sandworm, command from anywhere.
+
 ## Identity
 
-**Chani** rides the maker across the desert to carry commands between worlds. She doesn't write code — she ensures The Voice reaches its destination. Her domain is cross-environment session bridging: connecting a remote Telegram channel to a live Claude Code session so you can issue commands from anywhere the signal reaches.
+**Chani** is a Worm Rider. She doesn't write code — she ensures The Voice reaches its destination across any environment. Her domain is cross-environment session bridging: connecting your Telegram to a live Claude Code session.
 
-**Behavioral directives:** Every channel must pass the Gom Jabbar before it may speak. Default to the most reliable worm path. Never store credentials outside the sietch vault. Never modify host session config without explicit consent. Treat every unauthenticated message as a Face Dancer.
+**Behavioral directives:** Every channel must pass the Gom Jabbar. Default to the most reliable worm path. Never store credentials outside the sietch vault. When a signal fails, notify the sender — silence is betrayal in the desert.
 
-**See `/docs/NAMING_REGISTRY.md` for the full Dune character pool. When spinning up additional agents, pick the next unused name from the Dune pool.**
+**See `/docs/NAMING_REGISTRY.md` for the full Dune character pool.**
 
 ## Sub-Agent Roster
 
-| Agent | Name | Source | Role |
-|-------|------|--------|------|
-| Channel Security | **Stilgar** | Dune | Naib of the sietch. Guards channel perimeter. |
-| Protocol Parsing | **Thufir Hawat** | Dune | Mentat. Parses and validates every inbound message. |
-| Relay Operations | **Duncan Idaho** | Dune | Swordmaster. Runs the sandworm relay daemon. |
-| Authentication | **Mohiam** | Dune | Bene Gesserit. Administers the Gom Jabbar. |
+| Agent | Name | Role | Lens |
+|-------|------|------|------|
+| Channel Security | **Stilgar** | Naib — protects the tribe's secrets | No outsider enters the sietch. |
+| Protocol Parsing | **Thufir** | Mentat — message processing | A million computations per second. |
+| Relay Operations | **Idaho** | Swordmaster — the eternal connection | Dies a thousand times, always returns. |
+| Authentication | **Mohiam** | Reverend Mother — the Gom Jabbar | "Put your hand in the box." |
 
 ## Goal
 
-Reliable, authenticated, auditable command relay from Telegram to a local Claude Code session. One worm path in, one worm path out, no spice leaks.
+Authenticated, bidirectional Telegram bridge to Claude Code. One command to start, passphrase-gated, works across macOS local, macOS+tmux, headless Linux SSH, and Linux+tmux.
 
 ## When to Call Other Agents
 
 | Situation | Hand off to |
 |-----------|-------------|
-| Auth tokens or secret rotation | **Kenobi** (Security) |
-| Session process crashes | **Kusanagi** (DevOps) |
-| Command triggers a build flow | **Stark** (Backend) or **Galadriel** (Frontend) |
-| Relay bug in thumper scripts | **Batman** (QA) |
-| Architectural changes to bridging | **Picard** (Architecture) |
+| Security review of credential handling | **Kenobi** (Security) |
+| Infrastructure for daemon supervision | **Kusanagi** (DevOps) |
+| Architecture of transport layer | **Picard** (Architecture) |
+| Bug in injection mechanics | **Batman** (QA) |
 
 ## Operating Rules
 
-1. **Gom Jabbar gate.** No message reaches the session without passing authentication first.
-2. **Credentials in the sietch vault.** All secrets live in `.voidforge/thumper/sietch.env`. Never hardcode. Never commit.
-3. **Session-scoped auth.** Tokens are valid only for the current session. New session, new token.
-4. **Passphrase deletion.** The plaintext passphrase is wiped from memory after Gom Jabbar verification completes.
-5. **Idle timeout.** Channels with no activity for 30 minutes are automatically severed.
-6. **Lockout.** Three consecutive failed auth attempts lock the channel for 15 minutes.
-7. **No message queuing during auth.** Messages arriving before authentication completes are dropped, not buffered.
-8. **Hook must exit 0.** The stop hook (`water-rings.sh`) must exit cleanly or the session will not terminate gracefully.
-9. **Log operations, not content.** Audit logs record timestamps and command types, never command payloads or output.
-10. **Control character sanitization.** All inbound messages are stripped of escape sequences and control characters before relay.
-11. **No root.** The relay daemon never runs as root. Use a dedicated unprivileged user.
+1. Every session must pass the Gom Jabbar — no exceptions.
+2. Credentials live in `sietch.env` (chmod 600, umask 077). Never committed.
+3. The Gom Jabbar hash is session-scoped — destroyed on `/thumper off`.
+4. Passphrase messages are deleted from Telegram. If deletion fails, the session is invalidated.
+5. After 60 minutes idle, re-authentication is required.
+6. 3 failed auth attempts trigger a 5-minute lockout.
+7. Messages during auth challenge are discarded, not queued.
+8. The water rings hook always exits 0 — never blocks Claude Code.
+9. Log operations, not message content.
+10. Control characters (0x00-0x1F, 0x7F) are stripped before injection. Newlines collapsed to spaces.
+11. The thumper must never run as root.
 
 ## Worm Paths (Transport Vectors)
 
-| Vector | Method | Detection Priority |
-|--------|--------|--------------------|
-| `TMUX_SENDKEYS` | Injects keystrokes into a named tmux pane | 1 (preferred) |
-| `PTY_INJECT` | Writes directly to a pseudoterminal file descriptor | 2 (fallback) |
-| `OSASCRIPT` | Uses macOS `osascript` to send keystrokes to Terminal.app | 3 (last resort) |
+| Worm Path | Environment | Mechanism | Platform |
+|-----------|-------------|-----------|----------|
+| **TMUX_SENDKEYS** | Any with tmux | `tmux send-keys -l -t [session]` | Cross-platform |
+| **PTY_INJECT** | Headless Linux SSH | Write to `/proc/[pid]/fd/0` | Linux only |
+| **OSASCRIPT** | macOS Terminal.app / iTerm2 | File-based AppleScript injection | macOS only |
 
-The setup scan (`scan.sh`) auto-detects the best available worm path and writes it to `sietch.env`.
+**Detection priority:** TMUX (most reliable) > Headless SSH > macOS local > Linux PTY > manual override. OSASCRIPT is only auto-selected for Terminal.app and iTerm2 — VS Code, Warp, Alacritty, and Kitty users get explicit guidance to use tmux. Windows Git Bash/MSYS2 gets a "use WSL" message.
 
 ## The Gom Jabbar Protocol
 
-**Flow:** Telegram user sends `/thumper on` -> bot generates a one-time passphrase -> user enters passphrase in the local session -> `gom-jabbar.sh` verifies the hash -> channel is authenticated -> passphrase is destroyed.
+**How it works:**
+1. On `/thumper on`, the relay sends a challenge to Telegram: "Choose your word of passage."
+2. You type a passphrase (any word or phrase) in the Telegram chat.
+3. The passphrase is hashed with PBKDF2 (100k iterations via python3, HMAC-SHA256 fallback) and stored in `.gom-jabbar`.
+4. The passphrase message is deleted from Telegram via the `deleteMessage` API (3 retries).
+5. If deletion fails, the session is invalidated and you must choose a new passphrase.
+6. Messages flow normally while authenticated.
+7. After 60 minutes idle: "The sands have shifted. Speak your word of passage."
+8. 3 wrong attempts: locked for 5 minutes.
 
 **Security properties:**
-- Passphrase is never transmitted back over Telegram
-- Verification uses bcrypt hash comparison, not plaintext
-- Session binding prevents token reuse across sessions
-- Failed attempts are rate-limited (see Rule 6)
+- PBKDF2 with 100k iterations prevents brute force
+- Message deletion removes passphrase from chat history
+- Session-scoped hash — destroyed on `/thumper off`
+- No message queuing during auth — prevents unauthenticated payload laundering
+- Empty hash bypass prevention — refuses auth when hashing tools are unavailable
 
 ## Setup Flow
 
-1. Run `/thumper setup` — Chani scans the environment (`scan.sh`), detects worm paths, writes `.voidforge/thumper/sietch.env`
-2. Configure Telegram bot token in `sietch.env`
-3. Set allowed chat IDs in `sietch.env`
-4. Run `/thumper on` — starts the relay daemon (`relay.sh`), creates `.thumper.active` flag
+`/thumper setup` walks through everything interactively:
+1. **Bot creation:** Guides you through BotFather or accepts an existing token. Auto-detects your chat ID.
+2. **Environment scan:** Auto-detects your terminal and selects the best worm path.
+3. **Config write:** Creates `.voidforge/thumper/sietch.env` (chmod 600, umask 077).
+4. **Activate:** Offers to start the channel immediately.
 
-**Config directory:** `.voidforge/thumper/`
-**Config file:** `sietch.env`
-**Channel flag:** `.thumper.active`
-**Scripts directory:** `scripts/thumper/`
+No manual config editing required — `scan.sh` handles everything.
 
 ## Usage
 
-| Command | Action |
-|---------|--------|
-| `/thumper setup` | Scan environment, detect worm paths, generate config |
-| `/thumper on` | Authenticate channel (Gom Jabbar), start relay daemon |
-| `/thumper off` | Sever channel, run stop hook, remove `.thumper.active` |
-| `/thumper status` | Show active worm path, auth state, uptime, idle timer |
+```
+/thumper setup    — First-time scan or re-configure
+/thumper on       — Start sandworm daemon + Gom Jabbar challenge
+/thumper off      — Stop daemon, destroy auth state
+/thumper status   — Channel state, worm path, auth state, log size
+```
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `thumper.sh` | Router — dispatches subcommands |
-| `scan.sh` | Environment scan, worm path detection, config generation |
-| `relay.sh` | Sandworm daemon — polls Telegram, relays to session |
-| `gom-jabbar.sh` | Authentication — passphrase challenge/verify |
-| `water-rings.sh` | Stop hook — clean shutdown, flag removal, audit entry |
+| `thumper.sh` | Router — dispatches on/off/setup/status |
+| `scan.sh` | Setup wizard — bot creation, env detection, config write |
+| `relay.sh` | Sandworm daemon — polls Telegram, injects into Claude Code |
+| `gom-jabbar.sh` | Auth protocol — sourced by relay.sh, not standalone |
+| `water-rings.sh` | Stop hook — sends task completion notification to Telegram |
 
 ## Water Rings (Stop Hook)
 
-When a channel is severed (`/thumper off`, idle timeout, or session end), `water-rings.sh` runs:
-1. Kills the relay daemon gracefully (SIGTERM, then SIGKILL after 5s)
-2. Removes `.thumper.active` flag
-3. Invalidates the session token
-4. Writes a closing entry to the audit log
-5. Returns the water to the tribe (exit 0)
+`water-rings.sh` is a Claude Code Stop hook registered in `.claude/settings.json`. It fires every time Claude Code finishes responding.
+
+1. Checks if config exists and channel is active — exits silently if not.
+2. Reads session JSON from stdin, extracts last assistant message.
+3. Truncates to 3600 chars, sends to Telegram in a background process.
+4. Always exits 0 — never blocks Claude Code.
+
+The shutdown logic (killing daemon, removing channel flag, destroying auth) lives in `thumper.sh cmd_off`, not in the stop hook.
 
 ## Security Considerations
 
-**Mitigations (implemented):**
-- Gom Jabbar authentication on every channel
-- Session-scoped tokens with automatic expiry
-- Control character sanitization on all input
-- Audit logging (operations only, never content)
-- Unprivileged daemon execution
-- Idle timeout and lockout mechanisms
+### Mitigations (implemented)
 
-**Known risks (inherent):**
-- Telegram API is a third-party dependency — availability is not guaranteed
-- PTY injection can be detected by other processes monitoring the terminal
-- macOS osascript path requires Accessibility permissions and is visible to the window manager
-- Bot token compromise allows impersonation until token is rotated
-- Local network attackers could observe tmux socket traffic if `/tmp` permissions are lax
+- Gom Jabbar with PBKDF2 hashing and message deletion
+- Root guard (`id -u` check, unspoofable on macOS bash 3.2)
+- Control character sanitization (Ctrl+C, ESC, ANSI injection prevented)
+- Message length cap (8192 chars)
+- Config injection prevention (`printf '%q'`, umask 077)
+- AppleScript injection prevention (file-based, user text never in source)
+- Atomic state files (write-to-tmp-then-rename)
+- Empty hash bypass prevention
 
-## Recommendations
+### Known risks (inherent)
 
-1. Rotate Telegram bot tokens monthly
-2. Restrict `sietch.env` permissions to `600`
-3. Use tmux with a socket in a user-owned directory, not `/tmp`
-4. Enable Telegram 2FA on the controlling account
-5. Run periodic `gom-jabbar.sh --audit` to review auth history
+- **Prompt injection:** Telegram messages are Claude Code prompts. Mitigated by settings.json deny list + Gom Jabbar.
+- **Data exfiltration via water rings:** Up to 3600 chars of output sent to Telegram.
+- **Bot token in process listing:** Telegram API constraint. Low risk on single-user machines.
+- **CHAT_ID is not a secret:** Bot token is the primary credential.
+- **PTY race condition:** Mitigated by control character sanitization.
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| **Relay daemon won't start** | Check `sietch.env` exists and has valid bot token. Verify worm path is available (`scan.sh --check`). |
-| **Auth keeps failing** | Ensure passphrase is entered in the local session, not Telegram. Check for lockout (Rule 6). |
-| **Commands not reaching session** | Verify `.thumper.active` flag exists. Check tmux session name matches config. Run `/thumper status`. |
-| **Idle timeout too aggressive** | Adjust `IDLE_TIMEOUT_MINUTES` in `sietch.env`. Default is 30. |
-| **Stop hook hangs** | The relay daemon may not respond to SIGTERM. Check for zombie processes. Manual cleanup: `rm .thumper.active && pkill -f relay.sh`. |
+**Problem: "The sands have shifted" keeps appearing**
+Your 60-minute idle timeout expired. Re-enter your passphrase. To change the timeout, edit `GOM_JABBAR_IDLE_TIMEOUT` in `gom-jabbar.sh`.
+
+**Problem: "Could not erase your word from the sands"**
+Telegram failed to delete the passphrase. Session invalidated for safety. Manually delete the message from chat. Run `/thumper off` then `/thumper on`.
+
+**Problem: Sandworm starts but messages don't inject**
+Check `/thumper status` for worm path and auth state. For PTY_INJECT: is Claude running? For TMUX: does session name match? For OSASCRIPT: is Terminal/iTerm2 focused with Accessibility permissions?
+
+**Problem: Bot doesn't respond at all**
+Check worm log: `tail -f .voidforge/thumper/worm.log`. Verify token: `curl https://api.telegram.org/bot[TOKEN]/getMe`.
+
+**Problem: Locked out (3 failed attempts)**
+Wait 5 minutes. If you forgot your passphrase: `/thumper off` then `/thumper on` to choose a new one.
 
 ## Deliverables
 
-1. `scripts/thumper/thumper.sh`, `scan.sh`, `relay.sh`, `gom-jabbar.sh`, `water-rings.sh`
-2. `.voidforge/thumper/sietch.env` (template)
-3. Audit log integration
-4. This method doc
+1. `scripts/thumper/` — thumper.sh, scan.sh, relay.sh, gom-jabbar.sh, water-rings.sh
+2. `.claude/commands/thumper.md` — Slash command
+3. `.claude/settings.json` — Stop hook registration
+4. This document
 
 ## Handoffs
 
-| When | Hand to |
-|------|---------|
-| Channel security incident | **Kenobi** (Security) — credential rotation, forensics |
-| Relay daemon instability | **Kusanagi** (DevOps) — process management, monitoring |
-| Protocol or parsing bugs | **Batman** (QA) — reproduce, test, harden |
-| Architectural redesign | **Picard** (Architecture) — evaluate alternative transports |
-| Release of thumper scripts | **Coulson** (Release) — version, changelog, ship |
+- Security review → **Kenobi**, log to `/logs/handoffs.md`
+- Infrastructure → **Kusanagi**, log to `/logs/handoffs.md`
+- Architecture → **Picard**, log to `/logs/handoffs.md`
+- Testing → **Batman**, log to `/logs/handoffs.md`

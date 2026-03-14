@@ -9,7 +9,7 @@ set -uo pipefail
 
 # Security: refuse to run as root
 if [[ "$(id -u)" -eq 0 ]]; then
-    echo "❌ The sandworm serves no Emperor. Use a normal user account." >&2
+    echo "❌ Cannot run as root. Use a normal user account." >&2
     exit 1
 fi
 
@@ -327,8 +327,8 @@ while true; do
                     if gom_jabbar_delete_message "$msg_id"; then
                         if [[ "$auth_state" == "PENDING" ]]; then
                             send_telegram "$(printf '%s\n%s\n\n%s' \
-                                '✅ You are human, and your word is known.' \
-                                'It has been consumed by the desert.' \
+                                '✅ Passphrase accepted.' \
+                                'Your message has been deleted from this chat.' \
                                 'The Voice carries. 🪱')"
                         else
                             send_telegram "✅ You are human. The Voice carries. 🪱"

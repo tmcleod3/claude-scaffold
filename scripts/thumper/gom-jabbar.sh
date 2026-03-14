@@ -1,6 +1,6 @@
 #!/bin/bash
 # gom-jabbar.sh — The Test of Humanity
-# Authentication protocol for Chani's remote bridge
+# Authentication protocol for Chani's worm rider
 # Sourced by relay.sh — not run standalone
 #
 # "Put your hand in the box."
@@ -80,13 +80,12 @@ gom_jabbar_init() {
         # First time — The Choosing
         GJ_STATE="PENDING"
         _gom_jabbar_write_state
-        send_telegram "$(printf '%s\n\n%s\n\n%s\n%s\n\n%s\n%s' \
+        send_telegram "$(printf '%s\n\n%s\n\n%s\n\n%s\n%s' \
             '🔮 THE GOM JABBAR' \
-            '"You have heard of animals chewing off a limb to escape a trap. There is an animal kind of trick. A human would remain in the trap, endure the pain, feigning death that he might kill the trapper and remove a threat to his kind."' \
-            'You seek to command The Voice across the desert.' \
-            'First, you must prove you are human.' \
-            'Choose your word of passage.' \
-            'Type it now. It will be erased from the sands.')"
+            'You seek to command The Voice across the desert. First, you must prove you are human.' \
+            'Choose a passphrase — any word or phrase you will remember.' \
+            'Type it now in this chat.' \
+            'It will be deleted from the conversation immediately.')"
     fi
     # If hash exists, relay loop handles idle checks via gom_jabbar_verify_active
 }
@@ -128,9 +127,9 @@ gom_jabbar_verify_active() {
             GJ_STATE="CHALLENGE"
             _gom_jabbar_write_state
             send_telegram "$(printf '%s\n\n%s\n%s' \
-                '⏳ The sands have shifted. Time erodes all trust.' \
-                'The Reverend Mother demands the test.' \
-                'Speak your word of passage.')"
+                '⏳ Session idle for 60+ minutes. Re-authentication required.' \
+                '' \
+                'Type your passphrase to continue.')"
             echo "CHALLENGE"
             return
         fi
@@ -190,16 +189,14 @@ gom_jabbar_fail() {
         unlock_time=$(date -u -r "$GJ_LOCK_UNTIL" +"%H:%M UTC" 2>/dev/null || \
                       date -u -d "@$GJ_LOCK_UNTIL" +"%H:%M UTC" 2>/dev/null || \
                       echo "soon")
-        send_telegram "$(printf '%s\n%s\n\n%s' \
-            '💀 An animal. The needle finds its mark.' \
-            'The Voice is silenced for 5 minutes.' \
+        send_telegram "$(printf '%s\n\n%s' \
+            '🔒 Too many failed attempts. Locked for 5 minutes.' \
             "Locked until ${unlock_time}.")"
         log "LOCKED: $GJ_FAILED failed attempts. Locked until $GJ_LOCK_UNTIL"
     else
         _gom_jabbar_write_state
-        send_telegram "$(printf '%s\n%s' \
-            "⚠️ That is not the word. (Attempt ${GJ_FAILED} of ${GOM_JABBAR_MAX_ATTEMPTS})" \
-            'The Reverend Mother watches.')"
+        send_telegram "$(printf '%s' \
+            "⚠️ Incorrect passphrase. (Attempt ${GJ_FAILED} of ${GOM_JABBAR_MAX_ATTEMPTS})")"
         log "AUTH FAILED: attempt $GJ_FAILED of $GOM_JABBAR_MAX_ATTEMPTS"
     fi
 }

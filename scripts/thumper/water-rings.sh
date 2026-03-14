@@ -89,9 +89,9 @@ except Exception:
 MESSAGE=$(extract_message "$INPUT")
 
 if [ -n "$MESSAGE" ]; then
-    NOTIFICATION="$(printf '🏜️ The desert speaks\n\n%s\n\n─────────────────\n📡 Reply to continue' "$MESSAGE")"
+    NOTIFICATION="$(printf '✅ Task complete\n\n%s\n\n─────────────────\n📡 Reply to continue' "$MESSAGE")"
 else
-    NOTIFICATION="$(printf '🏜️ The desert speaks\n\n─────────────────\n📡 Reply to continue')"
+    NOTIFICATION="$(printf '✅ Claude Code finished — no summary available.\n\n─────────────────\n📡 Reply to continue')"
 fi
 
 _send_notification() {

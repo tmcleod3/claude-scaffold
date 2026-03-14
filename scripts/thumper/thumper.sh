@@ -1,5 +1,5 @@
 #!/bin/bash
-# thumper.sh — Main entrypoint for Chani's remote bridge
+# thumper.sh — Main entrypoint for Chani's worm rider
 # The Bene Gesserit Voice — command through speech across the desert
 # Routes commands to scan.sh (setup), relay.sh (sandworm daemon), and status
 
@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Security: refuse to run as root
 if [[ "$(id -u)" -eq 0 ]]; then
-    echo "❌ The Voice must not be wielded by the Emperor. Use a normal user account." >&2
+    echo "❌ Cannot run as root. Use a normal user account." >&2
     exit 1
 fi
 
@@ -21,7 +21,7 @@ GOM_JABBAR_FILE="$CONFIG_DIR/.gom-jabbar"
 
 usage() {
     cat <<'EOF'
-🏜️ /thumper — Chani's Remote Bridge (The Voice)
+🏜️ /thumper — Chani's Worm Rider
 
 Usage:
   /thumper setup    — First-time scan or re-configure
@@ -33,7 +33,7 @@ EOF
 
 ensure_config() {
     if [[ ! -f "$CONFIG_FILE" ]]; then
-        echo "🏜️ No sietch vault found. Reading the sand..."
+        echo "🏜️ No config found. Running first-time setup..."
         bash "$SCRIPT_DIR/scan.sh"
     fi
 }
@@ -77,8 +77,8 @@ cmd_on() {
     sleep 1
 
     echo "🪱 The Voice carries. Sandworm active."
-    echo "⚡ Worm path: $INJECT_METHOD"
-    echo "🔮 The Gom Jabbar awaits in Telegram — prove you are human."
+    echo "⚡ Transport: $INJECT_METHOD"
+    echo "🔮 Open your Telegram bot chat — you'll be asked to set a passphrase."
 }
 
 cmd_off() {
@@ -107,7 +107,7 @@ cmd_off() {
 
 cmd_status() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "🏜️ Voice Status Report"
+    echo "🏜️ Thumper Status Report"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
     if [[ ! -f "$CONFIG_FILE" ]]; then
