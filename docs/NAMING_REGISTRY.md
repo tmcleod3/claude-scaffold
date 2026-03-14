@@ -26,6 +26,7 @@
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
+| **Dune** | Remote Bridge | Chani |
 | **Tolkien** | Forge Sync & Updates | Bombadil |
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
 
@@ -323,6 +324,40 @@
 72. Sentaro — Rhythm, timing, cron jobs and scheduling
 
 **Reserved:** Kusanagi (lead), Alphonse (FMA — conflicts with previous version, use "Elric" if referencing Edward+Al together)
+
+---
+
+## 🏜️ DUNE — Remote Bridge & Communications
+
+**Lead:** Chani (Chani Kynes) — Remote Bridge
+
+**Available Pool:**
+
+*House Atreides & Fremen:*
+1. Stilgar — Channel security, Naib of Sietch Tabr, protects the tribe
+2. Thufir Hawat — Mentat, protocol parsing, human computer
+3. Duncan Idaho — Relay operations, the eternal connection that always returns
+4. Mohiam — Authentication, the Reverend Mother administers the Gom Jabbar
+5. Paul / Muad'Dib — Orchestration, prescient command
+6. Jessica — The Voice technique, Bene Gesserit power
+7. Leto — Sacrifice, protection of the channel
+8. Gurney Halleck — Message delivery, warrior-bard
+9. Irulan — Recording, documentation, the historian
+10. Alia — Prescience, threat detection before arrival
+
+*The Desert & Beyond:*
+11. Liet-Kynes — Deep system understanding, planetology
+12. Yueh — Trust verification, betrayal detection
+13. Feyd-Rautha — Adversarial testing, the challenger
+14. Fenring — Silent observation, passive monitoring
+15. Harah — Tradition, protocol enforcement
+16. Leto II — Long-term persistence, the God Emperor
+17. Ghanima — Twin awareness, paired system monitoring
+18. Siona — Invisibility, security evasion testing
+19. Miles Teg — Supreme strategist, performance optimization
+20. Sheeana — Worm riding, transport expertise
+
+**Reserved:** Chani (lead — remote bridge)
 
 ---
 

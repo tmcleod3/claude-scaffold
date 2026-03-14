@@ -2,7 +2,7 @@
 
 From nothing, everything.
 
-A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 150+ AI agents across 6 fictional universes.
+A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 170+ AI agents across 7 fictional universes.
 
 **New here?** Read the **[Holocron](HOLOCRON.md)** -- the complete guide. **Curious about what's next?** Read the **[Prophecy](PROPHECY.md)** -- the roadmap.
 
@@ -42,7 +42,7 @@ voidforge/
 │
 ├── .claude/
 │   ├── settings.json             ← Permissions, hooks
-│   └── commands/                 ← 10 slash commands
+│   └── commands/                 ← 11 slash commands
 │       ├── build.md              ← /build — 13-phase protocol
 │       ├── qa.md                 ← /qa — Batman's QA pass (double-pass)
 │       ├── test.md               ← /test — Batman's test-writing mode
@@ -52,11 +52,12 @@ voidforge/
 │       ├── devops.md             ← /devops — Kusanagi's infra
 │       ├── architect.md          ← /architect — Picard's review (parallel analysis)
 │       ├── git.md                ← /git — Coulson's releases
-│       └── void.md              ← /void — Bombadil's forge sync
+│       ├── void.md              ← /void — Bombadil's forge sync
+│       └── voice.md             ← /voice — Chani's remote bridge
 │
 ├── docs/
 │   ├── PRD.md                    ← PRD template with YAML frontmatter
-│   ├── NAMING_REGISTRY.md        ← 150+ characters, 6 universes
+│   ├── NAMING_REGISTRY.md        ← 170+ characters, 7 universes
 │   ├── LESSONS.md                ← Cross-project learnings
 │   ├── ARCHITECTURE.md           ← System overview + data flow
 │   ├── SCALING.md                ← Three-tier scaling assessment
@@ -82,7 +83,8 @@ voidforge/
 │   │   ├── SUB_AGENTS.md              ← Orchestration + conflict resolution
 │   │   ├── TROUBLESHOOTING.md         ← Error recovery + rollback
 │   │   ├── MCP_INTEGRATION.md         ← External tool connections
-│   │   └── PRD_GENERATOR.md           ← PRD auto-generation prompt
+│   │   ├── PRD_GENERATOR.md           ← PRD auto-generation prompt
+│   │   └── VOICE.md                  ← Chani — remote bridge (Dune)
 │   │
 │   └── patterns/                 ← Reference implementations
 │       ├── api-route.ts          ← Validation, auth, service call
@@ -98,7 +100,13 @@ voidforge/
 │
 ├── scripts/
 │   ├── new-project.sh            ← Manual project initialization
-│   └── voidforge.ts              ← CLI entry point
+│   ├── voidforge.ts              ← CLI entry point
+│   └── voice/                    ← /voice — Chani's remote bridge (Dune)
+│       ├── voice.sh              ← Main entrypoint (router)
+│       ├── scan.sh               ← Setup wizard (reading the sand)
+│       ├── relay.sh              ← Sandworm daemon
+│       ├── gom-jabbar.sh         ← Authentication protocol
+│       └── water-rings.sh        ← Stop hook (task notifications)
 │
 └── wizard/                       ← Full tier only
     ├── server.ts                 ← Local HTTP server (127.0.0.1)
@@ -121,8 +129,9 @@ voidforge/
 | DevOps | **Kusanagi** | Anime | Deploy, monitor, backup, infrastructure |
 | Release | **Coulson** | Marvel | Versioning, changelogs, releases |
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream |
+| Remote Bridge | **Chani** | Dune | The Voice, Gom Jabbar authentication, sandworm relay |
 
-150+ sub-agents across all 6 universes. See `docs/NAMING_REGISTRY.md`.
+170+ sub-agents across all 7 universes. See `docs/NAMING_REGISTRY.md`.
 
 ### Build Protocol
 
@@ -142,6 +151,7 @@ voidforge/
 | `/architect` | Picard | Architecture review with parallel analysis |
 | `/git` | Coulson | Semver + changelog + commit |
 | `/void` | Bombadil | Sync VoidForge methodology from upstream |
+| `/voice` | Chani | The Voice — Dune-themed Telegram bridge with Gom Jabbar auth |
 
 ### Wizards (Full Tier)
 

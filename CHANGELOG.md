@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [3.5.0] - 2026-03-14
+
+### Added
+- **/voice command** — Chani's remote bridge: drive Claude Code sessions via Telegram from anywhere. Environment-aware setup auto-detects tmux, headless Linux, and macOS terminals.
+- **Gom Jabbar authentication** — passphrase-based session gate with PBKDF2 hashing, Telegram message deletion, 60-minute idle timeout, and 3-attempt lockout. Passphrase is erased from chat history; session invalidated if deletion fails.
+- **Dune universe** — 9th agent lead (Chani) with 20 named characters from Arrakis. Sub-agents: Stilgar (security), Thufir (parsing), Idaho (relay), Mohiam (authentication).
+- **Water Rings stop hook** — automatic task completion notifications to Telegram when Claude Code finishes responding.
+- **Transport vectors** — three injection methods: TMUX_SENDKEYS (cross-platform), PTY_INJECT (headless Linux), OSASCRIPT (macOS Terminal.app/iTerm2). Auto-detection with manual override.
+
+### Security
+- Control character sanitization strips terminal-dangerous bytes (Ctrl+C, ESC, ANSI sequences) from all incoming messages before injection.
+- Root guard prevents /voice from running as root (unspoofable `id -u` check).
+- Config injection prevention via `printf '%q'` escaping and umask 077 subshells.
+- Empty hash bypass prevention — refuses authentication when hashing tools are unavailable.
+- Credentials stored in chmod 600 sietch vault, directory chmod 700, gitignored via `.voidforge/`.
+
+### Changed
+- CLAUDE.md updated with /voice command, Chani in Team table, VOICE.md in Docs Reference.
+- HOLOCRON.md updated to 11 commands, 9 agents, 7 universes, 170+ characters. Full /voice Arsenal entry with Gom Jabbar explanation.
+- README.md updated with /voice in commands table, Chani in agent leads, voice/ in structure tree.
+- NAMING_REGISTRY.md expanded with full Dune universe section (Chani lead + 20 pool characters).
+- Environment detection improved: VS Code, Warp, Alacritty, Kitty on macOS now get explicit guidance instead of silent OSASCRIPT failure. Windows Git Bash/MSYS2 gets explicit "use WSL" message.
+
+---
+
 ## [3.4.0] - 2026-03-13
 
 ### Added

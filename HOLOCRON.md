@@ -24,7 +24,7 @@
 
 ### What VoidForge Is
 
-VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 150+ AI agents across 6 fictional universes builds your application through a 13-phase protocol.
+VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 170+ AI agents across 7 fictional universes builds your application through a 13-phase protocol.
 
 **From nothing, everything.**
 
@@ -47,7 +47,7 @@ npm run wizard
 **Best for:** Users who want the guided experience. Merlin walks you through setup, Strange handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 10 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 11 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -60,7 +60,7 @@ git clone --branch scaffold https://github.com/tmcleod3/voidforge.git .
 **Best for:** Developers who know what they're doing and want to skip the wizard. You manage your own infrastructure. VoidForge manages your build process.
 
 #### Core (`core` branch)
-The lightest possible version. CLAUDE.md, the 10 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
+The lightest possible version. CLAUDE.md, the 11 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
 
 ```bash
 # Option A: Drop into an existing project
@@ -77,10 +77,10 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **10 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`
+- **11 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/voice`
 - **13-phase build protocol** — PRD to production with verification gates
-- **8 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
-- **150+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, and Anime
+- **9 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
+- **170+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, and Anime
 - **7 code patterns** — Reference implementations with framework adaptations
 - **This Holocron** — The guide you're reading now
 
@@ -257,7 +257,7 @@ Long builds span multiple Claude Code sessions. The build journal system handles
 
 ### How the Agent System Works
 
-VoidForge uses 8 lead agents across 6 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
+VoidForge uses 9 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
 
 1. **Scope boundaries.** When Stark is leading, you're doing backend work. When Galadriel takes over, you're doing frontend. The character tells you which domain you're in.
 2. **Scannable logs.** Build journal entries tagged with agent names are instantly searchable. "What did Batman find?" is faster than "What happened during QA?"
@@ -275,6 +275,7 @@ VoidForge uses 8 lead agents across 6 fictional universes, each commanding a ros
 | DevOps | **Kusanagi** | Anime | Deploy, monitor, backup, infrastructure | Ghost in the Shell precision, cybernetic efficiency |
 | Release | **Coulson** | Marvel | Versioning, changelogs, commits, releases | S.H.I.E.L.D.'s meticulous record-keeper, everything by the book |
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream | Ancient, joyful, sings while he works, tends the forge itself |
+| Remote Bridge | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
 
 ### Sub-Agent Highlights
 
@@ -322,7 +323,13 @@ Each lead has a deep bench. Here are some standouts:
 - **L** observes everything (logging and observability)
 - **Spike** stays cool under pressure (incident response)
 
-The full roster of 150+ characters lives in `docs/NAMING_REGISTRY.md`.
+**Dune (Remote Bridge)**
+- **Stilgar** protects the channel — no outsider enters the sietch
+- **Mohiam** administers the Gom Jabbar — "put your hand in the box"
+- **Idaho** keeps the connection alive — the eternal ghola who always returns
+- **Thufir** parses every signal — Mentat precision, a million calculations per second
+
+The full roster of 170+ characters lives in `docs/NAMING_REGISTRY.md`.
 
 ### How Handoffs Work
 
@@ -351,7 +358,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Ten commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Eleven commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.
@@ -404,6 +411,19 @@ Full architecture review with parallel analysis: Spock (schema) + Uhura (integra
 **When:** You want to update your VoidForge methodology to the latest version.
 
 Old Tom Bombadil tends the forge itself. He reaches upstream to the VoidForge scaffold branch, compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). Works regardless of which tier you installed (main, scaffold, or core). If you're already on the latest, Tom tells you so and goes back to singing.
+
+#### `/voice` — Chani's Remote Bridge (The Voice)
+**When:** You want to control Claude Code from your phone via Telegram.
+
+*"Tell me of your homeworld, Usul."*
+
+Chani opens a bidirectional Telegram bridge to your running Claude Code session. Send prompts from anywhere — a coffee shop, your phone, another machine. Claude's responses are sent back automatically via the Water Rings (stop hook).
+
+The Gom Jabbar protocol gates everything. On first activation, you choose a passphrase ("word of passage"). It's hashed with PBKDF2 and erased from your Telegram chat. After 60 minutes of idle, the Reverend Mother demands the test again — prove you're human. Three wrong attempts and The Voice is silenced for 5 minutes.
+
+The sandworm daemon auto-detects your environment: tmux (preferred, cross-platform), PTY injection (headless Linux), or osascript (macOS Terminal.app/iTerm2). For VS Code, Warp, Alacritty, or Kitty users on macOS, tmux is recommended.
+
+Setup: `/voice setup` (one-time). Control: `/voice on` / `/voice off` / `/voice status`.
 
 ---
 

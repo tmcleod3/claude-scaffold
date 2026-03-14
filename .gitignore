@@ -33,3 +33,9 @@ logs/
 # Database
 *.db
 *.db-journal
+
+# VoidForge runtime data (personal, never committed)
+.voidforge/
+
+# nohup output
+nohup.out
