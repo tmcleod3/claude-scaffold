@@ -63,6 +63,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/architect` | Picard's architecture review with parallel analysis and conflict resolution |
 | `/git` | Coulson's version bump, changelog, commit — full release management |
 | `/void` | Bombadil's forge sync — update VoidForge methodology from upstream |
+| `/voice` | Chani's remote bridge — Telegram bridge with Gom Jabbar authentication |
 
 ## Docs Reference
 
@@ -85,6 +86,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **MCP Integration** | `/docs/methods/MCP_INTEGRATION.md` | When connecting external tools |
 | **Release** | `/docs/methods/RELEASE_MANAGER.md` | Coulson — when versioning or releasing |
 | **Forge Keeper** | `/docs/methods/FORGE_KEEPER.md` | Bombadil — when syncing VoidForge updates |
+| **Remote Bridge** | `/docs/methods/VOICE.md` | Chani — when setting up Telegram remote control |
 | **Patterns** | `/docs/patterns/` | When writing code (7 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
@@ -100,8 +102,9 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | DevOps | **Kusanagi** (Anime) | Deploy, monitor, backup |
 | Release | **Coulson** (Marvel) | Version, changelog, commit, release |
 | Forge Sync | **Bombadil** (Tolkien) | Update VoidForge methodology from upstream |
+| Remote Bridge | **Chani** (Dune) | Telegram bridge, Gom Jabbar auth, sandworm relay |
 
-150+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
+170+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
 
 ## Release Tiers
 
