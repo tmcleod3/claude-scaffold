@@ -8,17 +8,32 @@ Claude Code has a finite context window. Long sessions accumulate tool results, 
 
 ## Core Strategy
 
-1. **Scope sessions narrowly** — one phase or one agent domain per session
-2. **Load on demand** — read method docs when you need them, not all upfront
+1. **Pre-load active domain** — load the active agent's method docs at session start (~4% of 1M context)
+2. **Application code on demand** — read source files when you need them, not all upfront
 3. **Write to disk, not memory** — decisions, state, and findings go in `/logs/` immediately
 4. **Checkpoint before context fills** — write build-state.md and hand off
 5. **New sessions read from disk** — build journal is the bridge between sessions
+
+## Pre-Loading Budget (1M Context)
+
+At 1M tokens, methodology docs consume ~4% of context. Pre-load strategically:
+
+| Pre-load at session start | Approximate tokens |
+|--------------------------|-------------------|
+| CLAUDE.md | ~2K |
+| Active agent's method doc | ~2-4K |
+| Related agent method docs (if cross-cutting) | ~4-8K |
+| PRD.md | ~5-10K |
+| build-state.md | ~1K |
+| **Total pre-load** | **~15-25K (1.5-2.5% of 1M)** |
+
+**Load on demand:** Application source code, pattern files, other agents' method docs, naming registry, log files, test output.
 
 ## File Size Discipline
 
 | File Type | Max Lines | Action When Exceeded |
 |-----------|-----------|---------------------|
-| CLAUDE.md (root) | 120 | Move content to README or method docs |
+| CLAUDE.md (root) | 130 | Move content to README or method docs |
 | Per-directory CLAUDE.md | 50 | Split into multiple directories |
 | Method docs | 200 | Extract sub-sections to separate files |
 | Source files | 300 | Split into modules (services, utils, components) |
@@ -41,43 +56,49 @@ Claude Code has a finite context window. Long sessions accumulate tool results, 
 
 ### When to split into multiple sessions
 
-- Building 3+ features → one session per feature
+- Building 5+ features → one session per 2-3 features
 - Full build (Phase 0-13) → split at natural boundaries (see below)
-- Large QA pass with 20+ findings → split: find bugs in session 1, fix in session 2
-- Any session where you've read 15+ files → checkpoint and continue
+- Large QA pass with 30+ findings → split: find bugs in session 1, fix in session 2
+- Any session where you've read 50+ files → checkpoint and continue
 
-### Natural session boundaries
+### Natural session boundaries (1M context)
+
+With 1M context, sessions can span more phases than before:
 
 ```
-Session 1: Phase 0 (Orient) + Phase 1 (Scaffold)
-Session 2: Phase 2 (Infrastructure) + Phase 3 (Auth)
-Session 3: Phase 4 (Core Feature)
-Session 4: Phase 5 (Supporting Features) — one session per 2-3 features
-Session 5: Phase 6 (Integrations)
-Session 6: Phase 7-8 (Admin + Marketing)
-Session 7: Phase 9 (QA Pass)
-Session 8: Phase 10 (UX Pass)
-Session 9: Phase 11 (Security Pass)
-Session 10: Phase 12-13 (Deploy + Launch)
+Session 1: Phase 0 (Orient) + Phase 1 (Scaffold) + Phase 2 (Infrastructure)
+Session 2: Phase 3 (Auth) + Phase 4 (Core Feature)
+Session 3: Phase 5 (Supporting Features) — 2-4 features per session
+Session 4: Phase 6 (Integrations) + Phase 7-8 (Admin + Marketing)
+Session 5: Phases 9-11 (QA + UX + Security — double-pass review cycle)
+Session 6: Phase 12-13 (Deploy + Launch)
 ```
 
-## Load-on-Demand Protocol
+Small-to-medium projects (≤5 features, ≤20 source files) may complete phases 0-8 in a single session.
+
+## Loading Protocol
 
 ### Session start — always read:
 1. `CLAUDE.md` (auto-loaded — ~120 lines)
 2. `/logs/build-state.md` (~50 lines)
+3. Active agent's method doc (~100-150 lines)
+4. PRD.md (if building — varies)
+
+### Pre-load when entering a domain:
+- Related agent method docs (e.g., QA_ENGINEER.md + TESTING.md when running /qa)
+- Pattern files relevant to current work
+- Cross-cutting method docs if doing review passes (QA + Security + UX)
 
 ### Read only when needed:
-- Method docs → when entering that agent's phase
-- Pattern files → when writing code in that category
 - NAMING_REGISTRY.md → only when spinning up named sub-agents
 - TROUBLESHOOTING.md → only when something fails
 - LESSONS.md → only during retrospective or when hitting a familiar problem
+- Other agents' method docs → only when cross-cutting work requires it
 
-### Never read all at once:
-- All method docs (12 files × ~100 lines = 1200 lines of instructions)
-- All pattern files (5 files of code examples)
-- NAMING_REGISTRY.md (360 lines — only need your universe's section)
+### Still avoid reading all at once:
+- All source code files (application code is high-volume)
+- Full git history or log files
+- Test output (ephemeral, high-volume)
 
 ## Context Checkpointing
 
@@ -91,8 +112,8 @@ When you sense context is getting full (many tool calls, large file reads, long 
 5. Tell the user: "Context is getting heavy. I've checkpointed state to `/logs/build-state.md`. Start a new session and I'll pick up from there."
 
 ### Signs context is filling:
-- You've read 15+ files in one session
-- The conversation has 30+ tool calls
+- You've read 50+ files in one session
+- The conversation has 100+ tool calls
 - You're re-reading files you already read earlier
 - Responses are getting slower
 - You can't remember earlier decisions (they've compressed)

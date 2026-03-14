@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 3.3.1
+**Current:** 3.4.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 3.4.0 | 2026-03-13 | 1M Context Adaptation — double-pass reviews, 3 new sub-agents, /test and /review commands, parallelized analysis |
 | 3.3.1 | 2026-03-13 | Fix silent PRD truncation — model-aware max tokens, truncation detection and UI warning |
 | 3.3.0 | 2026-03-13 | The Last Mile Complete — async resource polling, domain registration, security hardening (43 review findings resolved) |
 | 3.2.0 | 2026-03-13 | Bombadil's Forge Sync — /void self-update command, Forge Keeper method doc, 8th lead agent |

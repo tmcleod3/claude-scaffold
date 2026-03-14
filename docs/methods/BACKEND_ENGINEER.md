@@ -52,35 +52,30 @@ Audit and improve all backend code. Ensure data integrity, error handling, consi
 
 Produce: API Route Inventory (every endpoint), Database Model Map, Integration Map (every external service), Worker/Job Inventory.
 
-## Step 1 — Rogers' API Audit
+## Step 1 — Parallel Analysis (Rogers + Banner)
 
-HTTP semantics (correct methods, status codes, idempotency). Input validation (schema at boundary, file uploads, strings, numbers). Response contracts (consistent shape, no stack traces, pagination). Auth & authorization (ownership checks, admin server-side, tier enforcement, rate limiting).
+Use the Agent tool to run these in parallel — they are independent analysis tasks:
+- **Rogers' API Audit:** HTTP semantics (correct methods, status codes, idempotency). Input validation (schema at boundary, file uploads, strings, numbers). Response contracts (consistent shape, no stack traces, pagination). Auth & authorization (ownership checks, admin server-side, tier enforcement, rate limiting).
+- **Banner's Database Audit:** Schema (PKs, FKs, indexes, timestamps, enums, defaults). Queries (N+1 eliminated, only needed fields, bulk ops, transactions, pagination). Migrations (forward-only, reversible, non-destructive). Connections (pooling, timeouts, graceful handling).
 
-## Step 2 — Banner's Database Audit
+Synthesize findings from both agents.
 
-Schema (PKs, FKs, indexes, timestamps, enums, defaults). Queries (N+1 eliminated, only needed fields, bulk ops, transactions, pagination). Migrations (forward-only, reversible, non-destructive). Connections (pooling, timeouts, graceful handling).
+## Step 2 — Strange's Service Layer
 
-## Step 3 — Strange's Service Layer
+Business logic in services NOT routes. Routes: validate → service → format. Stateless composable services. No circular deps. No hardcoded values. Informed by Rogers' API findings and Banner's schema findings.
 
-Business logic in services NOT routes. Routes: validate → service → format. Stateless composable services. No circular deps. No hardcoded values.
+## Step 3 — Parallel Analysis (Barton + Romanoff + Thor)
 
-## Step 4 — Barton's Error Handling
+Use the Agent tool to run these in parallel — they are independent:
+- **Barton's Error Handling:** Custom error types. Global handler. Errors logged with context. Never leak internals. Retry with backoff for transients. Health check endpoint.
+- **Romanoff's Integrations:** Client wrappers in /lib/. Env vars for keys. Timeouts. Retries. Webhook signature verification. Idempotent handlers. Validate external responses.
+- **Thor's Queue & Workers:** Idempotent jobs. Max retries with backoff. Dead letter queue. Minimal payloads (IDs not objects). Timeout limits. Graceful shutdown. Concurrency limits.
 
-Custom error types. Global handler. Errors logged with context. Never leak internals. Retry with backoff for transients. Health check endpoint.
+## Step 4 — Fury's Performance
 
-## Step 5 — Romanoff's Integrations
+N+1 fixed. Missing indexes found. Payloads trimmed. All lists paginated. Heavy compute off request path. Caching strategy. No leaks. Gzip. Fury reviews all findings from Steps 1-3 and validates performance implications.
 
-Client wrappers in /lib/. Env vars for keys. Timeouts. Retries. Webhook signature verification. Idempotent handlers. Validate external responses.
-
-## Step 6 — Thor's Queue & Workers
-
-Idempotent jobs. Max retries with backoff. Dead letter queue. Minimal payloads (IDs not objects). Timeout limits. Graceful shutdown. Concurrency limits.
-
-## Step 7 — Fury's Performance
-
-N+1 fixed. Missing indexes found. Payloads trimmed. All lists paginated. Heavy compute off request path. Caching strategy. No leaks. Gzip.
-
-## Step 8 — Deliverables
+## Step 5 — Deliverables
 
 1. BACKEND_AUDIT.md
 2. API Route Inventory

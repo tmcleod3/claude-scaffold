@@ -23,15 +23,17 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 | **Kenobi** | Star Wars | Security Auditing | `SECURITY_AUDITOR.md` |
 | **Picard** | Star Trek | Systems Architecture | `SYSTEMS_ARCHITECT.md` |
 | **Kusanagi** | Anime | DevOps & Infrastructure | `DEVOPS_ENGINEER.md` |
+| **Coulson** | Marvel | Release Management | `RELEASE_MANAGER.md` |
+| **Bombadil** | Tolkien | Forge Sync & Updates | `FORGE_KEEPER.md` |
 
 ### Default Sub-Agents
 
 **Tolkien:** Gandalf, Aragorn, Legolas, Samwise, Elrond, Arwen, Gimli, Bilbo + 12 more
 **Marvel:** Rogers, Banner, Strange, Barton, Romanoff, Thor, Fury + 18 more
-**DC Comics:** Oracle, Red Hood, Alfred, Lucius, Nightwing + 20 more
-**Star Wars:** Yoda, Windu, Ahsoka, Leia, Rex, Padmé, Chewie + 17 more
+**DC Comics:** Oracle, Red Hood, Alfred, Lucius, Nightwing, Deathstroke, Constantine + 18 more
+**Star Wars:** Yoda, Windu, Ahsoka, Leia, Rex, Padmé, Chewie, Maul + 16 more
 **Star Trek:** Spock, Scotty, Uhura, La Forge, Data + 19 more
-**Anime:** Senku, Levi, Spike, L, Bulma, Holo + 66 more (from Tom's watch list)
+**Anime:** Senku, Levi, Spike, Bulma, Vegeta, Goku + 66 more (from Tom's watch list)
 
 ---
 
@@ -139,9 +141,26 @@ Use the Agent tool to run these in parallel:
   - Agent 1 (Oracle): Scan /src/lib/ for logic flaws, missing awaits, type mismatches
   - Agent 2 (Red Hood): Test all API endpoints with malformed inputs
   - Agent 3 (Alfred): Run npm audit and review package.json dependencies
+  - Agent 4 (Deathstroke): Adversarial probing — bypass validations, exploit business logic
+  - Agent 5 (Constantine): Hunt cursed code — dead branches, impossible conditions
 ```
 
 Each agent runs in its own context, reports back, and results are synthesized by the lead agent.
+
+### Double-Pass Review Pattern
+
+With 1M context, review phases use a double-pass pattern to catch fix-induced regressions:
+
+```
+Pass 1 (parallel): All review agents analyze → findings
+Fix batch: Resolve all critical/high findings
+Pass 2 (parallel): Verification agents re-probe fixed areas → confirm
+```
+
+This pattern applies to:
+- Batman's QA (Nightwing + Red Hood + Deathstroke re-verify)
+- Galadriel's UX (Samwise + Gandalf re-verify)
+- Kenobi's Security (Maul re-probes remediations)
 
 **Important distinction:** The Agent tool enables **parallel analysis**, not parallel coding. Sub-agents return text findings — the lead agent then implements code changes sequentially. This is still faster than sequential analysis, but don't expect parallel file edits.
 

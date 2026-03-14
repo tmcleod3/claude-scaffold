@@ -66,24 +66,23 @@
 2. Log to `/logs/phase-08-marketing.md`
 3. **Gate:** Pages render, SEO present, mobile responsive
 
-## Phase 9 — QA Pass (Batman)
-1. Read `/docs/methods/QA_ENGINEER.md` — execute full sequence
-2. Use Agent tool to run Oracle (static) + Red Hood (dynamic) + Alfred (deps) in parallel — these are analysis tasks, not code changes
-3. Nightwing runs full test suite, reports failures
-4. Log all findings to `/logs/phase-09-qa-audit.md`
-5. **Gate:** All critical/high bugs fixed, test suite green, regression checklist complete
+## Phases 9-11 — Double-Pass Review Cycle (Batman + Galadriel + Kenobi)
 
-## Phase 10 — UX/UI Pass (Galadriel) [SKIP if `type: api-only`]
-1. Read `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` — execute full sequence
-2. Use Agent tool to run Elrond (UX) + Arwen (visual) + Samwise (a11y) in parallel — analysis only
-3. Log findings to `/logs/phase-10-ux-audit.md`
-4. **Gate:** A11y audit clean, responsive verified, all states present
+### Pass 1 — Find (all three run in parallel)
+1. **Batman (QA):** Read `/docs/methods/QA_ENGINEER.md`. Run Oracle + Red Hood + Alfred + Deathstroke + Constantine in parallel. Lucius reviews config separately. Log to `/logs/phase-09-qa-audit.md`
+2. **Galadriel (UX)** [SKIP if `type: api-only`]: Read `/docs/methods/PRODUCT_DESIGN_FRONTEND.md`. Run Elrond + Arwen + Samwise in parallel, then Bilbo + Legolas + Gimli + Gandalf sequentially. Log to `/logs/phase-10-ux-audit.md`
+3. **Kenobi (Security):** Read `/docs/methods/SECURITY_AUDITOR.md`. Run Leia + Chewie + Rex + Maul in parallel, then Yoda → Windu → Ahsoka → Padmé sequentially. Log to `/logs/phase-11-security-audit.md`
 
-## Phase 11 — Security Pass (Kenobi)
-1. Read `/docs/methods/SECURITY_AUDITOR.md` — execute full sequence
-2. Use Agent tool to run Leia (secrets) + Chewie (deps) + Rex (headers) in parallel — analysis only
-3. Log findings to `/logs/phase-11-security-audit.md`
-4. **Gate:** No critical/high findings unresolved, security checklist complete
+### Fix Batch
+4. Resolve all critical/high findings across all three audits
+5. Where findings conflict between agents, apply conflict resolution from `/docs/methods/SUB_AGENTS.md`
+
+### Pass 2 — Re-Verify (all three run in parallel)
+6. **Batman:** Nightwing re-runs test suite + Red Hood re-probes fixed areas + Deathstroke re-tests boundaries
+7. **Galadriel:** Samwise re-audits a11y on modified components + Gandalf re-checks edge cases
+8. **Kenobi:** Maul re-probes all remediated vulnerabilities
+9. If Pass 2 finds new issues, fix and re-verify until clean
+10. **Gate:** All agents sign off — test suite green, a11y clean, no critical/high security findings
 
 ## Phase 12 — Deploy (Kusanagi)
 1. Read `/docs/methods/DEVOPS_ENGINEER.md` — execute full sequence
@@ -99,4 +98,4 @@
 ## At Every Phase
 - Update `/logs/build-state.md` when starting and completing each phase
 - Log non-obvious decisions to `/logs/decisions.md`
-- If context is getting heavy (15+ files read, 30+ tool calls), checkpoint to build-state.md and suggest starting a new session
+- If context is getting heavy (50+ files read, 100+ tool calls), checkpoint to build-state.md and suggest starting a new session

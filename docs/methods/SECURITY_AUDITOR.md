@@ -22,8 +22,9 @@
 | Infrastructure | **Rex** | Headers, CORS, CSP, TLS, DNS, ports | Tactical. Locks down every position. |
 | Data Auditor | **Padmé** | PII handling, encryption, logging, retention | Protects the people. |
 | Dependency Auditor | **Chewie** | Known vulns, outdated packages, supply chain | Rips apart bad packages. |
+| Red Team | **Maul** | Adversarial attacker perspective, exploit chaining, red-team verification | Thinks like an attacker. The missing dark side. |
 
-**Need more?** Pull from Star Wars pool: Luke, Han, Qui-Gon, Din Djarin, Cassian, Sabine, Maul. See NAMING_REGISTRY.md.
+**Need more?** Pull from Star Wars pool: Luke, Han, Qui-Gon, Din Djarin, Cassian, Sabine. See NAMING_REGISTRY.md.
 
 ## Goal
 
@@ -52,19 +53,45 @@ OWASP Top 10 evaluation. Find misconfigurations, missing protections, insecure d
 
 ## Audit Sequence
 
+### Phase 1 — Independent Audits (parallel analysis)
+
+These are independent, read-only scans. Run in parallel using the Agent tool:
+
+**Leia — Secrets:** No secrets in source code. No secrets in git history. .env in .gitignore. Different secrets dev/prod. Rotation plan documented.
+
+**Chewie — Dependencies:** `npm audit`. No critical/high vulns. Lock file committed. Versions pinned. No deprecated packages.
+
+**Rex — Infrastructure:** Security headers (HSTS, X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy, Permissions-Policy). CORS not wildcard. TLS 1.2+. Valid certs everywhere.
+
+**Maul — Red Team:** For each endpoint and flow, ask: "How would I exploit this?" Chain vulnerabilities. Test trust boundaries. Attempt privilege escalation. Find what the defenders missed.
+
+### Phase 2 — Sequential Audits (depend on codebase understanding)
+
+These require full codebase context — run sequentially:
+
 **Yoda — Auth:** Passwords (bcrypt ≥12), no plaintext anywhere, reset tokens single-use + expire, rate limited. OAuth state param, redirect whitelist, server-side exchange. Sessions: crypto random, httpOnly/secure/sameSite, invalidated on logout + password change, CSRF on mutations.
 
 **Windu — Input:** SQL (parameterized queries), XSS (escaped output, no dangerouslySetInnerHTML, CSP), SSRF (URL allowlist, block internal IPs), Command (no user input in shell), Path traversal (sanitized filenames), Deserialization (schema validate all parsed data).
 
 **Ahsoka — Access:** Every endpoint verifies ownership (no IDOR). UUIDs not sequential IDs. Admin verified server-side. Tier features verified server-side. User A can't access User B's anything. Rate limiting per-user and per-IP.
 
-**Leia — Secrets:** No secrets in source code. No secrets in git history. .env in .gitignore. Different secrets dev/prod. Rotation plan documented.
-
-**Rex — Infrastructure:** Security headers (HSTS, X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy, Permissions-Policy). CORS not wildcard. TLS 1.2+. Valid certs everywhere.
-
 **Padmé — Data:** PII identified. PII not in logs/errors/URLs. Deletion possible (GDPR). Export possible. Backups encrypted.
 
-**Chewie — Dependencies:** `npm audit`. No critical/high vulns. Lock file committed. Versions pinned. No deprecated packages.
+### Phase 3 — Remediate
+
+Fix critical and high findings immediately. Medium findings get tracked. For each fix:
+1. Apply the fix
+2. Verify it works
+3. Check it didn't break anything (`npm test`)
+4. Update the finding status
+
+### Phase 4 — Re-Verify Remediations
+
+After remediations are applied:
+
+**Maul — Red Team Verification:** Re-probe all remediated vulnerabilities. Verify fixes hold under adversarial conditions. Check that fixes didn't introduce new attack vectors. Attempt to bypass the remediations.
+
+Do not finalize the audit until Maul's re-verification passes.
 
 ## Deliverables
 

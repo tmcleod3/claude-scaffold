@@ -42,13 +42,15 @@ voidforge/
 │
 ├── .claude/
 │   ├── settings.json             ← Permissions, hooks
-│   └── commands/                 ← 8 slash commands
+│   └── commands/                 ← 10 slash commands
 │       ├── build.md              ← /build — 13-phase protocol
-│       ├── qa.md                 ← /qa — Batman's QA pass
-│       ├── security.md           ← /security — Kenobi's audit
-│       ├── ux.md                 ← /ux — Galadriel's review
+│       ├── qa.md                 ← /qa — Batman's QA pass (double-pass)
+│       ├── test.md               ← /test — Batman's test-writing mode
+│       ├── security.md           ← /security — Kenobi's audit (with Maul red-team)
+│       ├── ux.md                 ← /ux — Galadriel's review (with re-verify)
+│       ├── review.md             ← /review — Cross-agent code review
 │       ├── devops.md             ← /devops — Kusanagi's infra
-│       ├── architect.md          ← /architect — Picard's review
+│       ├── architect.md          ← /architect — Picard's review (parallel analysis)
 │       ├── git.md                ← /git — Coulson's releases
 │       └── void.md              ← /void — Bombadil's forge sync
 │
@@ -131,11 +133,13 @@ voidforge/
 | Command | Agent | Protocol |
 |---------|-------|----------|
 | `/build` | All | 13-phase build from PRD |
-| `/qa` | Batman | Parallel analysis + test suite |
-| `/security` | Kenobi | OWASP audit (parallel + sequential) |
-| `/ux` | Galadriel | Adversarial UX/UI + a11y |
+| `/qa` | Batman | Double-pass QA with parallel analysis |
+| `/test` | Batman | Test-writing mode — coverage + architecture |
+| `/security` | Kenobi | OWASP audit with red-team verification |
+| `/ux` | Galadriel | Adversarial UX/UI + a11y with re-verify |
+| `/review` | Picard | Cross-agent code review — patterns + quality |
 | `/devops` | Kusanagi | Target-adaptive infrastructure |
-| `/architect` | Picard | Architecture review + ADRs |
+| `/architect` | Picard | Architecture review with parallel analysis |
 | `/git` | Coulson | Semver + changelog + commit |
 | `/void` | Bombadil | Sync VoidForge methodology from upstream |
 

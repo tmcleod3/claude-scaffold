@@ -89,6 +89,14 @@ One flow or component cluster per batch. Reuse shared components. Add missing st
 
 Arwen leads. Buttons, inputs, cards, modals, toasts. Consistent variants, spacing, typography scale.
 
+## Step 7.5 — Pass 2: Re-Verify Fixes
+
+After all fixes are applied, run a verification pass to catch fix-induced regressions:
+- **Samwise** re-audits accessibility on all modified components — verify a11y fixes didn't break other a11y properties (common anti-pattern)
+- **Gandalf** re-checks edge cases on fixed flows — verify fixes hold under adversarial input
+
+If Pass 2 finds new issues, fix and re-verify. Do not finalize until Samwise and Gandalf sign off.
+
 ## Step 8 — Deliverables
 
 1. UX_UI_AUDIT.md

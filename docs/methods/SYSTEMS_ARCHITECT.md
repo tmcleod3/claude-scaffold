@@ -51,19 +51,23 @@ Ensure architecture matches product needs. Identify structural risks and scaling
 
 **Step 0 — System Discovery:** System identity, component inventory, data flow diagram, dependency graph.
 
-**Step 1 — Spock's Schema Review:** Normalization, relationships, indexes match queries, nullable intentional, audit fields, PII isolation, data lifecycle, backup/recovery plan.
+**Step 1 — Parallel Analysis (Spock + Uhura):**
+Use the Agent tool to run these in parallel — they are independent analysis tasks:
+- **Spock's Schema Review:** Normalization, relationships, indexes match queries, nullable intentional, audit fields, PII isolation, data lifecycle, backup/recovery plan.
+- **Uhura's Integration Review:** External service matrix (purpose, failure mode, fallback, cost, lock-in). API versions pinned. Responses validated. Abstraction layer exists.
 
-**Step 2 — Scotty's Service Architecture:** Boundary assessment, monolith vs services (default: monolith until specific reason to split), async vs sync decisions.
+Synthesize findings from both agents.
+
+**Step 2 — Scotty's Service Architecture:** Boundary assessment, monolith vs services (default: monolith until specific reason to split), async vs sync decisions. Informed by Spock's schema and Uhura's integration findings.
 
 **Step 3 — Scotty's Scaling Assessment:** First bottleneck analysis. Three-tier plan: Tier 1 (single server), Tier 2 (vertical + optimization, 10x), Tier 3 (horizontal, 100x). Cost analysis.
 
-**Step 4 — Uhura's Integration Review:** External service matrix (purpose, failure mode, fallback, cost, lock-in). API versions pinned. Responses validated. Abstraction layer exists.
+**Step 4 — Parallel Analysis (La Forge + Data):**
+Use the Agent tool to run these in parallel — they are independent analysis tasks:
+- **La Forge's Failure Analysis:** What happens when each component fails. Graceful degradation rules. Recovery procedures.
+- **Data's Tech Debt:** Wrong abstractions, missing abstractions, premature optimization, deferred decisions, dependency debt, documentation debt. Each with impact, risk, effort, urgency.
 
-**Step 5 — La Forge's Failure Analysis:** What happens when each component fails. Graceful degradation rules. Recovery procedures.
-
-**Step 6 — Data's Tech Debt:** Wrong abstractions, missing abstractions, premature optimization, deferred decisions, dependency debt, documentation debt. Each with impact, risk, effort, urgency.
-
-**Step 7 — ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives.
+**Step 5 — ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives.
 
 ## Deliverables
 

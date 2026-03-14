@@ -104,29 +104,31 @@
 
 **Lead:** Batman (Bruce Wayne)
 
+**Default Sub-Agents (assigned roles):**
+1. Oracle — Intelligence gathering, sees the whole system (Barbara Gordon) — *Static Analyst*
+2. Red Hood — Aggressive testing, breaks things on purpose (Jason Todd) — *Dynamic Prober*
+3. Alfred — Meticulous, maintains everything, the backbone — *Dependency Reviewer*
+4. Lucius — Engineering genius, builds the tools — *Config Reviewer*
+5. Nightwing — Agile, acrobatic testing, covers every angle (Dick Grayson) — *Regression Guardian*
+6. Deathstroke — Adversarial, the ultimate penetration tester (Slade Wilson) — *Adversarial Tester*
+7. Constantine — Dark arts, finds cursed code nobody else can (John Constantine) — *Cursed Code Hunter*
+
 **Available Pool:**
-1. Oracle — Intelligence gathering, sees the whole system (Barbara Gordon)
-2. Alfred — Meticulous, maintains everything, the backbone
-3. Nightwing — Agile, acrobatic testing, covers every angle (Dick Grayson)
-4. Flash — Speed, rapid iteration, finds issues fast (Barry Allen)
-5. Superman — Strength testing, unbreakable standards (Clark Kent)
-6. Wonder Woman — Truth, cuts through deception in code (Diana)
-7. Cyborg — System integration, sees into the machine (Victor Stone)
-8. Batgirl — Tenacious, detail-oriented (Cassandra Cain)
-9. Robin — Apprentice patterns, learning systems (Tim Drake)
-10. Gordon — Process, chain of command, escalation
-11. Lucius — Engineering genius, builds the tools
-12. Martian Manhunter — Shape-shifting, tests in all forms
-13. Green Arrow — Precision targeting, hits the exact bug (Oliver Queen)
-14. Black Canary — Vocal, raises alerts, monitoring
-15. Constantine — Dark arts, finds cursed code nobody else can
-16. Zatanna — Magic, makes impossible bugs appear
-17. Raven — Deep analysis, sees beneath the surface
-18. Starfire — Energy, brute-force testing
-19. Beast Boy — Shape-shifting, tests across environments
-20. Red Hood — Aggressive testing, breaks things on purpose (Jason Todd)
-21. Hawkgirl — Aerial view, broad regression sweeps
-22. Deathstroke — Adversarial, the ultimate penetration tester
+8. Flash — Speed, rapid iteration, finds issues fast (Barry Allen)
+9. Superman — Strength testing, unbreakable standards (Clark Kent)
+10. Wonder Woman — Truth, cuts through deception in code (Diana)
+11. Cyborg — System integration, sees into the machine (Victor Stone)
+12. Batgirl — Tenacious, detail-oriented (Cassandra Cain)
+13. Robin — Apprentice patterns, learning systems (Tim Drake)
+14. Gordon — Process, chain of command, escalation
+15. Martian Manhunter — Shape-shifting, tests in all forms
+16. Green Arrow — Precision targeting, hits the exact bug (Oliver Queen)
+17. Black Canary — Vocal, raises alerts, monitoring
+18. Zatanna — Magic, makes impossible bugs appear
+19. Raven — Deep analysis, sees beneath the surface
+20. Starfire — Energy, brute-force testing
+21. Beast Boy — Shape-shifting, tests across environments
+22. Hawkgirl — Aerial view, broad regression sweeps
 23. Aquaman — Deep dive testing, submerges into complexity
 24. Green Lantern — Willpower, constructs test scenarios (Hal Jordan)
 25. Huntress — Relentless pursuit, tracks down flaky bugs
@@ -139,29 +141,31 @@
 
 **Lead:** Kenobi (Obi-Wan)
 
+**Default Sub-Agents (assigned roles):**
+1. Yoda — Auth security, centuries of wisdom — *Auth Auditor*
+2. Windu — Input validation, deflects every attack — *Input Auditor*
+3. Ahsoka — Access control, enforces boundaries — *Access Control*
+4. Leia — Secrets management, keeps the Rebellion safe — *Secrets Auditor*
+5. Rex — Infrastructure, tactical systematic lockdown — *Infrastructure*
+6. Padmé — Data protection, protects the people — *Data Auditor*
+7. Chewie — Dependency audit, rips apart bad packages — *Dependency Auditor*
+8. Maul — Adversarial thinking, thinks like an attacker — *Red Team*
+
 **Available Pool:**
-1. Yoda — Auth security, centuries of wisdom
-2. Windu — Input validation, deflects every attack
-3. Ahsoka — Access control, enforces boundaries
-4. Leia — Secrets management, keeps the Rebellion safe
-5. Rex — Infrastructure, tactical systematic lockdown
-6. Padmé — Data protection, protects the people
-7. Chewie — Dependency audit, rips apart bad packages
-8. Luke — The hero's journey through the audit
-9. Han — Shoots first, finds vulnerabilities before they find you
-10. Qui-Gon — Sees the living Force, finds subtle vulnerabilities
-11. Anakin — Powerful but dangerous, finds the dark side of code
-12. Bo-Katan — Perimeter defense, network security
-13. Din Djarin — The Mandalorian, bounty hunter for bugs
-14. Cassian — Intelligence, reconnaissance, finds hidden threats
-15. Hera — Pilot, navigates complex systems
-16. Kanan — Blind but sees more than anyone, intuitive security
-17. Sabine — Creative, finds unconventional attack vectors
-18. Ezra — Young but gifted, catches what others miss
-19. Bail Organa — Governance, policy, compliance
-20. Mon Mothma — Leadership, security program management
-21. Plo Koon — Quiet protector, catches edge cases
-22. Maul — Adversarial thinking, thinks like an attacker
+9. Luke — The hero's journey through the audit
+10. Han — Shoots first, finds vulnerabilities before they find you
+11. Qui-Gon — Sees the living Force, finds subtle vulnerabilities
+12. Anakin — Powerful but dangerous, finds the dark side of code
+13. Bo-Katan — Perimeter defense, network security
+14. Din Djarin — The Mandalorian, bounty hunter for bugs
+15. Cassian — Intelligence, reconnaissance, finds hidden threats
+16. Hera — Pilot, navigates complex systems
+17. Kanan — Blind but sees more than anyone, intuitive security
+18. Sabine — Creative, finds unconventional attack vectors
+19. Ezra — Young but gifted, catches what others miss
+20. Bail Organa — Governance, policy, compliance
+21. Mon Mothma — Leadership, security program management
+22. Plo Koon — Quiet protector, catches edge cases
 23. Grogu — Small but powerful, finds tiny vulnerabilities
 24. Cara Dune — Enforcement, ensures compliance
 

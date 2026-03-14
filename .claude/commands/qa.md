@@ -15,17 +15,21 @@ Assign targets to each sub-agent:
 - **Red Hood (dynamic):** Empty/huge/unicode inputs, network failures, malformed JSON, rapid clicking
 - **Alfred (deps):** `npm audit`, outdated libs, deprecated APIs, version conflicts
 - **Lucius (config):** .env completeness, secrets not in git, prod vs dev mismatches
+- **Deathstroke (adversarial):** Penetration-style probing — bypass validations, chain interactions, exploit business logic
+- **Constantine (cursed code):** Unreachable branches, dead state, impossible conditions, logic that works by accident
 
 ## Step 2 — Baseline
 Get the project running. Verify manually: app starts, primary flow works, auth works (if applicable), data persists, error states display.
 
-## Step 3 — Find Bugs (parallel analysis)
+## Step 3 — Pass 1: Find Bugs (parallel analysis)
 Use the Agent tool to run these in parallel — these are read-only analysis tasks:
 - **Agent 1 (Oracle):** Scan /src/lib/ and /src/app/ for logic flaws, missing awaits, unsafe assumptions
 - **Agent 2 (Red Hood):** Test all API endpoints with malformed inputs, empty bodies, missing auth
 - **Agent 3 (Alfred):** Run `npm audit`, check package.json for deprecated/vulnerable packages
+- **Agent 4 (Deathstroke):** Adversarial probing — bypass validations, chain unexpected interactions, test authorization boundaries
+- **Agent 5 (Constantine):** Hunt cursed code — dead branches, impossible conditions, accidental correctness, shadowed variables
 
-Synthesize findings from all three agents into a unified list.
+Synthesize findings from all five agents into a unified list.
 
 Lucius reviews config separately (reads .env files — sensitive, don't delegate to sub-agent).
 
@@ -49,6 +53,14 @@ One batch = fixes for one area or severity level. After each batch:
 
 ## Step 6 — Harden
 Normalize error handling (reference `/docs/patterns/error-handling.ts`). Add guardrails. Improve structured logging.
+
+## Step 6.5 — Pass 2: Re-Verify Fixes
+After all fixes are applied, run a verification pass:
+- **Nightwing** re-runs full test suite, reports any new failures
+- **Red Hood** re-probes fixed areas — verify fixes hold under adversarial input
+- **Deathstroke** re-tests authorization boundaries and business logic exploits that were remediated
+
+If Pass 2 finds new issues, fix and re-verify until clean.
 
 ## Step 7 — Regression Checklist
 Nightwing builds the checklist. Template:

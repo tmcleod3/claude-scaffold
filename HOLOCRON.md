@@ -47,7 +47,7 @@ npm run wizard
 **Best for:** Users who want the guided experience. Merlin walks you through setup, Strange handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 8 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 10 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -60,7 +60,7 @@ git clone --branch scaffold https://github.com/tmcleod3/voidforge.git .
 **Best for:** Developers who know what they're doing and want to skip the wizard. You manage your own infrastructure. VoidForge manages your build process.
 
 #### Core (`core` branch)
-The lightest possible version. CLAUDE.md, the 8 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
+The lightest possible version. CLAUDE.md, the 10 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
 
 ```bash
 # Option A: Drop into an existing project
@@ -77,9 +77,9 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **8 slash commands** — `/build`, `/qa`, `/security`, `/ux`, `/devops`, `/architect`, `/git`, `/void`
+- **10 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`
 - **13-phase build protocol** — PRD to production with verification gates
-- **7 specialist agent protocols** — Each with behavioral directives and sub-agent rosters
+- **8 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **150+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, and Anime
 - **7 code patterns** — Reference implementations with framework adaptations
 - **This Holocron** — The guide you're reading now
@@ -257,7 +257,7 @@ Long builds span multiple Claude Code sessions. The build journal system handles
 
 ### How the Agent System Works
 
-VoidForge uses 7 lead agents, each from a different fictional universe, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
+VoidForge uses 8 lead agents across 6 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
 
 1. **Scope boundaries.** When Stark is leading, you're doing backend work. When Galadriel takes over, you're doing frontend. The character tells you which domain you're in.
 2. **Scannable logs.** Build journal entries tagged with agent names are instantly searchable. "What did Batman find?" is faster than "What happened during QA?"
@@ -351,7 +351,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Eight commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Ten commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.
@@ -363,17 +363,27 @@ This is the main command. Everything else is a targeted operation.
 #### `/qa` — Batman's QA Pass
 **When:** After building features, before deploy. Or anytime something feels off.
 
-Runs parallel analysis: Oracle scans the system, Red Hood breaks things, Alfred audits dependencies, Lucius checks configuration. Then Nightwing runs the full test suite and builds a regression checklist. Findings are prioritized by severity.
+Double-pass review: Pass 1 runs parallel analysis — Oracle scans the system, Red Hood breaks things, Alfred audits dependencies, Deathstroke probes adversarially, Constantine hunts cursed code. Lucius checks config. Fixes are applied in batch. Pass 2 re-verifies — Nightwing re-runs tests, Red Hood re-probes fixed areas, Deathstroke re-tests boundaries. Catches fix-induced regressions.
+
+#### `/test` — Batman's Test-Writing Mode
+**When:** You need to write or improve tests. Different from `/qa` (which finds bugs).
+
+Analyzes coverage gaps (Oracle + Alfred in parallel), reviews test architecture (Nightwing), writes missing unit/integration/component tests in priority order, then Red Hood writes adversarial tests for boundary values and edge cases.
 
 #### `/security` — Kenobi's Audit
 **When:** Before any deploy. After adding auth, payments, or external integrations.
 
-Phase 1 runs parallel scans (secrets, dependencies, infrastructure). Phase 2 runs sequential deep audits (auth, input validation, access control, data protection). Critical and high findings are fixed immediately. A reusable security checklist is produced.
+Phase 1 runs parallel scans (Leia: secrets, Chewie: dependencies, Rex: infrastructure, Maul: red-team). Phase 2 runs sequential deep audits (auth, input, access control, data). Critical/high findings are fixed. Phase 3: Maul re-probes all remediations to verify fixes hold.
 
 #### `/ux` — Galadriel's Review
 **When:** After UI work. Before launch.
 
-Adversarial UX/UI review: walks every user flow, checks all 4 component states (loading, empty, error, success), tests keyboard navigation, verifies contrast and ARIA. Produces prioritized findings.
+Adversarial UX/UI review with double-pass: Pass 1 walks every user flow with 7 agents in parallel (UX, visual, a11y, copy, code, perf, edge cases). Fixes are applied. Pass 2: Samwise re-audits a11y on modified components, Gandalf re-checks edge cases. Ensures fixes don't break other properties.
+
+#### `/review` — Picard's Code Review
+**When:** After writing code, before committing. For pattern compliance and quality.
+
+Picard-affiliated (Star Trek). Parallel analysis: Spock checks pattern compliance against `/docs/patterns/`, Seven reviews code quality (complexity, dead code, duplication), Data reviews maintainability (abstractions, coupling, boundaries). Re-verification pass after fixes. Findings categorized as Must Fix, Should Fix, Consider, or Nit.
 
 #### `/devops` — Kusanagi's Infrastructure
 **When:** Setting up deploy target. Adapts based on PRD `deploy` value.
@@ -383,7 +393,7 @@ Generates infrastructure configuration for your target (VPS, Vercel, Railway, Cl
 #### `/architect` — Picard's Review
 **When:** Before building, after major changes, when scaling concerns arise.
 
-Full architecture review: schema analysis (Spock), service boundaries (Scotty), scaling assessment (three-tier plan), integration review (Uhura), failure mode analysis (La Forge), tech debt catalog (Data), ADR production. Includes conflict resolution protocol.
+Full architecture review with parallel analysis: Spock (schema) + Uhura (integrations) run in parallel, then Scotty handles service architecture and scaling, then La Forge (failure modes) + Data (tech debt) run in parallel. ADR production. Includes conflict resolution protocol.
 
 #### `/git` — Coulson's Release
 **When:** After completing a set of changes you want to version.
@@ -462,7 +472,7 @@ Claude Code has a finite context window. VoidForge keeps sessions fast:
 
 - Load method docs **on demand**, not all at once. Read frontend docs when doing frontend work.
 - **One phase or agent domain per session.** Don't try to do everything in one sitting.
-- If **15+ files read** or **30+ tool calls**, checkpoint to `build-state.md` and suggest a new session.
+- If **50+ files read** or **100+ tool calls**, checkpoint to `build-state.md` and suggest a new session.
 - New sessions pick up from the journal, not from scratch.
 
 ### Session Recovery

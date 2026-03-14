@@ -16,9 +16,7 @@
 | 6. Integrations | **Stark** (Romanoff) | **Kenobi** (security) | Yes — independent integrations can be parallel |
 | 7. Admin & Ops | **Stark** + **Galadriel** | **Picard** (review) | Yes — parallel with Phase 8 |
 | 8. Marketing Pages | **Galadriel** | — | Yes — parallel with Phase 7 |
-| 9. QA Pass | **Batman** | All | No — needs complete codebase |
-| 10. UX/UI Pass | **Galadriel** | All | Yes — parallel with Phase 11 |
-| 11. Security Pass | **Kenobi** | All | Yes — parallel with Phase 10 |
+| 9-11. Review Cycle | **Batman** + **Galadriel** + **Kenobi** | All | Yes — all three run in parallel, then double-pass |
 | 12. Deploy | **Kusanagi** | **Batman** (smoke) | No — sequential, high risk |
 | 13. Launch | All | — | No — final verification |
 
@@ -57,7 +55,7 @@ If a value is missing or invalid, log it and use the default. If the entire fron
 | `marketing: no` | Phase 8 | No marketing/landing pages |
 | `workers: no` | Phase 6 queue section | No background jobs |
 | `deploy: static` | Phase 2 (partial), Phase 12 (simplified) | Static hosting |
-| `type: api-only` | Phase 8, Phase 10 | No frontend |
+| `type: api-only` | Phase 8, Galadriel's UX pass in Phases 9-11 | No frontend |
 
 When skipping a phase, log it to `/logs/build-state.md`: "Skipping Phase X — PRD indicates [reason]."
 
@@ -133,19 +131,24 @@ Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md
 1. Homepage, features, pricing, legal, SEO meta
 2. Log to `/logs/phase-08-marketing.md`
 
-**Phase 9 — Batman's QA Pass.**
-1. Execute `/docs/methods/QA_ENGINEER.md` full sequence
-2. Oracle scans, Red Hood breaks, Alfred reviews deps, Lucius checks config
-3. Nightwing runs full test suite, builds regression checklist
-4. Log to `/logs/phase-09-qa-audit.md`
+**Phases 9-11 — Double-Pass Review Cycle (Batman + Galadriel + Kenobi).**
 
-**Phase 10 — Galadriel's UX/UI Pass.**
-1. Execute `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` full sequence
-2. Log to `/logs/phase-10-ux-audit.md`
+The review phases use a double-pass pattern: find → fix → re-verify. This catches fix-induced regressions — the #1 source of shipped bugs.
 
-**Phase 11 — Kenobi's Security Pass.**
-1. Execute `/docs/methods/SECURITY_AUDITOR.md` full sequence
-2. Log to `/logs/phase-11-security-audit.md`
+*Pass 1 — Find (parallel):*
+1. Batman executes `/docs/methods/QA_ENGINEER.md` through Step 5 (find + fix). Oracle, Red Hood, Alfred, Deathstroke, Constantine scan in parallel.
+2. Galadriel executes `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` through Step 6. Elrond, Arwen, Samwise analyze in parallel.
+3. Kenobi executes `/docs/methods/SECURITY_AUDITOR.md` Phase 1-2. Leia, Chewie, Rex, Maul scan in parallel, then Yoda, Windu, Ahsoka, Padmé sequentially.
+4. Log findings to `/logs/phase-09-qa-audit.md`, `/logs/phase-10-ux-audit.md`, `/logs/phase-11-security-audit.md`
+
+*Fix batch:*
+5. Resolve all critical/high findings across all three audits. Where findings conflict between agents (e.g., security fix degrades UX), apply conflict resolution from SUB_AGENTS.md.
+
+*Pass 2 — Re-Verify (parallel):*
+6. Batman: Nightwing re-runs test suite + Red Hood re-probes fixed areas + Deathstroke re-tests authorization boundaries.
+7. Galadriel: Samwise re-audits a11y on modified components + Gandalf re-checks edge cases.
+8. Kenobi: Maul re-probes all remediated vulnerabilities, verifies fixes hold.
+9. If Pass 2 finds new issues, fix and re-verify until clean.
 
 **Phase 12 — Kusanagi Deploys.**
 1. Execute `/docs/methods/DEVOPS_ENGINEER.md` full sequence
@@ -172,9 +175,8 @@ Every phase must pass its gate before proceeding. Each gate requires BOTH manual
 | 6 | Each integration works in test mode | Integration tests pass | Fix integration |
 | 7 | Admin views show real data, audit log works | Tests pass | Fix |
 | 8 | Pages render on mobile + desktop | Build passes | Fix |
-| 9 | All critical/high bugs fixed | Full test suite green | Fix remaining bugs |
-| 10 | Keyboard nav works, no broken states | A11y checks pass | Fix a11y issues |
-| 11 | No critical/high security findings | Security checklist passes | Fix security issues |
+| 9-11 Pass 1 | All critical/high findings identified | All agents report | Fix in batch |
+| 9-11 Pass 2 | Fixes verified, no regressions | Re-verification clean | Fix new issues, re-verify |
 | 12 | App loads in production, health check passes | Monitoring receives data, backup runs | Rollback + fix |
 | 13 | All checklist items verified | All tests pass in production | Fix before launch |
 

@@ -20,8 +20,10 @@
 | Dependency Reviewer | **Alfred** | Identifies risky, outdated, or vulnerable libraries | Meticulous. Trusts nothing he hasn't inspected personally. |
 | Config Reviewer | **Lucius** | Environment variables, secrets, config drift | Engineering genius. Sees through the architecture. |
 | Regression Guardian | **Nightwing** | Maintains regression checklist, verifies fixes | Dick Grayson. Agile, disciplined, covers every angle. |
+| Adversarial Tester | **Deathstroke** | Penetration-style testing, exploits edge cases, breaks assumptions | Slade Wilson. The ultimate adversary. |
+| Cursed Code Hunter | **Constantine** | Dead code, impossible conditions, logic that works by accident | John Constantine. Finds the dark magic nobody else can. |
 
-**Need more?** Pull from DC pool: Flash, Superman, Cyborg, Constantine, Deathstroke, Wonder Woman. See NAMING_REGISTRY.md.
+**Need more?** Pull from DC pool: Flash, Superman, Cyborg, Wonder Woman, Zatanna, Raven. See NAMING_REGISTRY.md.
 
 ## Scope
 
@@ -52,6 +54,7 @@ Find, reproduce, and fix real bugs (not theoretical). Improve reliability, error
 7. If unsure, instrument/log rather than guess.
 8. Spin up all agents in parallel. Nightwing checks everyone's work.
 9. Automated tests catch regressions. Manual verification catches UX/integration issues. Use both.
+10. Double-pass: find → fix → re-verify. Fix-induced regressions are the #1 source of shipped bugs.
 
 ## Step 0 — Orient
 
@@ -63,22 +66,28 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Red Hood (Dynamic):** Empty/huge/unicode inputs, network failures, malformed JSON, partial data, concurrent requests, rapid clicking, double submissions.
 **Alfred (Dependencies):** Outdated libs, known vulns, deprecated APIs, version conflicts.
 **Lucius (Config):** .env completeness, secrets not hardcoded, no secrets in git history, prod vs dev mismatches.
+**Deathstroke (Adversarial):** Penetration-style probing — exploit business logic, bypass validations, chain unexpected interactions, test authorization boundaries.
+**Constantine (Cursed Code):** Unreachable branches, dead state, impossible conditions, logic that only works by accident, tautological checks, shadowed variables.
 **Nightwing (Regression):** Smoke validation, high-value manual flows, "break it on purpose" probes, exact commands.
 
 ## Step 2 — Baseline Repro Harness
 
 Get the project running. Create repeatable manual validation: app starts, primary flow works, auth works, data persists, error states display, mobile works. Document exact commands.
 
-## Step 3 — Find Bugs Systematically
+## Step 3 — Pass 1: Find Bugs (parallel analysis)
 
-A) Oracle scans code statically — logic flaws, unsafe assumptions, missing awaits, timezone issues, unclosed resources.
-B) Red Hood breaks it dynamically — empty inputs, huge inputs, unicode, nulls, network failures, malformed data, rapid clicking.
-C) Alfred reviews dependencies — `npm audit`, known patterns, lock files.
-D) Lucius reviews config — env vars, secrets, prod vs dev.
+Use the Agent tool to run these in parallel — all are read-only analysis:
+- A) **Oracle** scans code statically — logic flaws, unsafe assumptions, missing awaits, timezone issues, unclosed resources.
+- B) **Red Hood** breaks it dynamically — empty inputs, huge inputs, unicode, nulls, network failures, malformed data, rapid clicking.
+- C) **Alfred** reviews dependencies — `npm audit`, known patterns, lock files.
+- D) **Deathstroke** runs adversarial probes — bypass validations, chain interactions, exploit business logic.
+- E) **Constantine** hunts cursed code — dead branches, impossible conditions, accidental correctness, shadowed vars.
+
+Lucius reviews config separately (reads .env files — sensitive, don't delegate to sub-agent).
 
 ## Step 3.5 — Nightwing Runs Automated Tests
 
-Run the full test suite: `npm test`. Analyze failures. Cross-reference with Oracle and Red Hood's findings. For every bug found in Steps 3A-3D, ask: "Can this be caught by an automated test?" If yes, write the test. See `/docs/methods/TESTING.md` for patterns and conventions.
+Run the full test suite: `npm test`. Analyze failures. Cross-reference with Oracle, Red Hood, Deathstroke, and Constantine findings. For every bug found in Steps 3A-3E, ask: "Can this be caught by an automated test?" If yes, write the test. See `/docs/methods/TESTING.md` for patterns and conventions.
 
 ## Step 4 — Bug Tracker (MUST MAINTAIN)
 
@@ -94,6 +103,15 @@ Make changes → Re-run repro → Re-run manual flows → Add logging → Update
 ## Step 6 — Hardening Pass
 
 Normalize error handling (consistent types, no leaked secrets). Add guardrails (schema validation, timeouts, retries). Improve observability (structured logs).
+
+## Step 6.5 — Pass 2: Re-Verify Fixes
+
+After all fixes are applied, run a verification pass to catch fix-induced regressions:
+- **Nightwing** re-runs full test suite, reports any new failures
+- **Red Hood** re-probes fixed areas — verify fixes hold under adversarial input
+- **Deathstroke** re-tests authorization boundaries and business logic exploits that were remediated
+
+If Pass 2 finds new issues, fix them and re-verify. Do not proceed to regression checklist until Pass 2 is clean.
 
 ## Step 7 — Regression Checklist (Nightwing maintains)
 

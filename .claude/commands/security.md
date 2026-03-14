@@ -11,6 +11,7 @@ Use the Agent tool to run these simultaneously — all are read-only analysis:
 - **Agent 1 (Leia — Secrets):** Scan source code for hardcoded secrets, check .env is gitignored, check git history for leaked keys (`git log -p --all -S 'password' -S 'secret' -S 'api_key'`), verify different secrets dev/prod
 - **Agent 2 (Chewie — Dependencies):** Run `npm audit`, check for critical/high vulns, verify lock file committed, check for deprecated packages
 - **Agent 3 (Rex — Infrastructure):** Check security headers (HSTS, CSP, X-Frame-Options, CORS), verify TLS config, check for exposed ports/debug endpoints
+- **Agent 4 (Maul — Red Team):** For each endpoint and flow, ask: "How would I exploit this?" Chain vulnerabilities. Test trust boundaries. Attempt privilege escalation.
 
 ### Phase 2 — Sequential audits (depend on understanding the codebase)
 These require full codebase context — run sequentially:
@@ -43,7 +44,7 @@ These require full codebase context — run sequentially:
 - Deletion possible (GDPR right to erasure)
 - Backups encrypted
 
-### Phase 3 — Log findings
+### Phase 3 — Remediate
 Write all findings to `/logs/phase-11-security-audit.md` (or appropriate phase log):
 
 | ID | Finding | Severity | Category | Location | Remediation | Status |
@@ -51,12 +52,19 @@ Write all findings to `/logs/phase-11-security-audit.md` (or appropriate phase l
 
 Severity = exploitability x impact. Critical (auth bypass, data leak) > High (injection, IDOR) > Medium (missing headers, weak config) > Low (best practice)
 
-### Phase 4 — Remediate
 Fix critical and high findings immediately. Medium findings get tracked. For each fix:
 1. Apply the fix
 2. Verify it works
 3. Check it didn't break anything (`npm test`)
 4. Update the finding status in the log
+
+### Phase 4 — Maul's Re-Verification
+After remediations are applied, Maul re-probes:
+- Re-test all remediated vulnerabilities — verify fixes hold under adversarial conditions
+- Check that fixes didn't introduce new attack vectors
+- Attempt to bypass the remediations
+
+If Maul finds new issues, fix and re-verify until clean.
 
 ### Phase 5 — Deliverables
 1. SECURITY_AUDIT.md — prioritized findings with evidence

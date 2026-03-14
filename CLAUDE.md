@@ -31,10 +31,10 @@ Every phase, decision, handoff, and failure gets logged to `/logs/`. See `/docs/
 
 ## Context Management
 
-Load docs on demand, not all at once. See `/docs/methods/CONTEXT_MANAGEMENT.md`.
+Pre-load active domain methodology. Load application code on demand. See `/docs/methods/CONTEXT_MANAGEMENT.md`.
 
-- Read method docs when entering that agent's phase, not upfront
-- If 15+ files read or 30+ tool calls in one session, checkpoint and suggest a new session
+- Pre-load method docs for the active agent's domain at session start (1M context budget allows this)
+- If 50+ files read or 100+ tool calls in one session, checkpoint and suggest a new session
 - Per-directory `CLAUDE.md` files for directory-specific conventions (keep under 50 lines each)
 
 ## Code Patterns
@@ -54,11 +54,13 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Command | What It Does |
 |---------|-------------|
 | `/build` | Execute full build protocol — self-contained with inline steps per phase |
-| `/qa` | Batman's full QA pass with parallel analysis and regression checklist |
-| `/security` | Kenobi's OWASP audit with parallel + sequential phases |
-| `/ux` | Galadriel's adversarial UX/UI review with a11y audit |
+| `/qa` | Batman's full QA pass with double-pass verification and regression checklist |
+| `/test` | Batman's test-writing mode — coverage analysis, test architecture, write missing tests |
+| `/security` | Kenobi's OWASP audit with parallel + sequential phases and red-team verification |
+| `/ux` | Galadriel's adversarial UX/UI review with a11y audit and verification pass |
+| `/review` | Picard's code review — pattern compliance, quality, maintainability |
 | `/devops` | Kusanagi's infrastructure — adapts based on deploy target |
-| `/architect` | Picard's architecture review with conflict resolution protocol |
+| `/architect` | Picard's architecture review with parallel analysis and conflict resolution |
 | `/git` | Coulson's version bump, changelog, commit — full release management |
 | `/void` | Bombadil's forge sync — update VoidForge methodology from upstream |
 

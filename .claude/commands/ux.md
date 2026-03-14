@@ -56,6 +56,13 @@ Arwen leads. Audit shared components (buttons, inputs, cards, modals, toasts) fo
 - Keyboard focus styles
 - Proper ARIA attributes
 
+## Step 7.5 — Pass 2: Re-Verify Fixes
+After all fixes are applied, run a verification pass:
+- **Samwise** re-audits accessibility on all modified components — verify a11y fixes didn't break other a11y properties
+- **Gandalf** re-checks edge cases on fixed flows — verify fixes hold under adversarial input
+
+If Pass 2 finds new issues, fix and re-verify until Samwise and Gandalf sign off.
+
 ## Step 8 — Regression Checklist
 Add UX-specific items to the regression checklist in `/docs/qa-prompt.md`:
 
