@@ -21,6 +21,16 @@ Assign targets to each sub-agent:
 ## Step 2 — Baseline
 Get the project running. Verify manually: app starts, primary flow works, auth works (if applicable), data persists, error states display.
 
+## Step 2.5 — Smoke Tests (hit the server)
+After build + restart, for each new or modified feature, execute actual requests against the running server (not just read the code):
+- **Primary user flow:** Execute via curl/fetch against localhost — verify the end-to-end path works
+- **File uploads:** Upload a file, then fetch the returned URL and verify HTTP 200 + correct content-type
+- **Form submissions:** Submit valid data (verify 200), then submit invalid/duplicate data (verify error message is specific, not generic)
+- **Real-time features:** Trigger the polling/SSE and verify at least one successful response cycle
+- **Cross-module paths:** If code writes with key prefix X, verify the serving endpoint accepts prefix X
+
+This catches integration failures that static code review misses. If the server isn't running or can't be tested this way, document what couldn't be smoke-tested.
+
 ## Step 3 — Pass 1: Find Bugs (parallel analysis)
 Use the Agent tool to run these in parallel — these are read-only analysis tasks:
 - **Agent 1 (Oracle):** Scan /src/lib/ and /src/app/ for logic flaws, missing awaits, unsafe assumptions

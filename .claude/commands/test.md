@@ -57,6 +57,16 @@ Write tests in priority order from Step 1. For each module:
 
 Work in small batches — write tests for one module, run `npm test`, verify they pass, then move to the next.
 
+## Step 3.5 — Integration Tests (Oracle)
+For each new feature, write at least one test that exercises the full cross-module path:
+- **File handling:** upload file → verify returned URL → fetch URL → verify 200 + correct content-type
+- **Form save with conflict:** submit with duplicate/conflicting value → verify response includes specific error message (not generic)
+- **Bulk operations:** upload CSV/batch → verify created count + per-row error details
+- **Generated URLs/keys:** verify the URL/key pattern is accepted by the serving endpoint (proxy, CDN, static handler)
+- **Error propagation:** trigger a server error → verify the client receives and can display the specific error
+
+These can use mocked databases but MUST cross module boundaries — the test should touch at least two modules that would be reviewed by different agents.
+
 ## Step 4 — Hardening (Red Hood)
 Red Hood writes adversarial tests:
 - Boundary values (0, -1, MAX_INT, empty string, null, undefined)
