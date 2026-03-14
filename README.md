@@ -26,11 +26,11 @@ cd my-app
 |----------|----------|
 | **Root context** | `CLAUDE.md` — loaded every session |
 | **User guide** | `HOLOCRON.md` — the complete guide |
-| **Slash commands** (11) | `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/voice` |
+| **Slash commands** (11) | `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper` |
 | **Agent protocols** (17) | Build protocol, all 9 specialist methods, orchestration, testing, troubleshooting, context management, MCP, PRD generation |
 | **Code patterns** (7) | API route, service, component, middleware, error handling, job queue, multi-tenant |
 | **Agent roster** | 170+ named characters across 7 fictional universes |
-| **Remote bridge** | `/voice` — Telegram bridge with Gom Jabbar auth (Dune lore) |
+| **Worm rider** | `/thumper` — Telegram bridge with Gom Jabbar auth (Dune lore) |
 | **Build journal** | `logs/build-state.md` — persistent session recovery |
 | **Project init** | `scripts/new-project.sh` — manual scaffolding script |
 
@@ -57,7 +57,7 @@ For those, use the [`main` branch](https://github.com/tmcleod3/voidforge/tree/ma
 | DevOps | **Kusanagi** (Anime) | Deploy, monitor, backup |
 | Release | **Coulson** (Marvel) | Version, changelog, commit |
 | Forge Sync | **Bombadil** (Tolkien) | VoidForge self-update from upstream |
-| Remote Bridge | **Chani** (Dune) | Telegram bridge, Gom Jabbar, sandworm relay |
+| Worm Rider | **Chani** (Dune) | Telegram bridge, Gom Jabbar, sandworm relay |
 
 ---
 

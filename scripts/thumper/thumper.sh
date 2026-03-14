@@ -1,5 +1,5 @@
 #!/bin/bash
-# voice.sh — Main entrypoint for Chani's remote bridge
+# thumper.sh — Main entrypoint for Chani's remote bridge
 # The Bene Gesserit Voice — command through speech across the desert
 # Routes commands to scan.sh (setup), relay.sh (sandworm daemon), and status
 
@@ -13,21 +13,21 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CONFIG_DIR="$PROJECT_ROOT/.voidforge/voice"
+CONFIG_DIR="$PROJECT_ROOT/.voidforge/thumper"
 CONFIG_FILE="$CONFIG_DIR/sietch.env"
-CHANNEL_FLAG="$CONFIG_DIR/.voice.active"
+CHANNEL_FLAG="$CONFIG_DIR/.thumper.active"
 PID_FILE="$CONFIG_DIR/.worm.pid"
 GOM_JABBAR_FILE="$CONFIG_DIR/.gom-jabbar"
 
 usage() {
     cat <<'EOF'
-🏜️ /voice — Chani's Remote Bridge (The Voice)
+🏜️ /thumper — Chani's Remote Bridge (The Voice)
 
 Usage:
-  /voice setup    — First-time scan or re-configure
-  /voice on       — The Voice carries (open channel)
-  /voice off      — Silence in the desert (close channel)
-  /voice status   — Report channel state and worm path
+  /thumper setup    — First-time scan or re-configure
+  /thumper on       — The Voice carries (open channel)
+  /thumper off      — Silence in the desert (close channel)
+  /thumper status   — Report channel state and worm path
 EOF
 }
 
@@ -112,7 +112,7 @@ cmd_status() {
 
     if [[ ! -f "$CONFIG_FILE" ]]; then
         echo "Sietch:    ❌ No sietch vault found"
-        echo "           Run /voice setup to configure"
+        echo "           Run /thumper setup to configure"
         return 0
     fi
 

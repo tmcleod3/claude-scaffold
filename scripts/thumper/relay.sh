@@ -1,7 +1,7 @@
 #!/bin/bash
 # relay.sh — The Sandworm — Chani's message transport
 # Polls Telegram for thumper beats and rides them into Claude Code
-# Runs as a background daemon, started by voice.sh
+# Runs as a background daemon, started by thumper.sh
 #
 # Note: -e (errexit) intentionally omitted — a long-running daemon must not
 # exit on transient curl failures or non-zero returns from inject_text.
@@ -15,9 +15,9 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CONFIG_DIR="$PROJECT_ROOT/.voidforge/voice"
+CONFIG_DIR="$PROJECT_ROOT/.voidforge/thumper"
 CONFIG_FILE="$CONFIG_DIR/sietch.env"
-CHANNEL_FLAG="$CONFIG_DIR/.voice.active"
+CHANNEL_FLAG="$CONFIG_DIR/.thumper.active"
 PID_FILE="$CONFIG_DIR/.worm.pid"
 LOG_FILE="$CONFIG_DIR/worm.log"
 LAST_ID_FILE="$CONFIG_DIR/.last_thumper_id"
@@ -56,14 +56,14 @@ send_telegram() {
 # ─── Startup Checks ───────────────────────────────────────────
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
-    echo "❌ No sietch vault found. Run /voice setup first." >&2
+    echo "❌ No sietch vault found. Run /thumper setup first." >&2
     exit 1
 fi
 
 source "$CONFIG_FILE"
 
 if [[ "${SETUP_COMPLETE:-}" != "true" ]]; then
-    echo "❌ Setup incomplete. Run /voice setup." >&2
+    echo "❌ Setup incomplete. Run /thumper setup." >&2
     exit 1
 fi
 
@@ -283,7 +283,7 @@ while true; do
     if echo "$RESPONSE" | grep -q '"ok":false'; then
         error_code=$(echo "$RESPONSE" | grep -o '"error_code":[0-9]*' | head -1 | sed 's/.*://')
         if [[ "$error_code" = "401" ]]; then
-            log "FATAL: Bot token rejected (401). Re-run /voice setup."
+            log "FATAL: Bot token rejected (401). Re-run /thumper setup."
             break
         fi
         CONSECUTIVE_ERRORS=$((CONSECUTIVE_ERRORS + 1))
@@ -303,8 +303,8 @@ while true; do
             continue
         fi
 
-        if [[ "$text" == /voice* ]]; then
-            log "SKIPPED: /voice command (loop prevention)"
+        if [[ "$text" == /thumper* ]]; then
+            log "SKIPPED: /thumper command (loop prevention)"
             advance_offset "$update_id"
             continue
         fi
