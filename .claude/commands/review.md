@@ -17,7 +17,7 @@ List all files in scope and their types (API route, service, component, middlewa
 ## Step 1 — Parallel Analysis
 Use the Agent tool to run these in parallel — all are read-only analysis:
 
-**Agent 1 (Spock — Pattern Compliance):**
+**Agent 1 (Spock — Pattern Compliance + Integration Tracing):**
 For each file, check against its matching pattern in `/docs/patterns/`:
 - API routes follow `api-route.ts` — validate → auth → service → respond
 - Services follow `service.ts` — business logic not in routes, ownership checks, typed errors
@@ -27,6 +27,12 @@ For each file, check against its matching pattern in `/docs/patterns/`:
 - Queues follow `job-queue.ts` — idempotent, retry, dead letter
 - Multi-tenant follows `multi-tenant.ts` — workspace scoped, role-based
 
+**INTEGRATION TRACING (mandatory):** When reviewed code generates URLs, references other API endpoints, constructs storage keys, or produces data consumed by other modules — you MUST read the consuming code to verify compatibility. Examples:
+- File uploaded with key prefix `avatars/` → read the asset proxy to verify it serves that prefix
+- API returns error `{ code: "CONFLICT" }` → read the UI that calls this API to verify it displays the error
+- Middleware sets header `x-request-id` → read a sample API route to verify it can access the header
+- Service generates a URL → read the route/proxy that handles that URL pattern
+
 **Agent 2 (Seven — Code Quality):**
 - Unnecessary complexity (can this be simpler?)
 - Dead code, unused imports, unreachable branches
@@ -35,12 +41,18 @@ For each file, check against its matching pattern in `/docs/patterns/`:
 - Missing TypeScript types or `any` usage
 - Functions doing too many things (SRP violations)
 
-**Agent 3 (Data — Maintainability):**
+**Agent 3 (Data — Maintainability + Error Paths):**
 - Wrong abstractions (over-engineered or under-abstracted)
 - Coupling between modules that should be independent
 - Missing error handling at system boundaries
 - Hardcoded values that should be config
 - Missing or misleading comments on non-obvious logic
+
+**ERROR PATH VERIFICATION (mandatory):** For every API route that returns error responses (4xx, 5xx), identify the client that calls this endpoint and verify:
+- The client reads the response body (not just checks `res.ok`)
+- The specific error message/code is displayed to the user
+- Generic fallback messages are only used when the server truly returns no useful error info
+- The UI form state after error allows retry without losing user input
 
 ## Step 2 — Synthesize Findings
 Merge all findings into a review table:

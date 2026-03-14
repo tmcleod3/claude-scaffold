@@ -28,7 +28,14 @@ These require interactive testing:
 
 **Gimli (Performance):** Check loading states, skeleton screens, layout shift, optimistic UI, mobile responsiveness, touch targets (min 44px).
 
-**Gandalf (Edge Cases):** Test forms with empty/huge/unicode inputs, broken states, dangerous actions without confirmation, validation gaps.
+**Gandalf (Edge Cases + Error States):** Test forms with empty/huge/unicode inputs, broken states, dangerous actions without confirmation, validation gaps.
+
+**ERROR STATE TESTING (mandatory):** For every form/action in the UI:
+- Submit with intentionally invalid data (duplicate name, wrong format, missing required field)
+- Verify the error message is SPECIFIC and ACTIONABLE — never generic ("something went wrong", "failed to save")
+- Verify the form state after error allows retry without losing user input
+- If the feature involves a resource that can conflict (duplicate slug, duplicate email, taken domain), test the conflict case explicitly
+- For every API error the backend can return, verify the UI displays it meaningfully
 
 ## Step 4 — Issue Tracker
 Log all findings to `/logs/phase-10-ux-audit.md`:
