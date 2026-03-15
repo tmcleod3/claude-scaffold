@@ -3,8 +3,10 @@
  * VoidForge CLI entry point
  * Usage: npx voidforge init                    — Launch Merlin (setup wizard)
  *        npx voidforge init --template saas    — Start from a project template
+ *        npx voidforge init --remote           — Launch in remote mode (0.0.0.0 + auth)
  *        npx voidforge deploy                  — Launch Haku (deploy wizard)
  *        npx voidforge deploy --headless       — Deploy from CLI (no browser)
+ *        npx voidforge deploy --self           — Deploy VoidForge itself to a VPS
  *        npx voidforge templates               — List available project templates
  */
 
@@ -32,9 +34,27 @@ if (command === 'templates') {
 }
 
 const isHeadless = args.includes('--headless');
+const isRemote = args.includes('--remote');
+const isSelfDeploy = args.includes('--self');
 const projectDirFlag = args.find((a, i) => args[i - 1] === '--dir');
+const hostFlag = args.find((a, i) => args[i - 1] === '--host');
 
-if (command === 'deploy' && isHeadless) {
+if (command === 'deploy' && isSelfDeploy) {
+  // Self-deploy — deploy VoidForge itself to a remote VPS
+  import('../wizard/lib/provisioners/self-deploy.js')
+    .then(({ generateCaddyTemplate }) => {
+      const domain = hostFlag ?? 'forge.yourdomain.com';
+      console.log('\nVoidForge Self-Deploy\n');
+      console.log('Generate the Caddy config and provision script with:');
+      console.log('  npx voidforge deploy --self --host forge.yourdomain.com\n');
+      console.log('Caddy template:\n');
+      console.log(generateCaddyTemplate(domain));
+    })
+    .catch((err: unknown) => {
+      console.error('Self-deploy failed:', (err as Error).message);
+      process.exit(1);
+    });
+} else if (command === 'deploy' && isHeadless) {
   // Headless deploy — run provisioning from terminal
   import('../wizard/lib/headless-deploy.js')
     .then(({ headlessDeploy }) => headlessDeploy(projectDirFlag))
@@ -57,15 +77,18 @@ if (command === 'deploy' && isHeadless) {
     const { startServer } = await import('../wizard/server.js');
     const { openBrowser } = await import('../wizard/lib/open-browser.js');
 
-    const url = `http://localhost:${port}${wizard.path}`;
+    const protocol = isRemote ? 'https' : 'http';
+    const host = isRemote ? (hostFlag ?? 'localhost') : 'localhost';
+    const url = `${protocol}://${host}:${port}${wizard.path}`;
     console.log('');
-    console.log(`  VoidForge — ${wizard.name}`);
+    console.log(`  VoidForge — ${wizard.name}${isRemote ? ' (Remote Mode)' : ''}`);
     console.log(`  Server running at ${url}`);
+    if (isRemote) console.log('  Authentication: REQUIRED (5-layer security active)');
     console.log('  Press Ctrl+C to stop');
     console.log('');
 
-    await startServer(port);
-    await openBrowser(url);
+    await startServer(port, isRemote ? { remote: true, host: hostFlag } : undefined);
+    if (!isRemote) await openBrowser(url);
   }
 
   main().catch((err: unknown) => {

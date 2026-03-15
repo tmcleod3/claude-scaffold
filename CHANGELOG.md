@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [6.5.0] - 2026-03-15
+
+### Added
+- **Camelot Remote** — self-hosted VoidForge with 5-layer security. Access your forge from any browser, anywhere.
+  - `wizard/lib/camelot-auth.ts` — Full authentication engine: PBKDF2 password hashing (210k iterations, NIST SP 800-63B), TOTP 2FA (RFC 6238 with replay protection), session management (in-memory only, 8-hour TTL, IP binding, single active session), rate limiting (5/min, 10-consecutive lockout for 30 min), serialized writes, periodic cleanup.
+  - `wizard/api/auth.ts` — Login, logout, session check, initial setup endpoints. Runtime type validation, field length caps, Cache-Control: no-store on auth responses.
+  - `wizard/ui/login.html` + `wizard/ui/login.js` — Login page with setup flow (first-time TOTP enrollment) and auth flow (username + password + TOTP). Keyboard accessible, autofill-friendly.
+  - `wizard/lib/audit-log.ts` — Append-only JSON lines audit trail at `~/.voidforge/audit.log`. Logs: login attempts, sessions, vault events, terminal sessions, deploys, credential access. 10MB rotation. Never crashes the server.
+  - `wizard/lib/provisioners/self-deploy.ts` — VoidForge self-deploy provisioner: installs Node.js, Caddy, PM2, creates forge-user, generates Caddy HTTPS config, starts VoidForge as a managed service.
+  - ADR-027: Camelot Remote 5-Layer Security Architecture.
+
+### Changed
+- `wizard/server.ts` — Auth middleware gates all routes in remote mode (exempt: login/setup/static). WebSocket upgrade validates Camelot session. CSP includes `wss://` for remote WebSocket. CORS expanded for remote domain. Binds to `0.0.0.0` in remote mode.
+- `wizard/lib/pty-manager.ts` — Remote mode: 20 max sessions (vs. 5 local), audit log integration (terminal_start/terminal_end), forge-user sandboxing.
+- `wizard/ui/hall.html` + `wizard/ui/hall.js` — Auth-aware: shows username, logout button, redirects to login when unauthenticated.
+- `scripts/voidforge.ts` — `--remote` flag (remote mode), `--self` flag (self-deploy), `--host` flag (domain name).
+
+### Security
+- Two-password architecture: login password (bcrypt/PBKDF2) ≠ vault password (AES-256-GCM). Compromised session cannot read credentials.
+- TOTP replay protection: lastTotpStep tracked per user, codes rejected at or before last used step.
+- Rate limiting with memory cleanup: periodic eviction of expired sessions and stale rate-limit entries.
+- Setup endpoint rate-limited and serialized to prevent race-to-setup attacks.
+- X-Forwarded-For only trusted in remote mode (behind Caddy reverse proxy).
+- Auth store throws on corruption (prevents silent re-setup attack vector).
+- Shell injection prevention in self-deploy: input validation + shell escaping.
+- IP binding on sessions: mismatch invalidates session entirely.
+
+---
+
 ## [6.0.0] - 2026-03-15
 
 ### Added

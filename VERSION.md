@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 6.0.0
+**Current:** 6.5.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 6.5.0 | 2026-03-15 | Camelot Remote — 5-layer security, TOTP 2FA, self-deploy, audit trail, two-password architecture |
 | 6.0.0 | 2026-03-15 | Camelot Multi — Great Hall dashboard, project registry, health poller, import flow, SSRF protection |
 | 4.4.0 | 2026-03-15 | The Imagination Release — /imagine (Celebrimbor), /debrief (Bashir), 2 new leads, 7 new sub-agents |
 | 4.2.0 | 2026-03-14 | The DX Release — Prisma types, OpenAPI docs, ERD generation, integration templates, database seeding |

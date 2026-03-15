@@ -322,9 +322,41 @@
     if (e.key === 'Enter') handleImport();
   });
 
+  // ── Auth UI ─────────────────────────────────────────
+
+  const authUser = document.getElementById('auth-user');
+  const btnLogout = document.getElementById('btn-logout');
+
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const body = await res.json();
+      const data = body.data || {};
+      if (data.remoteMode && data.authenticated) {
+        authUser.textContent = data.username;
+        authUser.style.display = '';
+        btnLogout.style.display = '';
+      }
+      if (data.remoteMode && !data.authenticated) {
+        window.location.href = '/login.html';
+      }
+    } catch { /* local mode — no auth needed */ }
+  }
+
+  if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'X-VoidForge-Request': '1' },
+      });
+      window.location.href = '/login.html';
+    });
+  }
+
   // ── Init ───────────────────────────────────────────
 
   async function init() {
+    await checkAuth();
     projects = await fetchProjects();
     render();
 

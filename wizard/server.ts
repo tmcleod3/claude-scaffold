@@ -11,15 +11,19 @@ import './api/provision.js';
 import './api/deploy.js';
 import './api/terminal.js';
 import './api/projects.js';
+import './api/auth.js';
 
 import { handleTerminalUpgrade } from './api/terminal.js';
 import { killAllSessions } from './lib/pty-manager.js';
 import { startHealthPoller, stopHealthPoller } from './lib/health-poller.js';
+import { isRemoteMode, setRemoteMode, validateSession, parseSessionCookie, isAuthExempt } from './lib/camelot-auth.js';
+import { initAuditLog, audit } from './lib/audit-log.js';
 
 const UI_DIR = join(import.meta.dirname, 'ui');
 
 /** Set by startServer so handleRequest can scope CORS to the actual origin. */
 let serverPort = 0;
+let serverHost = ''; // Set for remote mode (e.g., 'forge.yourdomain.com')
 
 /** Expose the server port for WebSocket origin validation. */
 export function getServerPort(): number {
@@ -55,21 +59,25 @@ async function serveStatic(res: ServerResponse, filePath: string): Promise<void>
 }
 
 async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  // CORS — scoped to the wizard's own origin
-  // Allow both localhost and 127.0.0.1 — browser may use either
+  // CORS — scoped to the wizard's own origin (expanded for remote mode)
   const origin = req.headers.origin ?? '';
   const allowedOrigins = [`http://127.0.0.1:${serverPort}`, `http://localhost:${serverPort}`];
+  if (isRemoteMode() && serverHost) {
+    allowedOrigins.push(`https://${serverHost}`);
+  }
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-  // Non-matching origins: no Access-Control-Allow-Origin header (browser blocks)
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-VoidForge-Request');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort}; frame-ancestors 'none'`);
+  const connectSrc = isRemoteMode() && serverHost
+    ? `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort} wss://${serverHost}`
+    : `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort}`;
+  res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src ${connectSrc}; frame-ancestors 'none'`);
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -81,6 +89,27 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   if (req.method === 'POST' && !req.headers['x-voidforge-request']) {
     sendJson(res, 403, { error: 'Missing X-VoidForge-Request header' });
     return;
+  }
+
+  // Auth middleware — in remote mode, require valid session for non-exempt paths
+  if (isRemoteMode()) {
+    const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+    if (!isAuthExempt(url.pathname)) {
+      const token = parseSessionCookie(req.headers.cookie);
+      const ip = getClientIp(req);
+      const username = token ? validateSession(token, ip) : null;
+
+      if (!username) {
+        // API requests get 401, page requests get redirected to login
+        if (url.pathname.startsWith('/api/')) {
+          sendJson(res, 401, { error: 'Authentication required' });
+        } else {
+          res.writeHead(302, { Location: '/login.html' });
+          res.end();
+        }
+        return;
+      }
+    }
   }
 
   // Try API routes first
@@ -114,8 +143,12 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   await serveStatic(res, safePath);
 }
 
-export function startServer(port: number): Promise<void> {
+export function startServer(port: number, options?: { remote?: boolean; host?: string }): Promise<void> {
   serverPort = port;
+  if (options?.remote) {
+    setRemoteMode(true);
+    serverHost = options.host ?? '';
+  }
   return new Promise((resolve, reject) => {
     const server = createServer((req, res) => {
       handleRequest(req, res).catch((err: unknown) => {
@@ -138,15 +171,31 @@ export function startServer(port: number): Promise<void> {
     // WebSocket upgrade handler for terminal connections
     server.on('upgrade', (req, socket, head) => {
       const url = new URL(req.url || '', `http://localhost:${port}`);
-      if (url.pathname === '/ws/terminal') {
-        handleTerminalUpgrade(req, socket, head);
-      } else {
+      if (url.pathname !== '/ws/terminal') {
         socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
         socket.destroy();
+        return;
       }
+
+      // In remote mode, validate Camelot session before allowing WebSocket upgrade
+      if (isRemoteMode()) {
+        const token = parseSessionCookie(req.headers.cookie);
+        const ip = getClientIp(req);
+        const username = token ? validateSession(token, ip) : null;
+        if (!username) {
+          socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+          socket.destroy();
+          return;
+        }
+      }
+
+      handleTerminalUpgrade(req, socket, head);
     });
 
-    server.listen(port, '127.0.0.1', () => {
+    const bindAddress = isRemoteMode() ? '0.0.0.0' : '127.0.0.1';
+
+    server.listen(port, bindAddress, async () => {
+      await initAuditLog();
       startHealthPoller();
       resolve();
     });

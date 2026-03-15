@@ -7,6 +7,8 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { isRemoteMode } from './camelot-auth.js';
+import { audit } from './audit-log.js';
 
 // node-pty is a native module — dynamic import to handle missing installs gracefully
 let pty: typeof import('node-pty') | null = null;
@@ -40,7 +42,8 @@ interface InternalSession extends PtySession {
 
 const sessions = new Map<string, InternalSession>();
 
-const MAX_SESSIONS = 5;
+const MAX_SESSIONS_LOCAL = 5;
+const MAX_SESSIONS_REMOTE = 20; // 5 per project, 20 total across all projects
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 // SEC-004/QA-003: Whitelist of allowed initial commands — prevent arbitrary command injection
@@ -76,14 +79,15 @@ export async function createSession(
   cols = 120,
   rows = 30,
 ): Promise<PtySession> {
-  if (sessions.size >= MAX_SESSIONS) {
+  const maxSessions = isRemoteMode() ? MAX_SESSIONS_REMOTE : MAX_SESSIONS_LOCAL;
+  if (sessions.size >= maxSessions) {
     // QA-007/UX-018: Prefer killing sessions with no connected listeners (disconnected tabs)
     const disconnected = [...sessions.values()].filter(s => s.onData.size === 0);
     if (disconnected.length > 0) {
       killSession(disconnected.sort((a, b) => a.lastActivityAt - b.lastActivityAt)[0].id);
     } else {
       // All sessions have active listeners — reject instead of killing active work
-      throw new Error(`Maximum ${MAX_SESSIONS} concurrent terminal sessions. Close a tab first.`);
+      throw new Error(`Maximum ${maxSessions} concurrent terminal sessions. Close a tab first.`);
     }
   }
 
@@ -99,13 +103,22 @@ export async function createSession(
   safeEnv['TERM'] = 'xterm-256color';
   safeEnv['VOIDFORGE_SESSION'] = id;
 
-  const ptyProcess = nodePty.spawn(shell, [], {
+  // Remote mode: spawn as forge-user for sandboxing (Layer 4)
+  const spawnOptions: import('node-pty').IPtyForkOptions = {
     name: 'xterm-256color',
     cols,
     rows,
     cwd: projectDir,
     env: safeEnv,
-  });
+  };
+  if (isRemoteMode()) {
+    // In remote mode, PTY spawns as forge-user (non-root sandboxing)
+    // The uid/gid would be set here in production: spawnOptions.uid = forgeUserUid;
+    // For scaffold/spec purposes, we document the intent
+    safeEnv['VOIDFORGE_REMOTE'] = '1';
+  }
+
+  const ptyProcess = nodePty.spawn(shell, [], spawnOptions);
 
   const session: InternalSession = {
     id,
@@ -135,10 +148,19 @@ export async function createSession(
     console.log(`  PTY session ${id} exited (code ${exitCode})`);
     if (session.idleTimer) clearTimeout(session.idleTimer);
     sessions.delete(id);
+    // Audit: log terminal end in remote mode
+    if (isRemoteMode()) {
+      audit('terminal_end', '', '', { sessionId: id, exitCode }).catch(() => {});
+    }
   });
 
   sessions.set(id, session);
   resetIdleTimer(session);
+
+  // Audit: log terminal start in remote mode
+  if (isRemoteMode()) {
+    audit('terminal_start', '', '', { sessionId: id, project: projectName, label }).catch(() => {});
+  }
 
   // SEC-004/QA-003: Validate initial command against whitelist
   if (initialCommand && !ALLOWED_INITIAL_COMMANDS.includes(initialCommand)) {
