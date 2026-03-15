@@ -64,6 +64,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/git` | Coulson's version bump, changelog, commit — full release management |
 | `/void` | Bombadil's forge sync — update VoidForge methodology from upstream |
 | `/thumper` | Chani's worm rider — Telegram bridge with Gom Jabbar authentication |
+| `/assemble` | Fury's Initiative — full pipeline: architect → build → 3x review → UX → 2x security → devops → QA → test → crossfire → council |
 
 ## Docs Reference
 
@@ -87,6 +88,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **Release** | `/docs/methods/RELEASE_MANAGER.md` | Coulson — when versioning or releasing |
 | **Forge Keeper** | `/docs/methods/FORGE_KEEPER.md` | Bombadil — when syncing VoidForge updates |
 | **Worm Rider** | `/docs/methods/THUMPER.md` | Chani — when setting up Telegram remote control |
+| **The Initiative** | `/docs/methods/ASSEMBLER.md` | Fury — when running the full pipeline |
 | **Patterns** | `/docs/patterns/` | When writing code (7 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
@@ -103,6 +105,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Release | **Coulson** (Marvel) | Version, changelog, commit, release |
 | Forge Sync | **Bombadil** (Tolkien) | Update VoidForge methodology from upstream |
 | Worm Rider | **Chani** (Dune) | Telegram bridge, Gom Jabbar auth, sandworm relay |
+| The Initiative | **Fury** (Marvel) | Full pipeline orchestration — assembles all agents |
 
 170+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
 

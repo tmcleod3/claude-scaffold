@@ -42,7 +42,7 @@ voidforge/
 │
 ├── .claude/
 │   ├── settings.json             ← Permissions, hooks
-│   └── commands/                 ← 11 slash commands
+│   └── commands/                 ← 12 slash commands
 │       ├── build.md              ← /build — 13-phase protocol
 │       ├── qa.md                 ← /qa — Batman's QA pass (double-pass)
 │       ├── test.md               ← /test — Batman's test-writing mode
@@ -53,7 +53,8 @@ voidforge/
 │       ├── architect.md          ← /architect — Picard's review (parallel analysis)
 │       ├── git.md                ← /git — Coulson's releases
 │       ├── void.md              ← /void — Bombadil's forge sync
-│       └── thumper.md           ← /thumper — Chani's worm rider
+│       ├── thumper.md           ← /thumper — Chani's worm rider
+│       └── assemble.md          ← /assemble — Fury's Initiative
 │
 ├── docs/
 │   ├── PRD.md                    ← PRD template with YAML frontmatter
@@ -84,7 +85,8 @@ voidforge/
 │   │   ├── TROUBLESHOOTING.md         ← Error recovery + rollback
 │   │   ├── MCP_INTEGRATION.md         ← External tool connections
 │   │   ├── PRD_GENERATOR.md           ← PRD auto-generation prompt
-│   │   └── THUMPER.md                ← Chani — worm rider (Dune)
+│   │   ├── THUMPER.md                ← Chani — worm rider (Dune)
+│   │   └── ASSEMBLER.md             ← Fury — the initiative
 │   │
 │   └── patterns/                 ← Reference implementations
 │       ├── api-route.ts          ← Validation, auth, service call
@@ -130,6 +132,7 @@ voidforge/
 | Release | **Coulson** | Marvel | Versioning, changelogs, releases |
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream |
 | Worm Rider | **Chani** | Dune | The Voice, Gom Jabbar authentication, sandworm relay |
+| The Initiative | **Fury** | Marvel | Full pipeline orchestration — assembles all agents |
 
 170+ sub-agents across all 7 universes. See `docs/NAMING_REGISTRY.md`.
 
@@ -152,6 +155,7 @@ voidforge/
 | `/git` | Coulson | Semver + changelog + commit |
 | `/void` | Bombadil | Sync VoidForge methodology from upstream |
 | `/thumper` | Chani | Worm rider — Dune-themed Telegram bridge with Gom Jabbar auth |
+| `/assemble` | Fury | The Initiative — full pipeline with crossfire + council |
 
 ### Wizards (Full Tier)
 

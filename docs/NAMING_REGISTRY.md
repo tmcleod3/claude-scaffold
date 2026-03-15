@@ -23,6 +23,7 @@
 | **Tolkien** | Frontend, UX, Design | Galadriel |
 | **Marvel** | Backend Engineering | Stark |
 | **Marvel** | Release Management | Coulson |
+| **Marvel** | The Initiative | Fury |
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
@@ -66,7 +67,7 @@
 
 ## 🦾 MARVEL — Backend Engineering
 
-**Leads:** Stark (Tony Stark) — Backend Engineering, Coulson (Phil Coulson) — Release Management
+**Leads:** Stark (Tony Stark) — Backend Engineering, Coulson (Phil Coulson) — Release Management, Fury (Nick Fury) — The Initiative
 
 **Available Pool:**
 1. Rogers — API design, by the book, discipline
@@ -75,7 +76,7 @@
 4. Barton — Error handling, never misses
 5. Romanoff — Integrations, trusts no one
 6. Thor — Queue/workers, brings the thunder
-7. Fury — Oversight, tolerates nothing slow
+7. Hill — Mission control, tracks everything, Fury's right hand
 8. Parker — Eager, fast learner, web of connections
 9. T'Challa — Elegant engineering, vibranium-grade quality
 10. Wanda — Reality-bending, handles complex state transforms
@@ -97,7 +98,7 @@
 26. Friday — AI assistant, versioning and automation
 27. Coulson — Meticulous record-keeper, version and release management
 
-**Reserved:** Stark (lead — backend), Coulson (lead — release)
+**Reserved:** Stark (lead — backend), Coulson (lead — release), Fury (lead — the initiative)
 
 ---
 

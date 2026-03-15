@@ -47,7 +47,7 @@ npm run wizard
 **Best for:** Users who want the guided experience. Merlin walks you through setup, Strange handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 11 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 12 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -60,7 +60,7 @@ git clone --branch scaffold https://github.com/tmcleod3/voidforge.git .
 **Best for:** Developers who know what they're doing and want to skip the wizard. You manage your own infrastructure. VoidForge manages your build process.
 
 #### Core (`core` branch)
-The lightest possible version. CLAUDE.md, the 11 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
+The lightest possible version. CLAUDE.md, the 12 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
 
 ```bash
 # Option A: Drop into an existing project
@@ -77,9 +77,9 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **11 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`
+- **12 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`, `/assemble`
 - **13-phase build protocol** — PRD to production with verification gates
-- **9 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
+- **10 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **170+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, and Anime
 - **7 code patterns** — Reference implementations with framework adaptations
 - **This Holocron** — The guide you're reading now
@@ -257,7 +257,7 @@ Long builds span multiple Claude Code sessions. The build journal system handles
 
 ### How the Agent System Works
 
-VoidForge uses 9 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
+VoidForge uses 10 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
 
 1. **Scope boundaries.** When Stark is leading, you're doing backend work. When Galadriel takes over, you're doing frontend. The character tells you which domain you're in.
 2. **Scannable logs.** Build journal entries tagged with agent names are instantly searchable. "What did Batman find?" is faster than "What happened during QA?"
@@ -276,6 +276,7 @@ VoidForge uses 9 lead agents across 7 fictional universes, each commanding a ros
 | Release | **Coulson** | Marvel | Versioning, changelogs, commits, releases | S.H.I.E.L.D.'s meticulous record-keeper, everything by the book |
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream | Ancient, joyful, sings while he works, tends the forge itself |
 | Worm Rider | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
+| The Initiative | **Fury** | Marvel | Full pipeline orchestration, crossfire, council | Assembles the team. Doesn't leave until the mission is complete. |
 
 ### Sub-Agent Highlights
 
@@ -358,7 +359,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Eleven commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Twelve commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.
@@ -424,6 +425,17 @@ The Gom Jabbar protocol gates everything. On first activation, you choose a pass
 The sandworm daemon auto-detects your environment: tmux (preferred, cross-platform), PTY injection (headless Linux), or osascript (macOS Terminal.app/iTerm2). For VS Code, Warp, Alacritty, or Kitty users on macOS, tmux is recommended.
 
 Setup: `/thumper setup` (one-time). Control: `/thumper on` / `/thumper off` / `/thumper status`.
+
+#### `/assemble` — Fury's Initiative
+**When:** You want the full production pipeline in one command.
+
+*"There was an idea..."*
+
+Fury assembles every agent in VoidForge and runs the complete pipeline: architecture review, full build, three rounds of code review, UX pass, two rounds of security audit, infrastructure review, QA, and test suite — then the Crossfire (adversarial agents from four universes attack each other's work) and the Council (domain specialists verify nobody broke anyone else's fixes).
+
+13 phases, all 7 universes, 40+ agents. Checkpoints after every phase so you can resume across sessions with `/assemble --resume`. Skip the build with `--skip-build` to re-run reviews on existing code. Skip the Crossfire and Council with `--fast` for lower-stakes projects.
+
+This is the nuclear option. Use it when quality is non-negotiable.
 
 ---
 
