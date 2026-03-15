@@ -149,15 +149,16 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 ### Step 4 — Deploy Fury
 
 1. Construct the `/assemble` prompt with the mission scope
-2. Fury runs the full pipeline (or `--fast` if user prefers)
+2. Fury runs the full pipeline (or `--fast` if user prefers). **Note:** `--fast` skips Crossfire + Council but NEVER skips `/security` if the mission adds new endpoints, WebSocket handlers, or credential-handling code.
 3. Monitor for context pressure symptoms — if noticed, ask user to run `/context` before checkpointing
 4. On completion → Step 5
 
 ### Step 5 — Debrief and Commit
 
-1. Coulson commits the mission (`/git`)
-2. Update `/logs/campaign-state.md` — mark mission complete, log any deviations from PRD
-3. **Route BLOCKED items to the right place:**
+1. **Security gate (before commit):** Check if this mission added new TypeScript/JavaScript files that handle network I/O (HTTP endpoints, WebSocket handlers), user input (form parsing, body parsing), or credential storage (vault writes, env file generation). If yes, flag: **"This mission added network-facing code. Run `/security` before committing."** Even in `--fast` mode, security is non-negotiable for new attack surface. This prevents shipping Critical vulnerabilities that only get caught in a post-hoc hardening pass.
+2. Coulson commits the mission (`/git`)
+3. Update `/logs/campaign-state.md` — mark mission complete, log any deviations from PRD
+4. **Route BLOCKED items to the right place:**
    - Future feature → append to `ROADMAP.md` under the appropriate version
    - User-provided asset (illustrations, OG images) → add to `## Blocked Items` in campaign-state.md
    - PRD requirement beyond code → mark BLOCKED in the Prophecy Board with reason

@@ -83,7 +83,8 @@ Fix critical and high findings immediately. Medium findings get tracked. For eac
 1. Apply the fix
 2. Verify it works
 3. Check it didn't break anything (`npm test`)
-4. Update the finding status
+4. **Critical path smoke test:** After applying security fixes, verify the primary user flow still works. Security hardening that breaks core functionality is a regression, not an improvement. Common traps: stripping environment variables that the main tool needs (e.g., API keys), tightening auth that blocks legitimate users, restricting paths that the app needs to access. If the fix breaks the happy path, the fix is wrong — find a way to secure without breaking.
+5. Update the finding status
 
 ### Phase 4 — Re-Verify Remediations
 
@@ -91,7 +92,9 @@ After remediations are applied:
 
 **Maul — Red Team Verification:** Re-probe all remediated vulnerabilities. Verify fixes hold under adversarial conditions. Check that fixes didn't introduce new attack vectors. Attempt to bypass the remediations.
 
-Do not finalize the audit until Maul's re-verification passes.
+**Padmé — Functional Verification:** After Maul confirms security holds, Padmé verifies the primary user flow still works end-to-end. Open the app, complete the main task, verify output. This catches "secure but broken" regressions that pure security re-testing misses.
+
+Do not finalize the audit until both Maul AND Padmé sign off.
 
 ## Deliverables
 
