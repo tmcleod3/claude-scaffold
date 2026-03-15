@@ -101,6 +101,18 @@ On confirmation:
 2. If `$ARGUMENTS` includes `--fast`, pass `--fast` to assemble (skip Crossfire + Council)
 3. Monitor for context pressure symptoms (re-reading files, forgetting decisions). If noticed, ask user to run `/context` — only checkpoint if usage exceeds 70%.
 
+## Step 4.5 — Gauntlet Checkpoint (Thanos)
+
+After every 4th mission (missions 4, 8, 12, etc.), run a Gauntlet checkpoint before continuing:
+
+1. **Count completed missions** in this campaign. If `completedMissions % 4 === 0`, trigger checkpoint.
+2. **Run `/gauntlet --quick`** (3 rounds: Discovery → First Strike → Second Strike). This catches cross-module integration bugs that individual `/assemble` runs miss — each `/assemble` only reviews its own changeset, but the Gauntlet reviews the **combined system**.
+3. **Fix all Critical and High findings** before proceeding to the next mission.
+4. **Commit fixes** via `/git` with message: `Gauntlet checkpoint after mission N: X fixes`
+5. If `$ARGUMENTS` includes `--fast`, skip the checkpoint gauntlets (but NOT the final gauntlet in Step 6).
+
+**Why every 4 missions:** Individual `/assemble` runs catch 95% of issues within their scope. The remaining 5% are cross-cutting: missing imports between modules, inconsistent auth enforcement across endpoints built in different missions, CORS/CSP gaps for new connection patterns. Catching these every 4 missions prevents compounding — a bug in mission 2 that affects mission 6 is caught at mission 4, not at the end.
+
 ## Step 5 — Debrief and Commit
 
 After `/assemble` completes:
@@ -114,17 +126,19 @@ After `/assemble` completes:
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6
 
-## Step 6 — Victory Condition (with Troi's Compliance Check)
+## Step 6 — Victory Condition (Gauntlet + Troi's Compliance Check)
 
 All PRD requirements are COMPLETE or explicitly BLOCKED:
-1. Run `/assemble --skip-build` for one final full-project review
-2. **Troi reads the PRD section-by-section** — verifies every prose claim against the implementation. Not just "does the route exist?" but "does the component render what the PRD describes?" Checks numeric claims, visual treatments, copy accuracy, asset gaps.
-3. Fix code discrepancies. Flag asset requirements as BLOCKED.
-4. Report: COMPLETE items, BLOCKED items (with reasons), deviations from PRD
-5. Victory only if user acknowledges all BLOCKED items
-6. Sisko signs off: *"The Prophets' plan is fulfilled. The campaign is complete."*
 
-**Victory ≠ "everything built." Victory = "everything buildable built correctly, everything unbuildable explicitly acknowledged."**
+1. **Run `/gauntlet` (full 5 rounds)** — mandatory final Gauntlet on the complete codebase. This is non-negotiable, even with `--fast`. The Gauntlet tests the combined system across all domains: architecture, code review, UX, security, QA, DevOps, adversarial crossfire, and council convergence. Individual `/assemble` runs review one mission at a time; the Gauntlet reviews everything together.
+2. **Fix all Critical and High findings** from the Gauntlet.
+3. **Troi reads the PRD section-by-section** (runs as part of the Gauntlet Council round) — verifies every prose claim against the implementation. Not just "does the route exist?" but "does the component render what the PRD describes?" Checks numeric claims, visual treatments, copy accuracy, asset gaps.
+4. Fix code discrepancies. Flag asset requirements as BLOCKED.
+5. Report: COMPLETE items, BLOCKED items (with reasons), deviations from PRD
+6. Victory only if: Gauntlet Council signs off AND user acknowledges all BLOCKED items
+7. Sisko signs off: *"The Prophets' plan is fulfilled. The campaign is complete."*
+
+**Victory ≠ "everything built." Victory = "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 
 ## Arguments
 - `--plan [description]` → planning mode: update PRD and/or ROADMAP.md with new ideas, don't build

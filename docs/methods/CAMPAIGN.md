@@ -153,6 +153,18 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 3. Monitor for context pressure symptoms — if noticed, ask user to run `/context` before checkpointing
 4. On completion → Step 5
 
+### Step 4.5 — Gauntlet Checkpoint (Thanos)
+
+After every 4th completed mission (missions 4, 8, 12, etc.), Thanos runs a Gauntlet checkpoint:
+
+1. **Count completed missions.** If `completedMissions % 4 === 0`, trigger checkpoint.
+2. **Run `/gauntlet --quick`** (3 rounds: Discovery → First Strike → Second Strike). Individual `/assemble` runs review one mission's changeset. The Gauntlet reviews the **combined system** — catching cross-module integration bugs: missing imports between modules built in different missions, inconsistent auth enforcement across endpoints, CORS/CSP gaps for new connection patterns.
+3. **Fix all Critical and High findings** before the next mission.
+4. **Commit fixes** via `/git`: `Gauntlet checkpoint after mission N: X fixes`
+5. `--fast` mode skips checkpoint gauntlets (but NOT the mandatory final Gauntlet in Step 6).
+
+**Why every 4 missions:** Each `/assemble` catches ~95% of issues within its scope. The remaining ~5% are cross-cutting — a bug introduced in mission 2 that affects mission 6. Catching these periodically prevents compounding. The cost is one context window per checkpoint; the ROI is real (the v6.0-v6.5 Gauntlet found a build-breaking missing import that two full `/assemble` pipelines missed).
+
 ### Step 5 — Debrief and Commit
 
 1. **Security gate (before commit):** Check if this mission added new TypeScript/JavaScript files that handle network I/O (HTTP endpoints, WebSocket handlers), user input (form parsing, body parsing), or credential storage (vault writes, env file generation). If yes, flag: **"This mission added network-facing code. Run `/security` before committing."** Even in `--fast` mode, security is non-negotiable for new attack surface. This prevents shipping Critical vulnerabilities that only get caught in a post-hoc hardening pass.
@@ -162,26 +174,29 @@ User confirms, redirects, or overrides. On confirm → Step 4.
    - Future feature → append to `ROADMAP.md` under the appropriate version
    - User-provided asset (illustrations, OG images) → add to `## Blocked Items` in campaign-state.md
    - PRD requirement beyond code → mark BLOCKED in the Prophecy Board with reason
-4. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
+5. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6 (victory)
 
-### Step 6 — Victory (with Troi's Compliance Check)
+### Step 6 — Victory (Gauntlet + Troi's Compliance Check)
 
-1. Run `/assemble --skip-build` — final full-project review
-2. **Troi reads the PRD section-by-section** and verifies every prose claim against the implementation:
+All PRD requirements are COMPLETE or explicitly BLOCKED:
+
+1. **Run `/gauntlet` (full 5 rounds)** — mandatory final Gauntlet. Non-negotiable, even with `--fast`. Five rounds: Discovery → First Strike (full domain audits) → Second Strike (re-verification) → Crossfire (adversarial) → Council (convergence). The Gauntlet tests the combined system across all domains simultaneously. This is the "would I ship this" gate.
+2. **Fix all Critical and High findings** from the Gauntlet.
+3. **Troi reads the PRD section-by-section** (runs as part of the Gauntlet's Council round) and verifies every prose claim against the implementation:
    - Does the component render what the PRD describes? (not just "does the route exist?")
    - Are numeric claims accurate? (e.g., "11 lead agents" — count them)
    - Are visual treatments implemented as specified? (hover effects, layouts, colors)
    - Are non-code requirements flagged as BLOCKED? (illustrations, OG images, assets)
-3. If Troi finds discrepancies → fix code requirements, flag asset requirements as BLOCKED
-4. Present final report: COMPLETE items, BLOCKED items (with reasons), deviations from PRD
-5. Victory only if user acknowledges all BLOCKED items
-6. Sisko signs off:
+4. If Troi finds discrepancies → fix code requirements, flag asset requirements as BLOCKED
+5. Present final report: COMPLETE items, BLOCKED items (with reasons), deviations from PRD
+6. Victory only if: **Gauntlet Council signs off** AND user acknowledges all BLOCKED items
+7. Sisko signs off:
 
 > *"The Prophets' plan is fulfilled. The campaign is complete."*
 
-**Victory does NOT mean "everything was built." It means "everything buildable was built correctly, and everything unbuildable is explicitly acknowledged."**
+**Victory does NOT mean "everything was built." It means "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 
 ## The Prophecy Board
 
