@@ -41,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/thumper/water-rings.sh"
+            "command": "[ -f scripts/thumper/water-rings.sh ] && bash scripts/thumper/water-rings.sh || true"
           }
         ]
       }
