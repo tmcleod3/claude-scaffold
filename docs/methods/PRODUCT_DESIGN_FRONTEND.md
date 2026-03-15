@@ -72,6 +72,8 @@ Trace the primary user flow step by step. This is a narrative walkthrough, not a
 - Do search/filter results make sense? (Exact matches before substring matches)
 - Are displayed counts accurate? (Cross-reference rendered numbers against actual data)
 
+**Global CSS conflict check:** For projects with both a global stylesheet (globals.css, base styles) and component-level styles (Tailwind utilities, CSS modules), check for specificity conflicts. Global rules like `.parent { overflow: hidden }` will override Tailwind's `overflow-auto` on children. For each component with layout/overflow/position/z-index utilities, grep the global stylesheet for conflicting rules on parent or ancestor selectors. Common traps: `overflow: hidden` on layout containers, `position: relative` creating unexpected stacking contexts, global `:focus-visible` outlines bleeding through component boundaries.
+
 **If you cannot run the app:** Trace the state flow through the store and component tree to simulate what the user would see at each step. Follow the chain: user action → event handler → store action → state update → which components re-render → what they display.
 
 ## Step 1.75 — Éowyn's Enchantment Review

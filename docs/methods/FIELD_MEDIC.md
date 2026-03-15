@@ -112,11 +112,50 @@ When the user approves submission:
    - Body: the full post-mortem markdown
 3. Confirm: *"Report filed — Starfleet will review. Issue #[number]"*
 
+## Inbox Mode (`--inbox`)
+
+When Bashir is run on the upstream VoidForge repo with `--inbox`, he switches from writing reports to reading them. This completes the feedback loop:
+
+```
+Downstream → /debrief --submit → GitHub Issue filed
+                                       ↓
+Upstream   → /debrief --inbox  → Read, triage, fix
+                                       ↓
+Downstream → /void             → Get the fixes
+```
+
+### How it works
+
+1. Bashir fetches all open issues labeled `field-report` from GitHub
+2. For each report, he reads the full body and extracts: severity, root causes, proposed fixes
+3. He cross-references each proposed fix against the current codebase — some may already be fixed
+4. He presents an inbox summary showing each report with its key finding and fix status
+5. On triage, he classifies each proposed fix:
+   - **accept** — valid, should be implemented. Bashir specifies the exact file changes.
+   - **already-fixed** — the fix was shipped in a recent version. Bashir shows where.
+   - **wontfix** — edge case not worth the complexity. Bashir explains why.
+   - **needs-info** — can't evaluate without more context. Bashir comments on the issue asking for details.
+6. For accepted fixes, Bashir applies them (modifies method docs, commands, patterns) on user approval
+7. He comments on each GitHub issue with the triage results and closes resolved issues
+
+### Why this is Bashir's job (not Bombadil's)
+
+Bombadil (`/void`) carries messages — he syncs files. He doesn't read, think, or diagnose. Bashir reads post-mortems, traces root causes, and proposes fixes. Reading incoming field reports is a natural extension of his diagnostic role. The `--inbox` flag just changes the data source from "local session logs" to "GitHub issues labeled field-report."
+
+### Guard rails
+
+- Only works on the upstream repo (`tmcleod3/voidforge`). If run on a downstream project, warns and exits.
+- Requires `gh` CLI authentication
+- Never auto-applies fixes — always presents for user review first
+- Comments on issues are factual and professional (triage results, not opinions)
+- Closed issues can be reopened if the fix turns out to be insufficient
+
 ## Deliverables
 
 1. Structured post-mortem document
 2. Optional: GitHub issue on upstream repo
 3. Local copy saved to `/logs/debrief-YYYY-MM-DD.md`
+4. (Inbox mode) Triage comments on upstream issues, applied fixes
 
 ## Handoffs
 
