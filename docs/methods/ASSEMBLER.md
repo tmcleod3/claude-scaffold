@@ -52,7 +52,7 @@ Fury calls ALL of them. That's the point.
 7. The Council convergence loop caps at 3 iterations.
 8. `--skip-arch` and `--skip-build` allow re-running reviews on existing code.
 9. `--resume` picks up from the last completed phase.
-10. When context usage exceeds 70%, checkpoint and suggest a new session.
+10. Watch for context pressure symptoms (re-reading files, forgetting decisions). Ask user to run `/context` — only checkpoint if usage exceeds 70%.
 
 ## The Pipeline
 

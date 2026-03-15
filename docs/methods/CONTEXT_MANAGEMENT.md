@@ -59,7 +59,7 @@ At 1M tokens, methodology docs consume ~4% of context. Pre-load strategically:
 - Building 5+ features → one session per 2-3 features
 - Full build (Phase 0-13) → split at natural boundaries (see below)
 - Large QA pass with 30+ findings → split: find bugs in session 1, fix in session 2
-- **Context usage above 70%** → checkpoint and continue in a new session
+- **Context pressure symptoms appear** → ask user to run `/context`, checkpoint if above 70%
 
 ### Natural session boundaries (1M context)
 
@@ -104,23 +104,31 @@ Small-to-medium projects (≤5 features, ≤20 source files) may complete phases
 
 When context is genuinely running low, checkpoint to disk so the next session can resume.
 
+### How to detect context pressure (symptom-based, not count-based):
+
+**Watch for these symptoms:**
+- You're re-reading files you already read earlier (compression dropped them)
+- You can't recall decisions made earlier in the session
+- Responses are getting slower or less coherent
+
+**When symptoms appear:**
+1. Ask the user to run `/context` to check actual usage
+2. If usage is **below 70%** — symptoms may be from other causes. Continue working.
+3. If usage is **above 70%** — checkpoint and suggest a new session.
+
+**What is NOT a sign of context pressure:**
+- High file read count or tool call count alone — these are normal for ambitious sessions
+- Long conversations — 1M context supports extended work sessions
+- Multiple /assemble runs — these are expected in /campaign mode
+
+**Never preemptively suggest checkpoints based on file counts or tool calls.** The model cannot check its own context usage — only the user can via `/context`. Don't guess.
+
 ### Checkpoint procedure:
 1. Update `/logs/build-state.md` with current state
 2. Write current findings/progress to the active phase log
 3. Log any pending decisions to `/logs/decisions.md`
 4. If handing off to another agent, write to `/logs/handoffs.md`
-5. Tell the user: "Context at ~X%. I've checkpointed state to `/logs/build-state.md`. Start a new session and I'll pick up from there."
-
-### Signs context is actually filling (check these, don't guess):
-- **Context usage above 70%** — the real signal. Don't guess from file counts.
-- You're re-reading files you already read earlier (compression dropped them)
-- Responses are getting slower or less coherent
-- You can't remember earlier decisions (they've been compressed)
-
-### What is NOT a sign of context pressure:
-- High file read count or tool call count alone — these are normal for ambitious sessions
-- Long conversations — 1M context supports extended work sessions
-- Multiple /assemble runs — these are expected in /campaign mode
+5. Tell the user: "Context may be getting tight. Run `/context` to check. I've checkpointed state to `/logs/build-state.md` just in case."
 
 ## Efficient File Reading
 

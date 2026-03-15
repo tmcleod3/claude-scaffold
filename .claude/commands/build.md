@@ -98,4 +98,4 @@
 ## At Every Phase
 - Update `/logs/build-state.md` when starting and completing each phase
 - Log non-obvious decisions to `/logs/decisions.md`
-- If context usage exceeds 70%, checkpoint to build-state.md and suggest starting a new session
+- If you notice context pressure symptoms (re-reading files, forgetting decisions), ask user to run `/context`. Only checkpoint if usage exceeds 70%.
