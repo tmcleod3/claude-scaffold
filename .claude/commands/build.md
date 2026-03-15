@@ -86,9 +86,10 @@
 
 ## Phase 12 — Deploy (Kusanagi)
 1. Read `/docs/methods/DEVOPS_ENGINEER.md` — execute full sequence
-2. Provision, configure DNS/SSL, deploy pipeline, monitoring, backups
-3. Log to `/logs/phase-12-deploy.md`
-4. **Gate:** Health check passes in production, monitoring active, backup tested
+2. Run `npx voidforge deploy --headless` to provision infrastructure and deploy from the terminal (no browser needed — uses vault credentials and PRD frontmatter). If the vault isn't set up yet, generate deploy scripts per DEVOPS_ENGINEER.md instead.
+3. Configure DNS/SSL, monitoring, backups
+4. Log to `/logs/phase-12-deploy.md`
+5. **Gate:** Health check passes in production, monitoring active, backup tested
 
 ## Phase 13 — Launch (All agents)
 1. Full checklist: SSL, email, payments, analytics, monitoring, backups, security headers, legal, performance, mobile, accessibility, all tests passing

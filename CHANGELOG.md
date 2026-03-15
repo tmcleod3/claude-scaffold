@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [4.5.0] - 2026-03-15
+
+### Added
+- **PRD-driven credential collection** — Merlin Step 4.5: after pasting a PRD, the wizard parses the env var section and presents a dynamic form to collect project-specific API keys (WhatsApp, Mapbox, Google Places, etc.). All stored in the vault with AES-256-GCM encryption.
+  - New API endpoint: `POST /api/prd/env-requirements` — parses PRD content for service-specific credentials
+  - New API endpoint: `POST /api/credentials/env-batch` — stores multiple credentials in one call
+  - New Merlin step between PRD and Deploy Target with accordion-style credential groups
+- **Headless deploy mode** — `npx voidforge deploy --headless` runs the full provisioner pipeline from the terminal without opening a browser. Uses vault credentials and PRD frontmatter. Progress output to stdout with colored status icons. Used by `/build` Phase 12 so you never leave Claude Code.
+  - New file: `wizard/lib/headless-deploy.ts` — terminal adapter for provisioner pipeline
+  - Updated `scripts/voidforge.ts` with `--headless` and `--dir` flags
+  - Updated `/build` Phase 12 to reference headless deploy
+- **PostgreSQL extension support** — VPS provisioner now detects `postgis` and `pg_trgm` from Prisma schema's `extensions` directive and generates install commands in `provision.sh`
+  - Updated `wizard/lib/provisioners/scripts/provision-vps.ts` with extension block generator
+  - Updated `wizard/api/deploy.ts` to parse Prisma schema for extensions
+
+### Changed
+- Merlin navigation updated to handle Step 4b (project credentials) with proper back/forward flow
+- HOLOCRON updated with headless deploy documentation
+- `/build` Phase 12 now references `npx voidforge deploy --headless` as the primary deploy path
+
+---
+
 ## [4.4.0] - 2026-03-15
 
 ### Added

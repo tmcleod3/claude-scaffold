@@ -186,6 +186,44 @@ deploy: "static"
 3. User sends prompts from Telegram → Claude Code executes → responses sent back
 4. Gom Jabbar re-authenticates after 60 minutes idle
 
+### Feature 6: Camelot (Browser Terminal + Multi-Project Operations Console)
+
+**The vision:** Never leave the browser. Merlin creates the project (Steps 1-6), then the UI transitions to Camelot — a persistent browser workspace with real terminal sessions running Claude Code. The user types `/build`, `/campaign`, SSH commands, git pushes, everything — all inside the browser. After deploy, the terminal stays open. Camelot is where you live.
+
+**Why a real terminal, not API-based build:** Claude Code in a PTY gives you the full experience — 1M context window, all tools (Read, Write, Bash, Grep, etc.), interactive conversation, user intervention. Reimplementing this via the Anthropic API would produce a worse version at twice the code. The browser terminal (xterm.js + node-pty) is the same stack VS Code, Gitpod, and GitHub Codespaces use. It renders Claude Code's full ANSI output correctly because it IS a real terminal.
+
+**Local mode (v5.5):**
+- xterm.js in the browser, WebSocket to server-side PTY
+- Auto-launches Claude Code in the project directory
+- Multiple terminal tabs: Claude Code, SSH to production, shell
+- Session persistence across page navigation
+- Vault password required to establish PTY connection
+
+**Multi-project mode (v6.0):**
+- The Great Hall: dashboard showing all projects with status, health, deploy URL, cost
+- Each project is a "room" — click in for the full terminal workspace
+- Project registry at `~/.voidforge/projects.json`
+- Background health poller
+- Shared vault: cloud credentials work across all projects without re-entry
+
+**Remote mode (v6.5):**
+- VoidForge deployed on a remote VPS, accessed via public URL
+- 5-layer security: network (IP allowlist + rate limiting) → authentication (password + TOTP 2FA) → vault (separate password, auto-locks) → terminal sandboxing (non-root, resource limits) → audit trail (every action logged)
+- Two-password architecture: login password ≠ vault password (compromised session can't read credentials)
+- SSH keys never reach browser — server acts as jump host
+- Accessible from phone, iPad, any browser
+
+**Multi-user mode (v7.0):**
+- Role-based access: admin / deployer / viewer
+- Per-project permissions
+- Linked services for monorepo orchestration
+- Coordinated deploys with confirmation gates
+- Rollback dashboard, cost tracker, agent memory
+
+**New dependencies (only two):**
+- `node-pty` (~2MB native) — PTY process spawning (same as VS Code)
+- `xterm.js` (~200KB client) — browser terminal rendering (same as Gitpod)
+
 ---
 
 ## 5. Distribution Model
@@ -217,12 +255,18 @@ See `ROADMAP.md` for the full plan. Summary:
 | **v4.2** | The DX Release | Type generation, API docs, ERD, integration templates (Stripe/Resend/S3), database seeding |
 | **v4.3** | The Resilience Release | Multi-environment, preview deployments, platform rollback, migration automation, backups |
 | **v4.4** | The Imagination Release | `/imagine` (Celebrimbor — AI image generation) + `/debrief` (Bashir — post-mortem analysis, upstream feedback via GitHub issues) |
+| **v4.5** | The Seamless Release | PRD-driven credential collection in Merlin, headless deploy mode (`--headless`), PostgreSQL extension support |
 | **v5.0** | The Intelligence Release | Lessons integration, build analytics, smart scoping, template marketplace |
+| **v5.5** | Camelot Local | Browser terminal (xterm.js + node-pty), never leave the browser, Claude Code in the wizard |
+| **v6.0** | Camelot Multi | Project registry, Great Hall dashboard, multi-terminal per project, health poller |
+| **v6.5** | Camelot Remote | Self-hosted mode, 5-layer security (network + auth + vault + sandbox + audit), TOTP 2FA, two-password architecture |
+| **v7.0** | The Round Table | Multi-user RBAC, per-project permissions, linked services, coordinated deploys, rollback dashboard, cost tracker, agent memory |
 
 ---
 
 ## 7. Security
 
+### Current (v4.5 — local mode)
 - **Vault:** AES-256-GCM, PBKDF2 100k iterations, SHA-512, atomic writes
 - **Tokens:** Never touch disk. Git push via http.extraheader env var. Triple sanitization in error messages.
 - **Path validation:** projectDir rejects `..` segments, requires absolute paths
@@ -230,6 +274,45 @@ See `ROADMAP.md` for the full plan. Summary:
 - **Gom Jabbar:** PBKDF2 hashed passphrase, message deletion, 60-min idle timeout, 3-attempt lockout
 - **SSH:** Ed25519 key pairs, StrictHostKeyChecking=accept-new, .gitignore protection
 - **SSE output:** Secret stripping loop removes any key containing password/secret/token
+
+### Camelot Local (v5.5)
+- WebSocket requires vault password to establish PTY connection
+- PTY idle timeout: 30 minutes (configurable)
+- Max 5 concurrent terminal sessions
+- Terminal output sanitization (XSS prevention if content reflected to HTML)
+- PTY spawns as current user (never root)
+
+### Camelot Remote (v6.5) — Threat Model
+
+**What's behind the door:** Remote Camelot exposes Anthropic API keys, AWS credentials, GitHub tokens, Cloudflare tokens, all project-specific API keys, SSH access to every production server, source code for every project, database credentials, and a live terminal that can execute any command. This is root access to the user's entire digital infrastructure over HTTPS. A single password is wildly insufficient.
+
+**Attack vectors and mitigations:**
+
+| Vector | Risk | Mitigation |
+|---|---|---|
+| Brute force password | HIGH | Rate limiting (5/min), lockout (10 failures → 30 min ban) |
+| Credential stuffing | HIGH | TOTP 2FA mandatory, unique username |
+| Session hijacking | HIGH | HttpOnly + Secure + SameSite=Strict cookies, IP binding, single session |
+| MITM on WebSocket | MEDIUM | WSS only (TLS via Caddy), HSTS |
+| XSS in terminal output | MEDIUM | xterm.js renders raw bytes (safe); HTML reflections escaped |
+| Vault file exfiltration | HIGH | AES-256-GCM encryption, separate vault password, auto-lock |
+| Abandoned sessions | MEDIUM | 30-min idle timeout on PTYs, 8-hour session TTL |
+| Lost device with saved password | HIGH | TOTP 2FA required, single active session |
+| Shoulder surfing | MEDIUM | Vault password required for sensitive actions (separate from login) |
+
+**5-layer security architecture (all mandatory):**
+1. **Network:** IP allowlist (optional), rate limiting (mandatory), Caddy HTTPS
+2. **Authentication:** Username + bcrypt password → TOTP 2FA → time-limited session
+3. **Vault:** Separate vault password, auto-lock after 15 min, required for deploys/SSH/credential access
+4. **Sandboxing:** Non-root PTY user, resource limits, per-project scoping, SSH proxy (keys never reach browser)
+5. **Audit:** Every action logged to append-only `~/.voidforge/audit.log`, 90-day rotation, failed login alerting
+
+### Multi-User (v7.0)
+- Role-based access: admin / deployer / viewer
+- Per-project access control lists
+- User management requires admin + vault unlock
+- Session isolation between users
+- Cross-project credential access logged separately
 
 ---
 
@@ -241,4 +324,9 @@ How to know VoidForge is working:
 2. **Finding-to-fix ratio** — /assemble pipeline catches issues before users do
 3. **Session recovery rate** — how often build-state.md successfully resumes a multi-session build
 4. **Deploy success rate** — Strange provisions + deploys without manual intervention
+5. **Browser-only success rate** (v5.5+) — % of builds completed without opening a separate terminal
+6. **Zero-context-switch rate** (v5.5+) — from Merlin wizard to live URL, entirely in one browser tab
+7. **Remote build rate** (v6.5+) — builds initiated from non-development devices (phone, tablet, borrowed laptop)
+8. **Multi-project health** (v6.0+) — % of deployed projects with passing health checks in the Great Hall
+9. **Security incident rate** (v6.5+) — zero tolerance for credential exposure or unauthorized access
 5. **Branch sync consistency** — all 3 tiers have identical shared files at every release
