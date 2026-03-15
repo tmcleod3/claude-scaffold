@@ -66,6 +66,8 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/thumper` | Chani's worm rider — Telegram bridge with Gom Jabbar authentication |
 | `/assemble` | Fury's Initiative — full pipeline: architect → build → 3x review → UX → 2x security → devops → QA → test → crossfire → council |
 | `/campaign` | Sisko's War Room — read the PRD, pick the next mission, finish the fight, repeat until done |
+| `/imagine` | Celebrimbor's Forge — AI image generation from PRD visual descriptions |
+| `/debrief` | Bashir's Field Report — post-mortem analysis, upstream feedback via GitHub issues |
 
 ## Docs Reference
 
@@ -91,6 +93,8 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **Worm Rider** | `/docs/methods/THUMPER.md` | Chani — when setting up Telegram remote control |
 | **The Initiative** | `/docs/methods/ASSEMBLER.md` | Fury — when running the full pipeline |
 | **The Campaign** | `/docs/methods/CAMPAIGN.md` | Sisko — when building the whole PRD mission by mission |
+| **Forge Artist** | `/docs/methods/FORGE_ARTIST.md` | Celebrimbor — when generating images from PRD descriptions |
+| **Field Medic** | `/docs/methods/FIELD_MEDIC.md` | Bashir — when running post-mortems and submitting upstream feedback |
 | **Patterns** | `/docs/patterns/` | When writing code (7 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
@@ -109,6 +113,8 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Worm Rider | **Chani** (Dune) | Telegram bridge, Gom Jabbar auth, sandworm relay |
 | The Initiative | **Fury** (Marvel) | Full pipeline orchestration — assembles all agents |
 | Campaign Command | **Sisko** (Star Trek) | Reads the PRD, picks the next mission, runs the war |
+| Forge Artist | **Celebrimbor** (Tolkien) | AI image generation from PRD visual descriptions |
+| Field Medic | **Bashir** (Star Trek) | Post-mortem analysis, upstream feedback via GitHub issues |
 
 170+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
 

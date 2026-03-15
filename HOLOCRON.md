@@ -47,7 +47,7 @@ npm run wizard
 **Best for:** Users who want the guided experience. Merlin walks you through setup, Strange handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 13 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 15 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -77,9 +77,9 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **13 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`, `/assemble`, `/campaign`
+- **15 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`, `/assemble`, `/campaign`, `/imagine`, `/debrief`
 - **13-phase build protocol** — PRD to production with verification gates
-- **11 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
+- **13 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **170+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, and Anime
 - **7 code patterns** — Reference implementations with framework adaptations
 - **This Holocron** — The guide you're reading now
@@ -257,7 +257,7 @@ Long builds span multiple Claude Code sessions. The build journal system handles
 
 ### How the Agent System Works
 
-VoidForge uses 11 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
+VoidForge uses 13 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
 
 1. **Scope boundaries.** When Stark is leading, you're doing backend work. When Galadriel takes over, you're doing frontend. The character tells you which domain you're in.
 2. **Scannable logs.** Build journal entries tagged with agent names are instantly searchable. "What did Batman find?" is faster than "What happened during QA?"
@@ -278,6 +278,8 @@ VoidForge uses 11 lead agents across 7 fictional universes, each commanding a ro
 | Worm Rider | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
 | The Initiative | **Fury** | Marvel | Full pipeline orchestration, crossfire, council | Assembles the team. Doesn't leave until the mission is complete. |
 | Campaign Command | **Sisko** | Star Trek | PRD-to-product campaign, mission sequencing | The builder, the prophet, the war commander. Reads the plan, picks the next fight. |
+| Forge Artist | **Celebrimbor** | Lord of the Rings | AI image generation from PRD descriptions | Hand of Silver. Greatest elven smith. Forges visual assets from prose. |
+| Field Medic | **Bashir** | Star Trek | Post-mortem analysis, upstream feedback | Genetically enhanced diagnostician. Traces root causes, sends field reports to Starfleet. |
 
 ### Sub-Agent Highlights
 
@@ -361,7 +363,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Thirteen commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Fifteen commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.
@@ -451,6 +453,26 @@ Three sub-agents: Kira (detects unfinished work — if there's an in-progress bu
 The Prophecy Board (`/logs/campaign-state.md`) tracks which PRD sections are done, in progress, or not started — persistent across sessions. Run `/campaign` again and Sisko picks up where you left off.
 
 Flags: `--plan [idea]` (update PRD/ROADMAP without building), `--fast` (skip Crossfire+Council), `--resume` (explicit resume), `--mission "Name"` (jump to a specific section).
+
+#### `/imagine` — Celebrimbor's Forge
+**When:** Your PRD describes visual assets (illustrations, portraits, OG images, hero art) that code can't produce.
+
+Celebrimbor scans the PRD for image requirements, derives a consistent style from the brand section, presents a plan with cost estimate, then generates images via OpenAI's API. Every image gets an entry in the asset manifest (`public/images/manifest.json`) for regeneration and auditing.
+
+Three sub-agents: Nori (scans PRD for assets), Ori (crafts generation prompts), Dori (verifies images are wired into components).
+
+Flags: `--scan` (report only), `--asset "name"` (one image), `--regen "name"` (overwrite), `--style "override"` (change aesthetic), `--provider model`.
+
+#### `/debrief` — Bashir's Field Report
+**When:** Something went wrong and you want to understand why — or you want to help improve VoidForge.
+
+Bashir analyzes the session's build logs, git history, and campaign state to produce a structured post-mortem. He identifies methodology gaps, proposes fixes in VoidForge's own language, and can submit the report as a GitHub issue on the upstream repo. Users become contributors just by running `/debrief --submit` after a rough session.
+
+Four sub-agents: Ezri (reconstructs what happened), O'Brien (traces root causes), Nog (proposes solutions), Jake (writes the report).
+
+The feedback loop: `/void` (Bombadil) pulls updates DOWN from upstream. `/debrief` (Bashir) pushes learnings BACK UP. The forge becomes a conversation, not a broadcast.
+
+Flags: `--submit` (create GitHub issue after review), `--campaign` (full campaign analysis), `--session` (just this session), `--dry-run` (generate without submitting).
 
 ---
 

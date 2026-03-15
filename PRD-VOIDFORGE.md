@@ -78,7 +78,7 @@ deploy: "static"
 | Component | Purpose | Files |
 |-----------|---------|-------|
 | **Methodology** | Agent protocols, build phases, code patterns | CLAUDE.md, docs/methods/*.md, docs/patterns/*.ts |
-| **Commands** | 13 slash commands as executable prompts | .claude/commands/*.md |
+| **Commands** | 15 slash commands as executable prompts | .claude/commands/*.md |
 | **Merlin Wizard** | Browser-based setup: vault, credentials, PRD, scaffolding | wizard/ui/app.js, wizard/api/*.ts |
 | **Strange Wizard** | Browser-based deploy: provision infrastructure, deploy code | wizard/ui/deploy.js, wizard/lib/provisioners/*.ts |
 | **Vault** | AES-256-GCM encrypted credential storage | wizard/lib/vault.ts |

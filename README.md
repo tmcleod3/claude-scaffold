@@ -42,7 +42,7 @@ voidforge/
 │
 ├── .claude/
 │   ├── settings.json             ← Permissions, hooks
-│   └── commands/                 ← 13 slash commands
+│   └── commands/                 ← 15 slash commands
 │       ├── build.md              ← /build — 13-phase protocol
 │       ├── qa.md                 ← /qa — Batman's QA pass (double-pass)
 │       ├── test.md               ← /test — Batman's test-writing mode
@@ -54,7 +54,10 @@ voidforge/
 │       ├── git.md                ← /git — Coulson's releases
 │       ├── void.md              ← /void — Bombadil's forge sync
 │       ├── thumper.md           ← /thumper — Chani's worm rider
-│       └── assemble.md          ← /assemble — Fury's Initiative
+│       ├── assemble.md          ← /assemble — Fury's Initiative
+│       ├── campaign.md          ← /campaign — Sisko's War Room
+│       ├── imagine.md           ← /imagine — Celebrimbor's Forge
+│       └── debrief.md           ← /debrief — Bashir's Field Report
 │
 ├── docs/
 │   ├── PRD.md                    ← PRD template with YAML frontmatter
@@ -133,6 +136,9 @@ voidforge/
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream |
 | Worm Rider | **Chani** | Dune | The Voice, Gom Jabbar authentication, sandworm relay |
 | The Initiative | **Fury** | Marvel | Full pipeline orchestration — assembles all agents |
+| Campaign Command | **Sisko** | Star Trek | PRD-to-product campaign, mission sequencing |
+| Forge Artist | **Celebrimbor** | Lord of the Rings | AI image generation from PRD descriptions |
+| Field Medic | **Bashir** | Star Trek | Post-mortem analysis, upstream feedback |
 
 170+ sub-agents across all 7 universes. See `docs/NAMING_REGISTRY.md`.
 
@@ -156,6 +162,9 @@ voidforge/
 | `/void` | Bombadil | Sync VoidForge methodology from upstream |
 | `/thumper` | Chani | Worm rider — Dune-themed Telegram bridge with Gom Jabbar auth |
 | `/assemble` | Fury | The Initiative — full pipeline with crossfire + council |
+| `/campaign` | Sisko | War Room — autonomous PRD-to-product mission sequencing |
+| `/imagine` | Celebrimbor | Forge — AI image generation from PRD visual descriptions |
+| `/debrief` | Bashir | Field Report — post-mortem analysis, upstream feedback |
 
 ### Wizards (Full Tier)
 

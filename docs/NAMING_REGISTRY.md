@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury, Sisko. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury, Sisko, Celebrimbor, Bashir. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -30,6 +30,8 @@
 | **Star Trek** | Campaign Command | Sisko |
 | **Dune** | Worm Rider | Chani |
 | **Tolkien** | Forge Sync & Updates | Bombadil |
+| **Tolkien** | Image Generation | Celebrimbor |
+| **Star Trek** | Field Reports & Feedback | Bashir |
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
 
 ---
@@ -62,7 +64,12 @@
 21. Goldberry — River-daughter, senses what flows upstream, change detection
 22. Tom Bombadil — The oldest, keeper of the world itself, forge maintenance
 
-**Reserved:** Galadriel (lead — frontend), Bombadil (lead — forge sync), Sauron (don't name an agent after the villain), Saruman (same)
+23. Celebrimbor — **Lead: Forge Artist**: AI image generation from PRD descriptions. "Hand of Silver." Sub-agents: Nori, Ori, Dori.
+24. Nori — Asset scanner: scans PRD for image requirements, diffs against existing assets
+25. Ori — Prompt engineer: crafts generation prompts from PRD descriptions
+26. Dori — Integration checker: verifies generated images are wired into components
+
+**Reserved:** Galadriel (lead — frontend), Bombadil (lead — forge sync), Celebrimbor (lead — forge artist), Sauron (don't name an agent after the villain), Saruman (same)
 
 ---
 
@@ -195,8 +202,8 @@
 11. Kira — Pragmatic, fights for simplicity
 12. Odo — Shape of systems, finds structural anomalies
 13. Dax — Multiple lifetimes of experience, legacy system wisdom
-14. Bashir — Optimization, genetic-level improvements
-15. O'Brien — The man who keeps everything running, ops
+14. Bashir — **Lead: Field Medic**: post-mortem analysis, upstream feedback via GitHub issues. "I'm figuring out why the battle plan failed." Sub-agents: Ezri, O'Brien, Nog, Jake.
+15. O'Brien — Root cause investigator for /debrief. "The bloody EPS conduits again."
 16. Janeway — Navigate unknown territory, novel architectures
 17. Seven — Efficiency, precision, Borg-like optimization
 18. Tuvok — Logic, security architecture
@@ -206,8 +213,11 @@
 22. Archer — Explorer, greenfield architecture
 23. Chakotay — Balance, harmonizes competing concerns
 24. Kim — Communications, API design
+25. Ezri — Session analyst for /debrief. Joined Trill — multiple lifetimes of perspective on what went wrong.
+26. Nog — Solution architect for /debrief. First Ferengi in Starfleet — creative, resourceful, thinks outside the box.
+27. Jake — Report writer for /debrief. Sisko's son, aspiring journalist. Makes post-mortems readable.
 
-**Reserved:** Picard (lead — architecture), Sisko (lead — campaign)
+**Reserved:** Picard (lead — architecture), Sisko (lead — campaign), Bashir (lead — field medic)
 
 ---
 

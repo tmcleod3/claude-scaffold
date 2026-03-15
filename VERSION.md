@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 4.2.0
+**Current:** 4.4.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 4.4.0 | 2026-03-15 | The Imagination Release — /imagine (Celebrimbor), /debrief (Bashir), 2 new leads, 7 new sub-agents |
 | 4.2.0 | 2026-03-14 | The DX Release — Prisma types, OpenAPI docs, ERD generation, integration templates, database seeding |
 | 4.1.0 | 2026-03-14 | The Observability Release — deploy logs, cost estimation, health monitoring, Sentry integration |
 | 4.0.0 | 2026-03-14 | The Reliability Release — pre-deploy build step, CI/CD generation, env validation, Railway API migration, credential scoping |
