@@ -65,6 +65,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/void` | Bombadil's forge sync — update VoidForge methodology from upstream |
 | `/thumper` | Chani's worm rider — Telegram bridge with Gom Jabbar authentication |
 | `/assemble` | Fury's Initiative — full pipeline: architect → build → 3x review → UX → 2x security → devops → QA → test → crossfire → council |
+| `/gauntlet` | Thanos's Comprehensive Review — 5 rounds, 30+ agents, 6 universes. Review-only (no build). 4x QA, 4x UX, 4x security, crossfire, council. The ultimate test. |
 | `/campaign` | Sisko's War Room — read the PRD, pick the next mission, finish the fight, repeat until done |
 | `/imagine` | Celebrimbor's Forge — AI image generation from PRD visual descriptions |
 | `/debrief` | Bashir's Field Report — post-mortem analysis, upstream feedback via GitHub issues |
@@ -92,6 +93,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **Forge Keeper** | `/docs/methods/FORGE_KEEPER.md` | Bombadil — when syncing VoidForge updates |
 | **Worm Rider** | `/docs/methods/THUMPER.md` | Chani — when setting up Telegram remote control |
 | **The Initiative** | `/docs/methods/ASSEMBLER.md` | Fury — when running the full pipeline |
+| **The Gauntlet** | `/docs/methods/GAUNTLET.md` | Thanos — when putting a finished project through comprehensive review |
 | **The Campaign** | `/docs/methods/CAMPAIGN.md` | Sisko — when building the whole PRD mission by mission |
 | **Forge Artist** | `/docs/methods/FORGE_ARTIST.md` | Celebrimbor — when generating images from PRD descriptions |
 | **Field Medic** | `/docs/methods/FIELD_MEDIC.md` | Bashir — when running post-mortems and submitting upstream feedback |
@@ -112,6 +114,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Forge Sync | **Bombadil** (Tolkien) | Update VoidForge methodology from upstream |
 | Worm Rider | **Chani** (Dune) | Telegram bridge, Gom Jabbar auth, sandworm relay |
 | The Initiative | **Fury** (Marvel) | Full pipeline orchestration — assembles all agents |
+| The Gauntlet | **Thanos** (Marvel) | Comprehensive review — 5 rounds, 30+ agents, every domain |
 | Campaign Command | **Sisko** (Star Trek) | Reads the PRD, picks the next mission, runs the war |
 | Forge Artist | **Celebrimbor** (Tolkien) | AI image generation from PRD visual descriptions |
 | Field Medic | **Bashir** (Star Trek) | Post-mortem analysis, upstream feedback via GitHub issues |
