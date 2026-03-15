@@ -170,6 +170,39 @@ Modified: `wizard/lib/provisioners/scripts/provision-vps.ts`, `wizard/api/deploy
 
 ---
 
+## v4.6 — The Feedback Release
+
+*The forge learns from every battle it fights.*
+
+Clears the field report backlog (GitHub issues #1, #2, #3). Most findings from the marketing site and Union Station field reports were already fixed in v4.4.0 (Phase 2.5 smoke tests, route collision checks, React render cycle tracing, usability walkthrough in /ux, requirement classification in /campaign, Troi compliance). Four outstanding items remain.
+
+### `/debrief --inbox` — Bashir reads incoming field reports
+Completes the feedback loop. When run on the main VoidForge repo, Bashir fetches open GitHub issues labeled `field-report`, triages each one (accept / wontfix / duplicate / needs-info), and optionally applies the fixes. This is the inverse of `--submit`: downstream projects push learnings up, `--inbox` pulls them in.
+
+Flow: `gh issue list --label field-report --state open` → read each issue body → extract severity, root causes, proposed fixes → present inbox summary → user selects issue to triage → Bashir classifies each fix → applies accepted changes → comments on issue with triage results → closes if fully addressed.
+
+Modified: `.claude/commands/debrief.md` (add `--inbox` argument handling), `docs/methods/FIELD_MEDIC.md` (add Inbox Mode section with triage protocol).
+
+### `/imagine` retry logic
+DALL-E 3 returns 500 errors on ~15% of requests (field report #1). Add 3 attempts with exponential backoff (1s, 3s, 9s) to the image generation pipeline. Log retry attempts. Only fail after all 3 attempts exhausted.
+
+Modified: `wizard/lib/image-gen.ts`.
+
+### Global CSS conflict check
+Galadriel's UX review should check for specificity conflicts between global CSS (globals.css, base styles) and component-level styles (Tailwind utilities, CSS modules). When a component uses `overflow-auto` but globals.css has `.parent { overflow: hidden }`, the global wins. Add to Step 1.5 (Usability Review): "For each component with layout/overflow/position utilities, grep globals.css for conflicting rules on parent selectors."
+
+Modified: `docs/methods/PRODUCT_DESIGN_FRONTEND.md`.
+
+### Automated count cross-referencing in QA
+Marketing sites, landing pages, and docs often claim specific numbers ("170+ agents", "13 phases", "7 patterns"). Batman should grep for numeric claims and cross-reference against the actual data source. Add to Step 3: "For marketing/docs pages, grep for number + noun patterns (e.g., '\\d+ agents'). Cross-reference each against the data source (agents.length, phase count, pattern count). Flag mismatches."
+
+Modified: `docs/methods/QA_ENGINEER.md`.
+
+### Estimated effort
+~120 lines across 4 files. 1 session.
+
+---
+
 ## v5.0 — The Intelligence Release
 
 *VoidForge gets smarter with use.*
