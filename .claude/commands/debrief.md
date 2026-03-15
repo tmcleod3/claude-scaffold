@@ -108,9 +108,52 @@ It does NOT contain:
 
 The user reviews and approves every word before submission.
 
+## Step 6 — Inbox Mode (--inbox)
+
+If `$ARGUMENTS` contains `--inbox`, skip Steps 0-5 and triage incoming field reports instead:
+
+1. Verify this is the VoidForge upstream repo: `gh repo view --json nameWithOwner` — if not `tmcleod3/voidforge`, warn: "Inbox mode is for the upstream VoidForge repo. Run from your local clone of tmcleod3/voidforge."
+2. Fetch open field reports: `gh issue list --repo tmcleod3/voidforge --label field-report --state open --json number,title,body,createdAt`
+3. If no open reports → "Bashir's inbox is empty. No field reports pending."
+4. For each report:
+   - Read the full body
+   - Extract: severity, root causes, proposed fixes
+   - Check which fixes are already shipped (grep the codebase for the proposed changes)
+   - Summarize in one line
+5. Present the inbox:
+   ```
+   ═══════════════════════════════════════════
+     BASHIR'S INBOX — Field Reports
+   ═══════════════════════════════════════════
+
+     [count] open field reports.
+
+     #N  [Title] — [severity]
+         Key finding: [one-line summary]
+         Status: [N already fixed / N remaining]
+
+     [triage #N / triage all]
+   ═══════════════════════════════════════════
+   ```
+6. When user selects an issue to triage:
+   - Read the full issue body
+   - For each proposed fix, classify as:
+     - `accept` — valid finding, should be implemented
+     - `already-fixed` — check the codebase, this was already addressed
+     - `wontfix` — edge case, not worth the complexity
+     - `needs-info` — can't evaluate without more context
+   - For accepted fixes: list the specific file changes with line-level detail
+   - Present triage results to user
+   - On user approval:
+     - Apply accepted fixes (modify method docs, commands, patterns)
+     - Comment on the GitHub issue with triage results
+     - Close the issue if fully addressed: `gh issue close <number> --comment "Triaged and resolved."`
+7. After all issues processed, summarize: "Inbox cleared. [N] issues triaged, [N] fixes applied."
+
 ## Arguments
 - No arguments → full debrief of current session
 - `--submit` → generate, present for review, then submit as GitHub issue after user approval
+- `--inbox` → read incoming field reports from GitHub, triage and apply fixes (upstream repo only)
 - `--campaign` → analyze the full campaign (all missions)
 - `--session` → analyze just this session
 - `--dry-run` → generate report but don't submit

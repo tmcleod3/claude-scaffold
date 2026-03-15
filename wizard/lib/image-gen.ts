@@ -67,34 +67,65 @@ export async function generateImage(
     response_format: 'b64_json',
   });
 
-  try {
-    const res = await httpsPost(OPENAI_API, '/v1/images/generations', {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    }, body, 120_000); // 2 min timeout for image generation
+  // Retry logic: 3 attempts with exponential backoff (1s, 3s, 9s)
+  // DALL-E 3 returns 500 errors on ~15% of requests (field report #1)
+  const MAX_RETRIES = 3;
+  const BACKOFF_BASE_MS = 1000;
 
-    if (res.status !== 200) {
-      const errData = safeJsonParse(res.body) as { error?: { message?: string } } | null;
-      const errMsg = errData?.error?.message || `API returned ${res.status}`;
-      emit({ step: 'image-gen', status: 'error', message: `Generation failed: ${errMsg}` });
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const res = await httpsPost(OPENAI_API, '/v1/images/generations', {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      }, body, 120_000); // 2 min timeout for image generation
+
+      if (res.status === 500 || res.status === 502 || res.status === 503) {
+        // Server error — retry with backoff
+        if (attempt < MAX_RETRIES) {
+          const delay = BACKOFF_BASE_MS * Math.pow(3, attempt - 1);
+          emit({ step: 'image-gen', status: 'started', message: `Server error (${res.status}), retrying in ${delay / 1000}s (attempt ${attempt}/${MAX_RETRIES})` });
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+        emit({ step: 'image-gen', status: 'error', message: `Server error (${res.status}) after ${MAX_RETRIES} attempts` });
+        return null;
+      }
+
+      if (res.status !== 200) {
+        const errData = safeJsonParse(res.body) as { error?: { message?: string } } | null;
+        const errMsg = errData?.error?.message || `API returned ${res.status}`;
+        emit({ step: 'image-gen', status: 'error', message: `Generation failed: ${errMsg}` });
+        return null;
+      }
+
+      const data = safeJsonParse(res.body) as {
+        data?: { b64_json?: string }[];
+      } | null;
+
+      const b64 = data?.data?.[0]?.b64_json;
+      if (!b64) {
+        emit({ step: 'image-gen', status: 'error', message: 'No image data in API response' });
+        return null;
+      }
+
+      if (attempt > 1) {
+        emit({ step: 'image-gen', status: 'done', message: `Succeeded on attempt ${attempt}` });
+      }
+
+      return Buffer.from(b64, 'base64');
+    } catch (err) {
+      if (attempt < MAX_RETRIES) {
+        const delay = BACKOFF_BASE_MS * Math.pow(3, attempt - 1);
+        emit({ step: 'image-gen', status: 'started', message: `Request failed, retrying in ${delay / 1000}s (attempt ${attempt}/${MAX_RETRIES})`, detail: (err as Error).message });
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+      emit({ step: 'image-gen', status: 'error', message: `Image generation failed after ${MAX_RETRIES} attempts`, detail: (err as Error).message });
       return null;
     }
-
-    const data = safeJsonParse(res.body) as {
-      data?: { b64_json?: string }[];
-    } | null;
-
-    const b64 = data?.data?.[0]?.b64_json;
-    if (!b64) {
-      emit({ step: 'image-gen', status: 'error', message: 'No image data in API response' });
-      return null;
-    }
-
-    return Buffer.from(b64, 'base64');
-  } catch (err) {
-    emit({ step: 'image-gen', status: 'error', message: 'Image generation request failed', detail: (err as Error).message });
-    return null;
   }
+
+  return null;
 }
 
 /**

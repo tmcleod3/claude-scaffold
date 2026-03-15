@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 4.5.0
+**Current:** 4.6.0
 
 ## Versioning Scheme
 
