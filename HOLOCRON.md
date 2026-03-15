@@ -136,10 +136,14 @@ This is interactive. Claude works through each phase, verifies gates, and logs e
 #### Step 3: Deploy
 
 ```bash
+# Option A: Browser wizard
 npx voidforge deploy
+
+# Option B: Headless (from terminal / Claude Code — no browser needed)
+npx voidforge deploy --headless
 ```
 
-**Strange** opens in your browser. It scans your project, loads your PRD, and provisions infrastructure for your chosen target. For AWS VPS, that means:
+**Strange** scans your project, loads your PRD, and provisions infrastructure for your chosen target. The browser wizard shows a visual UI with SSE progress streaming; the `--headless` flag runs the same provisioner code from the terminal (used by `/build` Phase 12 so you never leave Claude Code). For AWS VPS, that means:
 - EC2 instance created and running
 - Security groups configured
 - SSH key generated

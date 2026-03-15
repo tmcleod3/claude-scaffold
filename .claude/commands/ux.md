@@ -11,6 +11,22 @@ Document in phase log: "How to run", key routes, where components/styles/copy li
 ## Step 1 — Product Surface Map
 List every screen/route, primary user journeys, key shared components, and the state taxonomy (loading/empty/error/success/partial/unauthorized). Write to phase log.
 
+## Step 1.75 — Éowyn's Enchantment Review
+Before the auditors begin, Éowyn dreams. Read the PRD's brand personality section. Walk through each primary flow and ask:
+- Where could this surprise and delight?
+- Where does functionality need warmth?
+- Do transitions breathe or just appear? (200ms ease-out minimum for panels, modals, state changes)
+- Do empty states invite or repel? (illustrations, warm copy, calls to action)
+- Does loading feel like anticipation or waiting? (progressive reveals, warm shimmers)
+- Do micro-moments celebrate? (toast personality, pin bounces, checkmark draws)
+- Is there a consistent motion language? (same duration/easing vocabulary throughout)
+- Does the first 5 seconds feel like the brand?
+- Could each opportunity be implemented in ~5 lines? (magic must be lightweight)
+
+Log enchantment opportunities to phase log with effort estimates. These are **nice-to-have** — never block ship. But the best ones get implemented in Step 6.
+
+See `PRODUCT_DESIGN_FRONTEND.md` Step 1.75 for full Éowyn protocol.
+
 ## Step 2 — Parallel Analysis
 Use the Agent tool to run these simultaneously — all are read-only analysis:
 - **Agent 1 (Elrond — UX):** Review information architecture, navigation, task flows, friction points. Can users find things? Are flows intuitive?

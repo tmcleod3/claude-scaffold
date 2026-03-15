@@ -50,7 +50,7 @@
 7. Gimli — Sturdiness, performance, reliability
 8. Bilbo — Storytelling, microcopy, content
 9. Frodo — The one carrying the hardest task
-10. Éowyn — Courage, breaking assumptions, "I am no man"
+10. Éowyn — **Delight Architect**: enchantment review, micro-moments, motion language, brand resonance, emotional design. "I am no mere auditor."
 11. Faramir — Judgment, quality over glory
 12. Pippin — Curiosity, edge case discovery (sometimes breaks things)
 13. Merry — Pippin's partner, pair review

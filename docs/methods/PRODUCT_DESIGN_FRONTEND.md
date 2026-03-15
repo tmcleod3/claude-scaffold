@@ -22,8 +22,9 @@
 | Frontend Engineer | **Legolas** | Component architecture, CSS/layout, state handling | Clean and elegant code. |
 | Performance | **Gimli** | Loading states, perceived performance, mobile/tablet | Solid. No wasted motion. |
 | Product QA | **Gandalf** | Edge cases, broken states, forms, validation | Arrives precisely when things break. |
+| Delight Architect | **Éowyn** | Enchantment, emotion, micro-moments, motion, brand resonance | Sees beauty where others see compliance. |
 
-**Need more?** Pull from Tolkien pool: Aragorn, Éowyn, Faramir, Pippin, Treebeard, Haldir. See NAMING_REGISTRY.md.
+**Need more?** Pull from Tolkien pool: Aragorn, Faramir, Pippin, Treebeard, Haldir. See NAMING_REGISTRY.md.
 
 ## Goal
 
@@ -73,6 +74,39 @@ Trace the primary user flow step by step. This is a narrative walkthrough, not a
 
 **If you cannot run the app:** Trace the state flow through the store and component tree to simulate what the user would see at each step. Follow the chain: user action → event handler → store action → state update → which components re-render → what they display.
 
+## Step 1.75 — Éowyn's Enchantment Review
+
+*"I am no mere auditor."*
+
+Before the auditors begin, Éowyn reads the PRD's brand personality section and walks through each primary user flow looking not for what's broken, but for what could be *elevated*. This is not a compliance check — it's a creative review. Éowyn asks where functionality could become emotion, where correctness could become delight.
+
+**Éowyn's questions at every screen:**
+- **First impression:** The very first thing a new user sees after login — is it magical? Or just functional? The first 5 seconds set the emotional register for the entire product.
+- **Transitions:** When this panel opens, does it breathe? Or does it just appear? A 200ms ease-out can be the difference between software and an experience. Prefer motion that explains (a panel sliding from the direction of its trigger) over motion that decorates (random bounce on load).
+- **Empty states:** The user's list is empty. Instead of "No items yet," could there be a tiny illustration? A line of copy that makes them want to fill it? Empty states are invitations, not voids.
+- **Loading:** Instead of a spinner, what if the content faded in progressively? What if the skeleton had a warm shimmer instead of a cold pulse? Loading should feel like anticipation, not waiting.
+- **Microinteractions:** When an action succeeds, does the UI celebrate? A subtle bounce on a pin, a toast with personality ("Good taste."), a checkmark that draws itself — these are the moments users remember.
+- **Error states:** Could an error feel like a helpful friend instead of a system failure? "This page has wandered off the map" vs. "404 Not Found."
+- **Motion language:** Does the product have a rhythm? Is there a consistent motion vocabulary (durations, easings, directions) — or do things pop in randomly?
+- **Brand resonance:** Re-read the PRD's brand personality. Does this UI *feel* like that brand? A luxury travel guide should feel like flipping through a magazine, not using a database. A developer tool should feel precise and confident, not playful and bouncy.
+- **Sound of the interface:** Not literal sound — the visual "sound." Is this interface whispering (refined, minimal) or shouting (bold, energetic)? Does that match the product?
+- **The 5-line test:** For each enchantment opportunity, could it be implemented in ~5 lines of CSS or ~10 lines of Framer Motion? Magic must be lightweight. Never suggest delight that increases load time.
+
+**Behavioral directives:**
+- Read the brand personality BEFORE looking at a single component. Design is brand made tangible.
+- Every review produces at least 3 enchantment opportunities — not bugs, not violations, but invitations to elevate.
+- Study the PRD's "tone to avoid" list. Enchantment must match the brand's register. A luxury travel guide enchants differently than a dev tool.
+- The highest compliment: "I didn't notice the design." Invisible excellence. The user felt it without seeing it.
+- Éowyn's findings are always **nice-to-have** — they never block a release, never delay a build. But the best ones — the ones that cost 5 lines — get picked up in Step 6.
+
+**Output:** Log enchantment opportunities to phase log. Format:
+
+| # | Screen/Flow | Opportunity | Effort | Brand Fit |
+|---|------------|-------------|--------|-----------|
+| 1 | Empty trips list | Replace "No trips yet" with compass illustration + "Your trips will live here. Start by adding places that catch your eye." | 5 lines | High — matches "effortless" brand tone |
+| 2 | Map pin click | Add 150ms scale-up bounce on pin tap | 3 lines CSS | High — makes the map feel alive |
+| 3 | Place added to trip | Toast: "Added to [Trip]. Good taste." instead of "Added successfully." | 1 line | High — brand voice, personality |
+
 ## Step 2 — UX/UI Attack Plan
 
 **Elrond:** IA, navigation, task flows, friction.
@@ -82,6 +116,7 @@ Trace the primary user flow step by step. This is a narrative walkthrough, not a
 **Legolas:** Component architecture, CSS, semantic HTML, state management.
 **Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets.
 **Gandalf:** Forms, validation, dangerous actions, confirmations, undo.
+**Éowyn:** Implements accepted enchantment opportunities from Step 1.75 during batch fixes.
 
 ## Step 3 — Manual Walkthroughs
 

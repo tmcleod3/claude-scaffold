@@ -8,26 +8,48 @@
 
 ---
 
-## v3.1 -- The Last Mile
+## v3.1 -- The Last Mile *(shipped)*
 
-The gap between "Strange provisioned your server" and "your app is live at your domain" is one DNS record. That's one record too many.
+~~The gap between "Strange provisioned your server" and "your app is live at your domain" is one DNS record. That's one record too many.~~
 
-**DNS Management**
-Kusanagi already has the keys. AWS credentials? In the vault. Cloudflare token? In the vault. Route53 and Cloudflare DNS APIs are waiting. Strange provisions the server, then points your domain at it. Caddy sees the domain, provisions SSL automatically. The user never opens a registrar dashboard.
+**~~DNS Management~~** — *Shipped in v3.1.0*
+Cloudflare DNS wiring now runs as a post-provision step after Strange provisions any target. A records for VPS (pointing at EC2 IP), CNAMEs for platforms (Vercel, Railway, Cloudflare Pages, S3). Caddy uses the hostname for automatic Let's Encrypt SSL. Haku routes. Rex locks down. The user never opens a DNS dashboard.
 
-Rex handles the tactical lockdown. Haku (the shapeshifter) handles DNS routing. Together they wire everything up before you finish your coffee.
+**~~Platform Domain Registration~~** — *Shipped in v3.1.0 (unforetold)*
+Not originally in the prophecy, but the Council saw the need. Vercel, Railway, and Cloudflare Pages now register the custom domain on the platform side via their APIs. DNS alone wasn't enough — the platforms need to know too.
 
-**Domain Registration**
-Why stop at DNS records? Route53 and Cloudflare Registrar both have APIs. Strange could ask "Buy this domain?" and register it on the spot. You don't even own the domain yet, and VoidForge handles the whole thing from purchase to production.
+**~~EC2 Instance Sizing~~** — *Shipped in v3.1.0 (unforetold)*
+PRD-driven instance type recommendation. The `instance_type` frontmatter field is auto-recommended from project scope (database, cache, workers, payments, framework). Strange shows the recommendation with cost estimates. RDS and ElastiCache sizes match automatically. ADR-005.
 
-Senku builds civilization from scratch. This is that energy.
+**~~Domain Registration~~** — *Shipped in v3.3.0*
+Cloudflare Registrar API for buying domains through Strange. Pre-DNS step with confirmation gate, cost warning, and post-failure verification. "You don't even own the domain yet, and VoidForge handles the whole thing from purchase to production." Senku built civilization from scratch. This was that energy. ADR-010.
 
-**Async Resource Polling**
-RDS and ElastiCache take 5-10 minutes to spin up. Right now, Strange shrugs and says "check the AWS console." That's beneath us. Strange should poll the APIs, watch for the endpoints to come online, and auto-update `.env` when they're ready. Frieren is patient. She can wait. The user shouldn't have to.
+**~~Async Resource Polling~~** — *Shipped in v3.3.0*
+RDS and ElastiCache endpoints now arrive automatically. Strange polls with AbortController integration, terminal failure detection, and jitter. Frieren waited patiently. The user no longer has to. ADR-009.
+
+**~~Security Hardening~~** — *Shipped in v3.3.0 (unforetold)*
+Four-team review (Galadriel, Batman, Kusanagi, Kenobi) produced 43 findings — all resolved. CSRF protection, DB_PASSWORD stripped from SSE, AWS error sanitization, `.env` chmod 600, concurrency lock, input validation at all layers, HTTP retry logic, partial success UI.
 
 ---
 
-## v3.2 -- The Pipeline
+## v3.2 -- Bombadil's Forge Sync *(shipped)*
+
+**~~`/void` Self-Update Command~~** — *Shipped in v3.2.0 (unforetold)*
+Not originally in the prophecy. Tom Bombadil emerged from the old forest with a new idea: keep the forge sharp. `/void` fetches the latest VoidForge methodology from the scaffold branch, compares every shared file, shows a human-readable update plan, and sings the changes into place — preserving project-specific customizations. Works on all three tiers. ADR-008.
+
+---
+
+## v3.3 -- The Last Mile Complete *(shipped)*
+
+**~~Async Resource Polling~~** — *Shipped in v3.3.0*
+**~~Domain Registration~~** — *Shipped in v3.3.0*
+**~~Security Hardening (43 findings)~~** — *Shipped in v3.3.0 (unforetold)*
+
+The remaining v3.1 prophecy items plus a full four-team security review. See v3.1 above for details.
+
+---
+
+## v3.4 -- The Pipeline *(next)*
 
 Deploying manually is fine for launch day. After that, you want a pipeline that deploys every time you push to main. Batman wants automated smoke tests. Kenobi wants secrets out of flat files. Everyone wins.
 
@@ -48,7 +70,7 @@ No more "did you remember to set the env vars in production?" Leia remembers. Le
 
 ---
 
-## v3.3 -- The Watchtower
+## v3.5 -- The Watchtower
 
 *Oracle sees the whole system. But right now, she's reading logs on a terminal. Give her a proper command center.*
 
@@ -67,7 +89,7 @@ Weekly test restores to a scratch database. If the restore fails, Zenitsu panics
 
 ---
 
-## v3.4 -- The Academy
+## v3.6 -- The Academy
 
 *"The only way to learn is to do." -- Picard, probably*
 
@@ -81,25 +103,35 @@ A sandbox where you can see each of the 7 code patterns in action, with live exa
 
 ---
 
-## v4 Territory -- The Multiverse
+## v5.5–v7.0 Territory — Camelot
 
-*"There was an idea... to bring together a group of remarkable people." -- Fury*
+*"Merlin is building Camelot."*
 
-These are the big swings. The ones that change what VoidForge fundamentally is.
+These are not incremental features. This is the transformation of VoidForge from a development tool you use in a terminal into a **castle you live in**. The key insight: don't rebuild Claude Code via the API — embed the real thing in a browser terminal. You get actual Claude Code (full tools, 1M context, interactive conversation) inside xterm.js, connected via WebSocket to a server-side PTY. After Merlin creates the project, the UI transitions to Camelot: a persistent browser workspace where you build, deploy, SSH into production, push hotfixes, run reviews, and manage every project you've ever built — all from one browser tab. Never leave. Never open a separate terminal.
 
-**Multi-Project Orchestration**
-VoidForge managing a monorepo with multiple services, each with their own PRD. Picard designs the system boundaries. Stark builds the services independently. Kusanagi deploys them as a fleet with service mesh, shared databases, and coordinated rollbacks.
+When Camelot runs on a remote server, you access it from any device — phone, iPad, hotel business center, a friend's laptop. The server IS your development machine, build server, and production host. One VPS to rule them all.
 
-Lelouch orchestrates. He's a master strategist. He sees the whole board.
+**v5.5 — Camelot Local** *(the foundation)*
+Browser terminal via `node-pty` + xterm.js + WebSocket. Merlin transitions to embedded terminal after project creation. Single project per instance. Claude Code runs in the browser. SSH to production from the browser. Multiple terminal tabs (Claude Code, SSH, shell). Session persistence across page navigation.
 
-**Rollback Dashboard**
-Strange grows a deployment history UI. See every deploy, every version, every rollback. One-click revert to any previous release. Deploy diffs showing exactly what changed. Trunks manages the timeline. Valkyrie handles the rescue operations.
+Haku (Spirited Away — the river spirit, master of transformation) handles the WebSocket bridge. He moves between worlds seamlessly.
 
-**Cost Tracker**
-AWS billing API integration, baked into Strange. "Your infrastructure costs $47/month. RDS is 60% of that. Here's what Picard's Tier 2 scaling plan would cost." Nanami tracks the budget. He's a 9-to-5 guy. He respects the numbers.
+**v6.0 — Camelot Multi** *(the Great Hall)*
+Multi-project dashboard. Project registry at `~/.voidforge/projects.json`. The Great Hall shows all projects: status, health, deploy URL, monthly cost, quick actions. Each project is a "room" — click in to get the full terminal workspace. Background health poller pings each project's health URL every 5 minutes. Shared vault: AWS, GitHub, Cloudflare credentials work across all projects without re-entry.
 
-**Agent Memory**
-Agents that remember across projects. "Last time you built a Next.js app with Stripe, we hit this issue in Phase 6." Holocrons storing not just methodology but experience. Wong guards the knowledge. The Sanctum grows.
+Lelouch (Code Geass — master strategist) sees the whole board from the Great Hall. He orchestrates across all projects.
+
+**v6.5 — Camelot Remote** *(the drawbridge)*
+Self-hosted mode. Deploy VoidForge itself to a VPS. Access via public URL behind 5-layer security: network (IP allowlist + rate limiting), authentication (username/password + TOTP 2FA), vault (separate encryption password that auto-locks), terminal sandboxing (non-root user, resource limits, session caps), audit trail (every action logged). Two-password architecture: login password ≠ vault password. If someone compromises the session, they still can't read credentials or deploy. SSH keys never reach the browser — the server acts as a jump host.
+
+Kenobi designed the security. "The high ground is everything."
+
+**v7.0 — The Round Table** *(the kingdom)*
+Multi-user, multi-project, coordinated operations. Role-based access (admin/deployer/viewer). Per-project permissions. Linked services for monorepo awareness. Coordinated deploys across service boundaries. Rollback dashboard with one-click revert. Cost tracking across the fleet. Agent memory that learns across projects.
+
+Lelouch orchestrates the fleet. Trunks manages the timeline (rollbacks). Nanami tracks the budget. Wong guards the accumulated knowledge. Valkyrie runs rescue operations when deploys go sideways.
+
+The full Prophecy v4 vision — Multi-Project Orchestration, Rollback Dashboard, Cost Tracker, Agent Memory — all live inside Camelot's walls.
 
 ---
 
