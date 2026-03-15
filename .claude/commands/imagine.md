@@ -81,6 +81,18 @@ For each asset:
 
 If `$ARGUMENTS` contains `--regen "name"`, regenerate just that asset (overwrite existing).
 
+## Step 5.5 — Optimize for Web (Gimli)
+
+DALL-E outputs 1024x1024 PNGs regardless of display size. A 40px avatar served from a 1024px source wastes 99% of bandwidth. For every generated image:
+
+1. **Determine display dimensions** — check the asset manifest for intended usage (avatar, hero, card, portrait). If the PRD or component specifies dimensions, use 2x those (retina). Default sizes by category: avatars → 200px, portraits → 400px, cards → 600px, hero → 1200px, OG images → 1200x630.
+2. **Resize** — use `sharp` (already a project dependency) to resize to 2x display dimensions. Never serve 1024px for a 40px slot.
+3. **Convert to WebP** — WebP is ~70% smaller than PNG at equivalent quality. Save as `.webp` with quality 85 (good enough for illustrations, dramatically smaller). Keep the original PNG in a `/originals` subfolder for regeneration.
+4. **Verify size** — individual image must be < 200KB after optimization. If larger, reduce quality to 75 and try again.
+5. **Update manifest** — record optimized filename, dimensions, and file size. Log savings: "Optimized {name}: {original_size} → {optimized_size} ({savings}% reduction)"
+
+Total asset budget: all generated images combined should be < 10MB. If over, flag the largest offenders.
+
 ## Step 6 — Integration Check (Dori)
 
 Scan codebase for image references (`src=`, `url(`, `import`):

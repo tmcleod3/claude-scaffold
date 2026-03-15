@@ -65,6 +65,8 @@ Deployable, observable, recoverable, maintainable. Automate everything done more
 
 **Holo — Cost:** Monthly hosting, per-user cost, most expensive service, growth projections, right-sizing recommendations.
 
+**Levi — Page Weight Gate (pre-deploy):** Before deploying, check total static asset size. Individual images must be < 200KB. Total `public/` or `static/` directory must be < 10MB (excluding node_modules and build cache). Flag images >4x their display dimensions — a 1024px source for a 40px avatar is a 97% bandwidth waste. If `/imagine` was used, verify Step 5.5 (Gimli optimization) ran. This gate catches the #1 cause of slow marketing sites.
+
 ## Deliverables
 
 1. /scripts/provision.sh, deploy.sh, rollback.sh, backup-db.sh
