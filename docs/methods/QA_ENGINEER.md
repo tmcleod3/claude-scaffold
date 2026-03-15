@@ -72,6 +72,8 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 
 **Copy Accuracy Pass:** Grep for numeric claims in rendered content (e.g., "10 lead agents", "12 commands", "53 pages"). Cross-reference against actual data counts. Any mismatch is a bug — inaccurate numbers undermine credibility. This is automatable and should run on every QA pass.
 
+**Image Size Audit:** For projects with static images (especially `/imagine` output), check every image in `public/` or `static/`: flag any image > 200KB, flag any image >4x its display dimensions (a 1024px source rendered at 40px is a 97% bandwidth waste). Total asset directory should be < 10MB for marketing sites, < 50MB for apps. If `/imagine` was used, verify Gimli's optimization step (Step 5.5) produced WebP files at 2x display dimensions, not raw 1024px DALL-E PNGs.
+
 ## Step 2 — Baseline Repro Harness
 
 Get the project running. Create repeatable manual validation: app starts, primary flow works, auth works, data persists, error states display, mobile works. Document exact commands.
