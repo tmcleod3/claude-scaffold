@@ -71,7 +71,7 @@
 
 ### Pass 1 — Find (all three run in parallel)
 1. **Batman (QA):** Read `/docs/methods/QA_ENGINEER.md`. Run Oracle + Red Hood + Alfred + Deathstroke + Constantine in parallel. Lucius reviews config separately. Log to `/logs/phase-09-qa-audit.md`
-2. **Galadriel (UX)** [SKIP if `type: api-only`]: Read `/docs/methods/PRODUCT_DESIGN_FRONTEND.md`. Run Elrond + Arwen + Samwise in parallel, then Bilbo + Legolas + Gimli + Gandalf sequentially. Log to `/logs/phase-10-ux-audit.md`
+2. **Galadriel (UX)** [SKIP if `type: api-only`]: Read `/docs/methods/PRODUCT_DESIGN_FRONTEND.md`. Run Elrond + Arwen + Samwise in parallel, then Bilbo + Legolas + Gimli + Radagast sequentially. Log to `/logs/phase-10-ux-audit.md`
 3. **Kenobi (Security):** Read `/docs/methods/SECURITY_AUDITOR.md`. Run Leia + Chewie + Rex + Maul in parallel, then Yoda → Windu → Ahsoka → Padmé sequentially. Log to `/logs/phase-11-security-audit.md`
 
 ### Fix Batch
@@ -80,7 +80,7 @@
 
 ### Pass 2 — Re-Verify (all three run in parallel)
 6. **Batman:** Nightwing re-runs test suite + Red Hood re-probes fixed areas + Deathstroke re-tests boundaries
-7. **Galadriel:** Samwise re-audits a11y on modified components + Gandalf re-checks edge cases
+7. **Galadriel:** Samwise re-audits a11y on modified components + Radagast re-checks edge cases
 8. **Kenobi:** Maul re-probes all remediated vulnerabilities
 9. If Pass 2 finds new issues, fix and re-verify until clean
 10. **Gate:** All agents sign off — test suite green, a11y clean, no critical/high security findings

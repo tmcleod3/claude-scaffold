@@ -29,7 +29,7 @@ Synthesize all four into a unified findings list. Log to `/logs/gauntlet-round-1
 Use the Agent tool to run all four in parallel — full domain audits:
 
 - **Agent 1 (Batman — Full QA):** Run the complete `/qa` protocol. Oracle + Red Hood + Alfred + Deathstroke + Constantine + Nightwing. Every edge case, every error state, every boundary.
-- **Agent 2 (Galadriel — Full UX):** Run the complete `/ux` protocol. Elrond + Arwen + Samwise + Bilbo + Legolas + Gimli + Gandalf + Éowyn. Usability, visual, a11y, copy, performance, edge cases, enchantment.
+- **Agent 2 (Galadriel — Full UX):** Run the complete `/ux` protocol. Elrond + Arwen + Samwise + Bilbo + Legolas + Gimli + Radagast + Éowyn. Usability, visual, a11y, copy, performance, edge cases, enchantment.
 - **Agent 3 (Kenobi — Full Security):** Run the complete `/security` protocol. Leia + Chewie + Rex + Maul parallel scans, then Yoda → Windu → Ahsoka → Padmé sequential audits.
 - **Agent 4 (Stark — Integration Tracing):** For every API endpoint, trace the full data path: client request → validation → service → database → response. For every file upload, trace: upload → storage → retrieval → display. For every credential, trace: entry → vault → usage → cleanup.
 
@@ -44,7 +44,7 @@ Merge all findings. Deduplicate across domains.
 Use the Agent tool to run all four in parallel — targeted re-verification:
 
 - **Agent 1 (Batman — Re-probe):** Nightwing re-runs the test suite. Red Hood re-probes fixed areas. Deathstroke tests new boundaries created by the fixes. Focus on regressions.
-- **Agent 2 (Galadriel — Error States + Re-verify):** Samwise re-audits a11y on all modified components. Gandalf re-checks edge cases on fixed flows. Bilbo re-checks microcopy on any changed UI.
+- **Agent 2 (Galadriel — Error States + Re-verify):** Samwise re-audits a11y on all modified components. Radagast re-checks edge cases on fixed flows. Bilbo re-checks microcopy on any changed UI.
 - **Agent 3 (Kenobi — Re-probe + Access Control):** Maul re-probes all remediated vulnerabilities. Ahsoka verifies access control across every role boundary. Padmé verifies the primary user flow still works (critical path smoke test).
 - **Agent 4 (Kusanagi — DevOps):** Run the complete `/devops` protocol. Deploy scripts, monitoring, backups, health checks, page weight gate, security headers.
 

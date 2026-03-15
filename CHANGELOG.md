@@ -6,21 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [6.5.1] - 2026-03-15
+
+### Changed
+- **The Arthurian Retcon** — All Arthurian legend references removed from the codebase. VoidForge's identity is rooted in its declared fictional universes (Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime). Arthurian legend was never one of them.
+  - **Merlin → Gandalf** (Tolkien) — Setup wizard is now Gandalf. *"I'm looking for someone to share in an adventure."* The wizard who kicks off the journey.
+  - **Gandalf → Radagast** (Tolkien) — UX edge-cases sub-agent renamed to free the name. Radagast notices things at the boundaries others overlook.
+  - **Camelot → Avengers Tower** (Marvel) — Browser terminal / operations console. Stark's HQ. Every project gets a floor.
+  - **Great Hall → The Lobby** (Marvel) — Multi-project dashboard. Where you see every floor at a glance.
+  - **Round Table → The Penthouse** (Marvel) — v7.0 multi-user coordination. Where the team meets. Top floor.
+- 39 files modified, 5 files renamed, ~180 replacements across code + docs.
+
+---
+
 ## [6.5.0] - 2026-03-15
 
 ### Added
-- **Camelot Remote** — self-hosted VoidForge with 5-layer security. Access your forge from any browser, anywhere.
-  - `wizard/lib/camelot-auth.ts` — Full authentication engine: PBKDF2 password hashing (210k iterations, NIST SP 800-63B), TOTP 2FA (RFC 6238 with replay protection), session management (in-memory only, 8-hour TTL, IP binding, single active session), rate limiting (5/min, 10-consecutive lockout for 30 min), serialized writes, periodic cleanup.
+- **Avengers Tower Remote** — self-hosted VoidForge with 5-layer security. Access your forge from any browser, anywhere.
+  - `wizard/lib/tower-auth.ts` — Full authentication engine: PBKDF2 password hashing (210k iterations, NIST SP 800-63B), TOTP 2FA (RFC 6238 with replay protection), session management (in-memory only, 8-hour TTL, IP binding, single active session), rate limiting (5/min, 10-consecutive lockout for 30 min), serialized writes, periodic cleanup.
   - `wizard/api/auth.ts` — Login, logout, session check, initial setup endpoints. Runtime type validation, field length caps, Cache-Control: no-store on auth responses.
   - `wizard/ui/login.html` + `wizard/ui/login.js` — Login page with setup flow (first-time TOTP enrollment) and auth flow (username + password + TOTP). Keyboard accessible, autofill-friendly.
   - `wizard/lib/audit-log.ts` — Append-only JSON lines audit trail at `~/.voidforge/audit.log`. Logs: login attempts, sessions, vault events, terminal sessions, deploys, credential access. 10MB rotation. Never crashes the server.
   - `wizard/lib/provisioners/self-deploy.ts` — VoidForge self-deploy provisioner: installs Node.js, Caddy, PM2, creates forge-user, generates Caddy HTTPS config, starts VoidForge as a managed service.
-  - ADR-027: Camelot Remote 5-Layer Security Architecture.
+  - ADR-027: Avengers Tower Remote 5-Layer Security Architecture.
 
 ### Changed
-- `wizard/server.ts` — Auth middleware gates all routes in remote mode (exempt: login/setup/static). WebSocket upgrade validates Camelot session. CSP includes `wss://` for remote WebSocket. CORS expanded for remote domain. Binds to `0.0.0.0` in remote mode.
+- `wizard/server.ts` — Auth middleware gates all routes in remote mode (exempt: login/setup/static). WebSocket upgrade validates Avengers Tower session. CSP includes `wss://` for remote WebSocket. CORS expanded for remote domain. Binds to `0.0.0.0` in remote mode.
 - `wizard/lib/pty-manager.ts` — Remote mode: 20 max sessions (vs. 5 local), audit log integration (terminal_start/terminal_end), forge-user sandboxing.
-- `wizard/ui/hall.html` + `wizard/ui/hall.js` — Auth-aware: shows username, logout button, redirects to login when unauthenticated.
+- `wizard/ui/lobby.html` + `wizard/ui/lobby.js` — Auth-aware: shows username, logout button, redirects to login when unauthenticated.
 - `scripts/voidforge.ts` — `--remote` flag (remote mode), `--self` flag (self-deploy), `--host` flag (domain name).
 
 ### Security
@@ -38,20 +51,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [6.0.0] - 2026-03-15
 
 ### Added
-- **Camelot Multi — The Great Hall** — multi-project operations console. Dashboard shows all VoidForge projects with health status, deploy URL, framework badge, cost, and quick actions.
+- **Avengers Tower Multi — The Lobby** — multi-project operations console. Dashboard shows all VoidForge projects with health status, deploy URL, framework badge, cost, and quick actions.
   - `wizard/lib/project-registry.ts` — CRUD for `~/.voidforge/projects.json`. Serialized writes (vault pattern), atomic file ops (temp + fsync + rename), backup before overwrite, field validation on read, MUTABLE_FIELDS allowlist on update.
   - `wizard/api/projects.ts` — REST API: list all, get by ID, import existing project, delete from registry. Runtime type validation on all inputs, path canonicalization via `resolve()`.
-  - `wizard/ui/hall.html` + `wizard/ui/hall.js` — Great Hall dashboard with project cards, health indicators (color + text labels for WCAG 1.4.1), import modal with focus trap, keyboard-navigable cards, 30-second polling.
+  - `wizard/ui/lobby.html` + `wizard/ui/lobby.js` — The Lobby dashboard with project cards, health indicators (color + text labels for WCAG 1.4.1), import modal with focus trap, keyboard-navigable cards, 30-second polling.
   - `wizard/lib/health-poller.ts` — Background health checks every 5 minutes. Parallel via `Promise.allSettled`, 5-second timeout per project, SSRF protection (private IP blocklist, redirect blocking, hex/octal/IPv6 coverage).
 - **Import Existing Project** — `POST /api/projects/import` scans a directory for CLAUDE.md, PRD frontmatter, .env, build-state, and auto-detects framework from package.json/requirements.txt/Gemfile.
-- **Back-to-Hall navigation** in Camelot — "← Hall" button with session persistence confirmation.
-- ADR-026: Project Registry and Great Hall Architecture.
+- **Back-to-Lobby navigation** in Avengers Tower — "← Lobby" button with session persistence confirmation.
+- ADR-026: Project Registry and The Lobby Architecture.
 
 ### Changed
-- Server landing page changed from Merlin (`/index.html`) to Great Hall (`/hall.html`). Merlin still accessible via direct URL and "New Project" buttons.
+- Server landing page changed from Gandalf (`/index.html`) to The Lobby (`/lobby.html`). Gandalf still accessible via direct URL and "New Project" buttons.
 - `wizard/server.ts` — health poller lifecycle (start on listen, stop before PTY cleanup), double-shutdown guard, CORS fix (non-matching origins get no allow-origin header).
 - `wizard/api/project.ts` — registers new projects in registry, runtime type validation on all body fields, .env template injection prevention (newline stripping).
-- `wizard/ui/camelot.html` — ARIA landmarks (`<main>`, `role="alert"`), `:focus-visible` on buttons, `prefers-reduced-motion` support.
+- `wizard/ui/tower.html` — ARIA landmarks (`<main>`, `role="alert"`), `:focus-visible` on buttons, `prefers-reduced-motion` support.
 
 ### Security
 - SSRF prevention in health poller: URL scheme validation, private IP blocklist (IPv4, IPv6, hex, octal, decimal, 0.0.0.0, metadata endpoints), `redirect: 'manual'` to prevent redirect-based SSRF.
@@ -68,11 +81,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [5.5.0] - 2026-03-15
 
 ### Added
-- **Camelot Local** — browser terminal with real Claude Code. Never leave the browser.
+- **Avengers Tower Local** — browser terminal with real Claude Code. Never leave the browser.
   - `wizard/lib/pty-manager.ts` — PTY lifecycle management using `node-pty`. Spawns real shell processes, manages multiple sessions per project, 30-min idle timeout, max 5 concurrent sessions.
   - `wizard/api/terminal.ts` — WebSocket ↔ PTY bridge (raw RFC 6455 implementation). REST endpoints for session CRUD. Vault password required to establish connections.
-  - `wizard/ui/camelot.html` + `wizard/ui/camelot.js` — browser terminal UI using xterm.js. Tabbed interface: multiple terminals per project (Claude Code, Shell, SSH). Auto-launches Claude Code on open. Resize handling, session reconnection on navigate-back.
-  - "Open in Camelot" button on Merlin's done screen — transitions directly from project creation to browser terminal.
+  - `wizard/ui/tower.html` + `wizard/ui/tower.js` — browser terminal UI using xterm.js. Tabbed interface: multiple terminals per project (Claude Code, Shell, SSH). Auto-launches Claude Code on open. Resize handling, session reconnection on navigate-back.
+  - "Open in Avengers Tower" button on Gandalf's done screen — transitions directly from project creation to browser terminal.
   - WebSocket upgrade handler in `wizard/server.ts` — routes `/ws/terminal` to PTY bridge.
   - Graceful shutdown: `killAllSessions()` on SIGINT/SIGTERM.
 - New dependency: `node-pty` (~2MB native module, same as VS Code terminal)
@@ -86,7 +99,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **Lessons integration** — Wong extracts learnings after every `/assemble` run and appends to `LESSONS.md`. Lessons confirmed across 2+ projects are flagged for promotion to method docs. `/build` Phase 0 now loads relevant lessons from prior projects to inform the current build.
 - **Build analytics** — `wizard/lib/build-analytics.ts` tracks metrics across projects: phase findings, fix-to-finding ratios, framework-specific trends. Stored at `~/.voidforge/analytics.json`. `surfaceTrends()` generates human-readable insights.
 - **Smart scoping** — `/campaign` now orders missions complexity-first within dependency tiers. Hardest features (most integrations, edge cases, schema relationships) built first when energy is fresh; polish and admin later.
-- **Project templates** — 4 curated starters: SaaS (Next.js + Stripe + teams), REST API (Express + Postgres), Marketing Site (Next.js + Tailwind), Admin Dashboard (Next.js + shadcn/ui). `npx voidforge init --template saas` or select in Merlin wizard. `npx voidforge templates` lists all available.
+- **Project templates** — 4 curated starters: SaaS (Next.js + Stripe + teams), REST API (Express + Postgres), Marketing Site (Next.js + Tailwind), Admin Dashboard (Next.js + shadcn/ui). `npx voidforge init --template saas` or select in Gandalf wizard. `npx voidforge templates` lists all available.
   - New file: `wizard/lib/templates.ts` — template definitions with frontmatter, suggested integrations, and PRD scaffolding
   - New API: `GET /api/prd/templates`, `GET /api/prd/templates/get?id=saas`
   - New CLI: `npx voidforge templates` command
@@ -108,10 +121,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [4.5.0] - 2026-03-15
 
 ### Added
-- **PRD-driven credential collection** — Merlin Step 4.5: after pasting a PRD, the wizard parses the env var section and presents a dynamic form to collect project-specific API keys (WhatsApp, Mapbox, Google Places, etc.). All stored in the vault with AES-256-GCM encryption.
+- **PRD-driven credential collection** — Gandalf Step 4.5: after pasting a PRD, the wizard parses the env var section and presents a dynamic form to collect project-specific API keys (WhatsApp, Mapbox, Google Places, etc.). All stored in the vault with AES-256-GCM encryption.
   - New API endpoint: `POST /api/prd/env-requirements` — parses PRD content for service-specific credentials
   - New API endpoint: `POST /api/credentials/env-batch` — stores multiple credentials in one call
-  - New Merlin step between PRD and Deploy Target with accordion-style credential groups
+  - New Gandalf step between PRD and Deploy Target with accordion-style credential groups
 - **Headless deploy mode** — `npx voidforge deploy --headless` runs the full provisioner pipeline from the terminal without opening a browser. Uses vault credentials and PRD frontmatter. Progress output to stdout with colored status icons. Used by `/build` Phase 12 so you never leave Claude Code.
   - New file: `wizard/lib/headless-deploy.ts` — terminal adapter for provisioner pipeline
   - Updated `scripts/voidforge.ts` with `--headless` and `--dir` flags
@@ -121,7 +134,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   - Updated `wizard/api/deploy.ts` to parse Prisma schema for extensions
 
 ### Changed
-- Merlin navigation updated to handle Step 4b (project credentials) with proper back/forward flow
+- Gandalf navigation updated to handle Step 4b (project credentials) with proper back/forward flow
 - HOLOCRON updated with headless deploy documentation
 - `/build` Phase 12 now references `npx voidforge deploy --headless` as the primary deploy path
 
@@ -227,7 +240,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 - **Haku's Last Mile** — every deploy target is now fully automated end-to-end. Run `npm run deploy` and get a live URL, not a manual checklist.
-- **GitHub integration** — new cloud provider in Merlin. Collects PAT, creates repos, pushes code. Used by Vercel, Cloudflare Pages, and Railway for auto-deploy on push.
+- **GitHub integration** — new cloud provider in Gandalf. Collects PAT, creates repos, pushes code. Used by Vercel, Cloudflare Pages, and Railway for auto-deploy on push.
 - **SSH deploy module** — provisions EC2 servers remotely (provision.sh), deploys via release-directory strategy with atomic symlink swap, health checks, and automatic rollback on failure.
 - **S3 deploy via SDK** — uploads build directory to S3 with correct MIME types and cache-control headers. No AWS CLI dependency (ADR-014).
 - **Shared exec utility** — child process wrapper with timeout, abort signal, and streaming (ADR-013). Used by GitHub and SSH modules.
@@ -423,7 +436,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 - **PRD-driven EC2 instance type selection** — PRD frontmatter `instance_type` field recommends t3.micro/small/medium/large based on project scope (database, cache, workers, payments, framework). Haku wizard shows the recommendation with cost estimates and allows override. RDS and ElastiCache sizes match automatically. (ADR-005)
-- **Cloudflare DNS wiring** — new `hostname` field in Merlin wizard and PRD frontmatter. After Haku provisions infrastructure, it auto-creates Cloudflare DNS records (A for VPS, CNAME for platforms) pointing your domain at the provisioned resource. Works with all deploy targets. Non-fatal — infrastructure still succeeds if DNS fails. (ADR-006)
+- **Cloudflare DNS wiring** — new `hostname` field in Gandalf wizard and PRD frontmatter. After Haku provisions infrastructure, it auto-creates Cloudflare DNS records (A for VPS, CNAME for platforms) pointing your domain at the provisioned resource. Works with all deploy targets. Non-fatal — infrastructure still succeeds if DNS fails. (ADR-006)
 - **Platform custom domain registration** — Haku now registers your hostname directly with Vercel, Railway, and Cloudflare Pages via their APIs, so the platform expects traffic on your domain
 - **Caddyfile auto-HTTPS** — when hostname is set, generated Caddyfile uses the domain instead of `:80`, enabling automatic Let's Encrypt SSL via Caddy
 - **Instance sizing module** (`wizard/lib/instance-sizing.ts`) — scoring heuristic with `recommendInstanceType()`, RDS/ElastiCache size mapping, swap scaling
@@ -454,15 +467,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [2.8.0] - 2026-03-12
 
 ### Added
-- **Wizard split into Merlin (setup) and Haku (deploy)** — `npx voidforge init` launches the setup wizard, `npx voidforge deploy` launches the deploy wizard. Provisioning moved from Merlin to Haku for cleaner separation of concerns.
+- **Wizard split into Gandalf (setup) and Haku (deploy)** — `npx voidforge init` launches the setup wizard, `npx voidforge deploy` launches the deploy wizard. Provisioning moved from Gandalf to Haku for cleaner separation of concerns.
 - **Architecture docs** — `ARCHITECTURE.md` (system overview + diagram), `SCALING.md` (three-tier assessment), `TECH_DEBT.md` (prioritized catalog), `FAILURE_MODES.md` (component failure analysis with recovery procedures)
 - **Security checklist** — `SECURITY_CHECKLIST.md`, reusable pre-deploy verification list covering secrets, vault, server, AWS provisioning, generated infrastructure, input validation, and dependencies
 
 ### Changed
-- **Merlin UI simplified** — removed provisioning steps (now in Haku). Merlin focuses on vault, credentials, project setup, PRD, and scaffold creation.
+- **Gandalf UI simplified** — removed provisioning steps (now in Haku). Gandalf focuses on vault, credentials, project setup, PRD, and scaffold creation.
 
 ### Fixed
-- **QA fixes** for Merlin/Haku restructure
+- **QA fixes** for Gandalf/Haku restructure
 - **UX polish** for Haku deploy wizard
 
 ### Security

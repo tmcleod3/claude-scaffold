@@ -40,10 +40,10 @@
 
 ## 🧝 TOLKIEN — Frontend & UX
 
-**Leads:** Galadriel (Frontend & UX), Bombadil (Forge Sync & Updates)
+**Leads:** Galadriel (Frontend & UX), Bombadil (Forge Sync & Updates), Gandalf (Setup Wizard)
 
 **Available Pool (use in order, skip if taken):**
-1. Gandalf — Edge cases, QA, the one who arrives when things break
+1. Radagast — Edge cases, QA, notices things at the boundaries others overlook
 2. Aragorn — Leadership, orchestration, the ranger who sees everything
 3. Legolas — Precision, elegance, clean frontend code
 4. Samwise — Accessibility, loyalty, never leaves anyone behind
@@ -60,7 +60,7 @@
 15. Boromir — Strong but flawed, catches hubris in design
 16. Théoden — Rallying, bringing teams together
 17. Haldir — Border guard, catches things at boundaries
-18. Radagast — Nature, organic patterns, accessibility
+18. (Radagast — moved to #1)
 19. Celeborn — Quiet authority, design system governance
 20. Glorfindel — Ancient power, handles the hardest rendering challenges
 21. Goldberry — River-daughter, senses what flows upstream, change detection

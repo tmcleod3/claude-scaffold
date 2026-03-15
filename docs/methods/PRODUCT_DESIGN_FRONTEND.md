@@ -21,7 +21,7 @@
 | Content Designer | **Bilbo** | Microcopy, error messages, empty states, tone | Does it speak clearly? |
 | Frontend Engineer | **Legolas** | Component architecture, CSS/layout, state handling | Clean and elegant code. |
 | Performance | **Gimli** | Loading states, perceived performance, mobile/tablet | Solid. No wasted motion. |
-| Product QA | **Gandalf** | Edge cases, broken states, forms, validation | Arrives precisely when things break. |
+| Product QA | **Radagast** | Edge cases, broken states, forms, validation | Arrives precisely when things break. |
 | Delight Architect | **Éowyn** | Enchantment, emotion, micro-moments, motion, brand resonance | Sees beauty where others see compliance. |
 
 **Need more?** Pull from Tolkien pool: Aragorn, Faramir, Pippin, Treebeard, Haldir. See NAMING_REGISTRY.md.
@@ -48,7 +48,7 @@ Adversarial UX/UI QA review. Identify usability issues, inconsistencies, broken 
 4. Maintain design consistency: use existing system/components.
 5. If change impacts behavior, call it out and offer alternatives.
 6. No new dependencies unless necessary.
-7. Spin up all seven agents. Gandalf checks everyone's work.
+7. Spin up all seven agents. Radagast checks everyone's work.
 8. Validation is manual + automated: run the app, click through, written regression checklist. Reference `/docs/patterns/component.tsx` for state handling patterns.
 
 ## Step 0 — Orient
@@ -117,7 +117,7 @@ Before the auditors begin, Éowyn reads the PRD's brand personality section and 
 **Bilbo:** Microcopy, labels, CTAs, error messages, empty states, tone.
 **Legolas:** Component architecture, CSS, semantic HTML, state management.
 **Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets.
-**Gandalf:** Forms, validation, dangerous actions, confirmations, undo.
+**Radagast:** Forms, validation, dangerous actions, confirmations, undo.
 **Éowyn:** Implements accepted enchantment opportunities from Step 1.75 during batch fixes.
 
 ## Step 3 — Manual Walkthroughs
@@ -145,9 +145,9 @@ Arwen leads. Buttons, inputs, cards, modals, toasts. Consistent variants, spacin
 
 After all fixes are applied, run a verification pass to catch fix-induced regressions:
 - **Samwise** re-audits accessibility on all modified components — verify a11y fixes didn't break other a11y properties (common anti-pattern)
-- **Gandalf** re-checks edge cases on fixed flows — verify fixes hold under adversarial input
+- **Radagast** re-checks edge cases on fixed flows — verify fixes hold under adversarial input
 
-If Pass 2 finds new issues, fix and re-verify. Do not finalize until Samwise and Gandalf sign off.
+If Pass 2 finds new issues, fix and re-verify. Do not finalize until Samwise and Radagast sign off.
 
 ## Step 8 — Deliverables
 

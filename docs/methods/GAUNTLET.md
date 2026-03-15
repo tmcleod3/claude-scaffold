@@ -44,13 +44,13 @@
 
 **Round 2 — First Strike (full teams):**
 - Batman team: Oracle, Red Hood, Alfred, Deathstroke, Constantine, Nightwing, Lucius
-- Galadriel team: Elrond, Arwen, Samwise, Bilbo, Legolas, Gimli, Gandalf, Éowyn
+- Galadriel team: Elrond, Arwen, Samwise, Bilbo, Legolas, Gimli, Radagast, Éowyn
 - Kenobi team: Leia, Chewie, Rex, Maul, Yoda, Windu, Ahsoka, Padmé
 - Stark: integration tracing (solo — follows data across all modules)
 
 **Round 3 — Second Strike (targeted re-verification):**
 - Batman: Nightwing + Red Hood + Deathstroke (re-probe)
-- Galadriel: Samwise + Gandalf + Bilbo (re-verify)
+- Galadriel: Samwise + Radagast + Bilbo (re-verify)
 - Kenobi: Maul + Ahsoka + Padmé (re-probe + functional check)
 - Kusanagi: Senku + Levi + Spike + L + Bulma + Holo (full DevOps)
 

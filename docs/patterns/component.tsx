@@ -149,7 +149,7 @@ function ProjectCard({
         )}
       </div>
 
-      {/* Dangerous action requires confirmation (Gandalf — safety) */}
+      {/* Dangerous action requires confirmation (Radagast — safety) */}
       {confirmDelete ? (
         <div className="flex gap-2" role="group" aria-label="Confirm deletion">
           <button
