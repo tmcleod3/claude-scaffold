@@ -13,9 +13,12 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Duplex } from 'node:stream';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import { access } from 'node:fs/promises';
+import { join } from 'node:path';
 import { addRoute } from '../router.js';
 import { getSessionPassword } from './credentials.js';
+import { getServerPort } from '../server.js';
 import { parseJsonBody } from '../lib/body-parser.js';
 import {
   createSession, writeToSession, onSessionData, resizeSession,
@@ -61,6 +64,20 @@ addRoute('POST', '/api/terminal/sessions', async (req: IncomingMessage, res: Ser
     return;
   }
 
+  // SEC-003/QA-002: Validate projectDir — absolute path, no traversal
+  if (!body.projectDir.startsWith('/') || body.projectDir.includes('..')) {
+    sendJson(res, 400, { error: 'projectDir must be an absolute path with no ".." segments' });
+    return;
+  }
+
+  // Verify this is a VoidForge project (CLAUDE.md exists)
+  try {
+    await access(join(body.projectDir, 'CLAUDE.md'));
+  } catch {
+    sendJson(res, 400, { error: 'Not a VoidForge project — no CLAUDE.md found' });
+    return;
+  }
+
   try {
     const session = await createSession(
       body.projectDir,
@@ -70,7 +87,9 @@ addRoute('POST', '/api/terminal/sessions', async (req: IncomingMessage, res: Ser
       body.cols || 120,
       body.rows || 30,
     );
-    sendJson(res, 200, { session });
+    // SEC-001/SEC-002: Generate per-session auth token for WebSocket upgrade
+    const authToken = createHmac('sha256', password).update(session.id).digest('hex');
+    sendJson(res, 200, { session, authToken });
   } catch (err) {
     sendJson(res, 400, { error: (err as Error).message });
   }
@@ -194,9 +213,12 @@ function decodeWsFrame(buf: Buffer): { data: string; bytesConsumed: number } | n
   return { data: '', bytesConsumed: totalLen };
 }
 
+/** Maximum WebSocket buffer size (1 MB) — prevents memory exhaustion from slow reads. */
+const MAX_BUFFER_SIZE = 1024 * 1024;
+
 /**
  * Handle a WebSocket upgrade request for a terminal session.
- * URL: /ws/terminal?session=<id>
+ * URL: /ws/terminal?session=<id>&token=<authToken>
  */
 export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer): void {
   const password = getSessionPassword();
@@ -206,11 +228,30 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
     return;
   }
 
+  // SEC-001: Origin validation — reject cross-origin WebSocket upgrades
+  const origin = req.headers.origin || '';
+  const port = getServerPort();
+  const allowedOrigins = [`http://127.0.0.1:${port}`, `http://localhost:${port}`];
+  if (origin && !allowedOrigins.includes(origin)) {
+    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
   const url = new URL(req.url || '', 'http://localhost');
   const sessionId = url.searchParams.get('session');
 
   if (!sessionId) {
     socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  // SEC-002: Validate per-session auth token
+  const token = url.searchParams.get('token');
+  const expectedToken = createHmac('sha256', password).update(sessionId).digest('hex');
+  if (!token || token.length !== expectedToken.length || !timingSafeEqual(Buffer.from(token), Buffer.from(expectedToken))) {
+    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
     socket.destroy();
     return;
   }
@@ -253,13 +294,32 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
   socket.on('data', (chunk: Buffer) => {
     buffer = Buffer.concat([buffer, chunk]);
 
+    // QA-004/SEC-005: Prevent memory exhaustion from slow reads or malicious clients
+    if (buffer.length > MAX_BUFFER_SIZE) {
+      socket.destroy();
+      return;
+    }
+
     while (buffer.length > 0) {
       const frame = decodeWsFrame(buffer);
       if (!frame) break; // incomplete frame, wait for more data
 
+      // QA-005: Guard against zero-length consumption (infinite loop)
+      if (frame.bytesConsumed === 0) break;
+
       buffer = buffer.subarray(frame.bytesConsumed);
 
-      if (!frame.data) continue; // close frame or empty
+      // QA-005: Handle close frame — send close frame back per RFC 6455
+      if (!frame.data && frame.bytesConsumed > 0) {
+        const closeFrame = Buffer.alloc(2);
+        closeFrame[0] = 0x88; // FIN + close opcode
+        closeFrame[1] = 0;
+        socket.write(closeFrame);
+        socket.destroy();
+        return;
+      }
+
+      if (!frame.data) continue;
 
       // Ping → send pong
       if (frame.data === '\x09') {

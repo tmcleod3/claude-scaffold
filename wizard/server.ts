@@ -19,6 +19,11 @@ const UI_DIR = join(import.meta.dirname, 'ui');
 /** Set by startServer so handleRequest can scope CORS to the actual origin. */
 let serverPort = 0;
 
+/** Expose the server port for WebSocket origin validation. */
+export function getServerPort(): number {
+  return serverPort;
+}
+
 const MIME_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -63,7 +68,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' ws://localhost:* ws://127.0.0.1:*; frame-ancestors 'none'");
+  res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort}; frame-ancestors 'none'`);
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);

@@ -43,6 +43,14 @@ const sessions = new Map<string, InternalSession>();
 const MAX_SESSIONS = 5;
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
+// SEC-004/QA-003: Whitelist of allowed initial commands — prevent arbitrary command injection
+const ALLOWED_INITIAL_COMMANDS = ['claude', 'bash', 'zsh', 'sh', 'npm run dev', 'npm start', 'npm test'];
+
+// SEC-013: Safe environment keys — no credential leakage into PTY sessions
+// Includes ANTHROPIC_API_KEY because Claude Code needs it to authenticate.
+// Includes TMPDIR/SSH_AUTH_SOCK for tool compatibility.
+const SAFE_ENV_KEYS = ['PATH', 'HOME', 'SHELL', 'USER', 'LANG', 'LC_ALL', 'LC_CTYPE', 'TERM_PROGRAM', 'EDITOR', 'VISUAL', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'NVM_DIR', 'NVM_BIN', 'NVM_INC', 'TMPDIR', 'TEMP', 'SSH_AUTH_SOCK', 'COLORTERM', 'ANTHROPIC_API_KEY'];
+
 function resetIdleTimer(session: InternalSession): void {
   if (session.idleTimer) clearTimeout(session.idleTimer);
   session.idleTimer = setTimeout(() => {
@@ -69,12 +77,13 @@ export async function createSession(
   rows = 30,
 ): Promise<PtySession> {
   if (sessions.size >= MAX_SESSIONS) {
-    // Kill oldest idle session to make room
-    const oldest = [...sessions.values()].sort((a, b) => a.lastActivityAt - b.lastActivityAt)[0];
-    if (oldest) {
-      killSession(oldest.id);
+    // QA-007/UX-018: Prefer killing sessions with no connected listeners (disconnected tabs)
+    const disconnected = [...sessions.values()].filter(s => s.onData.size === 0);
+    if (disconnected.length > 0) {
+      killSession(disconnected.sort((a, b) => a.lastActivityAt - b.lastActivityAt)[0].id);
     } else {
-      throw new Error(`Maximum ${MAX_SESSIONS} concurrent terminal sessions`);
+      // All sessions have active listeners — reject instead of killing active work
+      throw new Error(`Maximum ${MAX_SESSIONS} concurrent terminal sessions. Close a tab first.`);
     }
   }
 
@@ -82,17 +91,20 @@ export async function createSession(
   const shell = process.env['SHELL'] || '/bin/zsh';
   const id = randomUUID();
 
+  // SEC-013: Build clean environment — no credential leakage into PTY
+  const safeEnv: Record<string, string> = {};
+  for (const key of SAFE_ENV_KEYS) {
+    if (process.env[key]) safeEnv[key] = process.env[key]!;
+  }
+  safeEnv['TERM'] = 'xterm-256color';
+  safeEnv['VOIDFORGE_SESSION'] = id;
+
   const ptyProcess = nodePty.spawn(shell, [], {
     name: 'xterm-256color',
     cols,
     rows,
     cwd: projectDir,
-    env: {
-      ...process.env,
-      TERM: 'xterm-256color',
-      // Ensure Claude Code can detect it's in a PTY
-      VOIDFORGE_SESSION: id,
-    } as Record<string, string>,
+    env: safeEnv,
   });
 
   const session: InternalSession = {
@@ -127,6 +139,11 @@ export async function createSession(
 
   sessions.set(id, session);
   resetIdleTimer(session);
+
+  // SEC-004/QA-003: Validate initial command against whitelist
+  if (initialCommand && !ALLOWED_INITIAL_COMMANDS.includes(initialCommand)) {
+    initialCommand = undefined;
+  }
 
   // Auto-run initial command after a short delay (let shell init complete)
   if (initialCommand) {
@@ -170,6 +187,9 @@ export function onSessionData(sessionId: string, listener: (data: string) => voi
 export function resizeSession(sessionId: string, cols: number, rows: number): void {
   const session = sessions.get(sessionId);
   if (!session) return;
+  // QA-016/SEC-007: Clamp resize values to sane bounds
+  cols = Math.max(1, Math.min(500, Math.floor(cols)));
+  rows = Math.max(1, Math.min(200, Math.floor(rows)));
   session.cols = cols;
   session.rows = rows;
   session.process.resize(cols, rows);

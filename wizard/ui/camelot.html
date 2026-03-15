@@ -29,7 +29,13 @@
       flex-shrink: 0;
     }
     .camelot-header .logo { font-size: 14px; color: var(--accent); font-weight: 600; }
-    .camelot-header .project-name { font-size: 13px; color: var(--text-dim); }
+    .camelot-header .project-name {
+      font-size: 13px; color: var(--text-dim);
+      max-width: 40vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .camelot-header .actions { display: flex; gap: 8px; }
 
     /* Tab bar */
@@ -76,7 +82,9 @@
     .loading {
       display: flex; align-items: center; justify-content: center;
       height: 100%; color: var(--text-dim); font-size: 14px;
+      animation: pulse 2s ease-in-out infinite;
     }
+    @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
   </style>
 </head>
 <body>
@@ -92,6 +100,8 @@
   </header>
 
   <div class="tab-bar" id="tab-bar"></div>
+
+  <div id="camelot-status" style="display:none; padding: 4px 16px; background: rgba(239,68,68,0.1); color: #ef4444; font-size: 12px; border-bottom: 1px solid var(--border);"></div>
 
   <div class="terminal-container" id="terminal-container">
     <div class="loading" id="loading-state">Preparing Camelot...</div>

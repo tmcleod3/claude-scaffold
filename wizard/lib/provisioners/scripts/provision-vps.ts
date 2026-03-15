@@ -12,9 +12,16 @@ interface ProvisionScriptOptions {
   extensions?: string[];
 }
 
+// QA-001/SEC-009: Allowlist of safe PostgreSQL extensions — prevent SQL injection via extension names
+const ALLOWED_EXTENSIONS = ['postgis', 'pg_trgm', 'uuid-ossp', 'pgcrypto', 'citext', 'hstore', 'ltree', 'cube', 'earthdistance', 'unaccent', 'vector', 'pg_stat_statements', 'tablefunc', 'btree_gist', 'btree_gin', 'fuzzystrmatch'];
+
 /** Generate PostgreSQL extension install commands if extensions are specified. */
 function generateExtensionBlock(opts: ProvisionScriptOptions): string {
   if (!opts.extensions || opts.extensions.length === 0 || opts.database !== 'postgres') return '';
+
+  // Filter to only allowed extensions
+  const safeExtensions = opts.extensions.filter(ext => ALLOWED_EXTENSIONS.includes(ext.toLowerCase().trim()));
+  if (safeExtensions.length === 0) return '';
 
   const lines: string[] = [
     '',
@@ -23,7 +30,7 @@ function generateExtensionBlock(opts: ProvisionScriptOptions): string {
     '# ==========================================',
   ];
 
-  for (const ext of opts.extensions) {
+  for (const ext of safeExtensions) {
     const extLower = ext.toLowerCase().trim();
     if (extLower === 'postgis') {
       lines.push('echo "Installing PostGIS..."');

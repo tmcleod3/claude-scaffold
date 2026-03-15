@@ -23,6 +23,18 @@
   const container = document.getElementById('terminal-container');
   const loadingState = document.getElementById('loading-state');
 
+  tabBar.setAttribute('role', 'tablist');
+
+  const statusEl = document.getElementById('camelot-status');
+
+  function showStatus(msg, durationMs) {
+    statusEl.textContent = msg;
+    statusEl.style.display = 'block';
+    if (durationMs) {
+      setTimeout(() => { statusEl.style.display = 'none'; }, durationMs);
+    }
+  }
+
   // ── API helpers ────────────────────────────────────
   async function createPtySession(label, initialCommand, cols, rows) {
     const res = await fetch('/api/terminal/sessions', {
@@ -35,7 +47,7 @@
       throw new Error(err.error || 'Failed to create session');
     }
     const data = await res.json();
-    return data.session;
+    return { session: data.session, authToken: data.authToken };
   }
 
   async function killPtySession(sessionId) {
@@ -49,7 +61,7 @@
   // ── Tab management ─────────────────────────────────
   let tabIdCounter = 0;
 
-  function createTab(label, sessionId) {
+  function createTab(label, sessionId, authToken) {
     const tabId = ++tabIdCounter;
 
     // Create terminal
@@ -92,6 +104,7 @@
     const panelEl = document.createElement('div');
     panelEl.className = 'terminal-panel';
     panelEl.id = 'panel-' + tabId;
+    panelEl.setAttribute('role', 'tabpanel');
     container.appendChild(panelEl);
 
     terminal.open(panelEl);
@@ -99,7 +112,7 @@
 
     // Connect WebSocket
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/terminal?session=${sessionId}`);
+    const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/terminal?session=${sessionId}&token=${encodeURIComponent(authToken)}`);
 
     ws.onopen = () => {
       // Send initial resize
@@ -114,7 +127,7 @@
     };
 
     ws.onclose = () => {
-      terminal.write('\r\n\x1b[90m[Session ended]\x1b[0m\r\n');
+      terminal.write('\r\n\x1b[90m[Session ended — close this tab or open a new one above]\x1b[0m\r\n');
     };
 
     // Forward keystrokes to WebSocket
@@ -138,7 +151,10 @@
     const tabEl = document.createElement('div');
     tabEl.className = 'tab';
     tabEl.dataset.tabId = tabId;
-    tabEl.innerHTML = `<span class="tab-label">${escapeHtml(label)}</span><span class="close-tab" title="Close">&times;</span>`;
+    tabEl.setAttribute('role', 'tab');
+    tabEl.setAttribute('aria-selected', 'false');
+    tabEl.setAttribute('tabindex', '0');
+    tabEl.innerHTML = `<span class="tab-label">${escapeHtml(label)}</span><button class="close-tab" role="button" aria-label="Close ${escapeHtml(label)} tab" title="Close">&times;</button>`;
 
     tabEl.querySelector('.tab-label').addEventListener('click', () => {
       switchTab(tabId);
@@ -164,6 +180,7 @@
       const isActive = tab.id === tabId;
       tab.panelEl.classList.toggle('active', isActive);
       tab.tabEl.classList.toggle('active', isActive);
+      tab.tabEl.setAttribute('aria-selected', isActive ? 'true' : 'false');
       if (isActive) {
         tab.fitAddon.fit();
         tab.terminal.focus();
@@ -194,19 +211,19 @@
 
   document.getElementById('btn-new-shell').addEventListener('click', async () => {
     try {
-      const session = await createPtySession('Shell', undefined, 120, 30);
-      createTab('Shell', session.id);
+      const { session, authToken } = await createPtySession('Shell', undefined, 120, 30);
+      createTab('Shell', session.id, authToken);
     } catch (err) {
-      alert('Failed to create shell: ' + err.message);
+      showStatus('Failed to create shell: ' + err.message, 5000);
     }
   });
 
   document.getElementById('btn-claude').addEventListener('click', async () => {
     try {
-      const session = await createPtySession('Claude Code', 'claude', 120, 30);
-      createTab('Claude Code', session.id);
+      const { session, authToken } = await createPtySession('Claude Code', 'claude', 120, 30);
+      createTab('Claude Code', session.id, authToken);
     } catch (err) {
-      alert('Failed to launch Claude Code: ' + err.message);
+      showStatus('Failed to launch Claude Code: ' + err.message, 5000);
     }
   });
 
@@ -228,21 +245,32 @@
 
     try {
       loadingState.textContent = 'Launching Claude Code...';
-      const session = await createPtySession('Claude Code', 'claude', 120, 30);
+      const { session, authToken } = await createPtySession('Claude Code', 'claude', 120, 30);
       loadingState.style.display = 'none';
-      createTab('Claude Code', session.id);
+      createTab('Claude Code', session.id, authToken);
     } catch (err) {
       loadingState.textContent = 'Failed to start: ' + err.message;
       // Fallback — try a plain shell
       try {
-        const session = await createPtySession('Shell', undefined, 120, 30);
+        const { session, authToken } = await createPtySession('Shell', undefined, 120, 30);
         loadingState.style.display = 'none';
-        createTab('Shell', session.id);
+        createTab('Shell', session.id, authToken);
       } catch (err2) {
         loadingState.textContent = 'Could not start terminal: ' + err2.message;
       }
     }
   }
 
-  init();
+  async function start() {
+    await init();
+
+    window.addEventListener('beforeunload', (e) => {
+      if (tabs.length > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  }
+
+  start();
 })();

@@ -24,6 +24,12 @@ addRoute('POST', '/api/deploy/scan', async (req: IncomingMessage, res: ServerRes
     return;
   }
 
+  // SEC-010: Validate path — absolute, no traversal
+  if (!body.directory.startsWith('/') || body.directory.includes('..')) {
+    sendJson(res, 400, { error: 'directory must be an absolute path with no ".." segments' });
+    return;
+  }
+
   const dir = body.directory;
 
   // Check directory exists
