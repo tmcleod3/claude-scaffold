@@ -44,7 +44,7 @@ npm install
 npm run wizard
 ```
 
-**Best for:** Users who want the guided experience. Merlin walks you through setup, Haku handles deployment. Point-and-click where possible.
+**Best for:** Users who want the guided experience. Gandalf walks you through setup, Haku handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
 The methodology without the tooling. CLAUDE.md, all 15 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
@@ -85,7 +85,7 @@ Every tier includes:
 - **This Holocron** — The guide you're reading now
 
 The Full tier adds:
-- **Merlin** — Browser-based setup wizard (vault, credentials, PRD generation, scaffolding)
+- **Gandalf** — Browser-based setup wizard (vault, credentials, PRD generation, scaffolding)
 - **Haku** — Browser-based deploy wizard (6 target provisioners with SSE streaming)
 - **Encrypted vault** — AES-256-GCM credential storage
 - **Cloud provisioners** — Docker, AWS VPS, Vercel, Railway, Cloudflare, S3
@@ -104,14 +104,14 @@ Here's the complete flow from idea to live application. This walkthrough uses th
 npx voidforge init
 ```
 
-**Merlin** opens in your browser. Walk through:
+**Gandalf** opens in your browser. Walk through:
 1. **Vault** — Create a password-encrypted credential store (AES-256-GCM)
 2. **Credentials** — Add your Anthropic API key (required for PRD generation)
 3. **Cloud providers** — Optionally add AWS, Vercel, Railway, or Cloudflare credentials
 4. **Project** — Name your project, choose a directory, pick a domain
 5. **PRD** — Describe your idea and let Claude generate a full PRD with YAML frontmatter, OR paste one you've written
 6. **Deploy target** — Choose where you'll deploy (Docker, AWS VPS, Vercel, Railway, Cloudflare, S3)
-7. **Review & Create** — Merlin scaffolds your project
+7. **Review & Create** — Gandalf scaffolds your project
 
 Your project directory now contains the full VoidForge build system plus your PRD.
 

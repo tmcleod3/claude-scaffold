@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 6.5.0
+**Current:** 6.5.1
 
 ## Versioning Scheme
 
@@ -14,8 +14,9 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
-| 6.5.0 | 2026-03-15 | Camelot Remote — 5-layer security, TOTP 2FA, self-deploy, audit trail, two-password architecture |
-| 6.0.0 | 2026-03-15 | Camelot Multi — Great Hall dashboard, project registry, health poller, import flow, SSRF protection |
+| 6.5.1 | 2026-03-15 | The Arthurian Retcon — Merlin→Gandalf, Camelot→Avengers Tower, Great Hall→The Lobby, Round Table→The Penthouse |
+| 6.5.0 | 2026-03-15 | Avengers Tower Remote — 5-layer security, TOTP 2FA, self-deploy, audit trail, two-password architecture |
+| 6.0.0 | 2026-03-15 | Avengers Tower Multi — The Lobby dashboard, project registry, health poller, import flow, SSRF protection |
 | 4.4.0 | 2026-03-15 | The Imagination Release — /imagine (Celebrimbor), /debrief (Bashir), 2 new leads, 7 new sub-agents |
 | 4.2.0 | 2026-03-14 | The DX Release — Prisma types, OpenAPI docs, ERD generation, integration templates, database seeding |
 | 4.1.0 | 2026-03-14 | The Observability Release — deploy logs, cost estimation, health monitoring, Sentry integration |
@@ -33,7 +34,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 | 3.2.0 | 2026-03-13 | Bombadil's Forge Sync — /void self-update command, Forge Keeper method doc, 8th lead agent |
 | 3.1.0 | 2026-03-13 | The Last Mile — EC2 instance sizing, Cloudflare DNS wiring, platform domain registration |
 | 3.0.0 | 2026-03-12 | The VoidForge Holocron, three-tier distribution (main/scaffold/core), README as system reference |
-| 2.8.0 | 2026-03-12 | Merlin/Haku wizard split, architecture review docs, security audit with SG hardening |
+| 2.8.0 | 2026-03-12 | Gandalf/Haku wizard split, architecture review docs, security audit with SG hardening |
 | 2.7.0 | 2026-03-12 | Real provisioning for all 6 targets, hardened infra scripts, SSE keepalive, crash recovery loop complete |
 | 2.6.0 | 2026-03-12 | Auto-provisioning — Docker, AWS VPS (EC2/RDS/ElastiCache), config stubs, crash recovery manifest, atomic vault writes |
 | 2.5.0 | 2026-03-12 | /git command — Coulson's version & release management with semver, changelog, and commit automation |

@@ -146,7 +146,7 @@ The review phases use a double-pass pattern: find → fix → re-verify. This ca
 
 *Pass 2 — Re-Verify (parallel):*
 6. Batman: Nightwing re-runs test suite + Red Hood re-probes fixed areas + Deathstroke re-tests authorization boundaries.
-7. Galadriel: Samwise re-audits a11y on modified components + Gandalf re-checks edge cases.
+7. Galadriel: Samwise re-audits a11y on modified components + Radagast re-checks edge cases.
 8. Kenobi: Maul re-probes all remediated vulnerabilities, verifies fixes hold.
 9. If Pass 2 finds new issues, fix and re-verify until clean.
 

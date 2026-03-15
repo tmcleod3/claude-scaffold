@@ -44,7 +44,7 @@ These require interactive testing:
 
 **Gimli (Performance):** Check loading states, skeleton screens, layout shift, optimistic UI, mobile responsiveness, touch targets (min 44px).
 
-**Gandalf (Edge Cases + Error States):** Test forms with empty/huge/unicode inputs, broken states, dangerous actions without confirmation, validation gaps.
+**Radagast (Edge Cases + Error States):** Test forms with empty/huge/unicode inputs, broken states, dangerous actions without confirmation, validation gaps.
 
 **ERROR STATE TESTING (mandatory):** For every form/action in the UI:
 - Submit with intentionally invalid data (duplicate name, wrong format, missing required field)
@@ -82,9 +82,9 @@ Arwen leads. Audit shared components (buttons, inputs, cards, modals, toasts) fo
 ## Step 7.5 — Pass 2: Re-Verify Fixes
 After all fixes are applied, run a verification pass:
 - **Samwise** re-audits accessibility on all modified components — verify a11y fixes didn't break other a11y properties
-- **Gandalf** re-checks edge cases on fixed flows — verify fixes hold under adversarial input
+- **Radagast** re-checks edge cases on fixed flows — verify fixes hold under adversarial input
 
-If Pass 2 finds new issues, fix and re-verify until Samwise and Gandalf sign off.
+If Pass 2 finds new issues, fix and re-verify until Samwise and Radagast sign off.
 
 ## Step 8 — Regression Checklist
 Add UX-specific items to the regression checklist in `/docs/qa-prompt.md`:

@@ -30,7 +30,7 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 
 ### Default Sub-Agents
 
-**Tolkien:** Gandalf, Aragorn, Legolas, Samwise, Elrond, Arwen, Gimli, Bilbo + 12 more
+**Tolkien:** Radagast, Aragorn, Legolas, Samwise, Elrond, Arwen, Gimli, Bilbo + 12 more
 **Marvel:** Rogers, Banner, Strange, Barton, Romanoff, Thor, Hill, Loki + 17 more
 **DC Comics:** Oracle, Red Hood, Alfred, Lucius, Nightwing, Deathstroke, Constantine + 18 more
 **Star Wars:** Yoda, Windu, Ahsoka, Leia, Rex, Padmé, Chewie, Maul + 16 more
@@ -162,7 +162,7 @@ Pass 2 (parallel): Verification agents re-probe fixed areas → confirm
 
 This pattern applies to:
 - Batman's QA (Nightwing + Red Hood + Deathstroke re-verify)
-- Galadriel's UX (Samwise + Gandalf re-verify)
+- Galadriel's UX (Samwise + Radagast re-verify)
 - Kenobi's Security (Maul re-probes remediations)
 
 **Important distinction:** The Agent tool enables **parallel analysis**, not parallel coding. Sub-agents return text findings — the lead agent then implements code changes sequentially. This is still faster than sequential analysis, but don't expect parallel file edits.
