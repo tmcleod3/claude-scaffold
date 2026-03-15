@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -97,6 +97,7 @@
 25. Okoye — Fierce protector, guards data integrity
 26. Friday — AI assistant, versioning and automation
 27. Coulson — Meticulous record-keeper, version and release management
+28. Jarvis — AI assistant, status reporting, progress summaries
 
 **Reserved:** Stark (lead — backend), Coulson (lead — release), Fury (lead — the initiative)
 

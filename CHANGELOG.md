@@ -6,11 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
-## [3.6.0] - 2026-03-14
+## [3.7.0] - 2026-03-14
 
 ### Added
+- **/assemble command** — Fury's Initiative: 13-phase full pipeline (architect → build → 3x review → UX → 2x security → devops → QA → test → crossfire → council). Calls every agent from every universe. Convergence loop, session checkpointing, --resume/--fast/--skip-build flags.
+- **Fury** promoted to 10th lead agent (Marvel → The Initiative). Hill added to Marvel pool.
 - **/thumper command** — Chani's Worm Rider: drive Claude Code via Telegram from anywhere. Gom Jabbar passphrase authentication with PBKDF2 hashing, message deletion, 60-minute idle timeout, 3-attempt lockout. Five bash scripts, zero dependencies.
-- **Dune universe** — 9th agent lead (Chani, Worm Rider) with 20 named characters. Sub-agents: Stilgar (security), Thufir Hawat (parsing), Duncan Idaho (relay), Reverend Mother Mohiam (authentication).
+- **Dune universe** — Chani as lead (Worm Rider) with 20 named characters. Sub-agents: Stilgar (security), Thufir Hawat (parsing), Duncan Idaho (relay), Reverend Mother Mohiam (authentication).
 - **Transport auto-detection** — TMUX_SENDKEYS (cross-platform), PTY_INJECT (headless Linux), OSASCRIPT (macOS Terminal.app/iTerm2). Explicit guidance for VS Code, Warp, Alacritty, Kitty users. Windows Git Bash gets "use WSL" message.
 - **Water Rings stop hook** — automatic task completion notifications to Telegram.
 - **LESSONS.md** — first entries from Kongo.io Sprint 4 post-mortem.
@@ -23,7 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **/security** — Maul executes actual HTTP exploitation attempts. Ahsoka traces the full auth middleware chain.
 - **/build** — Phase 4/5/6 gates define "works manually" explicitly: error paths, cross-module integration, generated URLs.
 - **/devops** — post-deploy smoke tests verify application behavior (not just infrastructure health).
-- CLAUDE.md, HOLOCRON.md, README.md — 11 commands, 9 agents, 7 universes, 170+ characters.
+- CLAUDE.md, HOLOCRON.md, README.md — 12 commands, 10 agents, 7 universes, 170+ characters.
 
 ### Security
 - Gom Jabbar: PBKDF2 hashing (100k iterations), Telegram message deletion with fail-secure invalidation, idle timeout, lockout.

@@ -9,7 +9,7 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 
 **All orchestration uses the build journal.** Every delegation, handoff, and resolution is logged to `/logs/handoffs.md`. Agents read journal files to recover context. See `/docs/methods/BUILD_JOURNAL.md`.
 
-**Full character roster: `/docs/NAMING_REGISTRY.md`** — 150+ named characters across 6 universes. No duplicates allowed.
+**Full character roster: `/docs/NAMING_REGISTRY.md`** — 170+ named characters across 7 universes. No duplicates allowed.
 
 ---
 
@@ -25,14 +25,17 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 | **Kusanagi** | Anime | DevOps & Infrastructure | `DEVOPS_ENGINEER.md` |
 | **Coulson** | Marvel | Release Management | `RELEASE_MANAGER.md` |
 | **Bombadil** | Tolkien | Forge Sync & Updates | `FORGE_KEEPER.md` |
+| **Chani** | Dune | Worm Rider (Telegram Bridge) | `THUMPER.md` |
+| **Fury** | Marvel | The Initiative (Full Pipeline) | `ASSEMBLER.md` |
 
 ### Default Sub-Agents
 
 **Tolkien:** Gandalf, Aragorn, Legolas, Samwise, Elrond, Arwen, Gimli, Bilbo + 12 more
-**Marvel:** Rogers, Banner, Strange, Barton, Romanoff, Thor, Fury + 18 more
+**Marvel:** Rogers, Banner, Strange, Barton, Romanoff, Thor, Hill, Loki + 17 more
 **DC Comics:** Oracle, Red Hood, Alfred, Lucius, Nightwing, Deathstroke, Constantine + 18 more
 **Star Wars:** Yoda, Windu, Ahsoka, Leia, Rex, Padmé, Chewie, Maul + 16 more
 **Star Trek:** Spock, Scotty, Uhura, La Forge, Data + 19 more
+**Dune:** Stilgar, Thufir, Idaho, Mohiam + 16 more
 **Anime:** Senku, Levi, Spike, Bulma, Vegeta, Goku + 66 more (from Tom's watch list)
 
 ---

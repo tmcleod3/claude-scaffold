@@ -292,7 +292,7 @@ Each lead has a deep bench. Here are some standouts:
 **Marvel (Backend)**
 - **Banner** stays calm until queries get slow
 - **Romanoff** trusts no external API
-- **Fury** oversees performance and tolerates nothing
+- **Hill** tracks everything — mission control, nothing slips past her
 - **Thor** brings the thunder on queue processing
 - **Barton** never misses an error case
 
