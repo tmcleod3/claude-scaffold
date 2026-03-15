@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury, Sisko. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -27,6 +27,7 @@
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
+| **Star Trek** | Campaign Command | Sisko |
 | **Dune** | Worm Rider | Chani |
 | **Tolkien** | Forge Sync & Updates | Bombadil |
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
@@ -206,7 +207,7 @@
 23. Chakotay — Balance, harmonizes competing concerns
 24. Kim — Communications, API design
 
-**Reserved:** Picard (lead)
+**Reserved:** Picard (lead — architecture), Sisko (lead — campaign)
 
 ---
 

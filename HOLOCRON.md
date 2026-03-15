@@ -47,7 +47,7 @@ npm run wizard
 **Best for:** Users who want the guided experience. Merlin walks you through setup, Strange handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 12 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 13 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -60,7 +60,7 @@ git clone --branch scaffold https://github.com/tmcleod3/voidforge.git .
 **Best for:** Developers who know what they're doing and want to skip the wizard. You manage your own infrastructure. VoidForge manages your build process.
 
 #### Core (`core` branch)
-The lightest possible version. CLAUDE.md, the 12 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
+The lightest possible version. CLAUDE.md, the 13 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
 
 ```bash
 # Option A: Drop into an existing project
@@ -77,9 +77,9 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **12 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`, `/assemble`
+- **13 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`, `/assemble`, `/campaign`
 - **13-phase build protocol** — PRD to production with verification gates
-- **10 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
+- **11 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **170+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, and Anime
 - **7 code patterns** — Reference implementations with framework adaptations
 - **This Holocron** — The guide you're reading now
@@ -257,7 +257,7 @@ Long builds span multiple Claude Code sessions. The build journal system handles
 
 ### How the Agent System Works
 
-VoidForge uses 10 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
+VoidForge uses 11 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
 
 1. **Scope boundaries.** When Stark is leading, you're doing backend work. When Galadriel takes over, you're doing frontend. The character tells you which domain you're in.
 2. **Scannable logs.** Build journal entries tagged with agent names are instantly searchable. "What did Batman find?" is faster than "What happened during QA?"
@@ -277,6 +277,7 @@ VoidForge uses 10 lead agents across 7 fictional universes, each commanding a ro
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream | Ancient, joyful, sings while he works, tends the forge itself |
 | Worm Rider | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
 | The Initiative | **Fury** | Marvel | Full pipeline orchestration, crossfire, council | Assembles the team. Doesn't leave until the mission is complete. |
+| Campaign Command | **Sisko** | Star Trek | PRD-to-product campaign, mission sequencing | The builder, the prophet, the war commander. Reads the plan, picks the next fight. |
 
 ### Sub-Agent Highlights
 
@@ -310,12 +311,13 @@ Each lead has a deep bench. Here are some standouts:
 - **Ahsoka** enforces access control boundaries
 - **Rex** performs tactical systematic lockdown
 
-**Star Trek (Architecture)**
+**Star Trek (Architecture + Campaign)**
 - **Spock** brings logical precision to data architecture
 - **Scotty** knows the infrastructure limits ("I'm givin' her all she's got!")
 - **La Forge** keeps the engines running
-- **Data** recognizes patterns in tech debt
-- **Uhura** designs communication pathways (APIs)
+- **Kira** detects unfinished work — finishes the fight before starting new ones
+- **Dax** reads the PRD, figures out what's next across lifetimes of experience
+- **Odo** verifies prerequisites — shapeshifts to match whatever's needed
 
 **Anime (DevOps)**
 - **Levi** deploys with zero wasted motion
@@ -359,7 +361,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Twelve commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Thirteen commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.
@@ -436,6 +438,19 @@ Fury assembles every agent in VoidForge and runs the complete pipeline: architec
 13 phases, all 7 universes, 40+ agents. Checkpoints after every phase so you can resume across sessions with `/assemble --resume`. Skip the build with `--skip-build` to re-run reviews on existing code. Skip the Crossfire and Council with `--fast` for lower-stakes projects.
 
 This is the nuclear option. Use it when quality is non-negotiable.
+
+#### `/campaign` — Sisko's War Room
+**When:** You have a PRD and want VoidForge to build the whole thing, mission by mission, autonomously.
+
+*"It's easy to be a saint in paradise."*
+
+Sisko sits above Fury. Fury runs one battle — Sisko runs the war. He reads your PRD, diffs it against what's already built, identifies what's next, scopes it into a buildable mission, briefs you, and hands it to Fury. After each mission completes and gets committed, Sisko checks the map again and picks the next objective.
+
+Three sub-agents: Kira (detects unfinished work — if there's an in-progress build or assembly, she finishes the fight before starting anything new), Dax (reads the PRD and figures out what to build next, respecting dependency order), and Odo (verifies prerequisites are met before each mission).
+
+The Prophecy Board (`/logs/campaign-state.md`) tracks which PRD sections are done, in progress, or not started — persistent across sessions. Run `/campaign` again and Sisko picks up where you left off.
+
+Flags: `--fast` (passes --fast to every /assemble call), `--resume` (explicit resume), `--mission "Payments"` (jump to a specific section).
 
 ---
 
