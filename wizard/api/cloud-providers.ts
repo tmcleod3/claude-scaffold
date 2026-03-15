@@ -24,7 +24,7 @@ function requirePassword(res: ServerResponse): string | null {
 export interface ProviderInfo {
   id: string;
   name: string;
-  fields: { key: string; label: string; placeholder: string; secret: boolean }[];
+  fields: { key: string; label: string; placeholder: string; secret: boolean; optional?: boolean }[];
   deployTargets: string[];
   description: string;
   credentialUrl: string;
@@ -78,6 +78,18 @@ export const PROVIDERS: ProviderInfo[] = [
     description: 'Workers, Pages, D1, R2 — edge-first deployment',
     credentialUrl: 'https://dash.cloudflare.com/profile/api-tokens',
     help: '<ol><li>Sign in to the <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare Dashboard</a></li><li>Go to <strong>My Profile &rarr; API Tokens</strong></li><li>Click <strong>Create Token</strong></li><li>Use a <strong>custom token</strong> with permissions: <strong>Zone:DNS:Edit</strong>, <strong>Account:Cloudflare Pages:Edit</strong>, and <strong>Account:Registrar:Edit</strong> (for DNS wiring, Pages deployment, and domain registration)</li><li>Your <strong>Account ID</strong> is on the right sidebar of any zone\'s overview page, or at <strong>dash.cloudflare.com</strong> in the URL</li><li>Copy the token — it won\'t be shown again</li></ol>',
+  },
+  {
+    id: 'github',
+    name: 'GitHub',
+    fields: [
+      { key: 'github-token', label: 'Personal Access Token', placeholder: 'ghp_...', secret: true },
+      { key: 'github-owner', label: 'Owner (optional)', placeholder: 'username or org — defaults to token owner', secret: false, optional: true },
+    ],
+    deployTargets: ['vercel', 'cloudflare', 'railway', 'vps', 'static'],
+    description: 'Push code to GitHub for auto-deploy. Required for Vercel, Cloudflare Pages, and Railway.',
+    credentialUrl: 'https://github.com/settings/tokens',
+    help: '<ol><li>Sign in to <a href="https://github.com" target="_blank" rel="noopener">GitHub</a></li><li>Go to <strong>Settings &rarr; Developer settings &rarr; Personal access tokens &rarr; Fine-grained tokens</strong></li><li>Click <strong>Generate new token</strong></li><li>Set repository access to <strong>All repositories</strong> (or select specific repos)</li><li>Under permissions, enable: <strong>Contents: Read and write</strong> and <strong>Administration: Read and write</strong></li><li>Copy the token — it won\'t be shown again</li></ol><p>Classic tokens also work — select the <code>repo</code> scope.</p>',
   },
 ];
 
@@ -188,6 +200,29 @@ async function validateRailway(token: string): Promise<{ valid: boolean; error?:
   }
 }
 
+async function validateGithub(token: string): Promise<{ valid: boolean; error?: string; identity?: string }> {
+  try {
+    const { status, body } = await httpsGet('api.github.com', '/user', {
+      'Authorization': `Bearer ${token}`,
+      'User-Agent': 'VoidForge',
+      'X-GitHub-Api-Version': '2022-11-28',
+    });
+    if (status === 200) {
+      const data = JSON.parse(body) as { login?: string };
+      return { valid: true, identity: data.login };
+    }
+    if (status === 401) {
+      return { valid: false, error: 'Invalid or expired token' };
+    }
+    if (status === 403) {
+      return { valid: false, error: 'Token lacks required permissions. Ensure "repo" scope (classic) or "Contents: Read and write" (fine-grained).' };
+    }
+    return { valid: false, error: `GitHub API returned ${status}` };
+  } catch (err) {
+    return { valid: false, error: `Connection failed: ${(err as Error).message}` };
+  }
+}
+
 async function validateCloudflare(token: string): Promise<{ valid: boolean; error?: string; identity?: string }> {
   try {
     const { status, body } = await httpsGet('api.cloudflare.com', '/client/v4/user/tokens/verify', {
@@ -226,7 +261,12 @@ addRoute('GET', '/api/cloud/status', async (_req: IncomingMessage, res: ServerRe
 
   for (const provider of PROVIDERS) {
     // A provider is "configured" if all its required fields are stored
-    status[provider.id] = provider.fields.every((f) => keys.includes(f.key));
+    // GitHub is special: only token is required, owner is optional
+    if (provider.id === 'github') {
+      status[provider.id] = keys.includes('github-token');
+    } else {
+      status[provider.id] = provider.fields.every((f) => keys.includes(f.key));
+    }
   }
 
   sendJson(res, 200, { status });
@@ -268,6 +308,9 @@ addRoute('POST', '/api/cloud/validate', async (req: IncomingMessage, res: Server
       break;
     case 'railway':
       result = await validateRailway(creds['railway-token'] ?? '');
+      break;
+    case 'github':
+      result = await validateGithub(creds['github-token'] ?? '');
       break;
     case 'cloudflare': {
       result = await validateCloudflare(creds['cloudflare-api-token'] ?? '');
@@ -347,7 +390,7 @@ addRoute('GET', '/api/cloud/deploy-targets', async (_req: IncomingMessage, res: 
     if (target.provider) {
       const provider = PROVIDERS.find((p) => p.id === target.provider);
       if (provider) {
-        target.available = provider.fields.every((f) => keys.includes(f.key));
+        target.available = provider.fields.every((f) => f.optional || keys.includes(f.key));
       }
     }
   }

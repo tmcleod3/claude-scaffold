@@ -445,7 +445,7 @@
         });
 
         const provider = provRes.providers.find((p) => p.id === providerId);
-        const missing = provider.fields.filter((f) => !credentials[f.key]);
+        const missing = provider.fields.filter((f) => !f.optional && !credentials[f.key]);
         if (missing.length > 0) {
           showStatus(statusEl, 'error', `Missing: ${missing.map((f) => f.label).join(', ')}`);
           return;

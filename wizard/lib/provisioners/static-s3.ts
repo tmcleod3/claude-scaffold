@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import type { Provisioner, ProvisionContext, ProvisionEmitter, ProvisionResult, CreatedResource } from './types.js';
 import { recordResourcePending, recordResourceCreated } from '../provision-manifest.js';
 import { slugify } from './http-client.js';
+import { appendEnvSection } from '../env-writer.js';
 
 export const staticS3Provisioner: Provisioner = {
   async validate(ctx: ProvisionContext): Promise<string[]> {
@@ -190,14 +191,8 @@ echo "Site: ${outputs['S3_WEBSITE_URL'] || `http://$BUCKET.s3-website.amazonaws.
         `S3_BUCKET=${bucketName}`,
       ];
       if (outputs['S3_WEBSITE_URL']) envLines.push(`S3_WEBSITE_URL=${outputs['S3_WEBSITE_URL']}`);
-      envLines.push('# Deploy with: ./infra/deploy-s3.sh');
-
-      const envPath = join(ctx.projectDir, '.env');
-      const { readFile } = await import('node:fs/promises');
-      let existing = '';
-      try { existing = await readFile(envPath, 'utf-8'); } catch { /* new file */ }
-      const separator = existing ? '\n\n' : '';
-      await writeFile(envPath, existing + separator + envLines.join('\n') + '\n', 'utf-8');
+      envLines.push('# Deploy with: ./infra/deploy-s3.sh (or auto-deploys via Strange wizard)');
+      await appendEnvSection(ctx.projectDir, envLines);
       emit({ step: 's3-env', status: 'done', message: 'S3 config written to .env' });
     } catch (err) {
       emit({ step: 's3-env', status: 'error', message: 'Failed to write .env', detail: (err as Error).message });

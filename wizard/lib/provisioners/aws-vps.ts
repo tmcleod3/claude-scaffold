@@ -16,6 +16,8 @@ import { generateDeployScript } from './scripts/deploy-vps.js';
 import { generateRollbackScript } from './scripts/rollback-vps.js';
 import { generateEcosystemConfig } from './scripts/ecosystem-config.js';
 import { generateCaddyfile } from './scripts/caddyfile.js';
+import { appendEnvSection } from '../env-writer.js';
+import { slugify } from './http-client.js';
 
 const POLL_INTERVAL_MS = 5000;
 const MAX_POLL_MS = 300000; // 5 minutes
@@ -30,10 +32,6 @@ function cancellableSleep(ms: number, signal?: AbortSignal): Promise<void> {
     const timer = setTimeout(resolve, ms);
     signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new Error('Aborted')); }, { once: true });
   });
-}
-
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').slice(0, 40);
 }
 
 export const awsVpsProvisioner: Provisioner = {
@@ -515,7 +513,7 @@ dnf install -y git curl`;
       ];
       if (outputs['DB_ENGINE']) {
         envLines.push(`DB_ENGINE=${outputs['DB_ENGINE']}`);
-        envLines.push(`DB_HOST=${outputs['DB_HOST'] || '# pending — check AWS Console'}`);
+        envLines.push(`DB_HOST=${outputs['DB_HOST'] || `# pending — check https://${region}.console.aws.amazon.com/rds/home?region=${region}#databases:`}`);
         envLines.push(`DB_PORT=${outputs['DB_PORT']}`);
         envLines.push(`DB_INSTANCE_ID=${outputs['DB_INSTANCE_ID']}`);
         envLines.push(`DB_USERNAME=${outputs['DB_USERNAME']}`);
@@ -523,23 +521,15 @@ dnf install -y git curl`;
       }
       if (outputs['REDIS_CLUSTER_ID']) {
         envLines.push(`REDIS_CLUSTER_ID=${outputs['REDIS_CLUSTER_ID']}`);
-        envLines.push(`REDIS_HOST=${outputs['REDIS_HOST'] || '# pending — check AWS Console'}`);
+        envLines.push(`REDIS_HOST=${outputs['REDIS_HOST'] || `# pending — check https://${region}.console.aws.amazon.com/elasticache/home?region=${region}`}`);
         envLines.push(`REDIS_PORT=${outputs['REDIS_PORT'] || '6379'}`);
       }
-
-      const envPath = join(ctx.projectDir, '.env');
-      // Append to existing .env rather than overwrite
-      const { readFile } = await import('node:fs/promises');
-      let existing = '';
-      try { existing = await readFile(envPath, 'utf-8'); } catch { /* file doesn't exist yet */ }
-      const separator = existing ? '\n\n' : '';
-      await writeFile(envPath, existing + separator + envLines.join('\n') + '\n', 'utf-8');
-      chmodSync(envPath, 0o600);
-
+      await appendEnvSection(ctx.projectDir, envLines);
+      chmodSync(join(ctx.projectDir, '.env'), 0o600);
       emit({ step: 'write-env', status: 'done', message: 'Infrastructure config written to .env' });
     } catch (err) {
       console.error('Env file write error:', (err as Error).message);
-      emit({ step: 'write-env', status: 'error', message: 'Failed to write .env', detail: 'Check AWS Console for details' });
+      emit({ step: 'write-env', status: 'error', message: 'Failed to write .env', detail: (err as Error).message });
       // Non-fatal
     }
 

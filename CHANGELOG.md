@@ -6,6 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [3.8.0] - 2026-03-14
+
+### Added
+- **Strange's Last Mile** — every deploy target is now fully automated end-to-end. Run `npm run deploy` and get a live URL, not a manual checklist.
+- **GitHub integration** — new cloud provider in Merlin. Collects PAT, creates repos, pushes code. Used by Vercel, Cloudflare Pages, and Railway for auto-deploy on push.
+- **SSH deploy module** — provisions EC2 servers remotely (provision.sh), deploys via release-directory strategy with atomic symlink swap, health checks, and automatic rollback on failure.
+- **S3 deploy via SDK** — uploads build directory to S3 with correct MIME types and cache-control headers. No AWS CLI dependency (ADR-014).
+- **Shared exec utility** — child process wrapper with timeout, abort signal, and streaming (ADR-013). Used by GitHub and SSH modules.
+- **Shared env-writer** — extracted .env append logic from 5 copy-pasted provisioner implementations.
+- **Deploy polling** — Vercel, Cloudflare Pages, and Railway provisioners poll deployment status after git push, reporting progress until the app is live.
+- **DEPLOY_URL** and **GITHUB_REPO_URL** displayed as clickable links on the Strange Done screen.
+- 5 Architecture Decision Records: ADR-011 (GitHub pre-step), ADR-012 (no GitHub cleanup), ADR-013 (exec utility), ADR-014 (S3 via SDK), ADR-015 (platform auto-deploy).
+
+### Changed
+- **Vercel provisioner** — links GitHub repo, sets env vars via API, polls deploy. Re-runs (409) now fetch the existing project ID so all steps execute.
+- **Cloudflare provisioner** — includes GitHub source at project creation (required by Cloudflare API). Re-runs set CF_PROJECT_URL. Next.js destination dir corrected to `out`.
+- **Railway provisioner** — creates service with GitHub source, sets env vars using Railway's `${{Plugin.VAR}}` syntax. Deprecated `pluginCreate` gets clear fallback guidance.
+- **AWS VPS provisioner** — uses shared slugify and env-writer. Error messages now include resource IDs and console URLs instead of generic "Check AWS Console."
+- **GitHub org repos** — uses `/orgs/{owner}/repos` endpoint when owner is explicitly set, with fallback to `/user/repos`.
+
+### Security
+- **Token never touches disk** — git push uses `http.extraheader` via environment variables instead of embedding PAT in the URL. No reflog persistence (ADR-011).
+- **Triple token sanitization** — error messages scrubbed with 3 regexes covering URL-embedded tokens, Base64 Authorization headers, and GIT_CONFIG env vars.
+- **projectDir validation** — rejects paths with `..` segments or non-absolute paths to prevent directory traversal.
+- **Credential scoping** — in-memory cleanup credentials store only target-specific keys, not the full vault.
+- **Auth gate on /incomplete** — orphaned run enumeration now requires vault unlock.
+- **.gitignore defense-in-depth** — verifies `.env` and `.ssh/` are protected before `git add -A`.
+- **Secret stripping loop** — SSE output deletes any key containing "password", "secret", or "token" (case-insensitive).
+
+### Fixed
+- Vercel 409 (project exists) now fetches project ID — re-runs no longer silently skip linking, env vars, and deploy.
+- Cloudflare 409 now sets `CF_PROJECT_URL` — re-runs show the deploy URL on the Done screen.
+- Removed duplicate `slugify` from aws-vps.ts (diverged from shared implementation).
+- Removed unused `httpsPut` import from vercel.ts.
+- `.env` value parser strips surrounding quotes before uploading to Vercel.
+- `npm ci --omit=dev` replaces `--ignore-scripts` in SSH deploy (fixes native deps like bcrypt, sharp).
+- Null safety on all `safeJsonParse` casts in Cloudflare provisioner (8/8 now include `| null`).
+
+---
+
 ## [3.7.0] - 2026-03-14
 
 ### Added

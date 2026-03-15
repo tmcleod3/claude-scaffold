@@ -425,15 +425,20 @@
       'DNS_HOSTNAME': 'Domain', 'DNS_ZONE_ID': 'DNS Zone ID',
       'VERCEL_DOMAIN': 'Custom Domain', 'RAILWAY_DOMAIN': 'Custom Domain',
       'CF_CUSTOM_DOMAIN': 'Custom Domain',
+      'DEPLOY_URL': 'Live URL',
+      'GITHUB_REPO_URL': 'GitHub Repository',
+      'GITHUB_OWNER': 'GitHub Owner',
+      'GITHUB_REPO_NAME': 'GitHub Repo',
     };
     const sensitiveKeys = ['DB_PASSWORD'];
-    const urlKeys = ['CF_PROJECT_URL', 'S3_WEBSITE_URL'];
+    const urlKeys = ['CF_PROJECT_URL', 'S3_WEBSITE_URL', 'DEPLOY_URL', 'GITHUB_REPO_URL'];
 
     if (result?.success && result.outputs && Object.keys(result.outputs).length > 0) {
       infraCard.classList.remove('hidden');
       let html = '';
 
       const displayOrder = [
+        'DEPLOY_URL', 'GITHUB_REPO_URL',
         'SSH_KEY_PATH', 'SSH_HOST', 'SSH_USER',
         'DB_ENGINE', 'DB_HOST', 'DB_PORT', 'DB_INSTANCE_ID', 'DB_USERNAME', 'DB_PASSWORD',
         'REDIS_HOST', 'REDIS_PORT', 'REDIS_CLUSTER_ID',

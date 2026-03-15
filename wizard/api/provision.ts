@@ -4,6 +4,7 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { join } from 'node:path';
 import { addRoute } from '../router.js';
 import { getSessionPassword } from './credentials.js';
 import { vaultGet, vaultKeys } from '../lib/vault.js';
@@ -21,6 +22,14 @@ import {
 } from '../lib/provision-manifest.js';
 import { provisionDns, cleanupDnsRecords } from '../lib/dns/cloudflare-dns.js';
 import { registerDomain } from '../lib/dns/cloudflare-registrar.js';
+import { prepareGithub } from '../lib/github.js';
+import { sshDeploy } from '../lib/ssh-deploy.js';
+import { s3Deploy } from '../lib/s3-deploy.js';
+
+/** Deploy targets that benefit from GitHub repo linking (ADR-015). */
+const GITHUB_LINKED_TARGETS = ['vercel', 'cloudflare', 'railway'];
+/** Deploy targets where GitHub push is optional (deploy via SSH/SDK instead). */
+const GITHUB_OPTIONAL_TARGETS = ['vps', 'static'];
 
 function sendJson(res: ServerResponse, status: number, data: unknown): void {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -90,6 +99,12 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
 
   if (!body.projectDir || !body.projectName || !body.deployTarget) {
     sendJson(res, 400, { error: 'projectDir, projectName, and deployTarget are required' });
+    return;
+  }
+
+  // Validate projectDir (Kenobi: prevent directory traversal / file exfiltration)
+  if (!body.projectDir.startsWith('/') || body.projectDir.includes('..')) {
+    sendJson(res, 400, { error: 'projectDir must be an absolute path with no ".." segments' });
     return;
   }
 
@@ -167,8 +182,106 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
   await createManifest(runId, body.deployTarget, region, body.projectName);
 
   activeProvisionRun = runId;
+  /** Shared outputs that pre-steps inject and provisioners consume. */
+  const sharedOutputs: Record<string, string> = {};
+
   try {
+    // ── GitHub pre-step (ADR-011) ──────────────────────────────────
+    // Runs before the provisioner so platforms can link to the repo.
+    const hasGithub = credentials['github-token'];
+    const needsGithub = GITHUB_LINKED_TARGETS.includes(body.deployTarget);
+    const wantsGithub = GITHUB_OPTIONAL_TARGETS.includes(body.deployTarget);
+
+    if (hasGithub && (needsGithub || wantsGithub)) {
+      const ghResult = await prepareGithub(
+        runId,
+        credentials['github-token'],
+        credentials['github-owner'] || null,
+        body.projectName,
+        body.projectDir,
+        emit,
+        abortController.signal,
+      );
+      if (ghResult.success) {
+        sharedOutputs['GITHUB_REPO_URL'] = ghResult.repoUrl!;
+        sharedOutputs['GITHUB_OWNER'] = ghResult.owner!;
+        sharedOutputs['GITHUB_REPO_NAME'] = ghResult.repoName!;
+      } else if (needsGithub) {
+        // For platforms that require GitHub, warn but continue (graceful degradation)
+        emit({ step: 'github-warning', status: 'error', message: `GitHub setup failed — ${body.deployTarget} project will be created without auto-deploy. Push manually later.`, detail: ghResult.error });
+      }
+    } else if (!hasGithub && needsGithub) {
+      emit({ step: 'github-skip', status: 'skipped', message: `No GitHub token in vault. ${body.deployTarget} project will be created without auto-deploy. Add GitHub credentials for CI/CD.` });
+    }
+
+    // Pass GitHub outputs to provisioner via credentials (provisioners read from credentials map)
+    if (sharedOutputs['GITHUB_OWNER']) {
+      ctx.credentials['_github-owner'] = sharedOutputs['GITHUB_OWNER'];
+      ctx.credentials['_github-repo-name'] = sharedOutputs['GITHUB_REPO_NAME'];
+    }
+
+    // ── Provisioner ──────────────────────────────────────────────
     const result = await provisioner.provision(ctx, emit);
+
+    // Merge shared outputs into result
+    for (const [k, v] of Object.entries(sharedOutputs)) {
+      result.outputs[k] = v;
+    }
+
+    // ── Deploy post-step (v3.8.0 Last Mile) ──────────────────────
+    if (result.success && body.deployTarget === 'vps') {
+      // AWS VPS: SSH in and execute deploy scripts
+      const sshHost = result.outputs['SSH_HOST'];
+      const sshUser = result.outputs['SSH_USER'] || 'ec2-user';
+      const sshKey = result.outputs['SSH_KEY_PATH'] || '.ssh/deploy-key.pem';
+      if (sshHost) {
+        const deployResult = await sshDeploy(
+          body.projectDir,
+          sshHost,
+          sshUser,
+          sshKey,
+          ctx.hostname || undefined,
+          ctx.framework,
+          emit,
+          abortController.signal,
+        );
+        if (deployResult.deployUrl) {
+          result.outputs['DEPLOY_URL'] = deployResult.deployUrl;
+        }
+      } else {
+        emit({ step: 'deploy-skip', status: 'skipped', message: 'No SSH host available — SSH deploy skipped' });
+      }
+    } else if (result.success && body.deployTarget === 'static') {
+      // S3 Static: Upload build directory
+      const bucket = result.outputs['S3_BUCKET'];
+      const websiteUrl = result.outputs['S3_WEBSITE_URL'];
+      const awsKeyId = credentials['aws-access-key-id'];
+      const awsSecret = credentials['aws-secret-access-key'];
+      if (bucket && websiteUrl && awsKeyId && awsSecret) {
+        const s3Result = await s3Deploy(
+          bucket,
+          join(body.projectDir, 'dist'),
+          credentials['aws-region'] || 'us-east-1',
+          {
+            accessKeyId: awsKeyId,
+            secretAccessKey: awsSecret,
+          },
+          websiteUrl,
+          emit,
+        );
+        if (s3Result.deployUrl) {
+          result.outputs['DEPLOY_URL'] = s3Result.deployUrl;
+        }
+      } else {
+        emit({ step: 'deploy-skip', status: 'skipped', message: 'No S3 bucket available — upload skipped' });
+      }
+    } else if (result.success && (body.deployTarget === 'vercel' || body.deployTarget === 'cloudflare' || body.deployTarget === 'railway')) {
+      // Platform deploys are triggered by the git push — provisioner handles polling
+      const deployUrl = result.outputs['DEPLOY_URL'] || result.outputs['VERCEL_DOMAIN'] || result.outputs['CF_PROJECT_URL'] || result.outputs['RAILWAY_DOMAIN'];
+      if (deployUrl && !result.outputs['DEPLOY_URL']) {
+        result.outputs['DEPLOY_URL'] = deployUrl.startsWith('http') ? deployUrl : `https://${deployUrl}`;
+      }
+    }
 
     // Domain registration — pre-DNS step (non-fatal, irreversible)
     // Registration creates the Cloudflare zone, which DNS needs to exist (ADR-010)
@@ -221,9 +334,26 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
 
     // Track for cleanup by run ID (in-memory for current session)
     if (result.resources.length > 0) {
+      // Store only cleanup-relevant credentials, not the full vault (Kenobi: minimize credential exposure)
+      const cleanupCreds: Record<string, string> = {};
+      const cleanupKeys: Record<string, string[]> = {
+        vps: ['aws-access-key-id', 'aws-secret-access-key', 'aws-region'],
+        static: ['aws-access-key-id', 'aws-secret-access-key', 'aws-region'],
+        vercel: ['vercel-token'],
+        railway: ['railway-token'],
+        cloudflare: ['cloudflare-api-token'],
+        docker: [],
+      };
+      for (const key of (cleanupKeys[body.deployTarget] || [])) {
+        if (credentials[key]) cleanupCreds[key] = credentials[key];
+      }
+      // Always include Cloudflare token if DNS records were created
+      if (result.resources.some(r => r.type === 'dns-record') && credentials['cloudflare-api-token']) {
+        cleanupCreds['cloudflare-api-token'] = credentials['cloudflare-api-token'];
+      }
       provisionRuns.set(runId, {
         resources: result.resources,
-        credentials,
+        credentials: cleanupCreds,
         target: body.deployTarget,
       });
     }
@@ -234,6 +364,13 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
     // Strip DB_PASSWORD from SSE payload — secret must not leak to the client (Kenobi F-03)
     const safeOutputs = { ...result.outputs };
     delete safeOutputs['DB_PASSWORD'];
+    delete safeOutputs['GITHUB_TOKEN'];
+    // Ensure no credential keys leaked into outputs
+    for (const key of Object.keys(safeOutputs)) {
+      if (key.toLowerCase().includes('password') || key.toLowerCase().includes('secret') || key.toLowerCase().includes('token')) {
+        delete safeOutputs[key];
+      }
+    }
     const safeResult = { ...result, outputs: safeOutputs };
 
     sseWrite(`data: ${JSON.stringify({ step: 'complete', status: result.success ? 'done' : 'error', message: result.success ? 'Provisioning complete' : result.error || 'Provisioning failed', result: safeResult, runId })}\n\n`);
@@ -307,8 +444,9 @@ addRoute('POST', '/api/provision/cleanup', async (req: IncomingMessage, res: Ser
 
   try {
     // Clean up DNS records separately (they're not managed by the provisioner)
+    // Skip github-repo — repos are tracked for idempotency, not cleanup (ADR-012)
     const dnsResources = resources.filter((r) => r.type === 'dns-record');
-    const infraResources = resources.filter((r) => r.type !== 'dns-record');
+    const infraResources = resources.filter((r) => r.type !== 'dns-record' && r.type !== 'github-repo');
 
     if (dnsResources.length > 0 && credentials['cloudflare-api-token']) {
       await cleanupDnsRecords(
@@ -327,8 +465,11 @@ addRoute('POST', '/api/provision/cleanup', async (req: IncomingMessage, res: Ser
     await updateManifestStatus(runId, 'cleaned');
     await deleteManifest(runId);
     const notes: string[] = [];
-    // Domain registration is irreversible — always warn if cleanup was requested
+    // Domain registration and GitHub repos are irreversible — always warn
     notes.push('Note: If a domain was registered during this run, that purchase cannot be reversed. Manage it at dash.cloudflare.com.');
+    if (resources.some((r) => r.type === 'github-repo')) {
+      notes.push('Note: GitHub repository was not deleted (repos are preserved). Delete manually at github.com if needed.');
+    }
     sendJson(res, 200, { cleaned: true, message: `Cleaned up ${count} resources`, notes });
   } catch (err) {
     sendJson(res, 500, { error: `Cleanup failed: ${(err as Error).message}` });
@@ -337,6 +478,12 @@ addRoute('POST', '/api/provision/cleanup', async (req: IncomingMessage, res: Ser
 
 // GET /api/provision/incomplete — check for orphaned runs from crashes
 addRoute('GET', '/api/provision/incomplete', async (_req: IncomingMessage, res: ServerResponse) => {
+  const password = getSessionPassword();
+  if (!password) {
+    sendJson(res, 401, { error: 'Vault is locked.' });
+    return;
+  }
+
   const incomplete = await listIncompleteRuns();
   sendJson(res, 200, {
     runs: incomplete.map((m) => ({

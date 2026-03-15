@@ -1,5 +1,6 @@
 /**
  * Railway provisioner — creates a real Railway project via GraphQL API + generates railway.toml.
+ * v3.8.0: Creates service with GitHub source, sets env vars, polls deploy (ADR-015).
  */
 
 import { writeFile } from 'node:fs/promises';
@@ -7,6 +8,10 @@ import { join } from 'node:path';
 import type { Provisioner, ProvisionContext, ProvisionEmitter, ProvisionResult, CreatedResource } from './types.js';
 import { httpsPost, safeJsonParse } from './http-client.js';
 import { recordResourcePending, recordResourceCreated } from '../provision-manifest.js';
+import { appendEnvSection } from '../env-writer.js';
+
+const DEPLOY_POLL_INTERVAL_MS = 5000;
+const DEPLOY_POLL_TIMEOUT_MS = 300_000;
 
 function gql(token: string, query: string, variables?: Record<string, unknown>): Promise<{ status: number; body: string }> {
   const body = JSON.stringify({ query, variables });
@@ -107,7 +112,7 @@ export const railwayProvisioner: Provisioner = {
         outputs['RAILWAY_DB_PLUGIN'] = dbType;
         emit({ step: 'railway-db', status: 'done', message: `${dbType} service added — connection string available in Railway dashboard` });
       } catch (err) {
-        emit({ step: 'railway-db', status: 'error', message: `Failed to add ${dbType} service`, detail: (err as Error).message });
+        emit({ step: 'railway-db', status: 'error', message: `Failed to add ${dbType} service`, detail: 'Railway may have deprecated this API. Create the database manually in the Railway dashboard.' });
         // Non-fatal
       }
     } else {
@@ -146,7 +151,7 @@ export const railwayProvisioner: Provisioner = {
         }
         emit({ step: 'railway-redis', status: 'done', message: 'Redis service added' });
       } catch (err) {
-        emit({ step: 'railway-redis', status: 'error', message: 'Failed to add Redis service', detail: (err as Error).message });
+        emit({ step: 'railway-redis', status: 'error', message: 'Failed to add Redis service', detail: 'Railway may have deprecated this API. Create the database manually in the Railway dashboard.' });
       }
     } else {
       emit({ step: 'railway-redis', status: 'skipped', message: 'No cache requested' });
@@ -186,7 +191,163 @@ export const railwayProvisioner: Provisioner = {
       }
     }
 
-    // Step 5: Generate railway.toml
+    // Step 5: Create service with GitHub source (ADR-015)
+    const ghOwner = ctx.credentials['_github-owner'];
+    const ghRepo = ctx.credentials['_github-repo-name'];
+    let serviceId = '';
+    let environmentId = '';
+
+    if (projectId && ghOwner && ghRepo) {
+      emit({ step: 'railway-service', status: 'started', message: `Creating service linked to ${ghOwner}/${ghRepo}` });
+      try {
+        // First get the default environment ID
+        const envRes = await gql(token, `
+          query($projectId: String!) {
+            project(id: $projectId) {
+              environments { edges { node { id name } } }
+            }
+          }
+        `, { projectId });
+        if (envRes.status === 200) {
+          const envData = safeJsonParse(envRes.body) as {
+            data?: { project?: { environments?: { edges: { node: { id: string; name: string } }[] } } };
+          } | null;
+          const envEdges = envData?.data?.project?.environments?.edges ?? [];
+          const prodEnv = envEdges.find(e => e.node.name === 'production') || envEdges[0];
+          environmentId = prodEnv?.node.id ?? '';
+        }
+
+        // Create service with GitHub repo source
+        const svcRes = await gql(token, `
+          mutation($projectId: String!, $repo: String!) {
+            serviceCreate(input: {
+              projectId: $projectId,
+              source: { repo: $repo }
+            }) {
+              id
+              name
+            }
+          }
+        `, { projectId, repo: `${ghOwner}/${ghRepo}` });
+
+        if (svcRes.status === 200) {
+          const svcData = safeJsonParse(svcRes.body) as {
+            data?: { serviceCreate?: { id?: string; name?: string } };
+            errors?: { message: string }[];
+          } | null;
+          if (svcData?.errors?.length) {
+            emit({ step: 'railway-service', status: 'error', message: 'Failed to create service', detail: svcData.errors[0].message });
+          } else {
+            serviceId = svcData?.data?.serviceCreate?.id ?? '';
+            emit({ step: 'railway-service', status: 'done', message: `Service created — linked to GitHub repo` });
+          }
+        }
+      } catch (err) {
+        emit({ step: 'railway-service', status: 'error', message: 'Failed to create service', detail: (err as Error).message });
+        // Non-fatal — project exists, user can link manually
+      }
+    }
+
+    // Step 6: Set environment variables on the service
+    if (serviceId && environmentId) {
+      emit({ step: 'railway-envvars', status: 'started', message: 'Setting environment variables' });
+      try {
+        // Railway uses ${{Plugin.VAR}} syntax for database references
+        const variables: Record<string, string> = {};
+        if (ctx.database === 'postgres' || ctx.database === 'mysql') {
+          variables['DATABASE_URL'] = ctx.database === 'postgres'
+            ? '${{Postgres.DATABASE_URL}}'
+            : '${{MySQL.MYSQL_URL}}';
+        }
+        if (ctx.cache === 'redis') {
+          variables['REDIS_URL'] = '${{Redis.REDIS_URL}}';
+        }
+
+        if (Object.keys(variables).length > 0) {
+          await gql(token, `
+            mutation($input: VariableCollectionUpsertInput!) {
+              variableCollectionUpsert(input: $input)
+            }
+          `, {
+            input: {
+              projectId,
+              serviceId,
+              environmentId,
+              variables,
+            },
+          });
+          emit({ step: 'railway-envvars', status: 'done', message: `Set ${Object.keys(variables).length} environment variables` });
+        } else {
+          emit({ step: 'railway-envvars', status: 'done', message: 'No environment variables to set' });
+        }
+      } catch (err) {
+        emit({ step: 'railway-envvars', status: 'error', message: 'Failed to set env vars', detail: (err as Error).message });
+      }
+    }
+
+    // Step 7: Poll for deployment
+    if (serviceId && environmentId) {
+      emit({ step: 'railway-deploy', status: 'started', message: 'Waiting for Railway deployment...' });
+      try {
+        const start = Date.now();
+        let deployUrl = '';
+        while (Date.now() - start < DEPLOY_POLL_TIMEOUT_MS) {
+          await new Promise(r => setTimeout(r, DEPLOY_POLL_INTERVAL_MS));
+          if (ctx.abortSignal?.aborted) break;
+
+          const depRes = await gql(token, `
+            query($projectId: String!) {
+              project(id: $projectId) {
+                services { edges { node {
+                  serviceInstances { edges { node {
+                    domains { serviceDomains { domain } }
+                    latestDeployment { status }
+                  } } }
+                } } }
+              }
+            }
+          `, { projectId });
+
+          if (depRes.status === 200) {
+            const depData = safeJsonParse(depRes.body) as {
+              data?: { project?: { services?: { edges: { node: { serviceInstances?: { edges: { node: { domains?: { serviceDomains?: { domain: string }[] }; latestDeployment?: { status: string } } }[] } } }[] } } };
+            } | null;
+            const svcNode = depData?.data?.project?.services?.edges?.[0]?.node;
+            const instance = svcNode?.serviceInstances?.edges?.[0]?.node;
+            const deployStatus = instance?.latestDeployment?.status;
+            const domain = instance?.domains?.serviceDomains?.[0]?.domain;
+
+            if (deployStatus === 'SUCCESS' && domain) {
+              deployUrl = `https://${domain}`;
+              break;
+            }
+            if (deployStatus === 'FAILED' || deployStatus === 'CRASHED') {
+              emit({ step: 'railway-deploy', status: 'error', message: `Deployment ${deployStatus.toLowerCase()} — check Railway dashboard` });
+              break;
+            }
+          }
+
+          const elapsed = Math.round((Date.now() - start) / 1000);
+          if (elapsed % 15 === 0) {
+            emit({ step: 'railway-deploy', status: 'started', message: `Waiting for deployment... (${elapsed}s)` });
+          }
+        }
+
+        if (deployUrl) {
+          outputs['DEPLOY_URL'] = deployUrl;
+          outputs['RAILWAY_DOMAIN'] = deployUrl.replace('https://', '');
+          emit({ step: 'railway-deploy', status: 'done', message: `Live at ${deployUrl}` });
+        } else if (!ctx.abortSignal?.aborted) {
+          emit({ step: 'railway-deploy', status: 'error', message: 'Deployment polling timed out — check Railway dashboard' });
+        }
+      } catch (err) {
+        emit({ step: 'railway-deploy', status: 'error', message: 'Failed to poll deployment', detail: (err as Error).message });
+      }
+    } else if (!ghOwner || !ghRepo) {
+      emit({ step: 'railway-deploy', status: 'skipped', message: 'No GitHub repo linked — deploy manually with: railway link && railway up' });
+    }
+
+    // Step 8: Generate railway.toml
     emit({ step: 'railway-config', status: 'started', message: 'Generating railway.toml' });
     try {
       const startCommand = framework === 'next.js'
@@ -221,22 +382,17 @@ restartPolicyMaxRetries = 3
       emit({ step: 'railway-config', status: 'error', message: 'Failed to write railway.toml', detail: (err as Error).message });
     }
 
-    // Step 6: Write .env
+    // Step 9: Write .env
     emit({ step: 'railway-env', status: 'started', message: 'Writing Railway config to .env' });
     try {
       const envLines = [
         `# VoidForge Railway — generated ${new Date().toISOString()}`,
         `RAILWAY_PROJECT_ID=${projectId}`,
         `RAILWAY_PROJECT_NAME=${outputs['RAILWAY_PROJECT_NAME'] || ctx.projectName}`,
-        `# Deploy with: railway link ${projectId} && railway up`,
       ];
-
-      const envPath = join(ctx.projectDir, '.env');
-      const { readFile } = await import('node:fs/promises');
-      let existing = '';
-      try { existing = await readFile(envPath, 'utf-8'); } catch { /* new file */ }
-      const separator = existing ? '\n\n' : '';
-      await writeFile(envPath, existing + separator + envLines.join('\n') + '\n', 'utf-8');
+      if (outputs['DEPLOY_URL']) envLines.push(`DEPLOY_URL=${outputs['DEPLOY_URL']}`);
+      envLines.push(ghOwner ? '# Auto-deploys on push to main' : `# Deploy with: railway link ${projectId} && railway up`);
+      await appendEnvSection(ctx.projectDir, envLines);
       emit({ step: 'railway-env', status: 'done', message: 'Railway config written to .env' });
     } catch (err) {
       emit({ step: 'railway-env', status: 'error', message: 'Failed to write .env', detail: (err as Error).message });

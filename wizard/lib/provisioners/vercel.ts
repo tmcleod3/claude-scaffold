@@ -1,12 +1,17 @@
 /**
  * Vercel provisioner — creates a real Vercel project via API + generates vercel.json.
+ * v3.8.0: Links GitHub repo, sets env vars, polls deploy (ADR-015).
  */
 
-import { writeFile } from 'node:fs/promises';
+import { writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Provisioner, ProvisionContext, ProvisionEmitter, ProvisionResult, CreatedResource } from './types.js';
 import { httpsPost, httpsGet, httpsDelete, safeJsonParse, slugify } from './http-client.js';
 import { recordResourcePending, recordResourceCreated } from '../provision-manifest.js';
+import { appendEnvSection } from '../env-writer.js';
+
+const DEPLOY_POLL_INTERVAL_MS = 5000;
+const DEPLOY_POLL_TIMEOUT_MS = 300_000; // 5 minutes
 
 export const vercelProvisioner: Provisioner = {
   async validate(ctx: ProvisionContext): Promise<string[]> {
@@ -63,9 +68,21 @@ export const vercelProvisioner: Provisioner = {
         outputs['VERCEL_PROJECT_NAME'] = data?.name ?? slug;
         emit({ step: 'vercel-project', status: 'done', message: `Project "${data?.name}" created on Vercel` });
       } else if (res.status === 409) {
-        // Project already exists — use it
-        emit({ step: 'vercel-project', status: 'done', message: `Project "${slug}" already exists on Vercel — will use existing`, detail: 'No new project created' });
+        // Project already exists — fetch its ID for subsequent steps
+        try {
+          const existingRes = await httpsGet('api.vercel.com', `/v10/projects/${slug}`, headers);
+          if (existingRes.status === 200) {
+            const existingData = safeJsonParse(existingRes.body) as { id?: string; name?: string } | null;
+            projectId = existingData?.id ?? '';
+            if (projectId) {
+              resources.push({ type: 'vercel-project', id: projectId, region: 'global' });
+              await recordResourceCreated(ctx.runId, 'vercel-project', projectId, 'global');
+              outputs['VERCEL_PROJECT_ID'] = projectId;
+            }
+          }
+        } catch { /* fetch failed, proceed without ID */ }
         outputs['VERCEL_PROJECT_NAME'] = slug;
+        emit({ step: 'vercel-project', status: 'done', message: `Project "${slug}" already exists on Vercel — will use existing`, detail: projectId ? `ID: ${projectId}` : 'Could not fetch project ID' });
       } else {
         const errBody = safeJsonParse(res.body) as { error?: { message?: string } } | null;
         throw new Error(errBody?.error?.message || `Vercel API returned ${res.status}`);
@@ -129,7 +146,130 @@ export const vercelProvisioner: Provisioner = {
       // Non-fatal — project was still created
     }
 
-    // Step 4: Write .env
+    // Step 4: Link GitHub repo (ADR-015 — auto-deploy on push)
+    const ghOwner = ctx.credentials['_github-owner'];
+    const ghRepo = ctx.credentials['_github-repo-name'];
+    if (projectId && ghOwner && ghRepo) {
+      emit({ step: 'vercel-link', status: 'started', message: `Linking GitHub repo ${ghOwner}/${ghRepo} to Vercel` });
+      try {
+        const linkBody = JSON.stringify({
+          type: 'github',
+          repo: `${ghOwner}/${ghRepo}`,
+          sourceless: false,
+          productionBranch: 'main',
+        });
+        const linkRes = await httpsPost(
+          'api.vercel.com',
+          `/v10/projects/${projectId}/link`,
+          headers,
+          linkBody,
+        );
+        if (linkRes.status === 200 || linkRes.status === 201) {
+          emit({ step: 'vercel-link', status: 'done', message: `GitHub repo linked — auto-deploy enabled on push to main` });
+        } else {
+          const errBody = safeJsonParse(linkRes.body) as { error?: { message?: string } } | null;
+          emit({ step: 'vercel-link', status: 'error', message: 'Failed to link GitHub repo', detail: errBody?.error?.message || `API returned ${linkRes.status}` });
+        }
+      } catch (err) {
+        emit({ step: 'vercel-link', status: 'error', message: 'Failed to link GitHub repo', detail: (err as Error).message });
+        // Non-fatal — user can link manually
+      }
+    }
+
+    // Step 5: Set environment variables
+    if (projectId) {
+      emit({ step: 'vercel-envvars', status: 'started', message: 'Setting environment variables' });
+      try {
+        // Collect env vars from .env file (skip comments, empty lines, and VoidForge metadata)
+        let envContent = '';
+        try { envContent = await readFile(join(ctx.projectDir, '.env'), 'utf-8'); } catch { /* no .env */ }
+        const envVars = envContent
+          .split('\n')
+          .filter(line => line.includes('=') && !line.startsWith('#'))
+          .map(line => {
+            const idx = line.indexOf('=');
+            return { key: line.slice(0, idx).trim(), value: line.slice(idx + 1).trim().replace(/^["']|["']$/g, '') };
+          })
+          .filter(v => v.key && !v.key.startsWith('VERCEL_')); // Don't set Vercel metadata as env vars
+
+        if (envVars.length > 0) {
+          const envBody = JSON.stringify(envVars.map(v => ({
+            key: v.key,
+            value: v.value,
+            type: 'encrypted',
+            target: ['production', 'preview', 'development'],
+          })));
+          const envRes = await httpsPost(
+            'api.vercel.com',
+            `/v10/projects/${projectId}/env`,
+            headers,
+            envBody,
+          );
+          if (envRes.status === 200 || envRes.status === 201) {
+            emit({ step: 'vercel-envvars', status: 'done', message: `Set ${envVars.length} environment variables` });
+          } else {
+            emit({ step: 'vercel-envvars', status: 'error', message: 'Failed to set env vars', detail: `API returned ${envRes.status}` });
+          }
+        } else {
+          emit({ step: 'vercel-envvars', status: 'done', message: 'No environment variables to set' });
+        }
+      } catch (err) {
+        emit({ step: 'vercel-envvars', status: 'error', message: 'Failed to set env vars', detail: (err as Error).message });
+      }
+    }
+
+    // Step 6: Poll for deployment (triggered by GitHub push, ADR-015)
+    if (projectId && ghOwner && ghRepo) {
+      emit({ step: 'vercel-deploy', status: 'started', message: 'Waiting for deployment (triggered by git push)...' });
+      try {
+        const start = Date.now();
+        let deployUrl = '';
+        while (Date.now() - start < DEPLOY_POLL_TIMEOUT_MS) {
+          await new Promise(r => setTimeout(r, DEPLOY_POLL_INTERVAL_MS));
+          if (ctx.abortSignal?.aborted) break;
+
+          const depRes = await httpsGet(
+            'api.vercel.com',
+            `/v6/deployments?projectId=${projectId}&limit=1`,
+            headers,
+          );
+          if (depRes.status !== 200) continue;
+
+          const depData = safeJsonParse(depRes.body) as {
+            deployments?: { state?: string; url?: string; readyState?: string }[];
+          } | null;
+          const latest = depData?.deployments?.[0];
+          if (!latest) continue;
+
+          if (latest.readyState === 'READY' || latest.state === 'READY') {
+            deployUrl = latest.url ? `https://${latest.url}` : '';
+            break;
+          }
+          if (latest.readyState === 'ERROR' || latest.state === 'ERROR') {
+            emit({ step: 'vercel-deploy', status: 'error', message: 'Deployment failed on Vercel', detail: 'Check the Vercel dashboard for build logs' });
+            break;
+          }
+
+          const elapsed = Math.round((Date.now() - start) / 1000);
+          if (elapsed % 15 === 0) {
+            emit({ step: 'vercel-deploy', status: 'started', message: `Deployment status: ${latest.readyState || latest.state || 'building'}... (${elapsed}s)` });
+          }
+        }
+
+        if (deployUrl) {
+          outputs['DEPLOY_URL'] = deployUrl;
+          emit({ step: 'vercel-deploy', status: 'done', message: `Live at ${deployUrl}` });
+        } else if (!ctx.abortSignal?.aborted) {
+          emit({ step: 'vercel-deploy', status: 'error', message: 'Deployment polling timed out — check Vercel dashboard', detail: 'The deployment may still be building' });
+        }
+      } catch (err) {
+        emit({ step: 'vercel-deploy', status: 'error', message: 'Failed to poll deployment', detail: (err as Error).message });
+      }
+    } else if (!ghOwner || !ghRepo) {
+      emit({ step: 'vercel-deploy', status: 'skipped', message: 'No GitHub repo linked — deploy manually with: npx vercel deploy' });
+    }
+
+    // Step 7: Write .env
     emit({ step: 'vercel-env', status: 'started', message: 'Writing Vercel config to .env' });
     try {
       const envLines = [
@@ -139,14 +279,11 @@ export const vercelProvisioner: Provisioner = {
       if (outputs['VERCEL_PROJECT_ID']) {
         envLines.push(`VERCEL_PROJECT_ID=${outputs['VERCEL_PROJECT_ID']}`);
       }
-      envLines.push('# Deploy with: npx vercel deploy');
-
-      const envPath = join(ctx.projectDir, '.env');
-      const { readFile } = await import('node:fs/promises');
-      let existing = '';
-      try { existing = await readFile(envPath, 'utf-8'); } catch { /* new file */ }
-      const separator = existing ? '\n\n' : '';
-      await writeFile(envPath, existing + separator + envLines.join('\n') + '\n', 'utf-8');
+      if (outputs['DEPLOY_URL']) {
+        envLines.push(`DEPLOY_URL=${outputs['DEPLOY_URL']}`);
+      }
+      envLines.push('# Auto-deploys on push to main');
+      await appendEnvSection(ctx.projectDir, envLines);
       emit({ step: 'vercel-env', status: 'done', message: 'Vercel config written to .env' });
     } catch (err) {
       emit({ step: 'vercel-env', status: 'error', message: 'Failed to write .env', detail: (err as Error).message });
