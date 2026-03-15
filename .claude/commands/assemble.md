@@ -121,7 +121,7 @@ Present the summary to the user.
 
 ## Operating Rules
 - Update `/logs/assemble-state.md` after EVERY phase completion
-- If context gets heavy (50+ files read, 100+ tool calls), checkpoint and suggest a new session with `/assemble --resume`
+- If context usage exceeds 70%, checkpoint and suggest a new session with `/assemble --resume`
 - Each phase runs the FULL protocol of its command — no shortcuts
 - Fixes happen BETWEEN rounds, not batched at the end
 - The Crossfire (Phase 12) and Council (Phase 13) can be skipped with `/assemble --fast`

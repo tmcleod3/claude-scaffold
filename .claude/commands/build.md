@@ -98,4 +98,4 @@
 ## At Every Phase
 - Update `/logs/build-state.md` when starting and completing each phase
 - Log non-obvious decisions to `/logs/decisions.md`
-- If context is getting heavy (50+ files read, 100+ tool calls), checkpoint to build-state.md and suggest starting a new session
+- If context usage exceeds 70%, checkpoint to build-state.md and suggest starting a new session

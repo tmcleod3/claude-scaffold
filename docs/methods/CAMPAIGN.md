@@ -39,7 +39,7 @@ Autonomous campaign execution: read the PRD, figure out what's next, build it, v
 3. **Scope small.** Each mission is 1-3 PRD sections — a buildable unit, not the whole product.
 4. **Dependency order.** Auth before anything gated. Schema before API. Core before supporting.
 5. **Checkpoint everything.** Update `campaign-state.md` after every mission.
-6. **Respect context limits.** When things get heavy, checkpoint and suggest `/campaign --resume`.
+6. **Respect context limits.** Checkpoint when context usage exceeds 70%, not based on arbitrary file/tool counts.
 7. **One mission at a time.** Don't plan three missions ahead. Plan one, execute one, reassess.
 8. **Mission scoping follows PRD Section 16** (Launch Sequence) when available.
 9. **After each mission, commit.** Coulson handles versioning.
@@ -129,7 +129,7 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 
 1. Construct the `/assemble` prompt with the mission scope
 2. Fury runs the full pipeline (or `--fast` if user prefers)
-3. Monitor — if context gets heavy, Sisko checkpoints
+3. Monitor — if context exceeds 70%, Sisko checkpoints
 4. On completion → Step 5
 
 ### Step 5 — Debrief and Commit

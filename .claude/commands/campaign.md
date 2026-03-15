@@ -93,7 +93,7 @@ Wait for user confirmation before proceeding.
 On confirmation:
 1. Run `/assemble` with the scoped mission description
 2. If `$ARGUMENTS` includes `--fast`, pass `--fast` to assemble (skip Crossfire + Council)
-3. Monitor context — if getting heavy, checkpoint and suggest `/campaign --resume`
+3. Monitor context — if usage exceeds 70%, checkpoint and suggest `/campaign --resume`
 
 ## Step 5 — Debrief and Commit
 

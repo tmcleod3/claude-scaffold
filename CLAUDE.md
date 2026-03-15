@@ -34,7 +34,7 @@ Every phase, decision, handoff, and failure gets logged to `/logs/`. See `/docs/
 Pre-load active domain methodology. Load application code on demand. See `/docs/methods/CONTEXT_MANAGEMENT.md`.
 
 - Pre-load method docs for the active agent's domain at session start (1M context budget allows this)
-- If 50+ files read or 100+ tool calls in one session, checkpoint and suggest a new session
+- Checkpoint based on **actual context usage** (70%+ = consider checkpoint), not arbitrary file/tool counts
 - Per-directory `CLAUDE.md` files for directory-specific conventions (keep under 50 lines each)
 
 ## Code Patterns
