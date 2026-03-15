@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [4.2.0] - 2026-03-14
+
+### Added
+- **Prisma type generation** (ADR-025) — runs `prisma generate` and creates `types/index.ts` barrel export. Conditional on Prisma schema existing.
+- **OpenAPI spec generation** (ADR-025) — generates starter `docs/api.yaml` with framework-aware defaults. Users fill in their endpoints.
+- **Database ERD generation** (ADR-025) — parses Prisma schema and generates `docs/schema.md` with Mermaid entity-relationship diagram.
+- **Database seeding** (ADR-025) — generates `prisma/seed.ts` with factory functions for all models. Run with `npx tsx prisma/seed.ts`.
+- **Integration templates** (ADR-025) — pre-built client wrappers selected via PRD frontmatter:
+  - `payments: stripe` → `lib/stripe.ts` (checkout, portal, webhooks)
+  - `email: resend` → `lib/resend.ts` (transactional email)
+  - `storage: s3` → `lib/s3-upload.ts` (signed URL upload/download)
+
+### Security
+- All integration templates validate required env vars at startup (fail-fast, not silent fallback)
+
+---
+
 ## [4.1.0] - 2026-03-14
 
 ### Added

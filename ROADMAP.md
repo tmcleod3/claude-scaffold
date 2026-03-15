@@ -2,8 +2,8 @@
 
 > The plan for the plan-maker.
 
-**Current:** v4.1.0 (2026-03-14)
-**Status:** Observability release shipped. Deploy logs, cost estimation, health monitoring, Sentry integration.
+**Current:** v4.2.0 (2026-03-14)
+**Status:** DX release shipped. Prisma types, OpenAPI docs, ERD, integration templates, database seeding.
 
 ---
 
