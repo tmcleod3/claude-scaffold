@@ -1,0 +1,122 @@
+# /gauntlet — Thanos's Comprehensive Review
+
+*"I am inevitable."*
+
+The Gauntlet tests everything. Every domain. Multiple rounds. Escalating intensity. The project either survives or it doesn't. This is NOT a build command — it assumes code is already written. Run it after `/build` or `/campaign` to put the finished product through absolute hell.
+
+## Context Setup
+1. Read `/docs/methods/GAUNTLET.md` for operating rules
+2. Read `/logs/build-state.md` — what was built, what phases completed
+3. Read `/docs/PRD.md` — the source of truth for what the project should be
+
+## Round 1 — Discovery (parallel)
+
+**Thanos:** "Before I test, I must understand."
+
+Use the Agent tool to run all four in parallel — these are read-only analysis:
+
+- **Agent 1 (Picard — Architecture):** Schema review, service boundaries, dependency graph, scaling assessment. Read the full `/architect` protocol but produce findings only (no ADRs — this is review, not design).
+- **Agent 2 (Stark — Code Review):** Pattern compliance, logic errors, type safety, cross-module data flow tracing. Read `/review` protocol. One pass across all source files.
+- **Agent 3 (Galadriel — UX Surface Map):** Product surface map, usability walkthrough (Step 1.5), Éowyn's enchantment scan (Step 1.75). No fixes yet — discovery only.
+- **Agent 4 (Kenobi — Attack Surface Inventory):** List all endpoints, WebSocket handlers, file I/O, credential access points, user input parsing. Classify each by risk tier. No deep audit yet — just the map.
+
+Synthesize all four into a unified findings list. Log to `/logs/gauntlet-round-1.md`.
+
+## Round 2 — First Strike (parallel)
+
+**Thanos:** "Now I test every stone."
+
+Use the Agent tool to run all four in parallel — full domain audits:
+
+- **Agent 1 (Batman — Full QA):** Run the complete `/qa` protocol. Oracle + Red Hood + Alfred + Deathstroke + Constantine + Nightwing. Every edge case, every error state, every boundary.
+- **Agent 2 (Galadriel — Full UX):** Run the complete `/ux` protocol. Elrond + Arwen + Samwise + Bilbo + Legolas + Gimli + Gandalf + Éowyn. Usability, visual, a11y, copy, performance, edge cases, enchantment.
+- **Agent 3 (Kenobi — Full Security):** Run the complete `/security` protocol. Leia + Chewie + Rex + Maul parallel scans, then Yoda → Windu → Ahsoka → Padmé sequential audits.
+- **Agent 4 (Stark — Integration Tracing):** For every API endpoint, trace the full data path: client request → validation → service → database → response. For every file upload, trace: upload → storage → retrieval → display. For every credential, trace: entry → vault → usage → cleanup.
+
+Merge all findings. Deduplicate across domains.
+
+**→ FIX BATCH 1:** Fix all Critical and High findings. Update finding status.
+
+## Round 3 — Second Strike (parallel)
+
+**Thanos:** "The first wave reveals. The second wave breaks."
+
+Use the Agent tool to run all four in parallel — targeted re-verification:
+
+- **Agent 1 (Batman — Re-probe):** Nightwing re-runs the test suite. Red Hood re-probes fixed areas. Deathstroke tests new boundaries created by the fixes. Focus on regressions.
+- **Agent 2 (Galadriel — Error States + Re-verify):** Samwise re-audits a11y on all modified components. Gandalf re-checks edge cases on fixed flows. Bilbo re-checks microcopy on any changed UI.
+- **Agent 3 (Kenobi — Re-probe + Access Control):** Maul re-probes all remediated vulnerabilities. Ahsoka verifies access control across every role boundary. Padmé verifies the primary user flow still works (critical path smoke test).
+- **Agent 4 (Kusanagi — DevOps):** Run the complete `/devops` protocol. Deploy scripts, monitoring, backups, health checks, page weight gate, security headers.
+
+**→ FIX BATCH 2:** Fix remaining findings.
+
+## Round 4 — The Crossfire (parallel — adversarial)
+
+**Thanos:** "Now the real test. Everyone attacks everyone else's work."
+
+Use the Agent tool to run all five in parallel — pure adversarial:
+
+- **Maul** (Star Wars) — Attacks code that passed /review. Looks for exploits in "clean" code.
+- **Deathstroke** (DC) — Probes endpoints that /security hardened. Tests if remediations can be bypassed.
+- **Loki** (Marvel) — Chaos-tests features that /qa cleared. What breaks under unexpected conditions?
+- **Constantine** (DC) — Hunts cursed code in FIXED areas specifically. Code that only works by accident.
+- **Éowyn** (Tolkien) — Final enchantment pass on the polished, hardened product. Where can delight still be added without compromising security or stability?
+
+**→ FIX BATCH 3:** Fix all adversarial findings. If any fix is applied, re-run the affected adversarial agent on the fixed area only.
+
+## Round 5 — The Council (parallel — convergence)
+
+**Thanos:** "One last look. Every domain. One voice."
+
+Use the Agent tool to run all six in parallel:
+
+- **Spock** (Star Trek) — Did any QA/security/UX fix break code patterns or quality?
+- **Ahsoka** (Star Wars) — Did any fix introduce access control gaps?
+- **Nightwing** (DC) — Full regression: run the entire test suite. Any failures?
+- **Samwise** (Tolkien) — Final accessibility audit on all modified components.
+- **Padmé** (Star Wars) — Critical path functional verification. Open the app, complete the main task, verify output.
+- **Troi** (Star Trek) — PRD compliance: read the PRD prose section-by-section, verify every claim against the implementation. Numeric claims, visual treatments, copy accuracy.
+
+If the Council finds issues:
+1. Fix code discrepancies. Flag asset requirements as BLOCKED.
+2. Re-run the Council (max 2 iterations).
+3. If not converged after 2 rounds, present remaining findings to the user.
+
+## The Snap — Thanos's Verdict
+
+**If all domains sign off:**
+> *"I am inevitable. The project survives the Gauntlet."*
+
+Present the final summary:
+- Total findings across all 5 rounds
+- Total fixes applied
+- Findings by domain (QA, UX, Security, Architecture, DevOps)
+- Test suite status
+- Outstanding items (if any)
+
+**Wong extracts lessons:** Append notable patterns to `/docs/LESSONS.md`.
+
+**If findings remain:**
+Present them with severity and recommendation. The user decides whether to ship or iterate.
+
+## Arguments
+- No arguments → full 5-round gauntlet
+- `--quick` → 3 rounds only (skip Round 4 Crossfire + Round 5 Council)
+- `--security-only` → 4 rounds of security only (Kenobi marathon)
+- `--ux-only` → 4 rounds of UX only (Galadriel marathon)
+- `--qa-only` → 4 rounds of QA only (Batman marathon)
+- `--resume` → resume from last completed round (reads gauntlet state from logs)
+
+## Operating Rules
+- Update `/logs/gauntlet-state.md` after EVERY round
+- The Gauntlet does NOT build code — it reviews and hardens existing code
+- Fixes happen BETWEEN rounds, not batched at the end
+- Every finding must have: ID, severity, file, description, fix recommendation
+- If context pressure symptoms appear, ask user to run `/context`
+- The Gauntlet is the final test before shipping. Treat it with appropriate gravity.
+
+## Handoffs
+- If architecture changes are needed → log for Picard
+- If new tests are needed → log for Batman (`/test`)
+- If deploy config changes are needed → log for Kusanagi (`/devops`)
+- At completion, offer Bashir (`/debrief`) to capture session learnings

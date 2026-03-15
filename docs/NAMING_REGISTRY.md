@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury, Sisko, Celebrimbor, Bashir. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury, Thanos, Sisko, Celebrimbor, Bashir. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -24,6 +24,7 @@
 | **Marvel** | Backend Engineering | Stark |
 | **Marvel** | Release Management | Coulson |
 | **Marvel** | The Initiative | Fury |
+| **Marvel** | The Gauntlet | Thanos |
 | **DC Comics** | QA & Bug Hunting | Batman |
 | **Star Wars** | Security Auditing | Kenobi |
 | **Star Trek** | Systems Architecture | Picard |
@@ -108,7 +109,9 @@
 27. Coulson — Meticulous record-keeper, version and release management
 28. Jarvis — AI assistant, status reporting, progress summaries
 
-**Reserved:** Stark (lead — backend), Coulson (lead — release), Fury (lead — the initiative)
+29. Thanos — **Lead: The Gauntlet.** Comprehensive multi-round review. Tests every domain, every stone. "I am inevitable."
+
+**Reserved:** Stark (lead — backend), Coulson (lead — release), Fury (lead — the initiative), Thanos (lead — the gauntlet)
 
 ---
 
