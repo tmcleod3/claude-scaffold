@@ -117,7 +117,7 @@ voidforge/
     ├── server.ts                 ← Local HTTP server (127.0.0.1)
     ├── router.ts                 ← API route registry
     ├── api/                      ← API handlers
-    ├── ui/                       ← Merlin (setup) + Strange (deploy)
+    ├── ui/                       ← Merlin (setup) + Haku (deploy)
     └── lib/                      ← Vault, model resolution, provisioners
         └── provisioners/         ← Docker, AWS VPS, Vercel, Railway, Cloudflare, S3
 ```
@@ -171,11 +171,11 @@ voidforge/
 | Wizard | Command | Purpose |
 |--------|---------|---------|
 | **Merlin** | `npx voidforge init` | Setup: vault, credentials, PRD generation, scaffolding |
-| **Strange** | `npx voidforge deploy` | Deploy: provisions infrastructure for 6 targets |
+| **Haku** | `npx voidforge deploy` | Deploy: provisions infrastructure for 6 targets |
 
 ### Deploy Targets
 
-| Target | What Strange Provisions | Deploy Command |
+| Target | What Haku Provisions | Deploy Command |
 |--------|------------------------|----------------|
 | Docker | Dockerfile, docker-compose.yml | `docker-compose up -d` |
 | AWS VPS | EC2, security groups, SSH key, optional RDS + ElastiCache | `./infra/deploy.sh` |

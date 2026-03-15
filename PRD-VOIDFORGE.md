@@ -45,7 +45,7 @@ deploy: "static"
 └────────┬────────────────────────────┬────────────┘
          │                            │
     Slash Commands               Browser Wizards
-    (/build, /campaign,          (Merlin, Strange)
+    (/build, /campaign,          (Merlin, Haku)
      /assemble, etc.)                 │
          │                    ┌───────┴───────┐
          │                    │  Express API   │
@@ -80,7 +80,7 @@ deploy: "static"
 | **Methodology** | Agent protocols, build phases, code patterns | CLAUDE.md, docs/methods/*.md, docs/patterns/*.ts |
 | **Commands** | 15 slash commands as executable prompts | .claude/commands/*.md |
 | **Merlin Wizard** | Browser-based setup: vault, credentials, PRD, scaffolding | wizard/ui/app.js, wizard/api/*.ts |
-| **Strange Wizard** | Browser-based deploy: provision infrastructure, deploy code | wizard/ui/deploy.js, wizard/lib/provisioners/*.ts |
+| **Haku Wizard** | Browser-based deploy: provision infrastructure, deploy code | wizard/ui/deploy.js, wizard/lib/provisioners/*.ts |
 | **Vault** | AES-256-GCM encrypted credential storage | wizard/lib/vault.ts |
 | **Provisioners** | Create cloud resources for 6 deploy targets | wizard/lib/provisioners/*.ts |
 | **GitHub Integration** | Create repos, push code, link to platforms | wizard/lib/github.ts |
@@ -143,7 +143,7 @@ deploy: "static"
 - No duplicate names across active sessions
 - Character traits encode behavioral directives
 
-### Feature 3: The Wizards (Merlin + Strange)
+### Feature 3: The Wizards (Merlin + Haku)
 
 **Merlin (Setup):**
 1. Create encrypted vault
@@ -153,7 +153,7 @@ deploy: "static"
 5. Choose deploy target
 6. Scaffold project
 
-**Strange (Deploy):**
+**Haku (Deploy):**
 1. Unlock vault, scan project
 2. Confirm deploy settings
 3. Provision infrastructure (SSE-streamed progress)
@@ -323,7 +323,7 @@ How to know VoidForge is working:
 1. **Time to live URL** — from PRD paste to deployed app, measured in minutes not days
 2. **Finding-to-fix ratio** — /assemble pipeline catches issues before users do
 3. **Session recovery rate** — how often build-state.md successfully resumes a multi-session build
-4. **Deploy success rate** — Strange provisions + deploys without manual intervention
+4. **Deploy success rate** — Haku provisions + deploys without manual intervention
 5. **Browser-only success rate** (v5.5+) — % of builds completed without opening a separate terminal
 6. **Zero-context-switch rate** (v5.5+) — from Merlin wizard to live URL, entirely in one browser tab
 7. **Remote build rate** (v6.5+) — builds initiated from non-development devices (phone, tablet, borrowed laptop)

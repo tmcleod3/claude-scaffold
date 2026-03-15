@@ -33,6 +33,7 @@
 | **Tolkien** | Image Generation | Celebrimbor |
 | **Star Trek** | Field Reports & Feedback | Bashir |
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
+| **Anime** (from Tom's list) | Deploy Wizard | Haku |
 
 ---
 
@@ -310,7 +311,7 @@
 55. Howl — Transformation, handles system migration
 56. Calcifer — The fire that powers everything (the server daemon)
 57. Totoro — Guardian spirit, watches over the system silently
-58. Haku — Shapeshifter, handles DNS and routing
+58. Haku — **Lead: Deploy Wizard**: browser-based deploy wizard (Spirited Away — river spirit, master of transformation). Provisions infrastructure for 6 targets.
 59. Nausicaä — Environmental awareness, resource management
 60. Ashitaka — Curse-bearer, handles technical debt
 
@@ -336,7 +337,7 @@
 71. Kaoru — Harmony, brings systems together
 72. Sentaro — Rhythm, timing, cron jobs and scheduling
 
-**Reserved:** Kusanagi (lead), Alphonse (FMA — conflicts with previous version, use "Elric" if referencing Edward+Al together)
+**Reserved:** Kusanagi (lead — devops), Haku (lead — deploy wizard), Alphonse (FMA — conflicts with previous version, use "Elric" if referencing Edward+Al together)
 
 ---
 

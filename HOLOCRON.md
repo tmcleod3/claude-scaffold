@@ -44,7 +44,7 @@ npm install
 npm run wizard
 ```
 
-**Best for:** Users who want the guided experience. Merlin walks you through setup, Strange handles deployment. Point-and-click where possible.
+**Best for:** Users who want the guided experience. Merlin walks you through setup, Haku handles deployment. Point-and-click where possible.
 
 #### Scaffold (`scaffold` branch)
 The methodology without the tooling. CLAUDE.md, all 15 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
@@ -86,7 +86,7 @@ Every tier includes:
 
 The Full tier adds:
 - **Merlin** — Browser-based setup wizard (vault, credentials, PRD generation, scaffolding)
-- **Strange** — Browser-based deploy wizard (6 target provisioners with SSE streaming)
+- **Haku** — Browser-based deploy wizard (6 target provisioners with SSE streaming)
 - **Encrypted vault** — AES-256-GCM credential storage
 - **Cloud provisioners** — Docker, AWS VPS, Vercel, Railway, Cloudflare, S3
 
@@ -143,7 +143,7 @@ npx voidforge deploy
 npx voidforge deploy --headless
 ```
 
-**Strange** scans your project, loads your PRD, and provisions infrastructure for your chosen target. The browser wizard shows a visual UI with SSE progress streaming; the `--headless` flag runs the same provisioner code from the terminal (used by `/build` Phase 12 so you never leave Claude Code). For AWS VPS, that means:
+**Haku** scans your project, loads your PRD, and provisions infrastructure for your chosen target. The browser wizard shows a visual UI with SSE progress streaming; the `--headless` flag runs the same provisioner code from the terminal (used by `/build` Phase 12 so you never leave Claude Code). For AWS VPS, that means:
 - EC2 instance created and running
 - Security groups configured
 - SSH key generated

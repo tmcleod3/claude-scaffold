@@ -20,7 +20,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 | 4.0.0 | 2026-03-14 | The Reliability Release — pre-deploy build step, CI/CD generation, env validation, Railway API migration, credential scoping |
 | 3.9.1 | 2026-03-14 | Roadmap + VoidForge PRD + /campaign --plan mode for roadmap updates |
 | 3.9.0 | 2026-03-14 | Sisko's War Room — /campaign command, autonomous PRD-to-product mission sequencing, 11th lead agent |
-| 3.8.0 | 2026-03-14 | Strange's Last Mile — end-to-end deploy automation for all 6 targets, GitHub integration, SSH deploy with rollback |
+| 3.8.0 | 2026-03-14 | Haku's Last Mile — end-to-end deploy automation for all 6 targets, GitHub integration, SSH deploy with rollback |
 | 3.7.0 | 2026-03-14 | Fury's Initiative — /assemble full pipeline, /thumper Telegram bridge, Dune universe, 10 leads, 12 commands |
 | 3.6.0 | 2026-03-14 | Chani's Worm Rider — /thumper Telegram bridge, Dune universe, Kongo.io methodology upgrades |
 | 3.5.3 | 2026-03-14 | /thumper rename + cross-methodology hardening + Kongo.io lessons |
@@ -31,7 +31,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 | 3.2.0 | 2026-03-13 | Bombadil's Forge Sync — /void self-update command, Forge Keeper method doc, 8th lead agent |
 | 3.1.0 | 2026-03-13 | The Last Mile — EC2 instance sizing, Cloudflare DNS wiring, platform domain registration |
 | 3.0.0 | 2026-03-12 | The VoidForge Holocron, three-tier distribution (main/scaffold/core), README as system reference |
-| 2.8.0 | 2026-03-12 | Merlin/Strange wizard split, architecture review docs, security audit with SG hardening |
+| 2.8.0 | 2026-03-12 | Merlin/Haku wizard split, architecture review docs, security audit with SG hardening |
 | 2.7.0 | 2026-03-12 | Real provisioning for all 6 targets, hardened infra scripts, SSE keepalive, crash recovery loop complete |
 | 2.6.0 | 2026-03-12 | Auto-provisioning — Docker, AWS VPS (EC2/RDS/ElastiCache), config stubs, crash recovery manifest, atomic vault writes |
 | 2.5.0 | 2026-03-12 | /git command — Coulson's version & release management with semver, changelog, and commit automation |

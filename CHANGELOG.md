@@ -127,14 +127,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [3.8.0] - 2026-03-14
 
 ### Added
-- **Strange's Last Mile** — every deploy target is now fully automated end-to-end. Run `npm run deploy` and get a live URL, not a manual checklist.
+- **Haku's Last Mile** — every deploy target is now fully automated end-to-end. Run `npm run deploy` and get a live URL, not a manual checklist.
 - **GitHub integration** — new cloud provider in Merlin. Collects PAT, creates repos, pushes code. Used by Vercel, Cloudflare Pages, and Railway for auto-deploy on push.
 - **SSH deploy module** — provisions EC2 servers remotely (provision.sh), deploys via release-directory strategy with atomic symlink swap, health checks, and automatic rollback on failure.
 - **S3 deploy via SDK** — uploads build directory to S3 with correct MIME types and cache-control headers. No AWS CLI dependency (ADR-014).
 - **Shared exec utility** — child process wrapper with timeout, abort signal, and streaming (ADR-013). Used by GitHub and SSH modules.
 - **Shared env-writer** — extracted .env append logic from 5 copy-pasted provisioner implementations.
 - **Deploy polling** — Vercel, Cloudflare Pages, and Railway provisioners poll deployment status after git push, reporting progress until the app is live.
-- **DEPLOY_URL** and **GITHUB_REPO_URL** displayed as clickable links on the Strange Done screen.
+- **DEPLOY_URL** and **GITHUB_REPO_URL** displayed as clickable links on the Haku Done screen.
 - 5 Architecture Decision Records: ADR-011 (GitHub pre-step), ADR-012 (no GitHub cleanup), ADR-013 (exec utility), ADR-014 (S3 via SDK), ADR-015 (platform auto-deploy).
 
 ### Changed
@@ -269,13 +269,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [3.3.0] - 2026-03-13
 
 ### Added
-- **Async resource polling** — Strange now waits for RDS (up to 15min) and ElastiCache (up to 5min) to become available, extracts real endpoints (`DB_HOST`, `REDIS_HOST`), and writes them to `.env`. No more "check the AWS Console." (ADR-009)
-- **Domain registration via Cloudflare Registrar** — buy a domain through Strange as a pre-DNS step. Registration creates the zone, then DNS records are created in it. Includes availability check, price display, and non-refundable purchase confirmation gate. (ADR-010)
+- **Async resource polling** — Haku now waits for RDS (up to 15min) and ElastiCache (up to 5min) to become available, extracts real endpoints (`DB_HOST`, `REDIS_HOST`), and writes them to `.env`. No more "check the AWS Console." (ADR-009)
+- **Domain registration via Cloudflare Registrar** — buy a domain through Haku as a pre-DNS step. Registration creates the zone, then DNS records are created in it. Includes availability check, price display, and non-refundable purchase confirmation gate. (ADR-010)
 - **Cloudflare Account ID** field in Cloud Providers — required for domain registration, validated as 32-char hex on save
-- **Post-failure registration verification** — if the registration API times out, Strange re-checks availability to detect masked successes before reporting failure
+- **Post-failure registration verification** — if the registration API times out, Haku re-checks availability to detect masked successes before reporting failure
 
 ### Changed
-- **Partial success UI** — if infrastructure provisions but domain/DNS fails, Strange shows "partial success" with guidance instead of binary pass/fail
+- **Partial success UI** — if infrastructure provisions but domain/DNS fails, Haku shows "partial success" with guidance instead of binary pass/fail
 - **Output display** — infra details on the Done page are now grouped logically (server → DB → cache → platform → domain → DNS) with human-readable date formatting for domain expiry
 - **AbortController integration** — polling loops cancel cleanly when the client disconnects instead of running for up to 15 minutes server-side
 - **HTTP client** — single retry on transient errors (ECONNRESET, ETIMEDOUT) with 2s delay; per-call timeout override (60s for registration)
@@ -323,9 +323,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [3.1.0] - 2026-03-13
 
 ### Added
-- **PRD-driven EC2 instance type selection** — PRD frontmatter `instance_type` field recommends t3.micro/small/medium/large based on project scope (database, cache, workers, payments, framework). Strange wizard shows the recommendation with cost estimates and allows override. RDS and ElastiCache sizes match automatically. (ADR-005)
-- **Cloudflare DNS wiring** — new `hostname` field in Merlin wizard and PRD frontmatter. After Strange provisions infrastructure, it auto-creates Cloudflare DNS records (A for VPS, CNAME for platforms) pointing your domain at the provisioned resource. Works with all deploy targets. Non-fatal — infrastructure still succeeds if DNS fails. (ADR-006)
-- **Platform custom domain registration** — Strange now registers your hostname directly with Vercel, Railway, and Cloudflare Pages via their APIs, so the platform expects traffic on your domain
+- **PRD-driven EC2 instance type selection** — PRD frontmatter `instance_type` field recommends t3.micro/small/medium/large based on project scope (database, cache, workers, payments, framework). Haku wizard shows the recommendation with cost estimates and allows override. RDS and ElastiCache sizes match automatically. (ADR-005)
+- **Cloudflare DNS wiring** — new `hostname` field in Merlin wizard and PRD frontmatter. After Haku provisions infrastructure, it auto-creates Cloudflare DNS records (A for VPS, CNAME for platforms) pointing your domain at the provisioned resource. Works with all deploy targets. Non-fatal — infrastructure still succeeds if DNS fails. (ADR-006)
+- **Platform custom domain registration** — Haku now registers your hostname directly with Vercel, Railway, and Cloudflare Pages via their APIs, so the platform expects traffic on your domain
 - **Caddyfile auto-HTTPS** — when hostname is set, generated Caddyfile uses the domain instead of `:80`, enabling automatic Let's Encrypt SSL via Caddy
 - **Instance sizing module** (`wizard/lib/instance-sizing.ts`) — scoring heuristic with `recommendInstanceType()`, RDS/ElastiCache size mapping, swap scaling
 - **DNS module** (`wizard/lib/dns/`) — Cloudflare zone lookup, record CRUD, post-provision orchestration, cleanup support
@@ -355,16 +355,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [2.8.0] - 2026-03-12
 
 ### Added
-- **Wizard split into Merlin (setup) and Strange (deploy)** — `npx voidforge init` launches the setup wizard, `npx voidforge deploy` launches the deploy wizard. Provisioning moved from Merlin to Strange for cleaner separation of concerns.
+- **Wizard split into Merlin (setup) and Haku (deploy)** — `npx voidforge init` launches the setup wizard, `npx voidforge deploy` launches the deploy wizard. Provisioning moved from Merlin to Haku for cleaner separation of concerns.
 - **Architecture docs** — `ARCHITECTURE.md` (system overview + diagram), `SCALING.md` (three-tier assessment), `TECH_DEBT.md` (prioritized catalog), `FAILURE_MODES.md` (component failure analysis with recovery procedures)
 - **Security checklist** — `SECURITY_CHECKLIST.md`, reusable pre-deploy verification list covering secrets, vault, server, AWS provisioning, generated infrastructure, input validation, and dependencies
 
 ### Changed
-- **Merlin UI simplified** — removed provisioning steps (now in Strange). Merlin focuses on vault, credentials, project setup, PRD, and scaffold creation.
+- **Merlin UI simplified** — removed provisioning steps (now in Haku). Merlin focuses on vault, credentials, project setup, PRD, and scaffold creation.
 
 ### Fixed
-- **QA fixes** for Merlin/Strange restructure
-- **UX polish** for Strange deploy wizard
+- **QA fixes** for Merlin/Haku restructure
+- **UX polish** for Haku deploy wizard
 
 ### Security
 - **DB/Redis security group ports** restricted from `0.0.0.0/0` (internet-open) to self-referencing security group (SG-only). Prevents database and Redis exposure to the internet.

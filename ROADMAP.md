@@ -39,10 +39,10 @@ After the initial health check passes, generate a simple cron-based uptime monit
 Add Sentry as an optional integration in the Merlin wizard. If enabled, generate the Sentry SDK initialization code, configure source maps, and inject the DSN as an env var. Non-fatal — works without it.
 
 ### Structured deploy logs
-Store deploy results to `~/.voidforge/deploys/` with timestamps, targets, URLs, and resource IDs. Users can run `voidforge deploys` to see their deploy history. Strange's Done screen links to the log.
+Store deploy results to `~/.voidforge/deploys/` with timestamps, targets, URLs, and resource IDs. Users can run `voidforge deploys` to see their deploy history. Haku's Done screen links to the log.
 
 ### Cost estimation
-Before AWS provisioning, estimate the monthly cost based on instance type, RDS, and ElastiCache choices. Display in the Strange confirm screen. Rough but useful: "Estimated: ~$45/month (t3.micro + db.t3.micro + cache.t3.micro)."
+Before AWS provisioning, estimate the monthly cost based on instance type, RDS, and ElastiCache choices. Display in the Haku confirm screen. Rough but useful: "Estimated: ~$45/month (t3.micro + db.t3.micro + cache.t3.micro)."
 
 ---
 
@@ -78,13 +78,13 @@ Generate `seed.ts` with factory functions for all schema models. Used by tests a
 *From "it works" to "it stays working."*
 
 ### Multi-environment support
-Generate separate `.env.development`, `.env.staging`, `.env.production`. Strange wizard asks which environment to deploy. Platform deploys scope env vars per environment (Vercel already supports this — extend to Railway/Cloudflare).
+Generate separate `.env.development`, `.env.staging`, `.env.production`. Haku wizard asks which environment to deploy. Platform deploys scope env vars per environment (Vercel already supports this — extend to Railway/Cloudflare).
 
 ### Preview deployments
 For Vercel and Cloudflare Pages, configure PR preview deployments automatically. Each pull request gets a unique URL. Links posted as PR comments via GitHub API.
 
 ### Platform rollback
-Vercel, Railway, and Cloudflare all support rollback via API. Add a `/api/provision/rollback` endpoint that reverts to the previous deployment. Surface in the Strange UI as a "Rollback" button on the Done screen.
+Vercel, Railway, and Cloudflare all support rollback via API. Add a `/api/provision/rollback` endpoint that reverts to the previous deployment. Surface in the Haku UI as a "Rollback" button on the Done screen.
 
 ### Database migration automation
 Run `prisma migrate deploy` (or `rails db:migrate`, `python manage.py migrate`) as part of the deploy step. For VPS, include in the SSH deploy sequence before the symlink swap. For platforms, add as a build step.
@@ -159,7 +159,7 @@ Merlin currently collects cloud provider credentials (AWS, Vercel, etc.) in Step
 New API endpoint: `POST /api/prd/env-requirements` — parses PRD content and returns structured list of required credentials with labels, placeholders, and help text. New Merlin step between PRD and deploy target selection.
 
 ### Headless deploy mode (`--headless`)
-Strange is a browser wizard. But `/build` Phase 12 already says "Kusanagi provisions and deploys." The vault has the credentials. The PRD has the target. There's no reason to context-switch to a browser. Add `npx voidforge deploy --headless` that runs the same provisioner code but outputs progress to terminal (stdout) instead of SSE to a browser. Phase 12 of `/build` calls this directly.
+Haku is a browser wizard. But `/build` Phase 12 already says "Kusanagi provisions and deploys." The vault has the credentials. The PRD has the target. There's no reason to context-switch to a browser. Add `npx voidforge deploy --headless` that runs the same provisioner code but outputs progress to terminal (stdout) instead of SSE to a browser. Phase 12 of `/build` calls this directly.
 
 New file: `wizard/lib/headless-deploy.ts` — terminal output adapter that wraps the provisioner dispatch. Modified: `scripts/voidforge.ts` to accept `--headless` flag, `.claude/commands/build.md` Phase 12 to reference headless deploy.
 
