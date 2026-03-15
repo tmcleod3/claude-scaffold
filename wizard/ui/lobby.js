@@ -121,6 +121,9 @@
     const accessBtn = canManageAccess
       ? `<button class="btn" data-action="access" data-id="${escapeHtml(project.id)}" title="Manage project access">Access</button>`
       : '';
+    const linkBtn = canManageAccess
+      ? `<button class="btn" data-action="link" data-id="${escapeHtml(project.id)}" title="Link to another project">Link</button>`
+      : '';
 
     card.innerHTML = `
       <div class="project-card-header">
@@ -138,10 +141,12 @@
         <span class="badge">${escapeHtml(project.framework || 'unknown')}</span>
         <span class="badge deploy">${escapeHtml(project.deployTarget || 'unknown')}</span>
         ${project.database && project.database !== 'none' ? `<span class="badge">${escapeHtml(project.database)}</span>` : ''}
+        ${project.linkedProjects && project.linkedProjects.length > 0 ? `<span class="badge linked">Linked: ${escapeHtml(String(project.linkedProjects.length))}</span>` : ''}
       </div>
       <div class="project-actions">
         ${openBtn}
         ${sshBtn}
+        ${linkBtn}
         ${accessBtn}
         ${removeBtn}
       </div>
@@ -179,6 +184,7 @@
         else if (action === 'ssh') openRoom(p, 'ssh');
         else if (action === 'remove') handleRemove(p);
         else if (action === 'access') openAccessModal(p);
+        else if (action === 'link') openLinkModal(p);
       });
     });
 
@@ -465,6 +471,162 @@
   if (accessUsername) {
     accessUsername.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') handleGrantAccess();
+    });
+  }
+
+  // ── Link Modal ─────────────────────────────────────
+
+  const linkModal = document.getElementById('link-modal');
+  const linkCurrent = document.getElementById('link-current');
+  const linkExisting = document.getElementById('link-existing');
+  const linkSelect = document.getElementById('link-select');
+  const linkStatus = document.getElementById('link-status');
+  const linkConfirm = document.getElementById('link-confirm');
+  const linkCancel = document.getElementById('link-cancel');
+  let currentLinkProjectId = '';
+
+  async function openLinkModal(project) {
+    currentLinkProjectId = project.id;
+    linkStatus.textContent = '';
+    linkStatus.className = 'status-row';
+    linkCurrent.textContent = 'Project: ' + project.name;
+
+    // Show existing links
+    if (project.linkedProjects && project.linkedProjects.length > 0) {
+      const linkedNames = project.linkedProjects.map(function (lid) {
+        const lp = projects.find(function (p) { return p.id === lid; });
+        return lp ? lp.name : lid;
+      });
+      linkExisting.innerHTML = '';
+      linkedNames.forEach(function (name, i) {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 4px 0;';
+        const label = document.createElement('span');
+        label.textContent = name;
+        const unlinkBtn = document.createElement('button');
+        unlinkBtn.className = 'btn btn-danger-ghost';
+        unlinkBtn.style.cssText = 'padding: 2px 6px; font-size: 10px;';
+        unlinkBtn.textContent = 'Unlink';
+        unlinkBtn.addEventListener('click', function () {
+          handleUnlink(project.linkedProjects[i]);
+        });
+        row.appendChild(label);
+        row.appendChild(unlinkBtn);
+        linkExisting.appendChild(row);
+      });
+    } else {
+      linkExisting.innerHTML = '<div style="color: var(--text-dim); font-size: 12px;">No linked projects</div>';
+    }
+
+    // Populate dropdown with other projects the user can link to
+    linkSelect.innerHTML = '';
+    const linkable = projects.filter(function (p) {
+      return p.id !== project.id &&
+        (p.userRole === 'owner' || p.userRole === 'admin') &&
+        (!project.linkedProjects || !project.linkedProjects.includes(p.id));
+    });
+    if (linkable.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'No projects available to link';
+      linkSelect.appendChild(opt);
+      linkConfirm.disabled = true;
+    } else {
+      linkConfirm.disabled = false;
+      linkable.forEach(function (p) {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name;
+        linkSelect.appendChild(opt);
+      });
+    }
+
+    previousFocusEl = document.activeElement;
+    linkModal.classList.add('active');
+    linkSelect.focus();
+    document.addEventListener('keydown', trapLinkFocus);
+  }
+
+  function trapLinkFocus(e) {
+    if (!linkModal.classList.contains('active')) return;
+    if (e.key === 'Escape') {
+      closeLinkModal();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    var modal = linkModal.querySelector('.modal');
+    if (!modal) return;
+    var focusable = Array.from(modal.querySelectorAll(
+      'select, button, [tabindex]:not([tabindex="-1"])'
+    )).filter(function (el) { return !el.disabled; });
+    if (focusable.length === 0) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  function closeLinkModal() {
+    linkModal.classList.remove('active');
+    document.removeEventListener('keydown', trapLinkFocus);
+    if (previousFocusEl && previousFocusEl.focus) {
+      previousFocusEl.focus();
+      previousFocusEl = null;
+    }
+  }
+
+  async function handleLink() {
+    const targetId = linkSelect.value;
+    if (!targetId) return;
+
+    linkConfirm.disabled = true;
+    try {
+      const res = await fetch('/api/projects/link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-VoidForge-Request': '1' },
+        body: JSON.stringify({ projectIdA: currentLinkProjectId, projectIdB: targetId }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || 'Failed to link');
+      // Refresh projects and reopen modal
+      projects = await fetchProjects();
+      render();
+      const updated = projects.find(function (p) { return p.id === currentLinkProjectId; });
+      if (updated) openLinkModal(updated);
+    } catch (err) {
+      linkStatus.textContent = err.message;
+      linkStatus.className = 'status-row error';
+    } finally {
+      linkConfirm.disabled = false;
+    }
+  }
+
+  async function handleUnlink(targetId) {
+    try {
+      const res = await fetch('/api/projects/unlink', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-VoidForge-Request': '1' },
+        body: JSON.stringify({ projectIdA: currentLinkProjectId, projectIdB: targetId }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || 'Failed to unlink');
+      projects = await fetchProjects();
+      render();
+      const updated = projects.find(function (p) { return p.id === currentLinkProjectId; });
+      if (updated) openLinkModal(updated);
+    } catch (err) {
+      alert('Failed to unlink: ' + err.message);
+    }
+  }
+
+  if (linkCancel) linkCancel.addEventListener('click', closeLinkModal);
+  if (linkConfirm) linkConfirm.addEventListener('click', handleLink);
+  if (linkModal) {
+    linkModal.addEventListener('click', function (e) {
+      if (e.target === linkModal) closeLinkModal();
     });
   }
 

@@ -39,11 +39,13 @@ export interface Project {
   healthCheckedAt: string;
   owner: string;
   access: ProjectAccessEntry[];
+  linkedProjects: string[];
 }
 
 export type ProjectInput = Omit<Project, 'id' | 'healthStatus' | 'healthCheckedAt'> & {
   owner?: string;
   access?: ProjectAccessEntry[];
+  linkedProjects?: string[];
 };
 
 // ── Write serialization (from vault.ts) ────────────
@@ -82,9 +84,10 @@ function isValidProject(obj: unknown): obj is Project {
     typeof p.healthCheckedAt === 'string'
   );
   if (!valid) return false;
-  // Migrate legacy projects (pre-v7.0) without owner/access fields
+  // Migrate legacy projects without owner/access/linkedProjects fields
   if (typeof p.owner !== 'string') p.owner = '';
   if (!Array.isArray(p.access)) p.access = [];
+  if (!Array.isArray(p.linkedProjects)) p.linkedProjects = [];
   return true;
 }
 
@@ -166,6 +169,7 @@ export function addProject(input: ProjectInput): Promise<Project> {
       healthCheckedAt: '',
       owner: input.owner ?? '',
       access: input.access ?? [],
+      linkedProjects: input.linkedProjects ?? [],
     };
 
     projects.push(project);
@@ -216,7 +220,7 @@ export function updateProject(id: string, updates: Partial<Omit<Project, 'id' | 
   });
 }
 
-/** Remove a project by ID. Returns true if removed, false if not found. */
+/** Remove a project by ID. Cleans up linked references in other projects. */
 export function removeProject(id: string): Promise<boolean> {
   return serialized(async () => {
     const projects = await readRegistry();
@@ -224,6 +228,10 @@ export function removeProject(id: string): Promise<boolean> {
     if (idx === -1) return false;
 
     projects.splice(idx, 1);
+    // Clean up linked references in remaining projects
+    for (const project of projects) {
+      project.linkedProjects = project.linkedProjects.filter((lid) => lid !== id);
+    }
     await writeRegistry(projects);
     return true;
   });
@@ -354,4 +362,65 @@ export async function getProjectAccess(
   const project = await getProject(projectId);
   if (!project) return null;
   return { owner: project.owner, access: project.access };
+}
+
+// ── Linked services ─────────────────────────────────
+
+/** Link two projects bidirectionally. */
+export function linkProjects(projectIdA: string, projectIdB: string): Promise<void> {
+  return serialized(async () => {
+    if (projectIdA === projectIdB) throw new Error('Cannot link a project to itself');
+    const projects = await readRegistry();
+    const a = projects.find((p) => p.id === projectIdA);
+    const b = projects.find((p) => p.id === projectIdB);
+    if (!a || !b) throw new Error('Project not found');
+
+    if (!a.linkedProjects.includes(projectIdB)) a.linkedProjects.push(projectIdB);
+    if (!b.linkedProjects.includes(projectIdA)) b.linkedProjects.push(projectIdA);
+
+    await writeRegistry(projects);
+  });
+}
+
+/** Unlink two projects bidirectionally. */
+export function unlinkProjects(projectIdA: string, projectIdB: string): Promise<void> {
+  return serialized(async () => {
+    const projects = await readRegistry();
+    const a = projects.find((p) => p.id === projectIdA);
+    const b = projects.find((p) => p.id === projectIdB);
+    if (!a || !b) throw new Error('Project not found');
+
+    a.linkedProjects = a.linkedProjects.filter((id) => id !== projectIdB);
+    b.linkedProjects = b.linkedProjects.filter((id) => id !== projectIdA);
+
+    await writeRegistry(projects);
+  });
+}
+
+/** Get all projects in the linked group (BFS traversal with cycle detection). */
+export async function getLinkedGroup(projectId: string): Promise<Project[]> {
+  const projects = await readRegistry();
+  const start = projects.find((p) => p.id === projectId);
+  if (!start) return [];
+
+  // BFS to resolve transitive links: A→B→C means all three are in the group
+  const visited = new Set<string>();
+  const queue = [start];
+  const group: Project[] = [];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (visited.has(current.id)) continue;
+    visited.add(current.id);
+    group.push(current);
+
+    for (const linkedId of current.linkedProjects) {
+      if (!visited.has(linkedId)) {
+        const linked = projects.find((p) => p.id === linkedId);
+        if (linked) queue.push(linked);
+      }
+    }
+  }
+
+  return group;
 }

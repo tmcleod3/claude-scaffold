@@ -226,6 +226,7 @@ ${deployLine}${hostnameLine}
           return session?.username ?? '';
         })(),
         access: [],
+        linkedProjects: [],
       });
     } catch {
       // Registry write is best-effort — don't fail project creation
