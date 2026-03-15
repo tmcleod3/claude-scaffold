@@ -232,7 +232,7 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
   const origin = req.headers.origin || '';
   const port = getServerPort();
   const allowedOrigins = [`http://127.0.0.1:${port}`, `http://localhost:${port}`];
-  if (origin && !allowedOrigins.includes(origin)) {
+  if (!origin || !allowedOrigins.includes(origin)) {
     socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
     socket.destroy();
     return;

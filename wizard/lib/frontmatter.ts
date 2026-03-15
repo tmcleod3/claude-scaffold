@@ -41,15 +41,20 @@ export function parseFrontmatter(content: string): { frontmatter: PrdFrontmatter
     if (match) {
       const key = match[1];
       let value = match[2].trim();
+      // Track whether the original value was quoted
+      const wasQuoted = (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"));
       // Strip quotes
-      if ((value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))) {
+      if (wasQuoted) {
         value = value.slice(1, -1);
       }
-      // Strip inline comments
-      const commentIdx = value.indexOf('#');
-      if (commentIdx > 0) {
-        value = value.slice(0, commentIdx).trim();
+      // Strip inline comments — but only if the value was NOT quoted
+      // (a `#` inside a quoted value is literal, not a comment)
+      if (!wasQuoted) {
+        const commentIdx = value.indexOf('#');
+        if (commentIdx > 0) {
+          value = value.slice(0, commentIdx).trim();
+        }
       }
       frontmatter[key] = value;
     }

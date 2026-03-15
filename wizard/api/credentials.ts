@@ -115,6 +115,10 @@ addRoute('POST', '/api/credentials/unlock', async (req: IncomingMessage, res: Se
     return;
   }
 
+  // Capture vault existence BEFORE unlock — vaultUnlock creates the vault if new,
+  // so checking after would always return true (CODE-R1-001 / QA-009).
+  const wasNew = !vaultExists();
+
   const valid = await vaultUnlock(body.password);
 
   if (!valid) {
@@ -135,7 +139,7 @@ addRoute('POST', '/api/credentials/unlock', async (req: IncomingMessage, res: Se
 
   sendJson(res, 200, {
     unlocked: true,
-    isNew: !vaultExists(),
+    isNew: wasNew,
     anthropic: hasAnthropic,
   });
 });

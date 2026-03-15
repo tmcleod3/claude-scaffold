@@ -411,7 +411,7 @@
         }
 
         card.innerHTML = `
-          <div class="provider-header" data-toggle="${provider.id}">
+          <div class="provider-header" data-toggle="${provider.id}" role="button" tabindex="0" aria-expanded="false">
             <div class="provider-header-left">
               <span class="provider-chevron">&#9654;</span>
               <div>
@@ -442,18 +442,32 @@
         container.appendChild(card);
       }
 
-      // Toggle accordion on header click
+      // Toggle accordion on header click or keyboard (Enter/Space)
+      function toggleAccordion(toggle) {
+        const id = toggle.dataset.toggle;
+        const card = toggle.closest('.provider-card');
+        const body = $(`#body-${id}`);
+        const isOpen = !body.classList.contains('hidden');
+        body.classList.toggle('hidden');
+        card.classList.toggle('open', !isOpen);
+        toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      }
+
       container.addEventListener('click', (e) => {
         if (e.target.closest('[data-help]')) return;
         if (e.target.closest('[data-close-help]')) return;
         const toggle = e.target.closest('[data-toggle]');
+        if (toggle) toggleAccordion(toggle);
+      });
+
+      container.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        if (e.target.closest('[data-help]')) return;
+        if (e.target.closest('[data-close-help]')) return;
+        const toggle = e.target.closest('[data-toggle]');
         if (toggle) {
-          const id = toggle.dataset.toggle;
-          const card = toggle.closest('.provider-card');
-          const body = $(`#body-${id}`);
-          const isOpen = !body.classList.contains('hidden');
-          body.classList.toggle('hidden');
-          card.classList.toggle('open', !isOpen);
+          e.preventDefault();
+          toggleAccordion(toggle);
         }
       });
 
@@ -612,9 +626,13 @@
 
   $$('.tab').forEach((tab) => {
     tab.addEventListener('click', () => {
-      $$('.tab').forEach((t) => t.classList.remove('active'));
+      $$('.tab').forEach((t) => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
       $$('.tab-panel').forEach((p) => p.classList.remove('active'));
       tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
       const panel = $(`#tab-${tab.dataset.tab}`);
       if (panel) panel.classList.add('active');
       state.prdMode = tab.dataset.tab;

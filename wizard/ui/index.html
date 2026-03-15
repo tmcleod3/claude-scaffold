@@ -69,7 +69,7 @@
           <h1>How do you want to set up?</h1>
           <p class="subtitle">You can always add cloud providers later by re-running the wizard.</p>
 
-          <div class="setup-card" id="choose-simple" tabindex="0" role="button">
+          <div class="setup-card" id="choose-simple" tabindex="0" role="button" aria-label="Simple Setup — local development with Docker">
             <div class="setup-card-header">
               <span class="setup-card-name">Simple Setup</span>
               <span class="provider-badge connected">Quick Start</span>
@@ -82,7 +82,7 @@
             </ul>
           </div>
 
-          <div class="setup-card" id="choose-advanced" tabindex="0" role="button">
+          <div class="setup-card" id="choose-advanced" tabindex="0" role="button" aria-label="Advanced Setup — connect cloud providers for deployment">
             <div class="setup-card-header">
               <span class="setup-card-name">Advanced Setup</span>
               <span class="provider-badge not-connected">Cloud deploy</span>
@@ -148,13 +148,13 @@
         <h1>Product Requirements</h1>
         <p class="subtitle">Every great project starts with a PRD.</p>
 
-        <div class="tabs">
-          <button class="tab active" data-tab="generate" type="button">Generate with Claude</button>
-          <button class="tab" data-tab="paste" type="button">Bring Your Own PRD</button>
-          <button class="tab" data-tab="skip" type="button">Skip for Now</button>
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="generate" type="button" role="tab" aria-selected="true">Generate with Claude</button>
+          <button class="tab" data-tab="paste" type="button" role="tab" aria-selected="false">Bring Your Own PRD</button>
+          <button class="tab" data-tab="skip" type="button" role="tab" aria-selected="false">Skip for Now</button>
         </div>
 
-        <div class="tab-panel active" id="tab-generate">
+        <div class="tab-panel active" id="tab-generate" role="tabpanel">
           <div class="card">
             <p>Describe your idea and Claude will generate a production-ready PRD.</p>
 
@@ -209,7 +209,7 @@
           </div>
         </div>
 
-        <div class="tab-panel" id="tab-paste">
+        <div class="tab-panel" id="tab-paste" role="tabpanel">
           <div class="card">
             <p>Already have a PRD, or prefer to generate one with a different AI? Paste the finished result below.</p>
 
@@ -229,7 +229,7 @@
           </div>
         </div>
 
-        <div class="tab-panel" id="tab-skip">
+        <div class="tab-panel" id="tab-skip" role="tabpanel">
           <div class="card">
             <p>A blank PRD template will be included in your project at <code>docs/PRD.md</code>. You'll need to fill it out before running <code>/build</code>.</p>
             <div class="status-row info">This is fine if you want to set up the project structure first and write the PRD later.</div>
@@ -261,7 +261,7 @@
         <h1>Deploy Target</h1>
         <p class="subtitle">Where will this project run? Click a target to select it.</p>
 
-        <div id="deploy-targets-list"></div>
+        <div id="deploy-targets-list" role="radiogroup" aria-label="Deploy target"></div>
         <div id="deploy-note"></div>
       </section>
 
