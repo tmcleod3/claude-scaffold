@@ -26,6 +26,7 @@ interface StoredUser {
   passwordHash: string;
   totpSecret: string; // Base32-encoded — stored encrypted via vault in production
   lastTotpStep: number; // Replay protection: last successfully used time step
+  role: UserRole;
   createdAt: string;
 }
 
@@ -34,13 +35,21 @@ interface AuthStore {
   remoteMode: boolean;
 }
 
+export type UserRole = 'admin' | 'deployer' | 'viewer';
+
 interface Session {
   token: string;
   username: string;
+  role: UserRole;
   ip: string;
   createdAt: number;
   expiresAt: number;
   ipBinding: boolean;
+}
+
+export interface SessionInfo {
+  username: string;
+  role: UserRole;
 }
 
 interface RateLimitEntry {
@@ -90,6 +99,9 @@ export function setRemoteMode(enabled: boolean): void {
     // Periodic cleanup of expired sessions and stale rate-limit entries
     cleanupTimer = setInterval(cleanupExpired, CLEANUP_INTERVAL_MS);
     cleanupTimer.unref();
+  } else if (!enabled && cleanupTimer) {
+    clearInterval(cleanupTimer);
+    cleanupTimer = null;
   }
 }
 
@@ -226,6 +238,10 @@ async function readAuthStore(): Promise<AuthStore> {
     if (typeof parsed !== 'object' || !Array.isArray(parsed.users)) {
       throw new Error('Invalid auth store format');
     }
+    // Migrate legacy users (pre-v7.0) that lack a role field — they were implicitly admin
+    for (const user of parsed.users) {
+      if (!user.role) user.role = 'admin';
+    }
     return parsed as AuthStore;
   } catch (err: unknown) {
     // File not found — return empty store (setup needed)
@@ -307,12 +323,22 @@ export function getClientIp(req: { headers: Record<string, string | string[] | u
   if (remoteMode) {
     const forwarded = req.headers['x-forwarded-for'];
     if (typeof forwarded === 'string') {
-      // Take the rightmost IP that isn't a known proxy (Caddy adds to the left)
-      // For simplicity with single-proxy setup, take the first entry
-      return forwarded.split(',')[0].trim();
+      // Take the rightmost IP — the one added by our trusted proxy (Caddy).
+      // Leftmost entries are attacker-controlled and must not be trusted.
+      const parts = forwarded.split(',');
+      return parts[parts.length - 1].trim();
     }
   }
   return req.socket.remoteAddress ?? 'unknown';
+}
+
+// ── Validation ─────────────────────────────────────
+
+/** Validate username contains only safe ASCII characters. */
+const USERNAME_PATTERN = /^[a-zA-Z0-9._-]+$/;
+
+export function isValidUsername(username: string): boolean {
+  return username.length >= 3 && username.length <= MAX_USERNAME_LENGTH && USERNAME_PATTERN.test(username);
 }
 
 // ── Public API ─────────────────────────────────────
@@ -324,17 +350,37 @@ export async function hasUsers(): Promise<boolean> {
 }
 
 /**
- * Create the initial user (first-time setup only, serialized).
+ * Create a user (serialized). First user is always admin.
+ * Subsequent users require an explicit role.
  * Returns the TOTP secret for QR code generation.
  */
-export function createUser(username: string, password: string): Promise<{ totpSecret: string; totpUri: string }> {
+export function createUser(
+  username: string,
+  password: string,
+  role?: UserRole,
+): Promise<{ totpSecret: string; totpUri: string }> {
   return serialized(async () => {
     const store = await readAuthStore();
-    if (store.users.length > 0) {
-      throw new Error('User already exists. Only one admin user is supported in v6.5.');
-    }
 
     const safeUsername = username.slice(0, MAX_USERNAME_LENGTH);
+
+    // Check for duplicate username (timing-safe)
+    for (const user of store.users) {
+      const a = Buffer.from(user.username.padEnd(MAX_USERNAME_LENGTH));
+      const b = Buffer.from(safeUsername.padEnd(MAX_USERNAME_LENGTH));
+      if (a.length === b.length && timingSafeEqual(a, b)) {
+        throw new Error('Username already taken');
+      }
+    }
+
+    // First user is always admin, regardless of requested role.
+    // Subsequent users MUST provide an explicit role (from the invite flow).
+    // This prevents TOCTOU race on the setup endpoint from creating unauthorized users.
+    if (store.users.length > 0 && role === undefined) {
+      throw new Error('Invitation required for additional users');
+    }
+    const assignedRole: UserRole = store.users.length === 0 ? 'admin' : role!;
+
     const passwordHash = await hashPassword(password);
     const totpSecret = generateTotpSecret();
 
@@ -343,6 +389,7 @@ export function createUser(username: string, password: string): Promise<{ totpSe
       passwordHash,
       totpSecret,
       lastTotpStep: 0,
+      role: assignedRole,
       createdAt: new Date().toISOString(),
     });
     store.remoteMode = true;
@@ -352,6 +399,68 @@ export function createUser(username: string, password: string): Promise<{ totpSe
     const totpUri = `otpauth://totp/VoidForge:${encodeURIComponent(safeUsername)}?secret=${totpSecret}&issuer=VoidForge&digits=${TOTP_DIGITS}&period=${TOTP_STEP}`;
     return { totpSecret, totpUri };
   });
+}
+
+/** Remove a user by username (serialized). Cannot remove the last admin. */
+export function removeUser(targetUsername: string): Promise<void> {
+  return serialized(async () => {
+    const store = await readAuthStore();
+    const idx = store.users.findIndex((u) => u.username === targetUsername);
+    if (idx === -1) throw new Error('User not found');
+
+    const user = store.users[idx];
+    if (user.role === 'admin') {
+      const adminCount = store.users.filter((u) => u.role === 'admin').length;
+      if (adminCount <= 1) throw new Error('Cannot remove the last admin');
+    }
+
+    store.users.splice(idx, 1);
+    await writeAuthStore(store);
+
+    // Invalidate all sessions for this user
+    for (const [token, session] of sessions) {
+      if (session.username === targetUsername) sessions.delete(token);
+    }
+  });
+}
+
+/** Update a user's role (serialized). Cannot demote the last admin. */
+export function updateUserRole(targetUsername: string, newRole: UserRole): Promise<void> {
+  return serialized(async () => {
+    const store = await readAuthStore();
+    const user = store.users.find((u) => u.username === targetUsername);
+    if (!user) throw new Error('User not found');
+
+    if (user.role === 'admin' && newRole !== 'admin') {
+      const adminCount = store.users.filter((u) => u.role === 'admin').length;
+      if (adminCount <= 1) throw new Error('Cannot demote the last admin');
+    }
+
+    user.role = newRole;
+    await writeAuthStore(store);
+
+    // Update active sessions for this user with new role
+    for (const [, session] of sessions) {
+      if (session.username === targetUsername) session.role = newRole;
+    }
+  });
+}
+
+/** List all users (without sensitive fields). */
+export async function listUsers(): Promise<Array<{ username: string; role: UserRole; createdAt: string }>> {
+  const store = await readAuthStore();
+  return store.users.map((u) => ({
+    username: u.username,
+    role: u.role,
+    createdAt: u.createdAt,
+  }));
+}
+
+/** Get a user's role. Returns null if user not found. */
+export async function getUserRole(username: string): Promise<UserRole | null> {
+  const store = await readAuthStore();
+  const user = store.users.find((u) => u.username === username);
+  return user?.role ?? null;
 }
 
 /**
@@ -422,10 +531,15 @@ export async function login(
   }
   for (const token of toDelete) sessions.delete(token);
 
+  // Read the user's current role from the store (may have changed since login started)
+  // Legacy users without role field default to least-privileged role (viewer)
+  const currentRole = matchedUser.role ?? 'viewer';
+
   const token = randomBytes(32).toString('hex');
   sessions.set(token, {
     token,
     username: matchedUser.username,
+    role: currentRole,
     ip,
     createdAt: Date.now(),
     expiresAt: Date.now() + SESSION_TTL_MS,
@@ -435,8 +549,8 @@ export async function login(
   return { token };
 }
 
-/** Validate a session token. Returns username on success, null on failure. */
-export function validateSession(token: string, ip: string): string | null {
+/** Validate a session token. Returns session info on success, null on failure. */
+export function validateSession(token: string, ip: string): SessionInfo | null {
   const session = sessions.get(token);
   if (!session) return null;
 
@@ -451,7 +565,7 @@ export function validateSession(token: string, ip: string): string | null {
     return null;
   }
 
-  return session.username;
+  return { username: session.username, role: session.role };
 }
 
 /** Invalidate a session (logout). */
@@ -499,8 +613,11 @@ export function isAuthExempt(pathname: string): boolean {
     '/api/auth/logout',
     '/api/auth/setup',
     '/api/auth/session',
+    '/api/users/complete-invite',
     '/login.html',
     '/login.js',
+    '/invite.html',
+    '/invite.js',
     '/styles.css',
     '/favicon.svg',
   ];

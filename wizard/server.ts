@@ -12,12 +12,49 @@ import './api/deploy.js';
 import './api/terminal.js';
 import './api/projects.js';
 import './api/auth.js';
+import './api/users.js';
 
 import { handleTerminalUpgrade } from './api/terminal.js';
 import { killAllSessions } from './lib/pty-manager.js';
 import { startHealthPoller, stopHealthPoller } from './lib/health-poller.js';
-import { isRemoteMode, setRemoteMode, validateSession, parseSessionCookie, isAuthExempt, getClientIp } from './lib/tower-auth.js';
-import { initAuditLog } from './lib/audit-log.js';
+import { isRemoteMode, setRemoteMode, validateSession, parseSessionCookie, isAuthExempt, getClientIp, type SessionInfo, type UserRole } from './lib/tower-auth.js';
+import { initAuditLog, audit } from './lib/audit-log.js';
+import { hasRole } from './lib/user-manager.js';
+
+// ── Route-level RBAC ────────────────────────────────
+// Maps API path prefixes to minimum required role.
+// Routes not listed here are accessible to any authenticated user.
+// Auth-exempt routes bypass this entirely (handled by isAuthExempt).
+const ROUTE_ROLES: Array<{ prefix: string; minRole: UserRole }> = [
+  // Admin-only: user management
+  { prefix: '/api/users/invite', minRole: 'admin' },
+  { prefix: '/api/users/remove', minRole: 'admin' },
+  { prefix: '/api/users/role', minRole: 'admin' },
+  { prefix: '/api/users', minRole: 'admin' }, // GET /api/users (list)
+  // Deployer+: infrastructure, credentials, terminals, project mutations
+  { prefix: '/api/credentials', minRole: 'deployer' },
+  { prefix: '/api/provision', minRole: 'deployer' },
+  { prefix: '/api/deploy', minRole: 'deployer' },
+  { prefix: '/api/terminal', minRole: 'deployer' },
+  { prefix: '/api/project/create', minRole: 'deployer' },
+  { prefix: '/api/projects/import', minRole: 'deployer' },
+  { prefix: '/api/projects/delete', minRole: 'deployer' },
+  { prefix: '/api/prd', minRole: 'deployer' },
+  { prefix: '/api/cloud', minRole: 'deployer' },
+  { prefix: '/api/deploys', minRole: 'deployer' },
+  { prefix: '/api/project/validate', minRole: 'deployer' },
+  { prefix: '/api/project/defaults', minRole: 'deployer' },
+  // Viewer: read-only endpoints (GET /api/projects, GET /api/auth/session) — no entry needed
+];
+
+function getMinRole(pathname: string): UserRole | null {
+  for (const rule of ROUTE_ROLES) {
+    if (pathname === rule.prefix || pathname.startsWith(rule.prefix + '/')) {
+      return rule.minRole;
+    }
+  }
+  return null; // No restriction — any authenticated user
+}
 
 const UI_DIR = join(import.meta.dirname, 'ui');
 
@@ -92,7 +129,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
 
   // CSRF protection — require custom header on all POST requests (F-06)
   if (req.method === 'POST' && !req.headers['x-voidforge-request']) {
-    sendJson(res, 403, { error: 'Missing X-VoidForge-Request header' });
+    sendJson(res, 403, { success: false, error: 'Missing X-VoidForge-Request header' });
     return;
   }
 
@@ -102,16 +139,29 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     if (!isAuthExempt(url.pathname)) {
       const token = parseSessionCookie(req.headers.cookie);
       const ip = getClientIp(req);
-      const username = token ? validateSession(token, ip) : null;
+      const session = token ? validateSession(token, ip) : null;
 
-      if (!username) {
+      if (!session) {
         // API requests get 401, page requests get redirected to login
         if (url.pathname.startsWith('/api/')) {
-          sendJson(res, 401, { error: 'Authentication required' });
+          sendJson(res, 401, { success: false, error: 'Authentication required' });
         } else {
           res.writeHead(302, { Location: '/login.html' });
           res.end();
         }
+        return;
+      }
+
+      // RBAC — check route-level minimum role
+      const minRole = getMinRole(url.pathname);
+      if (minRole && !hasRole(session, minRole)) {
+        await audit('access_denied', ip, session.username, {
+          path: url.pathname,
+          role: session.role,
+          required: minRole,
+        });
+        // Return 404 not 403 — no information leakage (per CLAUDE.md)
+        sendJson(res, 404, { success: false, error: 'Not found' });
         return;
       }
     }
@@ -125,7 +175,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Internal server error';
       console.error('API error:', message);
-      sendJson(res, 500, { error: 'Internal server error' });
+      sendJson(res, 500, { success: false, error: 'Internal server error' });
     }
     return;
   }
@@ -183,18 +233,26 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
       }
 
       // In remote mode, validate Tower session before allowing WebSocket upgrade
+      let wsSession: SessionInfo | undefined;
       if (isRemoteMode()) {
         const token = parseSessionCookie(req.headers.cookie);
         const ip = getClientIp(req);
-        const username = token ? validateSession(token, ip) : null;
-        if (!username) {
+        const session = token ? validateSession(token, ip) : null;
+        if (!session) {
           socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
           socket.destroy();
           return;
         }
+        // Viewers cannot access terminals — read-only dashboard only
+        if (session.role === 'viewer') {
+          socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
+          socket.destroy();
+          return;
+        }
+        wsSession = session;
       }
 
-      handleTerminalUpgrade(req, socket, head);
+      handleTerminalUpgrade(req, socket, head, wsSession);
     });
 
     const bindAddress = isRemoteMode() ? '0.0.0.0' : '127.0.0.1';

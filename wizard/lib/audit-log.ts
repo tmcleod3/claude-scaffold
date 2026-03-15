@@ -31,7 +31,13 @@ export type AuditEventType =
   | 'credential_access'
   | 'project_create'
   | 'project_delete'
-  | 'health_failure';
+  | 'health_failure'
+  | 'user_create'
+  | 'user_remove'
+  | 'role_change'
+  | 'invite_create'
+  | 'invite_complete'
+  | 'access_denied';
 
 export interface AuditEntry {
   timestamp: string;

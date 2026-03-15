@@ -220,7 +220,7 @@ const MAX_BUFFER_SIZE = 1024 * 1024;
  * Handle a WebSocket upgrade request for a terminal session.
  * URL: /ws/terminal?session=<id>&token=<authToken>
  */
-export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer): void {
+export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer, _userSession?: { username: string; role: 'admin' | 'deployer' | 'viewer' }): void {
   const password = getSessionPassword();
   if (!password) {
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');

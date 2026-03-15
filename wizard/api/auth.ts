@@ -18,6 +18,8 @@ import {
   isRemoteMode,
   checkRateLimit,
   getClientIp,
+  getUserRole,
+  isValidUsername,
 } from '../lib/tower-auth.js';
 import { audit } from '../lib/audit-log.js';
 
@@ -46,12 +48,7 @@ addRoute('POST', '/api/auth/setup', async (req: IncomingMessage, res: ServerResp
     return;
   }
 
-  const existing = await hasUsers();
-  if (existing) {
-    sendJson(res, 409, { success: false, error: 'Admin user already exists' });
-    return;
-  }
-
+  // Validate body BEFORE the hasUsers check — body parsing is not security-sensitive
   const body = await parseJsonBody(req);
   if (typeof body !== 'object' || body === null) {
     sendJson(res, 400, { success: false, error: 'Request body must be a JSON object' });
@@ -59,8 +56,8 @@ addRoute('POST', '/api/auth/setup', async (req: IncomingMessage, res: ServerResp
   }
 
   const { username, password } = body as Record<string, unknown>;
-  if (typeof username !== 'string' || username.trim().length < 3) {
-    sendJson(res, 400, { success: false, error: 'Username must be at least 3 characters' });
+  if (typeof username !== 'string' || !isValidUsername(username.trim())) {
+    sendJson(res, 400, { success: false, error: 'Username must be 3-64 characters (letters, numbers, . _ -)' });
     return;
   }
   if (typeof password !== 'string' || password.length < 12 || password.length > 256) {
@@ -69,15 +66,23 @@ addRoute('POST', '/api/auth/setup', async (req: IncomingMessage, res: ServerResp
   }
 
   try {
+    // createUser is serialized — the hasUsers check inside it is atomic with creation.
+    // This prevents the TOCTOU race where two concurrent setup requests both pass hasUsers().
+    const existing = await hasUsers();
+    if (existing) {
+      sendJson(res, 409, { success: false, error: 'Admin user already exists' });
+      return;
+    }
+
     const { totpSecret, totpUri } = await createUser(username.trim(), password);
-    await audit('login_attempt', ip, username.trim(), { action: 'setup', success: true });
+    await audit('user_create', ip, username.trim(), { action: 'initial_setup' });
     sendJson(res, 201, {
       success: true,
       data: { totpSecret, totpUri, message: 'Scan the QR code with your authenticator app.' },
     }, true); // no-cache — TOTP secret must not be cached
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Setup failed';
-    if (message.includes('already exists')) {
+    if (message.includes('already taken')) {
       sendJson(res, 409, { success: false, error: 'Admin user already exists' });
     } else {
       sendJson(res, 500, { success: false, error: 'Failed to create user' });
@@ -122,11 +127,14 @@ addRoute('POST', '/api/auth/login', async (req: IncomingMessage, res: ServerResp
     return;
   }
 
-  await audit('login_success', ip, username.slice(0, 64), {});
+  const role = await getUserRole(username.slice(0, 64));
+  await audit('login_success', ip, username.slice(0, 64), { role: role ?? 'unknown' });
 
-  const secure = req.headers['x-forwarded-proto'] === 'https';
+  // In remote mode, always set Secure flag (Caddy provides HTTPS).
+  // Don't rely on X-Forwarded-Proto which could be omitted if proxy is bypassed.
+  const secure = isRemoteMode() || req.headers['x-forwarded-proto'] === 'https';
   res.setHeader('Set-Cookie', buildSessionCookie(result.token, secure));
-  sendJson(res, 200, { success: true, data: { username: username.slice(0, 64) } }, true);
+  sendJson(res, 200, { success: true, data: { username: username.slice(0, 64), role } }, true);
 });
 
 // POST /api/auth/logout — Invalidate session
@@ -135,10 +143,10 @@ addRoute('POST', '/api/auth/logout', async (req: IncomingMessage, res: ServerRes
   const ip = getClientIp(req);
 
   if (token) {
-    const username = validateSession(token, ip);
+    const session = validateSession(token, ip);
     logout(token);
-    if (username) {
-      await audit('logout', ip, username, {});
+    if (session) {
+      await audit('logout', ip, session.username, {});
     }
   }
 
@@ -149,7 +157,7 @@ addRoute('POST', '/api/auth/logout', async (req: IncomingMessage, res: ServerRes
 // GET /api/auth/session — Check if current session is valid
 addRoute('GET', '/api/auth/session', async (req: IncomingMessage, res: ServerResponse) => {
   if (!isRemoteMode()) {
-    sendJson(res, 200, { success: true, data: { authenticated: true, username: 'local', remoteMode: false } });
+    sendJson(res, 200, { success: true, data: { authenticated: true, username: 'local', role: 'admin', remoteMode: false } });
     return;
   }
 
@@ -161,11 +169,11 @@ addRoute('GET', '/api/auth/session', async (req: IncomingMessage, res: ServerRes
     return;
   }
 
-  const username = validateSession(token, ip);
-  if (!username) {
+  const session = validateSession(token, ip);
+  if (!session) {
     sendJson(res, 200, { success: true, data: { authenticated: false, needsSetup: false } });
     return;
   }
 
-  sendJson(res, 200, { success: true, data: { authenticated: true, username, remoteMode: true } });
+  sendJson(res, 200, { success: true, data: { authenticated: true, username: session.username, role: session.role, remoteMode: true } });
 });
