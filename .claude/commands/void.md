@@ -76,7 +76,8 @@ Verify and celebrate:
    - New method docs → mention what agent/domain they cover
    - New patterns → mention what they demonstrate
    - Changes to build protocol → recommend reviewing before next `/build`
-5. Announce completion with flair
+5. **Content impact check:** If NAMING_REGISTRY.md or CLAUDE.md was updated, diff the agent/command lists against the previous version. If new agents or commands were added, explicitly announce them: "New in this update: [Agent Name] ([role]). New commands: [/command]." Then warn: **"If your project displays agent counts, command lists, or references the team roster (e.g., marketing sites, docs pages, about pages), update those data sources to match."** This is a handoff, not an auto-fix — `/void` doesn't know your project's data model.
+6. Announce completion with flair
 
 ## Handoffs
 - If build protocol phases changed → recommend **Picard** review (`/architect`)
