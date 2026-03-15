@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [6.0.0] - 2026-03-15
+
+### Added
+- **Camelot Multi — The Great Hall** — multi-project operations console. Dashboard shows all VoidForge projects with health status, deploy URL, framework badge, cost, and quick actions.
+  - `wizard/lib/project-registry.ts` — CRUD for `~/.voidforge/projects.json`. Serialized writes (vault pattern), atomic file ops (temp + fsync + rename), backup before overwrite, field validation on read, MUTABLE_FIELDS allowlist on update.
+  - `wizard/api/projects.ts` — REST API: list all, get by ID, import existing project, delete from registry. Runtime type validation on all inputs, path canonicalization via `resolve()`.
+  - `wizard/ui/hall.html` + `wizard/ui/hall.js` — Great Hall dashboard with project cards, health indicators (color + text labels for WCAG 1.4.1), import modal with focus trap, keyboard-navigable cards, 30-second polling.
+  - `wizard/lib/health-poller.ts` — Background health checks every 5 minutes. Parallel via `Promise.allSettled`, 5-second timeout per project, SSRF protection (private IP blocklist, redirect blocking, hex/octal/IPv6 coverage).
+- **Import Existing Project** — `POST /api/projects/import` scans a directory for CLAUDE.md, PRD frontmatter, .env, build-state, and auto-detects framework from package.json/requirements.txt/Gemfile.
+- **Back-to-Hall navigation** in Camelot — "← Hall" button with session persistence confirmation.
+- ADR-026: Project Registry and Great Hall Architecture.
+
+### Changed
+- Server landing page changed from Merlin (`/index.html`) to Great Hall (`/hall.html`). Merlin still accessible via direct URL and "New Project" buttons.
+- `wizard/server.ts` — health poller lifecycle (start on listen, stop before PTY cleanup), double-shutdown guard, CORS fix (non-matching origins get no allow-origin header).
+- `wizard/api/project.ts` — registers new projects in registry, runtime type validation on all body fields, .env template injection prevention (newline stripping).
+- `wizard/ui/camelot.html` — ARIA landmarks (`<main>`, `role="alert"`), `:focus-visible` on buttons, `prefers-reduced-motion` support.
+
+### Security
+- SSRF prevention in health poller: URL scheme validation, private IP blocklist (IPv4, IPv6, hex, octal, decimal, 0.0.0.0, metadata endpoints), `redirect: 'manual'` to prevent redirect-based SSRF.
+- CORS hardened: non-matching origins no longer receive `Access-Control-Allow-Origin` header.
+- .env injection prevention: newlines stripped from all template-interpolated fields (name, description, domain, hostname, deploy target).
+- Runtime type validation on `/api/project/create` body fields (was unsafe `as` cast).
+- Registry file backup before every write (data loss prevention).
+
+### Fixed
+- **Field Report #9:** Rex (Kenobi's security team) now checks build output HTML for inline scripts before tightening CSP. Gauntlet adds build-output verification gate after every fix batch. Prevents framework-generated inline scripts (Next.js, Nuxt, SvelteKit) from being blocked by CSP changes.
+
+---
+
 ## [5.5.0] - 2026-03-15
 
 ### Added

@@ -35,7 +35,7 @@ Use the Agent tool to run all four in parallel — full domain audits:
 
 Merge all findings. Deduplicate across domains.
 
-**→ FIX BATCH 1:** Fix all Critical and High findings. Update finding status.
+**→ FIX BATCH 1:** Fix all Critical and High findings. Update finding status. **Build-output gate:** If the project has a build step, run the build after fixes and verify output — framework-generated inline scripts, hydration markers, and SSR output are invisible to source-level analysis but can be broken by security hardening (especially CSP changes). Check: `npm run build && grep -c '<script>' dist/**/*.html`.
 
 ## Round 3 — Second Strike (parallel)
 

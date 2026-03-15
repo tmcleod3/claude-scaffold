@@ -89,6 +89,8 @@ Fix batches happen between rounds:
 - After Round 4: fix adversarial findings
 - After Round 5: final convergence fixes (max 2 iterations)
 
+**Build-output verification:** After every fix batch, if the project has a build step, run the build and verify the output. Framework-generated code (inline scripts, hydration markers, SSR output) is invisible to source-level analysis but can be broken by security hardening. Check: `npm run build && grep -c '<script>' dist/**/*.html`. If the build fails or output changes unexpectedly, the fix is wrong.
+
 ## Finding Format
 
 Every finding, from every agent, in every round, uses this format:
