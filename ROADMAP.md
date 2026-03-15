@@ -305,6 +305,26 @@ Dashboard landing page. Cards for each project showing: name, status (building/d
 
 "+ New Project" button launches Merlin wizard. On completion, returns to Great Hall with the new project card.
 
+### Import Existing Project
+"+ Import Project" button in the Great Hall for projects that were built with VoidForge before v6.0, or built on the scaffold/core branches without the wizard, or created on a different machine. The import flow:
+
+1. User provides the project directory path (text input or paste)
+2. VoidForge scans the directory — reuses the same scan logic from `wizard/api/deploy.ts`:
+   - Checks for `CLAUDE.md` (confirms it's a VoidForge project)
+   - Reads project name from `CLAUDE.md`
+   - Reads `docs/PRD.md` frontmatter (framework, database, deploy target, cache)
+   - Reads `.env` (deploy URL, hostname)
+   - Auto-detects framework from `package.json` / `requirements.txt` / `Gemfile`
+   - Reads `logs/build-state.md` (build progress, last phase)
+   - Detects PostgreSQL extensions from Prisma schema
+3. Presents a confirmation card: "Found: [Name] ([framework], [deploy target]). Add to Camelot?"
+4. On confirm, project is added to `projects.json` with all discovered metadata
+5. Card appears in the Great Hall — user can open a terminal immediately
+
+Validation: directory must exist, must contain `CLAUDE.md`, must not already be in the registry (check by directory path). If the project has a deploy history in `~/.voidforge/deploys/`, the import links those deploy records to the project.
+
+New API endpoint: `POST /api/projects/import` — accepts `{ directory: string }`, runs the scan, adds to registry, returns the project card data. Path validation: absolute path required, no `..` segments (same as all other directory-accepting endpoints).
+
 ### Health Poller (`wizard/lib/health-poller.ts`)
 Background service that pings each project's health check URL every 5 minutes. Updates project registry with last health status and timestamp. Runs only when the server is active. Non-blocking — uses `fetch` with 5-second timeout. Health states: `healthy` (200 OK), `degraded` (non-200 but responding), `down` (timeout or connection refused), `unchecked` (no health URL configured).
 
@@ -323,14 +343,14 @@ The vault is already global (not per-project) — AWS, GitHub, Cloudflare creden
 
 ### Files to create
 - `wizard/lib/project-registry.ts` (~150 lines) — CRUD for projects.json
-- `wizard/api/projects.ts` (~100 lines) — REST endpoints for project list, status, health
+- `wizard/api/projects.ts` (~150 lines) — REST endpoints for project list, status, health, import
 - `wizard/ui/hall.html` (~100 lines) — Great Hall dashboard
 - `wizard/ui/hall.js` (~250 lines) — project cards, health indicators, navigation
 - `wizard/lib/health-poller.ts` (~100 lines) — background health checks
 - Update: `wizard/server.ts` (route hall.html as landing), `wizard/api/project.ts` (register project on creation), `wizard/ui/camelot.js` (back-to-hall navigation)
 
 ### Estimated effort
-~900 lines (including security), 2-3 sessions.
+~950 lines (including security + import), 2-3 sessions.
 
 ---
 
