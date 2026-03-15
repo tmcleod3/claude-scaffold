@@ -1,18 +1,30 @@
 #!/usr/bin/env npx tsx
 /**
  * VoidForge CLI entry point
- * Usage: npx voidforge init                — Launch Merlin (setup wizard)
- *        npx voidforge deploy              — Launch Haku (deploy wizard)
- *        npx voidforge deploy --headless   — Deploy from CLI (no browser)
+ * Usage: npx voidforge init                    — Launch Merlin (setup wizard)
+ *        npx voidforge init --template saas    — Start from a project template
+ *        npx voidforge deploy                  — Launch Haku (deploy wizard)
+ *        npx voidforge deploy --headless       — Deploy from CLI (no browser)
+ *        npx voidforge templates               — List available project templates
  */
 
 const args = process.argv.slice(2);
 const command = args[0];
 
-if (command !== 'init' && command !== 'deploy') {
+if (command === 'templates') {
+  import('../wizard/lib/templates.js').then(({ listTemplates }) => {
+    console.log('\nVoidForge Project Templates\n');
+    for (const t of listTemplates()) {
+      console.log(`  ${t.id.padEnd(12)} ${t.name}`);
+      console.log(`  ${''.padEnd(12)} ${t.description}\n`);
+    }
+    console.log('Usage: npx voidforge init --template <id>\n');
+  });
+} else if (command !== 'init' && command !== 'deploy') {
   console.log('VoidForge — From nothing, everything.\n');
   console.log('Usage:');
-  console.log('  npx voidforge init                Launch Merlin — the setup wizard');
+  console.log('  npx voidforge init                    Launch Merlin — the setup wizard');
+  console.log('  npx voidforge init --template saas    Start from a project template');
   console.log('  npx voidforge deploy              Launch Haku — the deploy wizard');
   console.log('  npx voidforge deploy --headless   Deploy from CLI without a browser');
   console.log('');

@@ -9,10 +9,11 @@
 2. Validate frontmatter values: `type` must be one of (full-stack, api-only, static-site, prototype). `auth` must be (yes, no). `payments` must be (stripe, lemonsqueezy, none). `deploy` must be (vps, vercel, railway, cloudflare, static, docker). Flag any invalid or missing values.
 3. Read `/docs/methods/BUILD_PROTOCOL.md` — check skip rules against frontmatter
 4. Extract from PRD: tech stack, database schema, API routes, page routes, integrations, env vars
-5. Flag any gaps or ambiguities — list them explicitly, don't guess
-6. Write initial ADRs to `/docs/adrs/`
-7. Create `/logs/build-state.md` and `/logs/phase-00-orient.md` with extraction results
-8. **Gate:** ADRs written, all PRD sections accounted for, skip rules documented in build-state.md
+5. Read `/docs/LESSONS.md` — check for relevant lessons from previous projects. If any lessons match this project's tech stack (framework, database, auth, integrations), note them: "Lessons from prior builds: [list relevant ones]." These inform later phases — e.g., if a lesson says "React useEffect render loops escape review," trace render cycles proactively in Phase 4+.
+6. Flag any gaps or ambiguities — list them explicitly, don't guess
+7. Write initial ADRs to `/docs/adrs/`
+8. Create `/logs/build-state.md` and `/logs/phase-00-orient.md` with extraction results + relevant lessons
+9. **Gate:** ADRs written, all PRD sections accounted for, skip rules documented in build-state.md
 
 ## Phase 1 — Scaffold (Stark + Kusanagi)
 1. Read `/docs/methods/BACKEND_ENGINEER.md` (Step 0 — Orient section only)

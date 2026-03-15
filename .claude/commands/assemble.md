@@ -144,6 +144,22 @@ Present the summary to the user.
 **IMPORTANT: Include this disclaimer in the completion message:**
 "All phases analyze source code and trace data flows. If this project has a runnable UI, manual testing of the deployed application is still recommended before shipping to users — runtime interaction bugs (render loops, endpoint collisions, focus management) can pass static analysis."
 
+## Lessons Extraction (Wong)
+After the summary, Wong extracts learnings for future builds:
+
+1. Review all findings from Phases 3-13. For each pattern that appeared 2+ times or took 2+ fix iterations, distill into a lesson.
+2. Append new entries to `/docs/LESSONS.md` using the existing format:
+   ```
+   ### [Short title]
+   **Agent:** [who discovered it] | **Category:** pattern/antipattern/decision/gotcha
+   **Context:** [this project name and phase]
+   **Lesson:** [what we learned]
+   **Action:** [what to do differently]
+   **Promoted to:** Not yet
+   ```
+3. Check existing lessons — if a lesson from a PREVIOUS project was confirmed again, add a note: "Confirmed in [project]. Promote to method doc." If the lesson was already promoted, note: "Promoted lesson held — no regressions."
+4. If any lesson appears in 3+ projects, promote it: add the rule to the relevant method doc and update the lesson's "Promoted to" field.
+
 ## Operating Rules
 - Update `/logs/assemble-state.md` after EVERY phase completion
 - If you notice context pressure symptoms (re-reading files, forgetting decisions), ask user to run `/context`. Only checkpoint if usage exceeds 70%.

@@ -113,9 +113,10 @@ Dax reads the Prophets' plan:
 **Priority cascade for mission ordering:**
 1. Section 16 (Launch Sequence) — if the user defined phases, follow them
 2. Dependency graph — Auth before gated features, Schema before API, API before UI
-3. PRD section order — Core (§4) → Supporting (§5) → Integrations (§6) → Admin (§7) → Marketing (§8)
-4. Frontmatter skip flags — skip sections where flags say no/none
-5. **Asset/infrastructure requirements** — flag as BLOCKED, do not include in code missions
+3. **Complexity-first (smart scoping)** — within a dependency tier, build the hardest features first. Estimate complexity by: number of external integrations, schema relationships, edge cases listed in the PRD, and whether the PRD calls out the feature as "the brain" or "the core." Hard things first (when energy and context are fresh), polish and admin later. If the PRD has a Conversation Intelligence Engine AND a Trip Planner, build the engine first — the planner is CRUD.
+4. PRD section order — as a tiebreaker when complexity is equal
+5. Frontmatter skip flags — skip sections where flags say no/none
+6. **Asset/infrastructure requirements** — flag as BLOCKED, do not include in code missions
 
 ### Step 2 — Odo's Prerequisite Check
 

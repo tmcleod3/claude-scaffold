@@ -61,9 +61,10 @@ Read the PRD and diff against the codebase:
 **Priority cascade:**
 1. Section 16 phases (if defined by user)
 2. Dependency order: Auth → Core → Supporting → Integrations → Admin → Marketing
-3. PRD section order as tiebreaker
-4. Skip sections flagged as no/none in frontmatter
-5. Asset/infrastructure requirements → flag as BLOCKED, don't include in code missions
+3. Complexity-first: within a dependency tier, build the hardest features first (most integrations, most edge cases, most schema relationships). Hard things when energy is fresh, polish later.
+4. PRD section order as tiebreaker when complexity is equal
+5. Skip sections flagged as no/none in frontmatter
+6. Asset/infrastructure requirements → flag as BLOCKED, don't include in code missions
 
 ## Step 2 — Odo's Prerequisite Check
 

@@ -8,6 +8,7 @@ import { getSessionPassword } from './credentials.js';
 import { resolveModelWithLimits } from '../lib/anthropic.js';
 import { parseFrontmatter, validateFrontmatter } from '../lib/frontmatter.js';
 import { parseJsonBody } from '../lib/body-parser.js';
+import { listTemplates, getTemplate } from '../lib/templates.js';
 
 /**
  * Extract the prompt from inside the outer ``` fence after "## The Prompt".
@@ -390,4 +391,30 @@ addRoute('GET', '/api/prd/prompt', async (_req: IncomingMessage, res: ServerResp
   } catch {
     sendJson(res, 500, { error: 'Could not load PRD generator prompt' });
   }
+});
+
+// GET /api/prd/templates — list available project templates
+addRoute('GET', '/api/prd/templates', async (_req: IncomingMessage, res: ServerResponse) => {
+  sendJson(res, 200, { templates: listTemplates() });
+});
+
+// GET /api/prd/templates/:id — get a specific template's full PRD content
+addRoute('GET', '/api/prd/templates/get', async (req: IncomingMessage, res: ServerResponse) => {
+  const url = new URL(req.url || '', 'http://localhost');
+  const id = url.searchParams.get('id');
+  if (!id) {
+    sendJson(res, 400, { error: 'id query parameter is required' });
+    return;
+  }
+  const template = getTemplate(id);
+  if (!template) {
+    sendJson(res, 404, { error: `Template not found: ${id}` });
+    return;
+  }
+  // Build a complete PRD with frontmatter
+  const frontmatterYaml = Object.entries(template.frontmatter)
+    .map(([k, v]) => `${k}: "${v}"`)
+    .join('\n');
+  const prd = `\`\`\`yaml\nname: "[PROJECT_NAME]"\n${frontmatterYaml}\n\`\`\`\n\n---\n\n${template.prdSections}`;
+  sendJson(res, 200, { template: { ...template, prd } });
 });
