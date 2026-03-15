@@ -61,7 +61,7 @@ These are independent, read-only scans. Run in parallel using the Agent tool:
 
 **Chewie — Dependencies:** `npm audit`. No critical/high vulns. Lock file committed. Versions pinned. No deprecated packages.
 
-**Rex — Infrastructure:** Security headers (HSTS, X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy, Permissions-Policy). CORS not wildcard. TLS 1.2+. Valid certs everywhere.
+**Rex — Infrastructure:** Security headers (HSTS, X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy, Permissions-Policy). CORS not wildcard. TLS 1.2+. Valid certs everywhere. **CSP build-output check:** If the project uses a framework with a build step (Next.js, Nuxt, SvelteKit, Gatsby, Astro), run the build and grep the output HTML for `<script>` tags. Framework-generated inline scripts are invisible in source code but will be blocked by CSP without `unsafe-inline`. Check before tightening CSP: `grep -c '<script>' dist/**/*.html` (or `out/`, `.next/`, `build/`).
 
 **Maul — Red Team:** For each endpoint and flow, ask: "How would I exploit this?" Chain vulnerabilities. Test trust boundaries. Attempt privilege escalation. Find what the defenders missed.
 
@@ -83,7 +83,7 @@ Fix critical and high findings immediately. Medium findings get tracked. For eac
 1. Apply the fix
 2. Verify it works
 3. Check it didn't break anything (`npm test`)
-4. **Critical path smoke test:** After applying security fixes, verify the primary user flow still works. Security hardening that breaks core functionality is a regression, not an improvement. Common traps: stripping environment variables that the main tool needs (e.g., API keys), tightening auth that blocks legitimate users, restricting paths that the app needs to access. If the fix breaks the happy path, the fix is wrong — find a way to secure without breaking.
+4. **Critical path smoke test:** After applying security fixes, verify the primary user flow still works. Security hardening that breaks core functionality is a regression, not an improvement. Common traps: stripping environment variables that the main tool needs (e.g., API keys), tightening auth that blocks legitimate users, restricting paths that the app needs to access, **removing `unsafe-inline` from CSP when framework-generated inline scripts exist in build output** (Next.js, Nuxt, SvelteKit all inject `<script>` tags at build time — invisible in source, fatal if blocked). If the fix breaks the happy path, the fix is wrong — find a way to secure without breaking.
 5. Update the finding status
 
 ### Phase 4 — Re-Verify Remediations

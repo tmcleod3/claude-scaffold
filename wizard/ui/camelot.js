@@ -261,6 +261,19 @@
     }
   }
 
+  // Back to Hall — warn if terminals are open (sessions persist server-side)
+  const backBtn = document.getElementById('btn-back-hall');
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      if (tabs.length > 0) {
+        const leave = confirm('Terminal sessions will continue running in the background. Leave?');
+        if (!leave) {
+          e.preventDefault();
+        }
+      }
+    });
+  }
+
   async function start() {
     await init();
 

@@ -10,9 +10,11 @@ import './api/project.js';
 import './api/provision.js';
 import './api/deploy.js';
 import './api/terminal.js';
+import './api/projects.js';
 
 import { handleTerminalUpgrade } from './api/terminal.js';
 import { killAllSessions } from './lib/pty-manager.js';
+import { startHealthPoller, stopHealthPoller } from './lib/health-poller.js';
 
 const UI_DIR = join(import.meta.dirname, 'ui');
 
@@ -59,9 +61,8 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   const allowedOrigins = [`http://127.0.0.1:${serverPort}`, `http://localhost:${serverPort}`];
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', `http://localhost:${serverPort}`);
   }
+  // Non-matching origins: no Access-Control-Allow-Origin header (browser blocks)
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-VoidForge-Request');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -100,7 +101,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   let pathname = url.pathname;
 
   if (pathname === '/' || pathname === '') {
-    pathname = '/index.html';
+    pathname = '/hall.html';
   }
 
   // Prevent directory traversal — resolve then verify prefix
@@ -146,12 +147,17 @@ export function startServer(port: number): Promise<void> {
     });
 
     server.listen(port, '127.0.0.1', () => {
+      startHealthPoller();
       resolve();
     });
 
-    // Graceful shutdown — kill all PTY sessions
+    // Graceful shutdown — stop health poller, then kill all PTY sessions
+    let shuttingDown = false;
     const shutdown = (): void => {
+      if (shuttingDown) return;
+      shuttingDown = true;
       console.log('\n  Shutting down...');
+      stopHealthPoller();
       killAllSessions();
       server.close(() => process.exit(0));
       setTimeout(() => process.exit(0), 2000);

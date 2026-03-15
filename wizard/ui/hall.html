@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Great Hall — VoidForge</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Hall Layout */
+    .hall { max-width: 960px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; }
+    .hall-header {
+      padding: 24px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hall-title { font-size: 18px; font-weight: 700; color: var(--accent); }
+    .hall-subtitle { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+    .hall-actions { display: flex; gap: 8px; }
+
+    /* Project Grid */
+    .project-grid {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      flex: 1;
+    }
+
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .project-card:hover { border-color: var(--accent); background: rgba(91, 91, 247, 0.03); }
+    .project-card:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(91, 91, 247, 0.25); outline: none; }
+
+    .project-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .project-card-name { font-size: 16px; font-weight: 600; }
+    .project-card-meta { font-size: 12px; color: var(--text-dim); }
+
+    /* Health Indicator — color + text label for a11y (WCAG 1.4.1) */
+    .health-indicator {
+      display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+    }
+    .health-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .health-dot.healthy { background: var(--success); }
+    .health-dot.degraded { background: var(--warning); }
+    .health-dot.down { background: var(--error); }
+    .health-dot.unchecked { background: var(--text-muted); }
+    .health-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Badges */
+    .badge-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge {
+      font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500;
+      background: rgba(91, 91, 247, 0.1); color: var(--accent);
+    }
+    .badge.deploy { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+
+    /* Deploy URL */
+    .project-url {
+      font-size: 12px; color: var(--accent); font-family: var(--mono);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .project-url:hover { text-decoration: underline; }
+
+    /* Quick Actions */
+    .project-actions { display: flex; gap: 8px; margin-top: auto; }
+    .project-actions .btn { padding: 4px 10px; font-size: 11px; }
+
+    /* Cost & Activity */
+    .project-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
+
+    /* Round Table (footer bar) */
+    .round-table {
+      padding: 12px 24px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--text-dim);
+    }
+    .round-table-stats { display: flex; gap: 16px; }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center; padding: 80px 24px;
+      color: var(--text-dim); grid-column: 1 / -1;
+    }
+    .empty-state h2 { font-size: 20px; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { margin-bottom: 24px; }
+
+    /* Import Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; width: 90%; max-width: 480px;
+    }
+    .modal h2 { margin-bottom: 16px; }
+
+    @media (max-width: 600px) {
+      .project-grid { grid-template-columns: 1fr; padding: 16px; }
+      .hall-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .round-table { flex-direction: column; gap: 8px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hall">
+    <header class="hall-header">
+      <div>
+        <div class="hall-title">The Great Hall</div>
+        <div class="hall-subtitle">VoidForge Operations Console</div>
+      </div>
+      <div class="hall-actions">
+        <button class="btn" id="btn-import" title="Import existing VoidForge project">+ Import Project</button>
+        <button class="btn btn-primary" id="btn-new" title="Create a new project with Merlin">+ New Project</button>
+      </div>
+    </header>
+
+    <main class="project-grid" id="project-grid" role="list">
+      <div class="empty-state" id="empty-state">
+        <h2>No projects yet</h2>
+        <p>Create your first project with Merlin, or import an existing one.</p>
+        <button class="btn btn-primary" id="btn-new-empty">+ New Project</button>
+      </div>
+    </main>
+
+    <footer class="round-table" id="round-table">
+      <div class="round-table-stats">
+        <span id="stat-projects">0 projects</span>
+        <span id="stat-cost">$0/mo</span>
+      </div>
+      <div>The Round Table</div>
+    </footer>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-backdrop" id="import-modal" role="dialog" aria-labelledby="import-title" aria-modal="true">
+    <div class="modal">
+      <h2 id="import-title">Import Existing Project</h2>
+      <div class="field">
+        <label for="import-dir">Project Directory</label>
+        <input type="text" id="import-dir" placeholder="/home/user/projects/my-app" autocomplete="off">
+        <div class="field-hint">Absolute path to a directory containing CLAUDE.md</div>
+      </div>
+      <div id="import-status" class="status-row" role="status" aria-live="polite"></div>
+      <div class="btn-row">
+        <button class="btn" id="import-cancel">Cancel</button>
+        <button class="btn btn-primary" id="import-confirm">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="hall.js"></script>
+</body>
+</html>
