@@ -81,6 +81,7 @@ Kira reads the battlefield:
 - **RESUME ASSEMBLY** — assemble-state shows incomplete phases → `/assemble --resume`
 - **RESUME BUILD** — build-state shows incomplete phases → `/build` (resume from phase)
 - **UNCOMMITTED** — git has unstaged changes → prompt user: commit first or continue?
+- **BLOCKED ITEMS** — campaign-state has unresolved BLOCKED items from previous missions → present them: "These items are still blocked: [list]. Resolve now, skip, or continue?"
 - **CLEAR** — no in-progress work → proceed to Step 1
 
 ### Step 1 — Dax's Strategic Analysis
@@ -155,7 +156,11 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 
 1. Coulson commits the mission (`/git`)
 2. Update `/logs/campaign-state.md` — mark mission complete, log any deviations from PRD
-3. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
+3. **Route BLOCKED items to the right place:**
+   - Future feature → append to `ROADMAP.md` under the appropriate version
+   - User-provided asset (illustrations, OG images) → add to `## Blocked Items` in campaign-state.md
+   - PRD requirement beyond code → mark BLOCKED in the Prophecy Board with reason
+4. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6 (victory)
 

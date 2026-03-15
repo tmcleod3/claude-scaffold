@@ -42,6 +42,7 @@ Check for unfinished business:
 - If build-state shows incomplete phases → resume `/build` first
 - If uncommitted changes exist → ask: "Commit first, or continue?"
 - If `/campaign --resume` was passed → resume from campaign-state's active mission
+- If campaign-state has unresolved BLOCKED items → present them: "These items from previous missions are still blocked: [list]. Resolve now, skip, or continue?"
 - If clear → proceed to Step 1
 
 ## Step 1 — Dax's Strategic Analysis
@@ -104,7 +105,11 @@ On confirmation:
 After `/assemble` completes:
 1. Run `/git` to commit and version the mission
 2. Update `/logs/campaign-state.md` — mark mission complete, update stats
-3. Check: are all PRD sections now implemented?
+3. **Collect BLOCKED items** from this mission (assets, infrastructure, copy issues). For each:
+   - If it's a future feature → append to `ROADMAP.md` under the appropriate version
+   - If it's a missing asset the user must provide → add to a `## Blocked Items` section in campaign-state.md with what's needed and who can unblock it
+   - If it's a PRD requirement that can't be satisfied by code → flag in the Prophecy Board as BLOCKED with the reason
+4. Check: are all PRD requirements COMPLETE or BLOCKED?
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6
 
