@@ -132,9 +132,13 @@ VoidForge ships on three branches. Shared methodology files exist on all three.
 | `core` | Ultra-light — CLAUDE.md, commands, methods, patterns, naming registry | Point Claude Code at branch to absorb methodology |
 
 **Branch sync rule:** Changes to any shared file must propagate to all branches. Shared files:
-- `CLAUDE.md`, `.claude/commands/*`, `.claude/settings.json`
+- `CLAUDE.md`, `.claude/commands/*`
 - `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
-- `HOLOCRON.md`
+- `HOLOCRON.md`, `VERSION.md`, `CHANGELOG.md`
+
+**NOT shared** (main-only): `package.json` (wizard dependencies differ per tier), `package-lock.json`, `.claude/settings.json` (user permissions/hooks), `wizard/*`, `scripts/*`, `logs/*`, `.env`
+
+Scaffold and core have their own minimal `package.json` (name + version + description only — no dependencies). When syncing version bumps, update `VERSION.md` and `CHANGELOG.md` on all branches but leave each branch's `package.json` version field to be updated independently.
 
 The agents, characters, and personality are VoidForge's identity — never strip them from any tier.
 
