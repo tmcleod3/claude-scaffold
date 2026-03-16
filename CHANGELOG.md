@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.3.1] - 2026-03-16
+
+### Changed
+- **`/campaign --blitz` now auto-debriefs after every mission.** In blitz mode, `/debrief --submit` runs automatically after each mission completes, filing a GitHub field report with learnings while context is fresh. No user review needed — blitz trusts the output. Run `/debrief --inbox` on the upstream repo later to triage accumulated reports. This is the missing feedback loop for autonomous builds: every mission's failures, patterns, and methodology gaps are captured even when nobody is watching.
+
+---
+
 ## [7.3.0] - 2026-03-16
 
 ### Added

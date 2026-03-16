@@ -128,11 +128,12 @@ After every 4th mission (missions 4, 8, 12, etc.), run a Gauntlet checkpoint bef
 After `/assemble` completes:
 1. Run `/git` to commit and version the mission
 2. Update `/logs/campaign-state.md` — mark mission complete, update stats
-3. **Collect BLOCKED items** from this mission (assets, infrastructure, copy issues). For each:
+3. **Blitz debrief:** If `$ARGUMENTS` contains `--blitz`, run `/debrief --submit` to capture learnings from this mission and auto-submit as a GitHub field report. Do not wait for user review — blitz mode trusts the debrief output. This ensures every mission's learnings are captured while context is fresh, even when nobody is watching.
+4. **Collect BLOCKED items** from this mission (assets, infrastructure, copy issues). For each:
    - If it's a future feature → append to `ROADMAP.md` under the appropriate version
    - If it's a missing asset the user must provide → add to a `## Blocked Items` section in campaign-state.md with what's needed and who can unblock it
    - If it's a PRD requirement that can't be satisfied by code → flag in the Prophecy Board as BLOCKED with the reason
-4. Check: are all PRD requirements COMPLETE or BLOCKED?
+5. Check: are all PRD requirements COMPLETE or BLOCKED?
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6
 
