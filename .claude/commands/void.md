@@ -13,6 +13,7 @@ Orient to the current state:
    - `.claude/commands/*`
    - `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
    - `scripts/thumper/*`
+   - `VERSION.md`, `CHANGELOG.md`
 4. Announce the current version and that you're checking for updates
 
 ## Step 1 — Listen to the River (Goldberry)

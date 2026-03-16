@@ -58,6 +58,8 @@ docs/methods/*                     ← All agent protocols
 docs/patterns/*                    ← All reference implementations
 docs/NAMING_REGISTRY.md            ← Character registry
 scripts/thumper/*                  ← Shared VoidForge runtime for /thumper command
+VERSION.md                         ← Current version + history
+CHANGELOG.md                       ← Release changelog
 ```
 
 **Never touched by Bombadil:**
