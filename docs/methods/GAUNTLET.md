@@ -62,6 +62,8 @@
 - Constantine (DC) — finds cursed code in fixed areas
 - Éowyn (Tolkien) — final enchantment on polished product
 
+**Defense-first rule:** Before claiming a bypass or missing defense, read the FULL function/module that implements the defense. Quote the defensive code. Then explain why the defense is insufficient. If you cannot find defensive code, state 'No defense found at [file:line range]' — do not assume it's missing without reading.
+
 **Round 5 — The Council (convergence):**
 - Spock (Star Trek) — code quality after fixes
 - Ahsoka (Star Wars) — access control integrity
@@ -96,6 +98,10 @@ Fix batches happen between rounds:
 
 **Build-output verification:** After every fix batch, if the project has a build step, run the build and verify the output. Framework-generated code (inline scripts, hydration markers, SSR output) is invisible to source-level analysis but can be broken by security hardening. Check: `npm run build && grep -c '<script>' dist/**/*.html`. If the build fails or output changes unexpectedly, the fix is wrong.
 
+**Commit per fix batch:** After each fix batch, create a separate commit. This enables surgical revert if a fix introduces a regression — one 43-file commit is impossible to partially revert.
+
+**Real data smoke test:** For fixes that modify data transformation, sanitization, or rendering, test against actual project data (not just unit tests). If the project has AI-generated content, test with real LLM output. Unit tests pass ≠ production works.
+
 ## Finding Format
 
 Every finding, from every agent, in every round, uses this format:
@@ -110,6 +116,8 @@ Attack vector: [how to exploit, if security]
 How to fix:  [specific recommendation]
 Status:      Open / Fixed / Verified / Won't Fix
 ```
+
+**Verification Gate:** Every Critical or High finding MUST include a direct code quote (3+ lines) from the actual file with file path and line numbers. Findings without exact code quotes are classified as 'Unverified' and must be verified before counting toward severity tallies. This prevents hallucinated findings from driving fix batches.
 
 ## State Tracking
 

@@ -141,6 +141,10 @@ Apply the updates:
    - For other files: Present both versions and let the user choose, or attempt a merge if the changes don't overlap
 4. After all files are written, verify each one is readable and not corrupted
 
+### Step 4.5 — Preview Deploy Verification
+
+After syncing methodology files, if the project has a deploy target, run a preview build (`npm run build`) to verify the sync didn't break anything. For Vercel projects: `vercel` (without `--prod`) to create a preview URL and verify it loads. Only promote to production after preview passes. This prevents the scenario where synced .md files trigger Tailwind v4 content scanning failures that only manifest in platform build environments.
+
 ### Step 4 — The Song Continues (Bombadil)
 
 Verify and celebrate:

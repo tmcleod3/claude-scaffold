@@ -95,6 +95,10 @@ Rules:
 - Em dash before elaboration if needed
 - No period at the end
 
+## Step 5.5 — PRD Refresh (Wong)
+
+For MINOR or MAJOR version bumps: scan the PRD's inventory section (if it has one — e.g., 'What exists today' table, numeric claims like 'N endpoints', 'N tests'). Update any stale counts to match the current codebase. This prevents PRD drift between campaigns.
+
 ## Verification Checklist
 
 After every commit, Barton verifies:

@@ -69,6 +69,8 @@ Deployable, observable, recoverable, maintainable. Automate everything done more
 
 **Levi — Platform Build Gate (pre-deploy):** For platform targets (Vercel, Cloudflare Pages, Railway), run the framework build locally BEFORE pushing to the platform. `npm run build` (or equivalent) must succeed locally — platform build environments may use different Node/npm versions and stricter PostCSS settings. Common failures: Tailwind v4 scanning non-source directories (see Galadriel's content scanning check), TypeScript strict errors suppressed locally but caught in CI, missing env vars. For Vercel specifically: prefer `vercel --prebuilt` with local build output, or use preview deploys (`vercel` without `--prod`) before production. If the build fails on the platform but passes locally, check: Node version mismatch, PostCSS plugin versions, content scanning paths.
 
+**Pin Node.js version:** Every project must have a `.node-version` file AND `engines.node` in package.json. Platform-managed environments (Vercel, Railway) auto-upgrade Node versions — silent failures when new Node breaks a dependency. Pin to the version used during development.
+
 ## Deliverables
 
 1. /scripts/provision.sh, deploy.sh, rollback.sh, backup-db.sh

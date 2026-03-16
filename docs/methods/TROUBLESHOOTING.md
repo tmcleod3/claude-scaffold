@@ -153,6 +153,14 @@
 4. Need to undo last commit (not pushed): `git reset --soft HEAD~1`
 5. File shouldn't be tracked: add to `.gitignore`, `git rm --cached filename`
 
+### Tailwind v4 Utilities Not Generating
+
+**Symptoms:** CSS builds locally but fails on Vercel/Cloudflare with PostCSS syntax errors. Or: Tailwind classes have no effect in production.
+
+**Cause:** Tailwind v4 auto-scans ALL files for class names by default. Non-source files (`.md`, docs, logs) can trigger invalid CSS generation. Or: `postcss.config.mjs` is missing.
+
+**Fix:** (1) Create `postcss.config.mjs` with `{ plugins: { "@tailwindcss/postcss": {} } }`. (2) Add `@import "tailwindcss" source("../..") to the top of your CSS entry point to limit scanning to source directories. (3) Pin Node.js version in `.node-version` — `@tailwindcss/postcss` has ESM bugs on Node 24.
+
 ### Environment mismatch (works locally, fails in prod)
 
 1. Compare env vars: local `.env` vs server environment

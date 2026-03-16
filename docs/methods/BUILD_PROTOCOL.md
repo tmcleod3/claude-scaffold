@@ -90,7 +90,8 @@ Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md
 1. Initialize framework, configs, schema, directory structure, types, utils, root layout
 2. Set up test runner per `/docs/methods/TESTING.md`
 3. Every placeholder references its PRD section
-4. Log to `/logs/phase-01-scaffold.md`
+4. **Tailwind v4 projects:** If framework is Next.js and styling is Tailwind, create `postcss.config.mjs` (`export default { plugins: { "@tailwindcss/postcss": {} } }`) and ensure `globals.css` starts with `@import "tailwindcss" source("../.."). Tailwind v4's implicit scanning breaks in deployed environments when non-source files (methodology docs, build logs) are scanned.
+5. Log to `/logs/phase-01-scaffold.md`
 
 **Phase 2 — Kusanagi Infrastructure.**
 1. Database (Banner assists) -> Redis -> Environment
