@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.1.0] - 2026-03-15
+
+### Added
+- **Operations menu** — Act 3 presents expandable cards: Deploy Target, Cloud Credentials, Domain & Hostname, Resilience Pack. Pick what you need, skip the rest.
+- **Resilience Pack** — 10 opt-in toggles for operational hardening: multi-env, preview deploys, auto-rollback, migrations, backups, health check, graceful shutdown, error boundaries, rate limiting, dead letter queue.
+- **Live header** — Shows "Gandalf — [Project Name]" as you type.
+
+### Changed
+- **Three-act wizard flow** — "Secure Your Forge" (vault → API key) → "Describe Your Vision" (project → PRD) → "Equip Your Project" (operations menu). Vault and API key split into separate focused screens. Domain/hostname moved to operations menu.
+- **Act-based progress labels** — "Act 1 — Secure Your Forge" instead of "Step 3 of 7".
+
+### Removed
+- **Simple/Advanced toggle** — Eliminated. Every user gets the same flow; configure depth via the operations menu.
+
+---
+
 ## [7.0.1] - 2026-03-15
 
 ### Changed

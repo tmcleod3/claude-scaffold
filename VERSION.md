@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 7.0.1
+**Current:** 7.1.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 7.1.0 | 2026-03-15 | The Redesign — three-act wizard flow, operations menu, Resilience Pack, simple/advanced eliminated |
 | 7.0.1 | 2026-03-15 | Three-act wizard redesign plan, Resilience Pack reclassification, 9 methodology fixes from field reports |
 | 7.0.0 | 2026-03-15 | The Penthouse — multi-user RBAC, per-project ACLs, linked services, coordinated deploys, rollback, cost tracker, agent memory |
 | 6.5.1 | 2026-03-15 | The Arthurian Retcon — Merlin→Gandalf, Camelot→Avengers Tower, Great Hall→The Lobby, Round Table→The Penthouse |
