@@ -71,7 +71,9 @@ These require full codebase context — run sequentially:
 
 **Yoda — Auth:** Passwords (bcrypt ≥12), no plaintext anywhere, reset tokens single-use + expire, rate limited. OAuth state param, redirect whitelist, server-side exchange. Sessions: crypto random, httpOnly/secure/sameSite, invalidated on logout + password change, CSRF on mutations.
 
-**Windu — Input:** SQL (parameterized queries), XSS (escaped output, no dangerouslySetInnerHTML, CSP), SSRF (URL allowlist, block internal IPs), Command (no user input in shell), Path traversal (sanitized filenames), Deserialization (schema validate all parsed data).
+**Windu — Input:** SQL (parameterized queries), XSS (escaped output, no dangerouslySetInnerHTML, CSP), SSRF (URL allowlist, block internal IPs — check ALL bypass vectors: octal IPs `0177.0.0.1`, decimal IPs `2130706433`, IPv6-mapped `::ffff:127.0.0.1`, DNS rebinding, URL scheme bypass `file://`, double-encoding), Command (no user input in shell), Path traversal (sanitized filenames), Deserialization (schema validate all parsed data). **AI Output Sanitization:** If the app generates or executes AI output (LLM responses, code generation), verify: (1) regex sanitization handles nested structures (e.g., nested braces), (2) sanitization failure does NOT fall through to a less-secure path, (3) server-side code execution uses true sandboxing (isolated-vm), NOT Node.js `vm` module (test: `this.constructor.constructor('return globalThis')()` — if it returns the real global, the sandbox is broken), (4) script/iframe tags stripped, (5) event handlers stripped via catch-all rename, not just regex match.
+
+**Security principle:** For security boundaries (tool access, URL allowlists, IP ranges, credential scopes), **always prefer whitelist (default-deny) over blocklist (default-allow)**. New entries should be blocked by default until explicitly allowed. Blocklists inevitably miss entries.
 
 **Ahsoka — Access:** Every endpoint verifies ownership (no IDOR). UUIDs not sequential IDs. Admin verified server-side. Tier features verified server-side. User A can't access User B's anything. Rate limiting per-user and per-IP.
 
