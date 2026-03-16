@@ -132,6 +132,7 @@ Normalize error handling (consistent types, no leaked secrets). Add guardrails (
 After all fixes are applied, run a verification pass to catch fix-induced regressions:
 - **Nightwing** re-runs full test suite, reports any new failures
 - **Red Hood** re-probes fixed areas — verify fixes hold under adversarial input
+- **Red Hood — grep for siblings:** For EVERY fix applied, grep the entire codebase for the same pattern. If `aria-controls` was missing in one view, grep all views. If a type validation was added to batch-delete, check batch-update too. Fix ALL instances — not just the one reported. This is the #1 source of rework.
 - **Deathstroke** re-tests authorization boundaries and business logic exploits that were remediated
 
 If Pass 2 finds new issues, fix them and re-verify. Do not proceed to regression checklist until Pass 2 is clean.

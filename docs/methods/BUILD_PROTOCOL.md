@@ -115,7 +115,8 @@ Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md
 2. One batch = one feature or tightly coupled feature group (max ~200 lines changed per batch)
 3. After each batch: build passes, previous flows work, new flow works, all tests pass
 4. If a batch breaks a previous flow: revert the batch, isolate the conflict, fix, re-verify (see Rollback below)
-5. Log each batch to `/logs/phase-05-features.md`
+5. **Enum/tier consumer sweep:** When adding new enum values (tiers, roles, statuses, categories), grep ALL consumers of that enum. Verify each handles the new value. Prefer centralized config lookups (e.g., `getTierConfig(tier)`) over hardcoded comparisons (`tier === 'PRO' || tier === 'ENTERPRISE'`). This is the #1 source of tier enforcement drift.
+6. Log each batch to `/logs/phase-05-features.md`
 
 **Phase 6 — Integrations.**
 1. Each integration: client wrapper, env vars, test mode, error handling, retry logic
@@ -129,7 +130,8 @@ Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md
 
 **Phase 8 — Marketing Pages.**
 1. Homepage, features, pricing, legal, SEO meta
-2. Log to `/logs/phase-08-marketing.md`
+2. **Cross-surface consistency sweep:** After changing pricing, tier names, feature descriptions, or agent counts, search for OLD values across ALL surfaces: marketing pages, dashboard CTAs, API error messages, email templates, JSON-LD structured data, admin panels, README, HOLOCRON. Numeric claims ("170+ agents", "13 phases") must match actual counts.
+3. Log to `/logs/phase-08-marketing.md`
 
 **Phases 9-11 — Double-Pass Review Cycle (Batman + Galadriel + Kenobi).**
 
