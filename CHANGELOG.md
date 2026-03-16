@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.2.1] - 2026-03-15
+
+### Fixed
+- **Avengers Tower terminal crash on Node.js v24** — `posix_spawnp failed` error when opening terminal. Upgraded `node-pty` from 1.1.0 to 1.2.0-beta.12 which includes prebuilds compatible with Node v24's ABI.
+
+---
+
 ## [7.2.0] - 2026-03-15
 
 ### Added
