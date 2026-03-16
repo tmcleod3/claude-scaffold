@@ -236,6 +236,7 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
 
     // WebSocket upgrade handler for terminal connections
     server.on('upgrade', (req, socket, head) => {
+      console.error('[UPGRADE]', req.url, 'from', req.socket.remoteAddress);
       const url = new URL(req.url || '', `http://localhost:${port}`);
       if (url.pathname !== '/ws/terminal') {
         socket.write('HTTP/1.1 404 Not Found\r\n\r\n');

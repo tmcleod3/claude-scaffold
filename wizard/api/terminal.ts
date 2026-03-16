@@ -281,8 +281,10 @@ const MAX_BUFFER_SIZE = 1024 * 1024;
 export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer, userSession?: { username: string; role: 'admin' | 'deployer' | 'viewer' }): void {
   // userSession is available for audit/logging — passed from server.ts auth middleware
   void userSession; // Used for future per-connection audit enrichment
+  console.error('[WS] Upgrade request:', req.url, 'Origin:', req.headers.origin, 'Head:', head.length, 'bytes');
   const password = getSessionPassword();
   if (!password) {
+    console.error('[WS] REJECTED: vault locked');
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
     socket.destroy();
     return;
@@ -298,6 +300,7 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
     allowedOrigins.push(`https://${remoteHost}`);
   }
   if (!origin || !allowedOrigins.includes(origin)) {
+    console.error('[WS] REJECTED: origin mismatch. Got:', JSON.stringify(origin), 'Allowed:', allowedOrigins);
     socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
     socket.destroy();
     return;
@@ -316,6 +319,7 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
   const token = url.searchParams.get('token');
   const expectedToken = createHmac('sha256', password).update(sessionId).digest('hex');
   if (!token || token.length !== expectedToken.length || !timingSafeEqual(Buffer.from(token), Buffer.from(expectedToken))) {
+    console.error('[WS] REJECTED: token mismatch');
     socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
     socket.destroy();
     return;
@@ -324,6 +328,7 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
   // Verify the session exists
   const sessions = listSessions();
   if (!sessions.find((s) => s.id === sessionId)) {
+    console.error('[WS] REJECTED: session not found:', sessionId);
     socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
     socket.destroy();
     return;
@@ -337,6 +342,7 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
     return;
   }
 
+  console.error('[WS] ACCEPTED: session', sessionId, '— completing handshake');
   const acceptKey = computeAcceptKey(wsKey);
   socket.write(
     'HTTP/1.1 101 Switching Protocols\r\n' +
@@ -346,11 +352,17 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
     '\r\n'
   );
 
-  // Subscribe to PTY output → send to WebSocket
-  const unsubscribe = onSessionData(sessionId, (data: string) => {
-    if (!socket.destroyed) {
-      socket.write(encodeWsFrame(data));
-    }
+  // Defer PTY subscription to next tick — ensure the handshake response
+  // is fully flushed before we start sending WebSocket frames.
+  // Without this, PTY output buffered during session creation can be sent
+  // as raw data interleaved with the handshake headers.
+  let unsubscribe: (() => void) | null = null;
+  setImmediate(() => {
+    unsubscribe = onSessionData(sessionId, (data: string) => {
+      if (!socket.destroyed) {
+        try { socket.write(encodeWsFrame(data)); } catch { /* socket gone */ }
+      }
+    });
   });
 
   // Process any data that arrived with the upgrade request (head buffer)
@@ -420,13 +432,13 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
 
   // Handle disconnection
   socket.on('close', () => {
-    unsubscribe();
+    if (unsubscribe) unsubscribe();
     // Don't kill the session on disconnect — allow reconnection
     // Session will be killed by idle timeout if not reconnected
   });
 
   socket.on('error', () => {
-    unsubscribe();
+    if (unsubscribe) unsubscribe();
   });
 
   // Write the head buffer if it contains data
