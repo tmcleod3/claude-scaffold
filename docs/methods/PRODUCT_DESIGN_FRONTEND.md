@@ -111,6 +111,20 @@ Before the auditors begin, Éowyn reads the PRD's brand personality section and 
 | 2 | Map pin click | Add 150ms scale-up bounce on pin tap | 3 lines CSS | High — makes the map feel alive |
 | 3 | Place added to trip | Toast: "Added to [Trip]. Good taste." instead of "Added successfully." | 1 line | High — brand voice, personality |
 
+### CSS Animation Replay
+
+CSS animations only fire when a class is ADDED to an element, not when it already exists. To replay an animation on a repeated user action (e.g., button click, form submit), use the remove-reflow-add pattern:
+
+```javascript
+element.classList.remove('animate');
+void element.offsetWidth; // force browser reflow
+element.classList.add('animate');
+```
+
+Without the `void element.offsetWidth` reflow, the browser batches the remove+add as a no-op and skips the animation entirely.
+
+(Field report #20: forge-lit vault pulse only fired once without this pattern.)
+
 ## Step 2 — UX/UI Attack Plan
 
 **Elrond:** IA, navigation, task flows, friction.

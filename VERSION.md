@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 7.1.0
+**Current:** 7.2.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 7.2.0 | 2026-03-15 | The Gauntlet Forging — 31 code fixes, 11 methodology fixes, 7 enchantments, WCAG AA, v8.0+ roadmap |
 | 7.1.0 | 2026-03-15 | The Redesign — three-act wizard flow, operations menu, Resilience Pack, simple/advanced eliminated |
 | 7.0.1 | 2026-03-15 | Three-act wizard redesign plan, Resilience Pack reclassification, 9 methodology fixes from field reports |
 | 7.0.0 | 2026-03-15 | The Penthouse — multi-user RBAC, per-project ACLs, linked services, coordinated deploys, rollback, cost tracker, agent memory |

@@ -75,6 +75,22 @@ Use the Agent tool to run these in parallel — they are independent:
 
 N+1 fixed. Missing indexes found. Payloads trimmed. All lists paginated. Heavy compute off request path. Caching strategy. No leaks. Gzip. Fury reviews all findings from Steps 1-3 and validates performance implications.
 
+### Node.js Single-Process Mutex
+
+When using a module-scope boolean/variable as a lock in async code, the check-and-set MUST be synchronous (same event loop tick). Never put `await` between the check and the set.
+
+```typescript
+if (lock) { return res.status(429).json({ error: 'Already in progress' }); }
+lock = true; // SET IMMEDIATELY — same tick as check
+try {
+  await asyncWork();
+} finally {
+  lock = false;
+}
+```
+
+**Why:** In Node.js, two requests arriving in the same event loop tick can both see `lock === false` if an `await` separates the check from the set. The check-and-set must be synchronous to prevent TOCTOU races. (Field report #20: provisioning lock had 100+ lines of async work between check and set.)
+
 ## Step 5 — Deliverables
 
 1. BACKEND_AUDIT.md

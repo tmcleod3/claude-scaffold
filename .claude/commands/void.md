@@ -56,7 +56,7 @@ For each file being updated:
 - **Updated files (with local mods):**
   - For `CLAUDE.md`: Preserve the `## Project` section (name, one-liner, domain, repo) and any user-added `## Coding Standards` entries. Update all methodology sections (Slash Commands, Team, Docs Reference, Release Tiers, etc.)
   - For other files: Show both versions, let user choose, or attempt to merge non-overlapping changes
-- **Never touch:** `docs/PRD.md`, `docs/LESSONS.md`, `logs/*`, `wizard/*`, `scripts/*`, `.env`, `package.json`, application code
+- **Never touch:** `docs/PRD.md`, `docs/LESSONS.md`, `logs/*`, `wizard/*`, `scripts/*`, `.env`, `.claude/settings.json`, `package.json`, application code
 
 ## Step 4 — The Song Continues (Bombadil)
 Verify and celebrate:
@@ -77,6 +77,7 @@ Verify and celebrate:
    - New patterns → mention what they demonstrate
    - Changes to build protocol → recommend reviewing before next `/build`
 5. **Content impact check:** If NAMING_REGISTRY.md or CLAUDE.md was updated, diff the agent/command lists against the previous version. If new agents or commands were added, explicitly announce them: "New in this update: [Agent Name] ([role]). New commands: [/command]." Then warn: **"If your project displays agent counts, command lists, references the team roster, or assigns agents to protocol phases (e.g., marketing sites, docs pages, about pages, protocol timelines), update those data sources to match. New agents may need to be added to protocol phase assignments — check which phases they should participate in."** This is a handoff, not an auto-fix — `/void` doesn't know your project's data model.
+   - If `VERSION.md` was updated, check if the project has any pages displaying version/release history. Flag versions in VERSION.md not reflected in site content.
 6. Announce completion with flair
 
 ## Handoffs

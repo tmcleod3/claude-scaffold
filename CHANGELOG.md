@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.2.0] - 2026-03-15
+
+### Added
+- **Third-party script loading pattern** — Three-state pattern (loading/ready/error) for external script dependencies (`docs/patterns/third-party-script.ts`)
+- **v8.0-v9.0+ roadmap** — The Hive Mind (Agent Memory, Conflict Prediction, `/prd`), The Evolution (Self-Improving Methodology, Agent Specialization), The Autonomy (`/campaign --autonomous`), The Horizon (Pattern Evolution, Cross-Project, Multi-Language)
+- **7 enchantment animations** — Forge-lit pulse on vault unlock, streaming cursor for PRD generation, success icon pop, directional step transitions, primary button gradient glow, subtitle delayed fade-in, status message slide-in
+
+### Changed
+- **Vault password minimum raised to 8 characters** — was 4, now consistent with security best practices (server + client)
+- **TOTP validation enforces exactly 6 digits** — rejects alphabetic and short/long codes per RFC 6238
+- **Provisioning concurrency lock** — check-and-set is now synchronous (same event loop tick), preventing TOCTOU race on concurrent requests
+- **Manifest writes serialized** — all mutation functions in provision-manifest.ts now use write queue, preventing race conditions
+- **PTY cols/rows clamped before spawnOptions** — consistent with resize clamping, prevents oversized terminal dimensions
+- **ANTHROPIC_API_KEY excluded from remote PTY** — operator's API key no longer leaks to deployer-role terminal sessions
+- **11 methodology fixes** from 5 field reports: execution order verification (Gauntlet), Node.js mutex pattern (Backend), symlink resolution (Security), CSS animation replay (Frontend), cross-file flow tracing (Assembler), VERSION.md content checks (Forge Keeper + void), .claude/settings.json in /void "Never touch" list
+
+### Security
+- **HSTS header** in remote mode (`Strict-Transport-Security: max-age=31536000; includeSubDomains`)
+- **Vault cache timing-safe comparison** — uses `timingSafeEqual` instead of `===` for password check
+- **UUID validation on manifest runId** — prevents path traversal via crafted cleanup requests
+- **Symlink resolution** in project import — `fs.realpath()` prevents symlink attacks pointing outside project directory
+
+### Fixed
+- **Skip navigation link** added for keyboard/screen reader users (WCAG 2.1 AA)
+- **ARIA tab linkage** — PRD tabs have ids, aria-controls, and aria-labelledby
+- **Section aria-labelledby** — all wizard step sections linked to their headings
+- **noscript fallback** — shows clear message when JavaScript is disabled
+- **--text-muted contrast** raised from #767676 to #8a8a8a (5.76:1 ratio, WCAG AA compliant)
+- **Heading "Describe Your Vision"** replaces "Product Requirements" — matches PRD three-act language
+- **Backward animation direction** — navigating from step 5 to 4b now plays slide-left (not slide-right)
+- **Forge-lit animation replay** — vault unlock pulse replays correctly on repeated attempts via reflow trick
+
+---
+
 ## [7.1.0] - 2026-03-15
 
 ### Added

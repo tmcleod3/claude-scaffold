@@ -160,7 +160,8 @@ Verify and celebrate:
    - Conflicts resolved: [list]
    ```
 4. Check for handoffs — if new commands or agents were added, mention them
-5. Announce: *"Hey dol! merry dol! The forge burns bright! VoidForge vA.B.C — all tools sharp, all songs true. The world is good."*
+5. **Version history check:** If VERSION.md was updated, compare the version table entries against any project pages that display release history (roadmap pages, changelog displays, "shipped versions" sections). Flag versions present in VERSION.md that are missing from site content. This prevents version drift between the methodology's version history and user-facing release pages.
+6. Announce: *"Hey dol! merry dol! The forge burns bright! VoidForge vA.B.C — all tools sharp, all songs true. The world is good."*
 
 ## Deliverables
 

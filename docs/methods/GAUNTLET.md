@@ -41,7 +41,7 @@
 - Stark (Marvel) — code review scan
 - Galadriel (Tolkien) — UX surface map + Éowyn enchantment
 - Kenobi (Star Wars) — attack surface inventory
-- Kusanagi (Anime) — infrastructure discovery (firewall, ports, database exposure, deploy config)
+- Kusanagi (Anime) — infrastructure discovery (deploy scripts, generated configs, CI/CD, open ports, default credentials)
 
 **Round 2 — First Strike (full teams):**
 - Batman team: Oracle, Red Hood, Alfred, Deathstroke, Constantine, Nightwing, Lucius
@@ -94,6 +94,8 @@ Fix batches happen between rounds:
 
 **Grep for siblings:** After EVERY fix, grep the entire codebase for the same pattern. When fixing `aria-controls` in one component, grep all components. When adding SSRF protection to one endpoint, check all endpoints that accept URLs. Fix ALL instances — not just the one that was reported. This is the #1 source of rework across field reports.
 
+**Execution order check:** For every fix, verify not just that the code exists, but that it executes in the correct order relative to the code that consumes its output. Specifically: if a fix sanitizes/validates a value, verify the sanitization happens BEFORE the value is captured by any object construction, function call, or closure. (Field report #20: PTY clamping placed after spawnOptions construction — caught in Round 3.)
+
 **Encoding variant check:** For every security filter that operates on tool names, function names, or identifiers, verify it handles all encoding variants (`:`, `__`, URL-encoded, dot-notation, etc.). MCP tool names, API paths, and permission identifiers may use different encodings across layers.
 
 **Build-output verification:** After every fix batch, if the project has a build step, run the build and verify the output. Framework-generated code (inline scripts, hydration markers, SSR output) is invisible to source-level analysis but can be broken by security hardening. Check: `npm run build && grep -c '<script>' dist/**/*.html`. If the build fails or output changes unexpectedly, the fix is wrong.
@@ -142,6 +144,7 @@ Write progress to `/logs/gauntlet-state.md` after every round:
 - `--ux-only` — Run 4 rounds of UX only: surface map, full audit, re-verify, enchantment. Galadriel's marathon.
 - `--qa-only` — Run 4 rounds of QA only: discovery, full pass, re-probe, adversarial. Batman's marathon.
 - `--resume` — Resume from the last completed round (reads from gauntlet-state.md).
+- `--ux-extra` — Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y. Produced 7 shipped enchantments in the v7.1.0 Gauntlet.
 
 ## Integration Points
 

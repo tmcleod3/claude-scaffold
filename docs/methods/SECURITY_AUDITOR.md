@@ -79,6 +79,22 @@ These require full codebase context — run sequentially:
 
 **Padmé — Data:** PII identified. PII not in logs/errors/URLs. Deletion possible (GDPR). Export possible. Backups encrypted.
 
+### Symlink Resolution
+
+For every user-controlled file path, call `fs.realpath()` (or equivalent) after path string validation to resolve symlinks. Compare the resolved path against the expected base directory.
+
+A path like `/opt/projects/legit` could be a symlink to `/etc/`. The `..` string check catches traversal in the path STRING but not symlink TARGETS. `resolve()` normalizes the string but does NOT resolve symlinks — only the OS does that during actual I/O.
+
+**Pattern:**
+```typescript
+const dir = resolve(userInput);         // Normalize string
+if (dir.includes('..')) throw 'traversal';  // Fast string pre-check
+const realDir = await realpath(dir);    // Resolve symlinks via OS
+if (!realDir.startsWith(expectedBase)) throw 'symlink escape';
+```
+
+(Field report #20: symlink bypass identified in Round 1, not fixed until Round 4.)
+
 ### Phase 3 — Remediate
 
 Fix critical and high findings immediately. Medium findings get tracked. For each fix:
