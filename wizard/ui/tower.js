@@ -275,16 +275,93 @@
         });
       }
     } catch (err) {
-      loadingState.textContent = 'Failed to start: ' + err.message;
-      // Fallback — try a plain shell
-      try {
-        const { session, authToken } = await createPtySession('Shell', undefined, 120, 30);
-        loadingState.style.display = 'none';
-        createTab('Shell', session.id, authToken);
-      } catch (err2) {
-        loadingState.textContent = 'Could not start terminal: ' + err2.message;
+      const msg = err.message || '';
+      if (msg.toLowerCase().includes('vault is locked') || msg.toLowerCase().includes('locked')) {
+        showVaultUnlock();
+      } else {
+        loadingState.textContent = 'Failed to start: ' + msg;
+        // Fallback — try a plain shell
+        try {
+          const { session, authToken } = await createPtySession('Shell', undefined, 120, 30);
+          loadingState.style.display = 'none';
+          createTab('Shell', session.id, authToken);
+        } catch (err2) {
+          const msg2 = err2.message || '';
+          if (msg2.toLowerCase().includes('vault is locked') || msg2.toLowerCase().includes('locked')) {
+            showVaultUnlock();
+          } else {
+            loadingState.textContent = 'Could not start terminal: ' + msg2;
+          }
+        }
       }
     }
+  }
+
+  function showVaultUnlock() {
+    loadingState.style.display = 'none';
+    // Remove any existing unlock form
+    const existing = document.getElementById('vault-unlock-form');
+    if (existing) existing.remove();
+
+    const form = document.createElement('div');
+    form.id = 'vault-unlock-form';
+    form.className = 'vault-unlock-form';
+    form.setAttribute('role', 'form');
+    form.setAttribute('aria-label', 'Unlock vault');
+    form.innerHTML = `
+      <div class="vault-unlock-card">
+        <h2>Vault Locked</h2>
+        <p>Enter your vault password to start a terminal session.</p>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <input type="password" id="vault-pwd" placeholder="Vault password" autocomplete="off"
+                 style="flex: 1; padding: 8px 12px; background: var(--bg, #0a0a0a); border: 1px solid var(--border, #333); border-radius: 4px; color: var(--text, #e5e5e5); font-size: 14px;">
+          <button class="btn btn-primary" id="vault-unlock-btn" style="padding: 8px 16px;">Unlock</button>
+        </div>
+        <div id="vault-unlock-status" role="status" aria-live="polite" style="margin-top: 8px; font-size: 13px;"></div>
+      </div>
+    `;
+    container.parentElement.insertBefore(form, container);
+
+    const pwdInput = document.getElementById('vault-pwd');
+    const unlockBtn = document.getElementById('vault-unlock-btn');
+    const status = document.getElementById('vault-unlock-status');
+    pwdInput.focus();
+
+    async function doUnlock() {
+      const password = pwdInput.value;
+      if (!password) { status.textContent = 'Please enter your password.'; status.style.color = '#ef4444'; return; }
+
+      unlockBtn.disabled = true;
+      status.textContent = 'Unlocking...';
+      status.style.color = '#888';
+
+      try {
+        const res = await fetch('/api/credentials/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-VoidForge-Request': '1' },
+          body: JSON.stringify({ password }),
+        });
+        const data = await res.json();
+        if (res.ok && data.unlocked) {
+          form.remove();
+          loadingState.style.display = '';
+          // Retry terminal creation now that vault is unlocked
+          init();
+        } else {
+          status.textContent = data.error || 'Wrong password.';
+          status.style.color = '#ef4444';
+          unlockBtn.disabled = false;
+          pwdInput.select();
+        }
+      } catch (e) {
+        status.textContent = 'Connection error.';
+        status.style.color = '#ef4444';
+        unlockBtn.disabled = false;
+      }
+    }
+
+    unlockBtn.addEventListener('click', doUnlock);
+    pwdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doUnlock(); });
   }
 
   // Back to Lobby — warn if terminals are open (sessions persist server-side)

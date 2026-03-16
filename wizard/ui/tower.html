@@ -98,6 +98,18 @@
     .auto-command-banner .btn-primary { box-shadow: 0 1px 4px rgba(91, 91, 247, 0.2); }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* Vault unlock form */
+    .vault-unlock-form {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; padding: 24px;
+    }
+    .vault-unlock-card {
+      max-width: 400px; width: 100%; padding: 24px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    }
+    .vault-unlock-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--accent); }
+    .vault-unlock-card p { font-size: 13px; color: var(--text-dim); }
+
     /* Rollback panel */
     .rollback-panel {
       position: absolute; top: 0; right: 0; bottom: 0; width: 280px;
