@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.3.2] - 2026-03-16
+
+### Changed
+- **Blitz debrief is now a blocking gate** — `/debrief --submit` must complete before the campaign loop continues. Previously it was a suggestion that agents skipped in velocity mode. Now it blocks progression. (Field reports #24, #25)
+- **Blitz per-mission checklist** added to campaign command header — 5 mandatory items (assemble, git, debrief, state update, proceed) that must be verified before each loop-back.
+- **Blitz mode documented in CAMPAIGN.md method doc** — full section under "Two Modes" explaining what blitz changes, what it preserves, and that `--blitz ≠ --fast`. (Field report #25)
+- **Debrief issue tracking** in campaign state — mission table now includes debrief issue number column.
+- **Blitz privacy exception** in FIELD_MEDIC.md — user opted into autonomous mode, so auto-submit is permitted without review. (Field report #25)
+- **Blitz checkpoint enforcement** — explicit mission counter instruction in Step 4.5 with mandatory logging. (Field report #23)
+- **"No questions in blitz"** rule — all decisions autonomous, choose quality-preserving option when uncertain. (Field report #23)
+- **Tier enforcement extended to UI components** — QA now greps `.tsx`/`.jsx` for hardcoded tier comparisons. (Field report #22)
+- **Action inventory before hiding containers** — UX redesigns must list all primary AND secondary actions before collapsing/hiding a component. (Field report #22)
+- **Test schema vs. production schema** check — verify test fixtures create all tables from migration runner. (Field report #21)
+- **Timestamp format enforcement** — QA greps for non-canonical `strftime`/format calls. (Field report #21)
+- **Auth retrofit audit** — when adding auth to a router, audit ALL existing endpoints in that file. (Field report #21)
+
+---
+
 ## [7.3.1] - 2026-03-16
 
 ### Changed

@@ -194,6 +194,10 @@ Batman's QA protocol now includes automated testing as Step 3.5 (between "Find B
 6. All findings go into the bug tracker
 7. Fixes include new tests to prevent regression
 
+### Test Schema vs. Production Schema
+Verify test fixtures (conftest, factories, seed files) create ALL tables from the migration runner. Compare table lists between the test DB setup and the production schema — any table present in migrations but missing from test fixtures is a gap that causes silent test failures. This is especially critical when using a hardcoded migration list instead of the actual migration runner.
+(Field report #21: conftest missed tables from later migrations — ALTER TABLE on non-existent table was silently caught.)
+
 ## Setup Checklist
 
 When setting up testing for a new project:

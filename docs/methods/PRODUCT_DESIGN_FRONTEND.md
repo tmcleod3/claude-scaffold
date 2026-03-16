@@ -125,6 +125,10 @@ Without the `void element.offsetWidth` reflow, the browser batches the remove+ad
 
 (Field report #20: forge-lit vault pulse only fired once without this pattern.)
 
+### Action Inventory Before Hiding Containers
+Before hiding, relocating, or collapsing a UI container (dropdown, panel, menu, toolbar), list ALL actions inside it — primary (viewing, selecting, navigating) AND secondary (creating, deleting, configuring, exporting). Verify every action remains reachable after the redesign. A "simplification" that hides a version picker also hides the "New Version" button inside it.
+(Field report #22: workspace redesign hid the version creation button that lived inside a dropdown.)
+
 ## Step 2 — UX/UI Attack Plan
 
 **Elrond:** IA, navigation, task flows, friction.

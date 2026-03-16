@@ -77,6 +77,10 @@ These require full codebase context — run sequentially:
 
 **Ahsoka — Access:** Every endpoint verifies ownership (no IDOR). UUIDs not sequential IDs. Admin verified server-side. Tier features verified server-side. User A can't access User B's anything. Rate limiting per-user and per-IP.
 
+### Auth Retrofit Audit
+When adding new auth middleware, role checks, or authorization gates to a router or module, audit ALL existing endpoints in that same file/router for missing enforcement — not just the new ones. New auth patterns must be retrofitted to existing endpoints. Pre-existing write endpoints without role checks become privilege escalation vectors the moment auth is added to their neighbors.
+(Field report #21: `_require_admin` added to new endpoints but not retrofitted to existing `PUT /settings/*` routes — any viewer could modify system config.)
+
 **Padmé — Data:** PII identified. PII not in logs/errors/URLs. Deletion possible (GDPR). Export possible. Backups encrypted.
 
 ### Symlink Resolution

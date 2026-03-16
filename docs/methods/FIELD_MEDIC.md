@@ -44,6 +44,7 @@ Transform session failures into structured, actionable field reports that improv
 
 1. **Privacy first.** Reports contain timeline, root causes, and proposed fixes. NEVER source code, credentials, file contents, or personal data.
 2. **User reviews everything.** The user sees and approves every word before submission. No silent uploads.
+   **Exception — `/campaign --blitz`:** When the user explicitly opts into autonomous mode via `--blitz`, `/debrief --submit` runs without user review. The user chose autonomous operation — the debrief is auto-filed as a GitHub field report. The user can review all filed reports later via `/debrief --inbox`. This exception only applies to blitz-initiated debriefs, not to manual `/debrief --submit` calls.
 3. **Propose within the system.** Solutions must reference existing VoidForge concepts — agents, phases, commands, patterns. Don't propose reimagining the system.
 4. **Categorize root causes.** Every failure is one of: methodology gap, tooling limitation, communication failure, scope issue, framework-specific bug, or external dependency.
 5. **Severity matters.** Distinguish between "this affects all users" (methodology flaw) and "this was specific to my project" (edge case).

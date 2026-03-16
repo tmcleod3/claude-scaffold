@@ -13,6 +13,15 @@ The Prophets have shown me the path. Time to execute the plan.
 
 **`--blitz` ≠ `--fast`.** Blitz skips human interaction. Fast skips review phases. They are independent flags and can be combined (`--blitz --fast`) if the user wants both.
 
+**In blitz mode, make ALL decisions autonomously. Never ask the user a question. If uncertain, choose the option that preserves quality (e.g., run the Gauntlet, not skip it). The only human interaction in blitz mode is the final completion summary.**
+
+**Blitz per-mission checklist** (verify ALL before continuing to next mission):
+1. `/assemble` completed
+2. `/git` committed
+3. `/debrief --submit` filed (MANDATORY — not optional)
+4. `campaign-state.md` updated with mission status + debrief issue number
+5. Proceed to next mission
+
 ## Context Setup
 1. Read `/logs/campaign-state.md` — if it exists, we're mid-campaign
 2. Read `/docs/methods/CAMPAIGN.md` for operating rules
@@ -119,6 +128,9 @@ On confirmation (or immediately in `--blitz` mode):
 After every 4th mission (missions 4, 8, 12, etc.), run a Gauntlet checkpoint before continuing:
 
 1. **Count completed missions** in this campaign. If `completedMissions % 4 === 0`, trigger checkpoint.
+
+**ENFORCEMENT:** After committing each mission, increment your mission counter. Check: if completedMissionsThisCampaign is divisible by 4, trigger the checkpoint. In blitz mode, this check is mandatory and automatic — do not skip or defer it. Log the count in campaign-state.md after each mission: "Missions completed: N. Next checkpoint at: N+X."
+
 2. **Run `/gauntlet --quick`** (3 rounds: Discovery → First Strike → Second Strike). This catches cross-module integration bugs that individual `/assemble` runs miss — each `/assemble` only reviews its own changeset, but the Gauntlet reviews the **combined system**.
 3. **Fix all Critical and High findings** before proceeding to the next mission.
 4. **Commit fixes** via `/git` with message: `Gauntlet checkpoint after mission N: X fixes`
@@ -130,8 +142,8 @@ After every 4th mission (missions 4, 8, 12, etc.), run a Gauntlet checkpoint bef
 
 After `/assemble` completes:
 1. Run `/git` to commit and version the mission
-2. Update `/logs/campaign-state.md` — mark mission complete, update stats
-3. **Blitz debrief:** If `$ARGUMENTS` contains `--blitz`, run `/debrief --submit` to capture learnings from this mission and auto-submit as a GitHub field report. Do not wait for user review — blitz mode trusts the debrief output. This ensures every mission's learnings are captured while context is fresh, even when nobody is watching.
+2. Update `/logs/campaign-state.md` — mark mission complete, update stats. When updating, include the debrief issue number: "Debrief: #XX" or "Debrief: SKIPPED (not blitz)" or "Debrief: N/A (normal mode)".
+3. **BLITZ GATE:** If `$ARGUMENTS` contains `--blitz`, run `/debrief --submit` NOW. Do not proceed to the next step until the debrief is filed. This is non-negotiable — blitz captures learnings while context is fresh. Log the debrief issue number in campaign-state.md.
 4. **Collect BLOCKED items** from this mission (assets, infrastructure, copy issues). For each:
    - If it's a future feature → append to `ROADMAP.md` under the appropriate version
    - If it's a missing asset the user must provide → add to a `## Blocked Items` section in campaign-state.md with what's needed and who can unblock it

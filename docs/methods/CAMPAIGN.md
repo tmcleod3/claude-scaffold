@@ -65,6 +65,26 @@ This is how ideas get into the plan without breaking the execution flow. The use
 
 ### Execution Mode (default)
 
+### Blitz Mode (`--blitz`)
+
+Blitz is fully autonomous campaign execution. Sisko does not pause between missions — he logs the brief, builds, commits, debriefs, and moves on. The user walks away and comes back to a built project.
+
+**What blitz changes:**
+- Mission briefs are logged but NOT presented for confirmation — execution begins immediately
+- `/debrief --submit` runs as a mandatory gate after every mission (see Step 5)
+- Auto-continues to the next mission after each completes
+- Victory Gauntlet at Step 6 is still mandatory and non-negotiable
+
+**What blitz does NOT change:**
+- Full `/assemble` runs (no `--fast` implied — quality is preserved)
+- Gauntlet checkpoints still fire every 4 missions
+- `/git` commits after every mission
+- BLOCKED items are still tracked
+
+**Combine with `--fast` explicitly** if you want reduced reviews: `--blitz --fast`
+
+Blitz is about removing human wait time, not reducing review quality.
+
 ## The Sequence
 
 ### Step 0 — Kira's Operational Reconnaissance
@@ -169,7 +189,7 @@ After every 4th completed mission (missions 4, 8, 12, etc.), Thanos runs a Gaunt
 
 1. **Security gate (before commit):** Check if this mission added new TypeScript/JavaScript files that handle network I/O (HTTP endpoints, WebSocket handlers), user input (form parsing, body parsing), or credential storage (vault writes, env file generation). If yes, flag: **"This mission added network-facing code. Run `/security` before committing."** Even in `--fast` mode, security is non-negotiable for new attack surface. This prevents shipping Critical vulnerabilities that only get caught in a post-hoc hardening pass.
 2. Coulson commits the mission (`/git`)
-3. Update `/logs/campaign-state.md` — mark mission complete, log any deviations from PRD
+3. Update `/logs/campaign-state.md` — mark mission complete, log any deviations from PRD. Include the debrief issue number: "Debrief: #XX" or "Debrief: SKIPPED (not blitz)" or "Debrief: N/A (normal mode)".
 4. **Route BLOCKED items to the right place:**
    - Future feature → append to `ROADMAP.md` under the appropriate version
    - User-provided asset (illustrations, OG images) → add to `## Blocked Items` in campaign-state.md
@@ -213,13 +233,13 @@ After each mission, Sisko updates `/logs/campaign-state.md`.
 # Campaign State — [Project Name]
 
 ## The Prophecy (PRD Coverage)
-| PRD Section | Status | Mission | Blocked By |
-|-------------|--------|---------|------------|
-| 4. Core > Booking | COMPLETE | Mission 1 | — |
-| 5. Auth & Accounts | COMPLETE | Mission 1 | — |
-| 4. Core > Agent Directory | STRUCTURAL | Mission 1 | Asset: 11 agent illustrations |
-| 6. SEO & Metadata | STRUCTURAL | Mission 2 | Asset: OG images per page |
-| 7. Payments | IN PROGRESS | Mission 3 | — |
+| PRD Section | Status | Mission | Blocked By | Debrief |
+|-------------|--------|---------|------------|---------|
+| 4. Core > Booking | COMPLETE | Mission 1 | — | #12 |
+| 5. Auth & Accounts | COMPLETE | Mission 1 | — | #12 |
+| 4. Core > Agent Directory | STRUCTURAL | Mission 1 | Asset: 11 agent illustrations | #12 |
+| 6. SEO & Metadata | STRUCTURAL | Mission 2 | Asset: OG images per page | #13 |
+| 7. Payments | IN PROGRESS | Mission 3 | — | N/A |
 
 ## Deviations from PRD
 | PRD Says | Actual | Reason | Accepted? |
@@ -237,6 +257,7 @@ After each mission, Sisko updates `/logs/campaign-state.md`.
 - **Resume:** `/campaign --resume` — explicit resume from campaign-state
 - **Skip to mission:** `/campaign --mission "Payments"` — jumps to that PRD section
 - **Fast mode:** `/campaign --fast` — passes `--fast` to every `/assemble` call (skips Crossfire + Council)
+- **Blitz mode:** `/campaign --blitz` — fully autonomous execution: skips mission confirmation, auto-debriefs after each mission, auto-continues. Does NOT imply `--fast`. Combine: `--blitz --fast`
 
 ## Deliverables
 

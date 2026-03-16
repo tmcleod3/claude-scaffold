@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 7.3.1
+**Current:** 7.3.2
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 7.3.2 | 2026-03-16 | 13 methodology fixes from field reports #21-#25 — blitz gate, tier UI audit, auth retrofit, timestamps |
 | 7.3.1 | 2026-03-16 | Blitz auto-debrief — /campaign --blitz files field reports after every mission |
 | 7.3.0 | 2026-03-16 | Avengers Tower Overhaul — ws library, vault unlock, build-state Lobby, /campaign --blitz, IPv6 fix |
 | 7.2.1 | 2026-03-15 | Fix Avengers Tower terminal crash on Node.js v24 (node-pty 1.1.0 → 1.2.0-beta.12) |
