@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 6.5.1
+**Current:** 7.0.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 7.0.0 | 2026-03-15 | The Penthouse — multi-user RBAC, per-project ACLs, linked services, coordinated deploys, rollback, cost tracker, agent memory |
 | 6.5.1 | 2026-03-15 | The Arthurian Retcon — Merlin→Gandalf, Camelot→Avengers Tower, Great Hall→The Lobby, Round Table→The Penthouse |
 | 6.5.0 | 2026-03-15 | Avengers Tower Remote — 5-layer security, TOTP 2FA, self-deploy, audit trail, two-password architecture |
 | 6.0.0 | 2026-03-15 | Avengers Tower Multi — The Lobby dashboard, project registry, health poller, import flow, SSRF protection |

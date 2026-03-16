@@ -6,6 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.0.0] - 2026-03-15
+
+### Added
+- **The Penthouse — Multi-User RBAC** — Three roles (admin, deployer, viewer) with invitation-only user creation. TOTP mandatory. ROUTE_ROLES middleware enforces role hierarchy on every API endpoint.
+  - `wizard/lib/user-manager.ts` — User CRUD, invitation system (24h tokens, single-use, timing-safe comparison), `hasRole()` hierarchy, `hasProjectAccess()` per-project checks.
+  - `wizard/api/users.ts` — User management endpoints: list, invite, complete-invite, remove, role change. All admin-gated with defense-in-depth.
+- **Per-Project Access Control** — Project ownership and access lists. Each project has an owner and a list of `{ username, role }` entries. Queries filtered by access — users only see projects they own or have been granted access to.
+  - `grantAccess()`, `revokeAccess()`, `getProjectsForUser()`, `checkProjectAccess()` in project-registry.
+  - Access management modal in Lobby UI with focus trap, Escape handler, DOM-safe event binding.
+  - Role badges on project cards (Owner/Deployer/Viewer).
+- **Linked Services** — Bidirectional project linking for monorepo orchestration. BFS group resolution with cycle detection. Coordinated deploy checks across linked services.
+  - `wizard/lib/deploy-coordinator.ts` — `checkDeployNeeded()`, `getDeployPlan()` with audit.
+  - Link/unlink API endpoints with dual-ownership verification.
+  - Link management modal in Lobby UI.
+- **Rollback Dashboard** — Deploy history panel in Avengers Tower with collapsible sidebar, keyboard navigation (Escape to close), `aria-expanded`/`aria-controls`.
+  - `wizard/ui/rollback.js` — viewer-gated deploy history display.
+- **Cost Tracker** — Aggregate monthly costs across all accessible projects via existing `monthlyCost` field. NaN/negative guard on writes.
+  - `wizard/lib/cost-tracker.ts` — `getAggregateCosts()`, `setProjectCost()`.
+  - Lobby Penthouse footer fetches real cost data from API.
+- **Agent Memory** — Cross-project lesson storage for methodology learning. 1000-entry cap with oldest-eviction. Serialized writes, atomic file ops.
+  - `wizard/lib/agent-memory.ts` — `addLesson()`, `getLessons()`, `getRelevantLessons()`.
+  - `~/.voidforge/lessons.json` (0600 permissions).
+- 4 Architecture Decision Records: ADR-028 (RBAC), ADR-029 (per-project access), ADR-030 (linked services), ADR-031 (observatory features).
+
+### Changed
+- `tower-auth.ts` — Extended for multi-user: `UserRole` type, `SessionInfo` return from `validateSession()`, role in sessions, `createUser()` accepts role, `removeUser()`/`updateUserRole()`/`listUsers()`/`getUserRole()` added, legacy user migration (pre-v7.0 users get `role: 'admin'`), username character validation (`/^[a-zA-Z0-9._-]+$/`), X-Forwarded-For takes rightmost IP.
+- `server.ts` — ROUTE_ROLES middleware maps API paths to minimum roles. WebSocket upgrade uses `hasRole()` (not hardcoded string). CSRF error format standardized. User context propagated to handlers.
+- `project-registry.ts` — `owner`, `access`, `linkedProjects` fields. `removeProject()` cleans up linked references. `removeUserFromAllProjects()` clears ownership on user deletion. BFS `getLinkedGroup()`.
+- `pty-manager.ts` — `username` field in PtySession for audit trail.
+- `terminal.ts` — Per-project access checks, user context extraction, session list filtered by ownership, kill endpoint with ownership check.
+- `lobby.js` — Role-aware UI: conditional buttons per role, access/link modals with focus traps, cost display from API.
+- `lobby.html` — Access modal, link modal, role badge styling, linked badge styling.
+- `tower.html` — Rollback panel with a11y attributes.
+
+### Fixed
+- Tailwind v4 content scanning check added to Galadriel's UX method (field report #10).
+- Platform Build Gate added to Kusanagi's DevOps method (field report #10).
+
+### Security
+- ROUTE_ROLES enforces minimum role on all 45+ API endpoints (defense-in-depth with handler-level checks).
+- Per-project access returns 404 (not 403) to prevent information leakage.
+- Invite tokens: 256-bit, timing-safe comparison, 24h expiry, single-use with rollback on failure.
+- Terminal sessions filtered by user — deployers can only see/kill their own sessions.
+- Viewer blocked from terminals (WebSocket + REST), deploy metadata, and write operations.
+- User removal clears project ownership to prevent privilege escalation via username reuse.
+- Session cookie always sets Secure flag in remote mode (not header-dependent).
+- `ProjectAccessEntry.role` tightened to `'deployer' | 'viewer'` (admin grants blocked at API).
+- 52 security/quality findings resolved across 4 missions + 2 Gauntlet checkpoints.
+
+---
+
 ## [6.5.1] - 2026-03-15
 
 ### Changed
