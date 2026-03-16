@@ -15,6 +15,7 @@
   const params = new URLSearchParams(window.location.search);
   const projectDir = params.get('dir') || '';
   const projectName = params.get('name') || 'Project';
+  const autoCommand = params.get('auto') || ''; // 'campaign', 'build', or '' — auto-type after Claude launches
 
   document.getElementById('project-name').textContent = '— ' + projectName;
 
@@ -248,6 +249,31 @@
       const { session, authToken } = await createPtySession('Claude Code', 'claude', 120, 30);
       loadingState.style.display = 'none';
       createTab('Claude Code', session.id, authToken);
+
+      // Auto-command banner: show a prompt to run /campaign or /build
+      if (autoCommand) {
+        const banner = document.createElement('div');
+        banner.className = 'auto-command-banner';
+        banner.setAttribute('role', 'status');
+        const cmdLabel = autoCommand === 'campaign' ? '/campaign' : '/' + autoCommand;
+        banner.innerHTML = `
+          <span>Ready to build <strong>${projectName}</strong>.</span>
+          <button class="btn btn-primary" id="auto-cmd-run">Run ${cmdLabel}</button>
+          <button class="btn btn-secondary" id="auto-cmd-dismiss">Dismiss</button>
+        `;
+        document.querySelector('.tower-header').after(banner);
+        document.getElementById('auto-cmd-run').addEventListener('click', () => {
+          // Find the active tab's WebSocket and send the command
+          const activeTab = tabs.find(t => t.id === activeTabId);
+          if (activeTab && activeTab.ws && activeTab.ws.readyState === WebSocket.OPEN) {
+            activeTab.ws.send(cmdLabel + '\n');
+          }
+          banner.remove();
+        });
+        document.getElementById('auto-cmd-dismiss').addEventListener('click', () => {
+          banner.remove();
+        });
+      }
     } catch (err) {
       loadingState.textContent = 'Failed to start: ' + err.message;
       // Fallback — try a plain shell

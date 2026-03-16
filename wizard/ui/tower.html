@@ -87,6 +87,17 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
+    /* Auto-command banner */
+    .auto-command-banner {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: rgba(91, 91, 247, 0.08); border-bottom: 1px solid var(--border);
+      font-size: 13px; color: var(--text);
+      animation: slideDown 0.3s ease;
+    }
+    .auto-command-banner .btn { padding: 4px 12px; font-size: 12px; }
+    .auto-command-banner .btn-primary { box-shadow: 0 1px 4px rgba(91, 91, 247, 0.2); }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
     /* Rollback panel */
     .rollback-panel {
       position: absolute; top: 0; right: 0; bottom: 0; width: 280px;

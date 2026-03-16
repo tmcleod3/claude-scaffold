@@ -24,6 +24,14 @@
   const statProjects = document.getElementById('stat-projects');
   const statCost = document.getElementById('stat-cost');
 
+  // ── Build status helper ───────────────────────────
+  function getBuildStatus(project) {
+    if (project.deployUrl) return { label: 'Live', action: 'Open Room', badge: 'success', auto: '' };
+    if (project.lastBuildPhase >= 13) return { label: 'Built', action: 'Open Room', badge: 'info', auto: '' };
+    if (project.lastBuildPhase > 0) return { label: 'Phase ' + project.lastBuildPhase + '/13', action: 'Resume Build', badge: 'warning', auto: 'campaign' };
+    return { label: 'Ready', action: 'Start Building', badge: 'accent', auto: 'campaign' };
+  }
+
   // ── API helpers ────────────────────────────────────
 
   async function fetchProjects() {
@@ -107,13 +115,16 @@
     const roleLabels = { owner: 'Owner', admin: 'Admin', deployer: 'Deployer', viewer: 'Viewer' };
     const roleBadgeClass = userRole === 'owner' ? 'role-owner' : 'role-' + userRole;
 
+    // Build status drives button label and auto-command
+    const buildStatus = getBuildStatus(project);
+
     // Conditional action buttons based on role
     const canOpenRoom = userRole !== 'viewer';
     const canRemove = userRole === 'owner' || userRole === 'admin';
     const canManageAccess = userRole === 'owner' || userRole === 'admin';
 
     const openBtn = canOpenRoom
-      ? `<button class="btn btn-primary" data-action="open" data-id="${escapeHtml(project.id)}" title="Open terminal workspace">Open Room</button>`
+      ? `<button class="btn btn-primary" data-action="open" data-id="${escapeHtml(project.id)}" data-auto="${escapeHtml(buildStatus.auto)}" title="Open terminal workspace">${escapeHtml(buildStatus.action)}</button>`
       : '';
     const removeBtn = canRemove
       ? `<button class="btn btn-danger-ghost" data-action="remove" data-id="${escapeHtml(project.id)}" title="Remove from registry (does not delete files)">Remove</button>`
@@ -152,7 +163,8 @@
       </div>
       <div class="project-footer">
         <span>${project.monthlyCost ? '$' + escapeHtml(String(project.monthlyCost)) + '/mo' : ''}</span>
-        <span>${project.lastDeployAt ? 'Deployed ' + escapeHtml(timeAgo(project.lastDeployAt)) : 'Phase ' + escapeHtml(String(project.lastBuildPhase || 0))}</span>
+        <span class="badge build-${escapeHtml(buildStatus.badge)}">${escapeHtml(buildStatus.label)}</span>
+        <span>${project.lastDeployAt ? 'Deployed ' + escapeHtml(timeAgo(project.lastDeployAt)) : ''}</span>
       </div>
     `;
 
@@ -233,6 +245,11 @@
     });
     if (mode === 'ssh' && project.sshHost) {
       params.set('ssh', project.sshHost);
+    }
+    // Pass auto-command for build status context (start/resume)
+    const buildStatus = getBuildStatus(project);
+    if (buildStatus.auto && mode !== 'ssh') {
+      params.set('auto', buildStatus.auto);
     }
     window.location.href = '/tower.html?' + params.toString();
   }
