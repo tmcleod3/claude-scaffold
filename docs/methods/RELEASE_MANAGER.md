@@ -99,6 +99,14 @@ Rules:
 
 For MINOR or MAJOR version bumps: scan the PRD's inventory section (if it has one — e.g., 'What exists today' table, numeric claims like 'N endpoints', 'N tests'). Update any stale counts to match the current codebase. This prevents PRD drift between campaigns.
 
+## Step 5.75 — Command↔Doc Sync Check (Friday)
+
+If any `docs/methods/*.md` file was modified in this release, check whether the paired `.claude/commands/*.md` file needs a matching update. Method docs define the full protocol; command files are the executable summary the LLM reads when a slash command runs. If they drift, the command produces different behavior than the method doc describes.
+
+**Pairs:** GAUNTLET↔gauntlet, CAMPAIGN↔campaign, FORGE_KEEPER↔void, ASSEMBLER↔assemble, FIELD_MEDIC↔debrief, BUILD_PROTOCOL↔build, QA_ENGINEER↔qa, SECURITY_AUDITOR↔security, PRODUCT_DESIGN_FRONTEND↔ux, SYSTEMS_ARCHITECT↔architect, DEVOPS_ENGINEER↔devops, RELEASE_MANAGER↔git, THUMPER↔thumper.
+
+If a method doc gained a new section, flag, checklist item, or agent — flag it for the user. They decide if the command file needs updating.
+
 ## Verification Checklist
 
 After every commit, Barton verifies:

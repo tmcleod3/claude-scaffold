@@ -74,6 +74,27 @@ Only if the user explicitly requests:
 3. Push: `git push`
 4. Verify: `git log --oneline -1` matches remote
 
+## Step 5.5 — Command↔Doc Sync Check (Friday)
+If any `docs/methods/*.md` file was modified, verify the paired `.claude/commands/*.md` file reflects the same additions:
+
+| Method Doc | Command File |
+|-----------|-------------|
+| GAUNTLET.md | gauntlet.md |
+| CAMPAIGN.md | campaign.md |
+| FORGE_KEEPER.md | void.md |
+| ASSEMBLER.md | assemble.md |
+| FIELD_MEDIC.md | debrief.md |
+| BUILD_PROTOCOL.md | build.md |
+| QA_ENGINEER.md | qa.md |
+| SECURITY_AUDITOR.md | security.md |
+| PRODUCT_DESIGN_FRONTEND.md | ux.md |
+| SYSTEMS_ARCHITECT.md | architect.md |
+| DEVOPS_ENGINEER.md | devops.md |
+| RELEASE_MANAGER.md | git.md |
+| THUMPER.md | thumper.md |
+
+If a method doc gained a new section, flag, or checklist item — flag it: "Method doc X changed but command file Y may need matching update." The user decides whether the command file needs updating.
+
 ## Handoffs
 - If changes include security fixes → note for Kenobi (`/security`)
 - If changes include infrastructure → note for Kusanagi (`/devops`)
