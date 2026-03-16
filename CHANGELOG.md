@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.3.0] - 2026-03-16
+
+### Added
+- **`/campaign --blitz`** — Fully autonomous campaign mode. Skips mission confirmation prompts, implies `--fast`, auto-continues between missions. Victory Gauntlet still mandatory. Use when you want to click "Start Building" and walk away.
+- **Lobby build-state indicator** — Project cards show contextual buttons: "Start Building" (Phase 0), "Resume Build" (Phase 1-12), "Open Room" (built/deployed). Color-coded badge shows current state.
+- **Tower vault unlock form** — When the vault is locked (server restart, import), the Tower shows an inline password form instead of a cryptic error. Unlock → auto-retries terminal creation.
+- **Tower auto-send countdown** — After Claude Code launches, a 3-second countdown auto-types the command (e.g., `/campaign --blitz`). Cancel button available.
+
+### Fixed
+- **WebSocket terminal connection** — Replaced custom WebSocket implementation with the `ws` library (same as VS Code). The custom handshake was incompatible with Node.js v24's HTTP internals, causing `code 1006` connection failures in all browsers.
+- **IPv6 localhost binding** — Server now binds to `::` (dual-stack) in local mode. macOS resolves `localhost` to `::1` (IPv6 first); binding to `127.0.0.1` broke WebSocket connections.
+- **PTY Enter key** — Auto-send used `\n` (line feed) instead of `\r` (carriage return). PTY terminals require `\r` to simulate the Enter key.
+- **Build status "Live" false positive** — Projects with a `deployUrl` set during wizard setup (intended domain) showed as "Live" even at Phase 0. Now requires both `deployUrl` AND `lastDeployAt` to confirm actual deployment.
+- **Static file caching** — Added `Cache-Control: no-cache, must-revalidate` to static file responses. Prevents browsers from serving stale JS after server updates.
+- **CSP connect-src** — Added `https://cdn.jsdelivr.net` to allow xterm.js source map fetching.
+
+### Changed
+- **Claude Code in Tower** now launches with `--dangerously-skip-permissions` for autonomous operation.
+- **`ws` + `@types/ws`** added as dependencies (replaces 200+ lines of custom WebSocket code).
+
+---
+
 ## [7.2.1] - 2026-03-15
 
 ### Fixed
