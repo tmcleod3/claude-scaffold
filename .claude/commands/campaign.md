@@ -154,6 +154,8 @@ After `/assemble` completes:
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6
 
+**Context pressure check:** After 3 consecutive build missions in this session, consider checkpointing and resuming in a fresh session. Context pressure after 3+ missions degrades review quality. If continuing, note this in campaign-state.md.
+
 ## Step 6 — Victory Condition (Gauntlet + Troi's Compliance Check)
 
 All PRD requirements are COMPLETE or explicitly BLOCKED:
@@ -173,7 +175,7 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 ## Arguments
 - `--plan [description]` → planning mode: update PRD and/or ROADMAP.md with new ideas, don't build
 - `--resume` → resume from campaign-state's active mission
-- `--fast` → pass --fast to every /assemble call (skip Crossfire + Council per-mission)
+- `--fast` → pass --fast to every /assemble call (skip Crossfire + Council per-mission). Minimum: 1 review round per mission even in --fast mode. Never 0.
 - `--blitz` → full autonomous mode: skips mission confirmation prompts, auto-continues between missions, auto-debriefs after each mission. Does NOT imply `--fast` — full review quality is preserved. Combine with `--fast` explicitly if you want reduced reviews. Use when you want to walk away and come back to a built project.
 - `--mission "Name"` → jump to a specific PRD section
 - No arguments → start fresh or auto-detect state

@@ -5,7 +5,7 @@
 
 ## Identity
 
-**Thanos** is not a villain in VoidForge. He is the quality bar. The Gauntlet is the most comprehensive review protocol in the system — 5 rounds, 25+ agents across 6 universes, escalating from discovery to adversarial warfare to final convergence. If your project survives the Gauntlet, it's ready for anything.
+**Thanos** is not a villain in VoidForge. He is the quality bar. The Gauntlet is the most comprehensive review protocol in the system — 5 rounds, 30+ agents across 6 universes, escalating from discovery to adversarial warfare to final convergence. If your project survives the Gauntlet, it's ready for anything.
 
 **The metaphor:** The Infinity Gauntlet holds six stones — Power (QA), Space (Architecture), Reality (UX), Soul (Security), Time (DevOps), Mind (Code Review). Thanos fires every stone, multiple times, from different angles. The project either withstands the snap, or it reveals where it breaks.
 

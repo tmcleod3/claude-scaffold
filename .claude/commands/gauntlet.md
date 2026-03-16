@@ -13,14 +13,15 @@ The Gauntlet tests everything. Every domain. Multiple rounds. Escalating intensi
 
 **Thanos:** "Before I test, I must understand."
 
-Use the Agent tool to run all four in parallel — these are read-only analysis:
+Use the Agent tool to run all five in parallel — these are read-only analysis:
 
 - **Agent 1 (Picard — Architecture):** Schema review, service boundaries, dependency graph, scaling assessment. Read the full `/architect` protocol but produce findings only (no ADRs — this is review, not design).
 - **Agent 2 (Stark — Code Review):** Pattern compliance, logic errors, type safety, cross-module data flow tracing. Read `/review` protocol. One pass across all source files.
 - **Agent 3 (Galadriel — UX Surface Map):** Product surface map, usability walkthrough (Step 1.5), Éowyn's enchantment scan (Step 1.75). No fixes yet — discovery only.
 - **Agent 4 (Kenobi — Attack Surface Inventory):** List all endpoints, WebSocket handlers, file I/O, credential access points, user input parsing. Classify each by risk tier. No deep audit yet — just the map.
+- **Agent 5 (Kusanagi — Infrastructure Discovery):** Scan deploy scripts, generated configs, provisioning scripts, CI/CD templates. Classify each by risk: hardcoded credentials, open ports, missing auth on generated services. No deep audit yet — just the map.
 
-Synthesize all four into a unified findings list. Log to `/logs/gauntlet-round-1.md`.
+Synthesize all five into a unified findings list. Log to `/logs/gauntlet-round-1.md`.
 
 ## Round 2 — First Strike (parallel)
 
@@ -28,7 +29,7 @@ Synthesize all four into a unified findings list. Log to `/logs/gauntlet-round-1
 
 Use the Agent tool to run all four in parallel — full domain audits:
 
-- **Agent 1 (Batman — Full QA):** Run the complete `/qa` protocol. Oracle + Red Hood + Alfred + Deathstroke + Constantine + Nightwing. Every edge case, every error state, every boundary.
+- **Agent 1 (Batman — Full QA):** Run the complete `/qa` protocol. Oracle + Red Hood + Alfred + Deathstroke + Constantine + Nightwing + Lucius. Every edge case, every error state, every boundary.
 - **Agent 2 (Galadriel — Full UX):** Run the complete `/ux` protocol. Elrond + Arwen + Samwise + Bilbo + Legolas + Gimli + Radagast + Éowyn. Usability, visual, a11y, copy, performance, edge cases, enchantment.
 - **Agent 3 (Kenobi — Full Security):** Run the complete `/security` protocol. Leia + Chewie + Rex + Maul parallel scans, then Yoda → Windu → Ahsoka → Padmé sequential audits.
 - **Agent 4 (Stark — Integration Tracing):** For every API endpoint, trace the full data path: client request → validation → service → database → response. For every file upload, trace: upload → storage → retrieval → display. For every credential, trace: entry → vault → usage → cleanup.
@@ -36,6 +37,17 @@ Use the Agent tool to run all four in parallel — full domain audits:
 Merge all findings. Deduplicate across domains.
 
 **→ FIX BATCH 1:** Fix all Critical and High findings. Update finding status. **Build-output gate:** If the project has a build step, run the build after fixes and verify output — framework-generated inline scripts, hydration markers, and SSR output are invisible to source-level analysis but can be broken by security hardening (especially CSP changes). Check: `npm run build && grep -c '<script>' dist/**/*.html`.
+
+## Round 2.5 — Runtime Smoke Test (Hawkeye)
+
+If the project has a runnable server, start it and verify the full lifecycle:
+1. Start the server (`npm run dev`, `python manage.py runserver`, etc.)
+2. Hit every new/modified API endpoint with curl — verify HTTP status codes
+3. If WebSocket endpoints exist, open a connection and verify handshake + data flow
+4. If terminal/PTY features exist, create a session and verify it stays alive for 5 seconds
+5. If the server cannot start (scaffold/methodology-only), skip with a note
+
+This catches runtime bugs invisible to static analysis: IPv6 binding, native module ABI, WebSocket framing, browser caching.
 
 ## Round 3 — Second Strike (parallel)
 
@@ -106,6 +118,7 @@ Present them with severity and recommendation. The user decides whether to ship 
 - `--ux-only` → 4 rounds of UX only (Galadriel marathon)
 - `--qa-only` → 4 rounds of QA only (Batman marathon)
 - `--resume` → resume from last completed round (reads gauntlet state from logs)
+- `--ux-extra` → Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y.
 
 ## Operating Rules
 - Update `/logs/gauntlet-state.md` after EVERY round
