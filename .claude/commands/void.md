@@ -12,6 +12,7 @@ Orient to the current state:
    - `CLAUDE.md`, `HOLOCRON.md`
    - `.claude/commands/*`
    - `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
+   - `scripts/thumper/*`
 4. Announce the current version and that you're checking for updates
 
 ## Step 1 — Listen to the River (Goldberry)
@@ -56,7 +57,7 @@ For each file being updated:
 - **Updated files (with local mods):**
   - For `CLAUDE.md`: Preserve the `## Project` section (name, one-liner, domain, repo) and any user-added `## Coding Standards` entries. Update all methodology sections (Slash Commands, Team, Docs Reference, Release Tiers, etc.)
   - For other files: Show both versions, let user choose, or attempt to merge non-overlapping changes
-- **Never touch:** `docs/PRD.md`, `docs/LESSONS.md`, `logs/*`, `wizard/*`, `scripts/*`, `.env`, `.claude/settings.json`, `package.json`, application code
+- **Never touch:** `docs/PRD.md`, `docs/LESSONS.md`, `logs/*`, `wizard/*`, `scripts/* (except scripts/thumper/)`, `.env`, `.claude/settings.json`, `package.json`, application code
 
 ## Step 4 — The Song Continues (Bombadil)
 Verify and celebrate:

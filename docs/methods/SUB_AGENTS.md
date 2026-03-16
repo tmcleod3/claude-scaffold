@@ -177,6 +177,15 @@ For larger projects where agents need to make code changes simultaneously, use s
 
 ---
 
+### Parallel Agent Coordination
+
+When launching parallel background agents that modify overlapping concerns, the orchestrator MUST specify:
+1. **Schema ownership:** Only ONE agent may modify shared schemas (Prisma, SQL migrations, TypeScript interfaces). Other agents consume the schema, they don't change it.
+2. **Naming conventions:** Specify casing and format for shared values (e.g., "tab values are lowercase", "enum values are UPPER_SNAKE"). Agents working in isolation will choose different conventions.
+3. **Required fields:** List fields that MUST appear in shared data shapes (e.g., "all user selects must include isAnonymous"). Otherwise each agent cherry-picks different fields.
+
+Without this lock, ~30% of cross-agent MUST FIX findings are convention conflicts, not logic bugs. (Field report #33)
+
 ### Mode Instructions Must Replace, Not Append
 
 When an AI system has modal behavior (e.g., different output types, deck modes, project types), each mode's instructions must COMPLETELY REPLACE the default instructions — not append a footnote. A one-line override ("no scrolling") gets ignored when the default 11-section architecture contradicts it. Each mode needs its own complete specification. (Field report #27: one-line mode instructions were ignored because they contradicted the default architecture.)

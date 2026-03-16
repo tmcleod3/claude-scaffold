@@ -198,6 +198,14 @@ Batman's QA protocol now includes automated testing as Step 3.5 (between "Find B
 Verify test fixtures (conftest, factories, seed files) create ALL tables from the migration runner. Compare table lists between the test DB setup and the production schema — any table present in migrations but missing from test fixtures is a gap that causes silent test failures. This is especially critical when using a hardcoded migration list instead of the actual migration runner.
 (Field report #21: conftest missed tables from later migrations — ALTER TABLE on non-existent table was silently caught.)
 
+### Database Fixtures — Use the Production Schema
+
+Always use the test framework's shared database fixture (e.g., conftest `db` fixture) for store and service tests. It applies the full production schema + all migrations.
+
+Do NOT create custom DDL in test files — it drifts from the real schema (missing NOT NULL constraints, columns added by later migrations, different defaults). If you need tables the shared fixture doesn't have, add them AFTER the fixture yields — don't replace it.
+
+Custom DDL causes test DB schema mismatches that require 2-3 fix-and-retry cycles per occurrence. (Field report #31)
+
 ## Setup Checklist
 
 When setting up testing for a new project:

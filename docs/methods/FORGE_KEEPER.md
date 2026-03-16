@@ -57,6 +57,7 @@ HOLOCRON.md                        ← User guide
 docs/methods/*                     ← All agent protocols
 docs/patterns/*                    ← All reference implementations
 docs/NAMING_REGISTRY.md            ← Character registry
+scripts/thumper/*                  ← Shared VoidForge runtime for /thumper command
 ```
 
 **Never touched by Bombadil:**
@@ -68,7 +69,7 @@ docs/ARCHITECTURE.md               ← User's architecture
 docs/adrs/*                        ← User's decisions
 logs/*                             ← User's build journal
 wizard/*                           ← Full-tier wizard code (use npm update for this)
-scripts/*                          ← Initialization scripts
+scripts/* (EXCEPT scripts/thumper/* — shared VoidForge runtime for the /thumper command)
 package.json                       ← User's dependencies
 .env                               ← User's secrets
 ```

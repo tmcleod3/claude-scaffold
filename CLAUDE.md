@@ -135,6 +135,7 @@ VoidForge ships on three branches. Shared methodology files exist on all three.
 - `CLAUDE.md`, `.claude/commands/*`
 - `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
 - `HOLOCRON.md`, `VERSION.md`, `CHANGELOG.md`
+- `scripts/thumper/*`
 
 **NOT shared** (main-only): `package.json` (wizard dependencies differ per tier), `package-lock.json`, `.claude/settings.json` (user permissions/hooks), `wizard/*`, `scripts/*`, `logs/*`, `.env`
 

@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.4.1] - 2026-03-16
+
+### Added
+- **Thumper scripts now synced** by `/void` — `scripts/thumper/*` added to shared files, carved out from `scripts/*` exclusion. (Field report #34)
+- **Parallel agent convention lock** — schema ownership, naming conventions, required fields must be specified when launching parallel agents. (Field report #33)
+- **Integration wiring check** in build protocol — verify new services are connected to consumers, TODOs resolved, workers registered. (Field report #33)
+- **Cascade review checklist** — orphaned references, race conditions, PII scrubbing, reassignment fallbacks for DELETE/UPDATE operations. (Field report #31)
+- **Mandatory end-of-campaign debrief** — `/debrief --submit` required after Victory Gauntlet, non-negotiable. (Field report #31)
+- **Campaign state auto-sync** — cross-reference git log against campaign-state.md at session start. (Field report #32)
+- **3-mission context pressure limit** — checkpoint and consider fresh session after 3 consecutive build missions. (Field report #33)
+
+### Changed
+- **Proxy route SSRF** added to security checklist — validate target paths against regex allowlist. (Field report #33)
+- **No secrets in stored data** — verify no API keys/tokens embedded in database-stored URLs. (Field report #33)
+- **Crypto randomness** check — flag `Math.random()` in token/code/identifier generation. (Field report #32)
+- **Deeper PRD scan** in Dax's analysis — grep for feature completeness, not just file existence. (Field report #32)
+- **Database fixtures** guidance — always use shared conftest, never custom DDL. (Field report #31)
+
+---
+
 ## [7.4.0] - 2026-03-16
 
 ### Added

@@ -166,6 +166,8 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 6. Victory only if: Gauntlet Council signs off AND user acknowledges all BLOCKED items
 7. Sisko signs off: *"The Prophets' plan is fulfilled. The campaign is complete."*
 
+8. **Run `/debrief --submit`** — mandatory end-of-campaign post-mortem covering all missions together. Captures cross-cutting learnings that per-mission debriefs miss. In blitz mode, auto-submits per FIELD_MEDIC.md rule 2 exception. This is non-negotiable, like the Victory Gauntlet itself. (Field report #31)
+
 **Victory ≠ "everything built." Victory = "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 
 ## Arguments

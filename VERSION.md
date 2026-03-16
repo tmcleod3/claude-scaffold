@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 7.4.0
+**Current:** 7.4.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 7.4.1 | 2026-03-16 | 15 fixes from #31-#34 — thumper sync, parallel agents, cascade review, crypto check, proxy SSRF, campaign end debrief |
 | 7.4.0 | 2026-03-16 | The Field Hardening — 20 methodology fixes from 5 field reports, runtime smoke test, first-run checklist, campaign-mode pipeline |
 | 7.3.2 | 2026-03-16 | 13 methodology fixes from field reports #21-#25 — blitz gate, tier UI audit, auth retrofit, timestamps |
 | 7.3.1 | 2026-03-16 | Blitz auto-debrief — /campaign --blitz files field reports after every mission |

@@ -97,6 +97,10 @@ Kira reads the battlefield:
 4. Check `git status` — uncommitted work?
 5. Read auto-memory for project context
 
+### Campaign State Auto-Sync
+
+At the start of every campaign session, cross-reference `git log` against `campaign-state.md`. If commits exist for missions marked PENDING, auto-update campaign-state to match git history before proceeding. The git log is the source of truth — campaign-state.md can drift across multi-session campaigns when updates are missed. (Field report #32: 5 missions completed but never recorded, causing wasted investigation.)
+
 **Verdicts:**
 - **RESUME ASSEMBLY** — assemble-state shows incomplete phases → `/assemble --resume`
 - **RESUME BUILD** — build-state shows incomplete phases → `/build` (resume from phase)
@@ -119,6 +123,10 @@ Dax reads the Prophets' plan:
    - **Infrastructure** — DNS, env vars, deployments, third-party dashboard setup (require CLI/dashboard access)
 6. Diff: PRD requirements vs. implemented features (structural AND semantic — not just "does the route exist?" but "does the component render what the PRD describes?")
 7. Produce: **The Prophecy Board** — ordered list of missions with scope, plus a separate list of BLOCKED items (assets, credentials, user decisions)
+
+### Deep Codebase Scan for PRD Diff
+
+When classifying a PRD requirement as "needs building," verify with a codebase search — not just "does the route/component file exist" but "is the feature functionally complete." Use Grep to search for key function names, API endpoints, and UI components. Mark as ALREADY COMPLETE if >90% implemented. This prevents creating missions for features that are already built. (Field report #32: 4 of 8 blitz missions found features already complete, wasting planning overhead.)
 
 **Requirement classification table (include in mission briefs):**
 ```
@@ -188,6 +196,16 @@ When `/assemble` runs from within `/campaign`, the full 13-phase pipeline is imp
 
 The Victory Gauntlet at campaign end covers everything the per-mission pipeline defers. This is why the Victory Gauntlet is non-negotiable even with `--fast`. (Field report #26)
 
+### Cascade Review Checklist
+
+When a mission involves DELETE or UPDATE cascade operations (user offboarding, bulk cleanup, entity removal), the 1-round review MUST include:
+- [ ] **Orphaned references:** Does deleting entity A leave dangling FK/access records in table B?
+- [ ] **Race condition:** Can the subject create new data while the cascade runs? Should deactivation happen first?
+- [ ] **PII scrubbing:** Does the cleanup write raw PII to logs, audit trails, or API responses?
+- [ ] **Reassignment fallback:** What happens when the reassignment target doesn't exist or is also being deleted?
+
+These issues are invisible to standard code review but Critical when found by the Gauntlet. (Field report #31: 3 HIGH findings in offboarding mission — all cascade issues.)
+
 ### Minimum Review Guarantee
 
 Even in `--fast` mode, each mission gets at least **1 review round** (not 3, but never 0). A single review catches ~80% of issues for 33% of the review cost. Zero reviews in blitz caused 7 Critical+High issues to accumulate undetected across 4 missions — all caught by the Victory Gauntlet but at much higher fix cost. (Field report #28)
@@ -215,6 +233,15 @@ If context pressure makes full `/debrief --submit` impractical mid-campaign, cap
 ```
 
 Full debrief runs once at campaign end (after Victory Gauntlet), covering all missions together. This reduces per-mission debrief cost from ~5-10% context to ~0.5%. The BLITZ GATE in the command file still applies — this is a lighter alternative that satisfies the gate without invoking the full skill. (Field report #26)
+
+### Context Pressure Limit
+
+After 3 consecutive build missions in a single session, checkpoint and consider resuming in a fresh session. Context pressure after 3+ missions causes measurable quality degradation:
+- Review rounds get skipped (Mission 6 in field report #33 received zero review)
+- Debriefs get skipped despite being mandatory gates
+- Agent coordination errors increase as the orchestrator loses track of conventions
+
+The Victory Gauntlet catches issues from late-session missions, but at much higher fix cost than per-mission review. (Field report #33)
 
 ### Step 5 — Debrief and Commit
 
@@ -246,6 +273,8 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 7. Sisko signs off:
 
 > *"The Prophets' plan is fulfilled. The campaign is complete."*
+
+8. **Run `/debrief --submit`** — mandatory end-of-campaign post-mortem covering all missions together. Captures cross-cutting learnings that per-mission debriefs miss. In blitz mode, auto-submits per FIELD_MEDIC.md rule 2 exception. This is non-negotiable, like the Victory Gauntlet itself. (Field report #31)
 
 **Victory does NOT mean "everything was built." It means "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 

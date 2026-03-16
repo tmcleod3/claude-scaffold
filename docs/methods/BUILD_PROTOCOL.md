@@ -111,6 +111,16 @@ Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md
 3. Write unit tests for core service logic + integration tests for API routes
 4. Log to `/logs/phase-04-core.md`
 
+### Integration Wiring Check
+
+After building a new service, worker, or pipeline, verify it's connected to the system:
+1. Search for `TODO` comments referencing the new feature in existing code
+2. Check existing call sites that should consume the new service — are they updated?
+3. Verify new workers/jobs are registered in the main entry point (e.g., `workers/index.ts`)
+4. Check that new API routes are imported in the router
+
+New infrastructure that isn't wired to consumers is dead code. This check runs at the end of every build mission, not deferred to review. (Field report #33: entire enrichment pipeline was dead code — orchestrator built but never connected to conversation engine.)
+
 **Phase 5 — Supporting Features.**
 1. Build in dependency order: schema -> API -> UI -> wire up -> verify
 2. One batch = one feature or tightly coupled feature group (max ~200 lines changed per batch)
