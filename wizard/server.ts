@@ -266,7 +266,10 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
       handleTerminalUpgrade(req, socket, head, wsSession);
     });
 
-    const bindAddress = isRemoteMode() ? '0.0.0.0' : '127.0.0.1';
+    // Bind to '::' (dual-stack) in local mode — macOS resolves 'localhost' to ::1 (IPv6),
+    // so binding only to 127.0.0.1 breaks WebSocket connections from browsers.
+    // CORS + CSRF headers restrict access to the wizard's own origin regardless.
+    const bindAddress = isRemoteMode() ? '0.0.0.0' : '::';
 
     server.listen(port, bindAddress, async () => {
       await initAuditLog();
