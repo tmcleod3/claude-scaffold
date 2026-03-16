@@ -90,6 +90,8 @@ Authenticated, bidirectional Telegram bridge to Claude Code. One command to star
 
 No manual config editing required — `scan.sh` handles everything.
 
+**Non-interactive mode:** Claude Code's Bash tool doesn't support interactive stdin (`read -r -p`). For setup from within Claude Code, use: `bash scripts/thumper/scan.sh --token YOUR_BOT_TOKEN --chat-id YOUR_CHAT_ID`. This skips all prompts and writes the sietch vault directly. (Field report #35)
+
 ## Usage
 
 ```
