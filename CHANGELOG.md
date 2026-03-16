@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.0.1] - 2026-03-15
+
+### Changed
+- **Gandalf wizard redesigned as Three-Act Flow** — identity (vault + key), vision (name + PRD), operations (menu of cards). Eliminates simple/advanced toggle. Éowyn's enchantment notes woven into each act.
+- **v4.3 reclassified as "The Resilience Pack"** — opt-in card in Gandalf's Act 3 operations menu with 10 toggles (5 deploy + 5 runtime resilience). Smart defaults based on deploy target and framework.
+- **v7.1 "The Redesign" added to ROADMAP** — implementation plan for the wizard UX overhaul.
+
+### Fixed
+- **SSRF bypass checklist** added to Kenobi's security audit — octal IPs, decimal IPs, IPv6, DNS rebinding, URL scheme bypass (field report #12).
+- **AI output sanitization checklist** added — nested structure handling, secure fallback paths, isolated-vm requirement, sandbox escape test (field report #11).
+- **"Grep for siblings" rule** added to Batman's QA Pass 2 and Gauntlet fix batches — fix ALL instances of a pattern, not just the one reported (field reports #11 + #12).
+- **Encoding variant check** added to Gauntlet fix batch protocol — verify security filters handle all name encodings (field report #12).
+- **Enum consumer sweep** added to Build Protocol Phase 5 — grep all consumers when adding new enum values (field report #11).
+- **Cross-surface consistency sweep** added to Build Protocol Phase 8 — search all surfaces when changing pricing/tiers/counts (field report #11).
+- **Kusanagi added to Gauntlet Round 1** — infrastructure issues discovered earlier, not deferred to Round 3 (field report #11).
+- **Whitelist-over-blocklist** documented as general security principle in Kenobi's method doc (field report #12).
+
+---
+
 ## [7.0.0] - 2026-03-15
 
 ### Added
