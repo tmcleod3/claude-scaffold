@@ -1,7 +1,9 @@
 /**
  * VoidForge Wizard — Vanilla JS Step Machine
- * Gandalf — Setup Wizard
- * Steps: 1=Vault, 2=Cloud, 3=Project, 4=PRD, 5=Deploy, 6=Review, 7=Create/Done
+ * Gandalf — Setup Wizard (Three-Act Flow, v7.1)
+ * Act 1: 1=Vault, 2=API Key
+ * Act 2: 3=Project, 4=PRD, 4b=Credentials
+ * Act 3: 5=Operations Menu, 6=Review, 7=Create/Done
  */
 
 (function () {
@@ -46,15 +48,9 @@
 
     currentStep = step;
 
-    // Dynamic step count — simple mode skips steps 2(cloud) and 5(deploy)
-    // Step '4b' is the PRD-driven credentials step (shown only if PRD has env vars)
+    // Act-based progress: Act 1 (steps 1-2), Act 2 (steps 3-4b), Act 3 (steps 5-7)
     const hasEnvStep = state.envGroups.length > 0;
-    let visibleSteps;
-    if (advancedMode) {
-      visibleSteps = hasEnvStep ? [1, 2, 3, 4, '4b', 5, 6, 7] : [1, 2, 3, 4, 5, 6, 7];
-    } else {
-      visibleSteps = hasEnvStep ? [1, 2, 3, 4, '4b', 6, 7] : [1, 2, 3, 4, 6, 7];
-    }
+    const visibleSteps = hasEnvStep ? [1, 2, 3, 4, '4b', 5, 6, 7] : [1, 2, 3, 4, 5, 6, 7];
     const currentIdx = visibleSteps.indexOf(step);
     const totalVisible = visibleSteps.length;
     const displayNum = currentIdx >= 0 ? currentIdx + 1 : (typeof step === 'number' ? step : 5);
@@ -62,7 +58,15 @@
     const pct = Math.round((displayNum / totalVisible) * 100);
     progressBar.style.width = `${pct}%`;
     progressBar.setAttribute('aria-valuenow', String(pct));
-    stepLabel.textContent = `Step ${displayNum} of ${totalVisible}`;
+
+    // Show act labels instead of step numbers
+    let actLabel = 'Act 1 — Secure Your Forge';
+    if (step >= 3 && step !== 5 && step !== 6 && step !== 7) actLabel = 'Act 2 — Describe Your Vision';
+    if (step === '4b') actLabel = 'Act 2 — Describe Your Vision';
+    if (step >= 5) actLabel = 'Act 3 — Equip Your Project';
+    if (step === 6) actLabel = 'Review';
+    if (step === 7) actLabel = 'Creating';
+    stepLabel.textContent = actLabel;
 
     btnBack.disabled = step === 1;
 
@@ -91,8 +95,11 @@
       state.projectName = $('#project-name').value.trim();
       state.projectDir = $('#project-dir').value.trim();
       state.projectDesc = $('#project-desc').value.trim();
-      state.projectDomain = $('#project-domain').value.trim();
-      state.projectHostname = $('#project-hostname').value.trim();
+    }
+    if (currentStep === 5) {
+      // Domain/hostname are now in the operations menu
+      state.projectDomain = $('#project-domain')?.value.trim() || '';
+      state.projectHostname = $('#project-hostname')?.value.trim() || '';
     }
     if (currentStep === 4) {
       if (state.prdMode === 'paste') {
@@ -108,11 +115,11 @@
 
   function canAdvance() {
     switch (currentStep) {
-      case 1: return state.anthropicKeyStored;
-      case 2: return true;  // Cloud credentials are optional
+      case 1: return true; // Vault unlock handled by button, not Next
+      case 2: return true; // API key has skip option
       case 3: return state.projectName.trim() !== '' && state.projectDir.trim() !== '';
-      case 4: return true;  // PRD optional
-      case 5: return true;  // Deploy target optional
+      case 4: return true; // PRD optional
+      case 5: return true; // Operations menu — all optional
       case 6: return true;
       default: return false;
     }
@@ -126,7 +133,7 @@
     }
     clearValidationErrors();
 
-    // After PRD step (4), check for env requirements before proceeding
+    // After PRD step (4), check for env requirements then go to operations menu
     if (currentStep === 4) {
       const prdText = state.prdContent || state.generatedPrd || '';
       if (prdText) {
@@ -138,25 +145,17 @@
           return;
         }
       }
-      // No env requirements — skip 4b
-      if (!advancedMode) {
-        populateReview();
-        showStep(6);
-        return;
-      }
+      // No env requirements — go to operations menu
       await loadDeployTargets();
+      loadCloudProviders();
       showStep(5);
       return;
     }
 
-    // After 4b, proceed to deploy (advanced) or review (simple)
+    // After 4b, proceed to operations menu
     if (currentStep === '4b') {
-      if (!advancedMode) {
-        populateReview();
-        showStep(6);
-        return;
-      }
       await loadDeployTargets();
+      loadCloudProviders();
       showStep(5);
       return;
     }
@@ -177,25 +176,10 @@
 
   function prevStep() {
     if (currentStep === 1) return;
-    // Step 4b goes back to 4
-    if (currentStep === '4b') {
-      showStep(4);
-      return;
-    }
-    // Step 5 goes back to 4b if env groups exist, else 4
-    if (currentStep === 5 && state.envGroups.length > 0) {
-      showStep('4b');
-      return;
-    }
-    // In simple mode, review goes back to 4b (if exists) or 4
-    if (currentStep === 6 && !advancedMode) {
-      if (state.envGroups.length > 0) {
-        showStep('4b');
-      } else {
-        showStep(4);
-      }
-      return;
-    }
+    if (currentStep === '4b') { showStep(4); return; }
+    if (currentStep === 5 && state.envGroups.length > 0) { showStep('4b'); return; }
+    if (currentStep === 5) { showStep(4); return; }
+    if (currentStep === 6) { showStep(5); return; }
     showStep(currentStep - 1);
   }
 
@@ -211,13 +195,16 @@
     e.preventDefault();
 
     if (currentStep === 1) {
-      if (!apikeyCard.classList.contains('hidden') && keyInput.value.trim()) {
-        validateKeyBtn.click();
-      } else if (vaultPasswordInput.value) {
-        unlockVaultBtn.click();
-      }
+      if (vaultPasswordInput.value) unlockVaultBtn.click();
       return;
     }
+    if (currentStep === 2) {
+      if (keyInput.value.trim()) validateKeyBtn.click();
+      else nextStep(); // skip
+      return;
+    }
+
+    if (currentStep === '4b') return; // Step 4b has its own Store/Skip buttons
 
     if (currentStep === 4) {
       const generateTab = $('#tab-generate');
@@ -299,11 +286,11 @@
         if (data.anthropic) {
           state.anthropicKeyStored = true;
           showStatus(vaultStatus, 'success', 'Vault unlocked — API key found');
-          setTimeout(() => nextStep(), 600);
+          // Skip step 2 (API key) since it's already stored
+          setTimeout(() => showStep(3), 600);
         } else {
           showStatus(vaultStatus, 'success', 'Vault unlocked');
-          apikeyCard.classList.remove('hidden');
-          keyInput.focus();
+          setTimeout(() => showStep(2), 600);
         }
       } else {
         showStatus(vaultStatus, 'error', data.error || 'Failed to unlock');
@@ -333,6 +320,7 @@
       if (res.ok && data.stored) {
         showStatus(keyStatus, 'success', 'Key validated and stored in vault');
         state.anthropicKeyStored = true;
+        setTimeout(() => showStep(3), 600);
       } else {
         showStatus(keyStatus, 'error', data.error || 'Validation failed');
       }
@@ -344,10 +332,9 @@
   });
 
   // =============================================
-  // Step 2: Simple/Advanced Choice + Cloud Credentials
+  // Step 2: API Key + Skip
   // =============================================
 
-  let advancedMode = false;
   let providersLoaded = false;
 
   /** Make a div act as a keyboard-accessible button */
@@ -361,18 +348,9 @@
     });
   }
 
-  // Simple setup — skip cloud, go straight to project
-  activateOnKeyboard($('#choose-simple'), () => {
-    advancedMode = false;
-    nextStep();
-  });
-
-  // Advanced setup — show cloud provider cards
-  activateOnKeyboard($('#choose-advanced'), () => {
-    advancedMode = true;
-    $('#setup-choice').classList.add('hidden');
-    $('#cloud-setup').classList.remove('hidden');
-    loadCloudProviders();
+  // Skip API key button
+  $('#skip-key')?.addEventListener('click', () => {
+    showStep(3);
   });
 
   async function loadCloudProviders() {
@@ -576,14 +554,9 @@
     }
   }
 
-  // Reset choice view when navigating back to step 2
+  // Step 4b needs to re-show nav buttons properly
   const origShowStep = showStep;
   showStep = function (step) {
-    if (step === 2 && !advancedMode) {
-      $('#setup-choice').classList.remove('hidden');
-      $('#cloud-setup').classList.add('hidden');
-    }
-    // Step 4b needs to re-show nav buttons properly
     if (step === '4b') {
       btnNext.style.display = 'none';
       btnBack.style.display = '';
@@ -866,12 +839,7 @@
   });
 
   function proceedFromEnvStep() {
-    if (advancedMode) {
-      loadDeployTargets().then(() => showStep(5));
-    } else {
-      populateReview();
-      showStep(6);
-    }
+    Promise.all([loadDeployTargets(), loadCloudProviders()]).then(() => showStep(5));
   }
 
   // =============================================
@@ -1065,17 +1033,50 @@
   // Provisioning moved to Haku (deploy wizard) — launch with `npm run deploy`
 
   // =============================================
+  // Step 5: Operations Menu — Card Expand/Collapse
+  // =============================================
+
+  $$('.ops-card-header').forEach((header) => {
+    function toggle() {
+      const card = header.closest('.ops-card');
+      const body = card.querySelector('.ops-card-body');
+      const isOpen = !body.classList.contains('hidden');
+      body.classList.toggle('hidden');
+      card.classList.toggle('expanded', !isOpen);
+      header.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      if (!isOpen) {
+        const firstInput = body.querySelector('input, select');
+        if (firstInput) setTimeout(() => firstInput.focus(), 100);
+      }
+    }
+    header.addEventListener('click', toggle);
+    header.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
+
+  // Skip All button
+  $('#ops-skip-all')?.addEventListener('click', () => {
+    populateReview();
+    showStep(6);
+  });
+
+  // Update header when project name is typed (Éowyn's enchantment)
+  projectNameInput.addEventListener('input', () => {
+    const name = projectNameInput.value.trim();
+    const logo = $('.logo');
+    if (name) {
+      logo.textContent = 'Gandalf — ' + name;
+    } else {
+      logo.textContent = 'Gandalf — VoidForge Setup';
+    }
+  });
+
+  // =============================================
   // Utilities
   // =============================================
 
   function showValidationErrors() {
-    if (currentStep === 1 && !state.anthropicKeyStored) {
-      if (apikeyCard.classList.contains('hidden')) {
-        showStatus(vaultStatus, 'error', 'Unlock your vault to continue');
-      } else {
-        showStatus(keyStatus, 'error', 'Validate your API key to continue');
-      }
-    }
     if (currentStep === 3) {
       const nameInput = $('#project-name');
       const dirInput = $('#project-dir');

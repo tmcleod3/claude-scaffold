@@ -19,14 +19,16 @@
 
     <main class="wizard-body" id="wizard-body">
 
-      <!-- Step 1: Welcome + API Key -->
+      <!-- Act 1: Secure Your Forge -->
+
+      <!-- Step 1: Vault Only -->
       <section class="step" id="step-1" data-step="1">
-        <h1>Welcome to VoidForge</h1>
-        <p class="subtitle">From nothing, everything. Let's set up your project.</p>
+        <h1>Secure Your Forge</h1>
+        <p class="subtitle">This password protects everything you build.</p>
 
         <div class="card" id="vault-card">
           <h2>Credential Vault</h2>
-          <p>Your API keys are encrypted with a password you choose. The vault is stored at <code id="vault-path">~/.voidforge/vault.enc</code> — AES-256-GCM encrypted. You manage the password however you like (memory, 1Password, keychain, etc.).</p>
+          <p>Your API keys are encrypted with a password you choose. The vault is stored at <code id="vault-path">~/.voidforge/vault.enc</code> — AES-256-GCM encrypted.</p>
 
           <div class="field">
             <label for="vault-password" id="vault-password-label">Choose a Vault Password</label>
@@ -41,11 +43,14 @@
 
           <button class="btn btn-primary" id="unlock-vault" type="button">Unlock Vault</button>
         </div>
+      </section>
 
-        <div class="card hidden" id="apikey-card">
-          <h2>Anthropic API Key</h2>
-          <p>Required for PRD generation with Claude.</p>
+      <!-- Step 2: API Key Only -->
+      <section class="step hidden" id="step-2" data-step="2">
+        <h1>Connect Claude</h1>
+        <p class="subtitle">Claude needs an Anthropic API key to help you build.</p>
 
+        <div class="card" id="apikey-card">
           <div class="field">
             <label for="anthropic-key">API Key</label>
             <div class="input-row">
@@ -58,60 +63,16 @@
           <div class="status-row" id="key-status" role="status" aria-live="polite"></div>
 
           <button class="btn btn-primary" id="validate-key" type="button">Validate & Store</button>
+          <button class="btn btn-secondary" id="skip-key" type="button" style="margin-left: 8px;">Skip for now</button>
         </div>
       </section>
 
-      <!-- Step 2: Setup Path + Cloud Credentials -->
-      <section class="step hidden" id="step-2" data-step="2">
-
-        <!-- Path choice -->
-        <div id="setup-choice">
-          <h1>How do you want to set up?</h1>
-          <p class="subtitle">You can always add cloud providers later by re-running the wizard.</p>
-
-          <div class="setup-card" id="choose-simple" tabindex="0" role="button" aria-label="Simple Setup — local development with Docker">
-            <div class="setup-card-header">
-              <span class="setup-card-name">Simple Setup</span>
-              <span class="provider-badge connected">Quick Start</span>
-            </div>
-            <p class="setup-card-desc">Get straight to building. Your project runs locally or with Docker. You can deploy anywhere later — just add credentials when you're ready.</p>
-            <ul class="setup-card-includes">
-              <li>Project scaffolding with all VoidForge methodology</li>
-              <li>PRD generation with Claude</li>
-              <li>Docker deploy target available out of the box</li>
-            </ul>
-          </div>
-
-          <div class="setup-card" id="choose-advanced" tabindex="0" role="button" aria-label="Advanced Setup — connect cloud providers for deployment">
-            <div class="setup-card-header">
-              <span class="setup-card-name">Advanced Setup</span>
-              <span class="provider-badge not-connected">Cloud deploy</span>
-            </div>
-            <p class="setup-card-desc">Connect cloud providers now so the deploy wizard (Haku) can provision infrastructure later. Best if you already have accounts with AWS, Vercel, Railway, or Cloudflare.</p>
-            <ul class="setup-card-includes">
-              <li>Everything in Simple, plus:</li>
-              <li>Connect AWS, Vercel, Railway, or Cloudflare credentials</li>
-              <li>Deploy target selection filtered by your available providers</li>
-              <li>Credentials stored for Haku to use after <code>/build</code></li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Cloud providers (shown after choosing Advanced) -->
-        <div id="cloud-setup" class="hidden">
-          <h1>Cloud Credentials</h1>
-          <p class="subtitle">Connect the providers you want to use. Click a provider to expand it.</p>
-
-          <div id="cloud-providers-list"></div>
-
-          <div class="status-row info" style="margin-top: 16px;">All credentials are AES-256 encrypted in your local vault. Click the <strong>?</strong> button on any provider for setup instructions.</div>
-        </div>
-      </section>
+      <!-- Act 2: Describe Your Vision -->
 
       <!-- Step 3: Project Setup -->
       <section class="step hidden" id="step-3" data-step="3">
-        <h1>Project Setup</h1>
-        <p class="subtitle">Tell us about your project.</p>
+        <h1>Name Your Project</h1>
+        <p class="subtitle">What are you building?</p>
 
         <div class="card">
           <div class="field">
@@ -128,17 +89,6 @@
           <div class="field">
             <label for="project-desc">One-Line Description <span class="optional">(optional)</span></label>
             <input type="text" id="project-desc" placeholder="A tool for managing widget inventories">
-          </div>
-
-          <div class="field">
-            <label for="project-domain">Domain <span class="optional">(optional)</span></label>
-            <input type="text" id="project-domain" placeholder="SaaS, E-commerce, Developer Tools...">
-          </div>
-
-          <div class="field">
-            <label for="project-hostname">Hostname <span class="optional">(optional)</span></label>
-            <input type="text" id="project-hostname" placeholder="myapp.com">
-            <div class="field-hint">Your domain for DNS wiring (must be on Cloudflare)</div>
           </div>
         </div>
       </section>
@@ -256,13 +206,87 @@
         </div>
       </section>
 
-      <!-- Step 5: Deploy Target -->
-      <section class="step hidden" id="step-5" data-step="5">
-        <h1>Deploy Target</h1>
-        <p class="subtitle">Where will this project run? Click a target to select it.</p>
+      <!-- Act 3: Equip Your Project -->
 
-        <div id="deploy-targets-list" role="radiogroup" aria-label="Deploy target"></div>
-        <div id="deploy-note"></div>
+      <!-- Step 5: Operations Menu -->
+      <section class="step hidden" id="step-5" data-step="5">
+        <h1>Equip Your Project</h1>
+        <p class="subtitle">Configure what you need. Skip what you don't.</p>
+
+        <!-- Deploy Target Card -->
+        <div class="ops-card" id="ops-deploy">
+          <div class="ops-card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="ops-deploy-body">
+            <span class="ops-card-title">Deploy Target</span>
+            <span class="ops-card-summary" id="ops-deploy-summary">Docker (default)</span>
+            <span class="ops-card-chevron" aria-hidden="true">&#9654;</span>
+          </div>
+          <div class="ops-card-body hidden" id="ops-deploy-body">
+            <p class="field-hint" style="margin-bottom: 12px;">Where will this project run?</p>
+            <div id="deploy-targets-list" role="radiogroup" aria-label="Deploy target"></div>
+            <div id="deploy-note"></div>
+          </div>
+        </div>
+
+        <!-- Cloud Credentials Card -->
+        <div class="ops-card" id="ops-cloud">
+          <div class="ops-card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="ops-cloud-body">
+            <span class="ops-card-title">Cloud Credentials</span>
+            <span class="ops-card-summary" id="ops-cloud-summary">Not configured</span>
+            <span class="ops-card-chevron" aria-hidden="true">&#9654;</span>
+          </div>
+          <div class="ops-card-body hidden" id="ops-cloud-body">
+            <p class="field-hint" style="margin-bottom: 12px;">Connect providers for your deploy target.</p>
+            <div id="cloud-providers-list"></div>
+          </div>
+        </div>
+
+        <!-- Domain & Hostname Card -->
+        <div class="ops-card" id="ops-domain">
+          <div class="ops-card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="ops-domain-body">
+            <span class="ops-card-title">Domain & Hostname</span>
+            <span class="ops-card-summary" id="ops-domain-summary">Not set</span>
+            <span class="ops-card-chevron" aria-hidden="true">&#9654;</span>
+          </div>
+          <div class="ops-card-body hidden" id="ops-domain-body">
+            <div class="field">
+              <label for="project-domain">Domain</label>
+              <input type="text" id="project-domain" placeholder="SaaS, E-commerce, Developer Tools...">
+            </div>
+            <div class="field">
+              <label for="project-hostname">Hostname</label>
+              <input type="text" id="project-hostname" placeholder="myapp.com">
+              <div class="field-hint">Your domain for DNS wiring (must be on Cloudflare)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resilience Pack Card -->
+        <div class="ops-card" id="ops-resilience">
+          <div class="ops-card-header" role="button" tabindex="0" aria-expanded="false" aria-controls="ops-resilience-body">
+            <span class="ops-card-title">Resilience Pack</span>
+            <span class="ops-card-summary">Optional hardening</span>
+            <span class="ops-card-chevron" aria-hidden="true">&#9654;</span>
+          </div>
+          <div class="ops-card-body hidden" id="ops-resilience-body">
+            <p class="field-hint" style="margin-bottom: 12px;">Operational resilience features. Smart defaults based on your deploy target.</p>
+            <div class="resilience-grid">
+              <label class="resilience-toggle"><input type="checkbox" id="res-multi-env"> Multi-environment (.env per stage)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-preview"> Preview deployments (PR previews)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-rollback"> Auto-rollback (one-click revert)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-migrations"> Migration automation (deploy-time)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-backups"> Backup automation (daily DB dumps)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-health"> Health check endpoint (/api/health)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-shutdown"> Graceful shutdown (SIGTERM handling)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-errors"> Error boundaries (React + global)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-ratelimit"> Rate limiting (auth endpoints)</label>
+              <label class="resilience-toggle"><input type="checkbox" id="res-dlq"> Dead letter queue (if workers enabled)</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; text-align: center;">
+          <button class="btn btn-secondary" id="ops-skip-all" type="button">Skip All — I'll configure later</button>
+        </div>
       </section>
 
       <!-- Step 6: Review -->
