@@ -130,7 +130,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   const connectSrc = isRemoteMode() && serverHost
     ? `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort} wss://${serverHost}`
     : `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort}`;
-  res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src ${connectSrc}; frame-ancestors 'none'`);
+  res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src ${connectSrc} https://cdn.jsdelivr.net; frame-ancestors 'none'`);
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);

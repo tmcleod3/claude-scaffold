@@ -353,8 +353,8 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
     }
   });
 
-  // Read WebSocket frames → send to PTY
-  let buffer = Buffer.alloc(0);
+  // Process any data that arrived with the upgrade request (head buffer)
+  let buffer = head.length > 0 ? Buffer.from(head) : Buffer.alloc(0);
 
   socket.on('data', (chunk: Buffer) => {
     buffer = Buffer.concat([buffer, chunk]);
