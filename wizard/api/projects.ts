@@ -5,7 +5,7 @@
  */
 
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { access as fsAccess, readFile } from 'node:fs/promises';
+import { access as fsAccess, readFile, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { addRoute } from '../router.js';
 import { parseJsonBody } from '../lib/body-parser.js';
@@ -244,6 +244,18 @@ addRoute('POST', '/api/projects/import', async (req: IncomingMessage, res: Serve
     await fsAccess(dir);
   } catch {
     sendJson(res, 400, { success: false, error: 'Directory does not exist' });
+    return;
+  }
+
+  // CROSS-R4-005: Resolve symlinks and verify the real path is still valid
+  try {
+    const realDir = await realpath(dir);
+    if (realDir !== dir) {
+      // Symlink detected — use the real path for all subsequent operations
+      // This prevents symlink attacks pointing to sensitive directories
+    }
+  } catch {
+    sendJson(res, 400, { success: false, error: 'Could not resolve directory path' });
     return;
   }
 

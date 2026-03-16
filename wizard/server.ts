@@ -120,6 +120,10 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  // SEC-R2-003: HSTS in remote mode — prevent downgrade attacks before Caddy redirect
+  if (isRemoteMode()) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
   const connectSrc = isRemoteMode() && serverHost
     ? `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort} wss://${serverHost}`
     : `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort}`;

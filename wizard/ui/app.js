@@ -42,9 +42,19 @@
   // --- Navigation ---
 
   function showStep(step) {
-    $$('.step').forEach((el) => el.classList.add('hidden'));
+    // ENCHANT-R2-012 + CROSS-R4-016: Determine direction for animation
+    const goingBack = (typeof step === 'number' && typeof currentStep === 'number' && step < currentStep) ||
+                      (step === 4 && currentStep === '4b') ||
+                      (step === '4b' && currentStep === 5);
+    $$('.step').forEach((el) => {
+      el.classList.add('hidden');
+      el.classList.remove('entering-backward');
+    });
     const target = $(`#step-${step}`);
-    if (target) target.classList.remove('hidden');
+    if (target) {
+      if (goingBack) target.classList.add('entering-backward');
+      target.classList.remove('hidden');
+    }
 
     currentStep = step;
 
@@ -269,7 +279,7 @@
   unlockVaultBtn.addEventListener('click', async () => {
     const password = vaultPasswordInput.value;
     if (!password) { showStatus(vaultStatus, 'error', 'Please enter a password'); return; }
-    if (password.length < 4) { showStatus(vaultStatus, 'error', 'Password must be at least 4 characters'); return; }
+    if (password.length < 8) { showStatus(vaultStatus, 'error', 'Password must be at least 8 characters'); return; }
 
     showStatus(vaultStatus, 'loading', 'Unlocking...');
     unlockVaultBtn.disabled = true;
@@ -283,14 +293,16 @@
       const data = await res.json();
 
       if (res.ok && data.unlocked) {
+        // ENCHANT-R2-003 + CROSS-R4-017: Forge-lit pulse on vault unlock (force replay)
+        const vc = document.getElementById('vault-card');
+        if (vc) { vc.classList.remove('forge-lit'); void vc.offsetWidth; vc.classList.add('forge-lit'); }
         if (data.anthropic) {
           state.anthropicKeyStored = true;
           showStatus(vaultStatus, 'success', 'Vault unlocked — API key found');
-          // Skip step 2 (API key) since it's already stored
-          setTimeout(() => showStep(3), 600);
+          setTimeout(() => showStep(3), 900);
         } else {
           showStatus(vaultStatus, 'success', 'Vault unlocked');
-          setTimeout(() => showStep(2), 600);
+          setTimeout(() => showStep(2), 900);
         }
       } else {
         showStatus(vaultStatus, 'error', data.error || 'Failed to unlock');
@@ -671,6 +683,8 @@
     generatePrdBtn.textContent = 'Generating...';
     generationOutput.classList.remove('hidden');
     generatedContent.textContent = '';
+    // ENCHANT-R2-006: Add streaming cursor
+    generatedContent.classList.add('streaming');
     state.generatedPrd = '';
 
     try {
@@ -728,6 +742,8 @@
     } catch (err) {
       generatedContent.textContent += '\n\nConnection error: ' + err.message;
     } finally {
+      // ENCHANT-R2-006: Remove streaming cursor when done
+      generatedContent.classList.remove('streaming');
       generatePrdBtn.disabled = false;
       generatePrdBtn.textContent = 'Generate PRD with Claude';
     }

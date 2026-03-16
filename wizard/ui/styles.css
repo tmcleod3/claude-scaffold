@@ -8,7 +8,7 @@
   --border-focus: #5b5bf7;
   --text: #e5e5e5;
   --text-dim: #888;
-  --text-muted: #767676;
+  --text-muted: #8a8a8a; /* UX-R2-005: raised from #767676 for WCAG AA 4.5:1 contrast on #0a0a0a */
   --accent: #5b5bf7;
   --accent-hover: #7070ff;
   --success: #22c55e;
@@ -101,12 +101,106 @@ a:hover { text-decoration: underline; }
 /* Visibility */
 .hidden { display: none; }
 
-/* Steps */
-.step { animation: fadeIn 0.3s ease; }
+/* Steps — ENCHANT-R2-012: Directional transitions */
+.step { animation: slideInRight 0.3s ease; }
+.step.entering-backward { animation: slideInLeft 0.3s ease; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Skip navigation — UX-R2-010 */
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  z-index: 100;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  text-decoration: none;
+}
+.skip-nav:focus {
+  left: 8px;
+  top: 8px;
+}
+
+/* ENCHANT-R2-002: Subtitle delayed entrance */
+.step .subtitle {
+  opacity: 0;
+  animation: subtitleReveal 0.6s ease 0.2s forwards;
+}
+
+@keyframes subtitleReveal {
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ENCHANT-R2-003: Forge-lit pulse on vault unlock */
+.forge-lit {
+  animation: forgePulse 0.6s ease-out;
+}
+
+@keyframes forgePulse {
+  0% { box-shadow: 0 0 0 0 rgba(91, 91, 247, 0.4); }
+  50% { box-shadow: 0 0 30px 10px rgba(91, 91, 247, 0.15); border-color: var(--accent); }
+  100% { box-shadow: 0 0 0 0 rgba(91, 91, 247, 0); }
+}
+
+/* ENCHANT-R2-006: Streaming cursor for PRD generation */
+.generation-output pre.streaming::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s ease-in-out infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ENCHANT-R2-011: Success icon pop animation */
+.success-icon {
+  opacity: 0;
+  transform: scale(0.5);
+  animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s forwards;
+}
+
+@keyframes successPop {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ENCHANT-R2-014: Status message slide-in */
+.status-row:not(:empty) {
+  animation: statusSlideIn 0.25s ease;
+}
+
+@keyframes statusSlideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* noscript fallback — UX-R2-030 */
+.noscript-msg {
+  padding: 40px;
+  text-align: center;
+  color: var(--error);
+  font-size: 16px;
 }
 
 h1 {
@@ -260,15 +354,24 @@ select {
   cursor: not-allowed;
 }
 
+/* ENCHANT-R2-013: Primary button gradient glow */
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, #6b6bff 100%);
   border-color: var(--accent);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(91, 91, 247, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, #8080ff 100%);
   border-color: var(--accent-hover);
+  box-shadow: 0 4px 16px rgba(91, 91, 247, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(91, 91, 247, 0.2);
 }
 
 .btn-secondary:hover:not(:disabled) {

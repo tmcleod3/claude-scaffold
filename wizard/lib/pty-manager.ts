@@ -51,9 +51,15 @@ const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 const ALLOWED_INITIAL_COMMANDS = ['claude', 'bash', 'zsh', 'sh', 'npm run dev', 'npm start', 'npm test'];
 
 // SEC-013: Safe environment keys — no credential leakage into PTY sessions
-// Includes ANTHROPIC_API_KEY because Claude Code needs it to authenticate.
+// ANTHROPIC_API_KEY included only in local mode (user's own key).
+// In remote mode, operator's API key must NOT leak to deployer-role users.
 // Includes TMPDIR/SSH_AUTH_SOCK for tool compatibility.
-const SAFE_ENV_KEYS = ['PATH', 'HOME', 'SHELL', 'USER', 'LANG', 'LC_ALL', 'LC_CTYPE', 'TERM_PROGRAM', 'EDITOR', 'VISUAL', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'NVM_DIR', 'NVM_BIN', 'NVM_INC', 'TMPDIR', 'TEMP', 'SSH_AUTH_SOCK', 'COLORTERM', 'ANTHROPIC_API_KEY'];
+const BASE_SAFE_ENV_KEYS = ['PATH', 'HOME', 'SHELL', 'USER', 'LANG', 'LC_ALL', 'LC_CTYPE', 'TERM_PROGRAM', 'EDITOR', 'VISUAL', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'NVM_DIR', 'NVM_BIN', 'NVM_INC', 'TMPDIR', 'TEMP', 'SSH_AUTH_SOCK', 'COLORTERM'];
+// FLOW-R2-007: Only pass ANTHROPIC_API_KEY in local mode
+function getSafeEnvKeys(): string[] {
+  if (isRemoteMode()) return BASE_SAFE_ENV_KEYS;
+  return [...BASE_SAFE_ENV_KEYS, 'ANTHROPIC_API_KEY'];
+}
 
 function resetIdleTimer(session: InternalSession): void {
   if (session.idleTimer) clearTimeout(session.idleTimer);
@@ -99,11 +105,15 @@ export async function createSession(
 
   // SEC-013: Build clean environment — no credential leakage into PTY
   const safeEnv: Record<string, string> = {};
-  for (const key of SAFE_ENV_KEYS) {
+  for (const key of getSafeEnvKeys()) {
     if (process.env[key]) safeEnv[key] = process.env[key]!;
   }
   safeEnv['TERM'] = 'xterm-256color';
   safeEnv['VOIDFORGE_SESSION'] = id;
+
+  // QA-R2-010 + QA-R3-002: Clamp cols/rows BEFORE spawnOptions construction
+  cols = Math.max(1, Math.min(500, Math.floor(cols)));
+  rows = Math.max(1, Math.min(200, Math.floor(rows)));
 
   // Remote mode: spawn as forge-user for sandboxing (Layer 4)
   const spawnOptions: import('node-pty').IPtyForkOptions = {

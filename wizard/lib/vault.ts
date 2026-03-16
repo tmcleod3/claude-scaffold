@@ -9,7 +9,7 @@
  *   (memory, 1Password, macOS Keychain, etc.)
  */
 
-import { createCipheriv, createDecipheriv, pbkdf2, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, pbkdf2, randomBytes, timingSafeEqual } from 'node:crypto';
 import { readFile, writeFile, rename, mkdir, open } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
@@ -81,9 +81,13 @@ async function decrypt(data: Buffer, password: string): Promise<string> {
 }
 
 async function readVault(password: string): Promise<VaultData> {
-  // Check session cache first
-  if (sessionCache && sessionCache.password === password) {
-    return sessionCache.data;
+  // QA-R2-002: Use timing-safe comparison for cache password check
+  if (sessionCache) {
+    const a = Buffer.from(sessionCache.password, 'utf-8');
+    const b = Buffer.from(password, 'utf-8');
+    if (a.length === b.length && timingSafeEqual(a, b)) {
+      return sessionCache.data;
+    }
   }
 
   if (!existsSync(VAULT_PATH)) {

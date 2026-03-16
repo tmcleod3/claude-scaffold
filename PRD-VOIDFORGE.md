@@ -289,6 +289,10 @@ See `ROADMAP.md` for the full plan. Summary:
 | **v6.5** | Avengers Tower Remote | Self-hosted mode, 5-layer security (network + auth + vault + sandbox + audit), TOTP 2FA, two-password architecture |
 | **v7.0** | The Penthouse | Multi-user RBAC, per-project permissions, linked services, coordinated deploys, rollback dashboard, cost tracker, agent memory |
 | **v7.1** | The Redesign | Three-act wizard flow, operations menu replaces simple/advanced toggle, Resilience Pack as opt-in card, Éowyn's enchantment layer |
+| **v8.0** | The Hive Mind | Agent Memory (active lessons read-back), Conflict Prediction (Phase 0.5), Auto-PRD generation (`/prd` command) |
+| **v8.1** | The Evolution | Self-Improving Methodology (auto-draft from lesson clusters), Agent Specialization (custom sub-agents) |
+| **v8.2** | The Autonomy | Autonomous Campaigns (`/campaign --autonomous` with guardrails and git checkpoints) |
+| **v9.0+** | The Horizon | Pattern Evolution, Cross-Project Orchestration, Multi-Language Forge, The Forge Builds the Forge |
 
 ---
 

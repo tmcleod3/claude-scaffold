@@ -2,8 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v4.5.0 (2026-03-15)
-**Status:** Seamless release in progress. PRD-driven credentials, headless deploy, extension support.
+**Current:** v7.1.0 (2026-03-15)
+**Next:** v8.0 — The Hive Mind (Agent Memory, Conflict Prediction, Auto-PRD)
+**Status:** v7.1 shipped. Gauntlet passed (6/6 council sign-off). Planning v8.0.
 
 ---
 
@@ -600,6 +601,132 @@ A single screen with expandable cards — not a sequence of steps. Five cards: D
 
 ### Estimated effort
 ~400 lines changed (mostly restructuring existing code), 1-2 sessions.
+
+---
+
+## v8.0 — The Hive Mind
+
+*VoidForge remembers, predicts, and generates.*
+
+The first release where VoidForge learns from experience. Three features that compound: agents read past lessons before reviewing, Phase 0 catches structural contradictions before building, and a new command generates production-ready PRDs from conversation.
+
+### Agent Memory — Active Lessons Read-Back
+
+`docs/LESSONS.md` exists but is passive — agents never read it. Activate the feedback loop: during Phase 0 Orient, Wong loads lessons matching the current project's framework and domain. During reviews, agents check lessons tagged to their domain and flag matching patterns.
+
+**What changes:** Phase 0 in BUILD_PROTOCOL.md gains a "Wong loads relevant lessons" step. Review commands (/qa, /security, /ux, /review) gain a directive: "Before analysis, check LESSONS.md for entries in your domain. Flag matches." The existing `wizard/lib/agent-memory.ts` (getRelevantLessons) provides the query mechanism for the wizard tier.
+
+**Why first:** Agent Memory is the foundation — everything in v8.x reads from it.
+
+### Conflict Prediction — Phase 0.5 Architecture Scan
+
+Before a single line is written, Picard runs a lightweight contradiction scan on the PRD frontmatter:
+- Auth required but no session store → flag
+- Payments enabled but auth disabled → flag
+- WebSocket features but static/Cloudflare deploy → flag
+- Workers enabled but deploy target has no background process support → flag
+- Database specified but deploy target doesn't support persistent storage → flag
+
+10-15 common contradictions, checked in seconds. Catches the architecture mistakes that currently escape until Phase 9-11 reviews — where fixing them costs hours instead of minutes.
+
+**What changes:** BUILD_PROTOCOL.md Step 0.5 (new). SYSTEMS_ARCHITECT.md gains a "Conflict Checklist" section. `.claude/commands/architect.md` gains a pre-analysis step.
+
+### Auto-PRD Generation — `/prd` Command
+
+The PRD is VoidForge's highest-friction input. Users who aren't good at writing PRDs produce bad builds. A new `/prd` command where Sisko conducts a structured interview:
+
+1. "What are you building?" → name, one-liner, audience
+2. "What stack?" → framework, database, deploy target (Sisko proposes defaults)
+3. "What features?" → core flow, supporting features, integrations
+4. "What does it look like?" → brand personality, key screens
+5. "How does it ship?" → launch sequence, success metrics
+
+Each act drafts that PRD section, shows it for confirmation. Output: complete `docs/PRD.md` with valid frontmatter. The existing wizard PRD generation (Step 4, SSE stream via Anthropic API) provides the backend; this adds a CLI-native path.
+
+**New files:** `.claude/commands/prd.md`, update CLAUDE.md and HOLOCRON.md.
+
+### Estimated effort
+3-4 sessions total. All methodology doc changes + 1 new command file.
+
+---
+
+## v8.1 — The Evolution
+
+*The methodology improves itself. With permission.*
+
+### Self-Improving Methodology
+
+When 3+ entries in `docs/LESSONS.md` share the same category and target the same method doc, Wong auto-drafts a method doc update: a specific new checklist item, rule, or pattern based on the lesson cluster. Presented for user approval — never auto-applied.
+
+For upstream: `/debrief --submit` includes the proposed method doc change in the GitHub issue body. `/debrief --inbox` processes these proposals.
+
+**What changes:** FIELD_MEDIC.md gains a "Promotion Analysis" step. `/debrief` command gains promotion logic. LESSONS.md format unchanged (already has "Promoted to" field).
+
+### Agent Specialization — Custom Sub-Agents
+
+Users can create project-specific sub-agents that carry domain knowledge. A `docs/CUSTOM_AGENTS.md` file defines specialists:
+
+```markdown
+### Jarvis-Tailwind
+**Universe:** Marvel | **Reports to:** Galadriel
+**Domain:** Tailwind CSS v4 configuration, PostCSS, source() directive
+**Behavioral directives:** Always check for v3→v4 migration issues. Verify @config path.
+**Reference docs:** tailwindcss.com/docs/upgrade-guide
+```
+
+Custom agents run alongside built-in agents, not instead of them. Names must not collide with the naming registry.
+
+**What changes:** SUB_AGENTS.md gains "Custom Agent" section. NAMING_REGISTRY.md gains collision check rule. New template file: `docs/CUSTOM_AGENTS.md`.
+
+### Estimated effort
+2-3 sessions. Methodology doc changes + 1 new template.
+
+---
+
+## v8.2 — The Autonomy
+
+*Supervised autonomy with safety rails.*
+
+### Autonomous Campaigns — `/campaign --autonomous`
+
+Sisko executes missions without waiting for confirmation at every brief. Guardrails:
+1. Git checkpoint (`git tag campaign-mission-N-start`) before each mission
+2. If `/assemble` produces Critical findings that can't be auto-fixed → rollback to tag, pause for human
+3. Maximum 5 consecutive autonomous missions before mandatory human checkpoint
+4. Victory Gauntlet ALWAYS requires human confirmation
+5. Post-mission summary logged but not presented interactively
+
+**Why after v8.0-v8.1:** Autonomous campaigns are safer when Agent Memory catches known pitfalls and Conflict Prediction catches structural problems before they propagate through 10 unattended missions.
+
+**What changes:** CAMPAIGN.md gains `--autonomous` section with guardrails. `.claude/commands/campaign.md` gains flag handling.
+
+### Estimated effort
+1-2 sessions. Command + method doc changes.
+
+---
+
+## v9.0+ — The Horizon
+
+*Exploring the frontier. Build order TBD based on user demand.*
+
+### Pattern Evolution (after v8.1 + 10+ projects with analytics data)
+After 10+ projects use the same pattern variation, Wong surfaces it as a proposed new pattern during `/debrief`. Advisory only. Requires build analytics data from `wizard/lib/build-analytics.ts` to identify recurring shapes.
+
+### Cross-Project Orchestration (after Avengers Tower ships)
+A "fleet commander" layer above Sisko for monorepos and multi-service architectures. Reads a `meta-prd.md` defining the service graph. Each service's campaign runs independently; the commander gates cross-boundary changes. Requires v7.0 Penthouse (linked services) as infrastructure.
+
+### Multi-Language Forge (based on user demand)
+Framework adapters for Python (Django/FastAPI), Go, Rust. Start with Python only — enhance the existing adaptation notes in each pattern file to full "Django Deep Dive" sections rather than separate files. Preserves single-file-per-pattern architecture. Only pursue if user demand evidence exists.
+
+### The Forge Builds the Forge (supervised demonstration only)
+Run `/campaign` on VoidForge's own repo as a validation exercise. Never autonomous self-modification — the "user reviews everything" principle is non-negotiable for changes to the system's own methodology. Human approval gate at every step.
+
+### Deferred Indefinitely
+
+| Proposal | Reason |
+|----------|--------|
+| Visual PRD Editor | Solved better by `/prd` command (v8.0). Identity risk — pushes VoidForge toward SaaS. Dependency explosion contradicts zero-dep philosophy. |
+| Live Collaboration | Solved better by Git branching + existing scope boundaries in SUB_AGENTS.md. Architectural mismatch with single-process monolith. |
 
 ---
 

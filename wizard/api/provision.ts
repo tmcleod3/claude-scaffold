@@ -104,10 +104,14 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
     return;
   }
 
+  // CROSS-R4-011: Synchronous check-and-set to prevent TOCTOU race on concurrent requests
   if (activeProvisionRun) {
     sendJson(res, 429, { error: 'A provisioning run is already in progress. Wait for it to complete.' });
     return;
   }
+  // Set lock IMMEDIATELY (synchronous) before any async work
+  const runId = randomUUID();
+  activeProvisionRun = runId;
 
   const body = await parseJsonBody(req) as {
     projectDir?: string;
@@ -145,7 +149,6 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
   }
 
   const allCredentials = await loadCredentials(password);
-  const runId = randomUUID();
 
   // Scope credentials to only what this provisioner needs (ADR-020)
   const scopedCreds = scopeCredentials(allCredentials, body.deployTarget);
@@ -214,7 +217,6 @@ addRoute('POST', '/api/provision/start', async (req: IncomingMessage, res: Serve
   // Persist manifest to disk before starting (crash recovery)
   await createManifest(runId, body.deployTarget, region, body.projectName);
 
-  activeProvisionRun = runId;
   /** Shared outputs that pre-steps inject and provisioners consume. */
   const sharedOutputs: Record<string, string> = {};
 

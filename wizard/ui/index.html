@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- UX-R2-010: Skip navigation for keyboard/screen reader users -->
+  <a href="#wizard-body" class="skip-nav">Skip to main content</a>
+  <!-- UX-R2-030: noscript fallback -->
+  <noscript><div class="noscript-msg">VoidForge requires JavaScript to run. Please enable JavaScript and reload.</div></noscript>
   <div class="wizard" id="wizard">
     <header class="wizard-header">
       <div class="logo">Gandalf — VoidForge Setup</div>
@@ -22,8 +26,8 @@
       <!-- Act 1: Secure Your Forge -->
 
       <!-- Step 1: Vault Only -->
-      <section class="step" id="step-1" data-step="1">
-        <h1>Secure Your Forge</h1>
+      <section class="step" id="step-1" data-step="1" aria-labelledby="step-1-heading">
+        <h1 id="step-1-heading">Secure Your Forge</h1>
         <p class="subtitle">This password protects everything you build.</p>
 
         <div class="card" id="vault-card">
@@ -46,8 +50,8 @@
       </section>
 
       <!-- Step 2: API Key Only -->
-      <section class="step hidden" id="step-2" data-step="2">
-        <h1>Connect Claude</h1>
+      <section class="step hidden" id="step-2" data-step="2" aria-labelledby="step-2-heading">
+        <h1 id="step-2-heading">Connect Claude</h1>
         <p class="subtitle">Claude needs an Anthropic API key to help you build.</p>
 
         <div class="card" id="apikey-card">
@@ -70,8 +74,8 @@
       <!-- Act 2: Describe Your Vision -->
 
       <!-- Step 3: Project Setup -->
-      <section class="step hidden" id="step-3" data-step="3">
-        <h1>Name Your Project</h1>
+      <section class="step hidden" id="step-3" data-step="3" aria-labelledby="step-3-heading">
+        <h1 id="step-3-heading">Name Your Project</h1>
         <p class="subtitle">What are you building?</p>
 
         <div class="card">
@@ -94,17 +98,18 @@
       </section>
 
       <!-- Step 4: PRD -->
-      <section class="step hidden" id="step-4" data-step="4">
-        <h1>Product Requirements</h1>
+      <section class="step hidden" id="step-4" data-step="4" aria-labelledby="step-4-heading">
+        <h1 id="step-4-heading">Describe Your Vision</h1>
         <p class="subtitle">Every great project starts with a PRD.</p>
 
+        <!-- UX-R2-011/019: ARIA tab linkage with ids and aria-controls -->
         <div class="tabs" role="tablist">
-          <button class="tab active" data-tab="generate" type="button" role="tab" aria-selected="true">Generate with Claude</button>
-          <button class="tab" data-tab="paste" type="button" role="tab" aria-selected="false">Bring Your Own PRD</button>
-          <button class="tab" data-tab="skip" type="button" role="tab" aria-selected="false">Skip for Now</button>
+          <button class="tab active" id="tab-btn-generate" data-tab="generate" type="button" role="tab" aria-selected="true" aria-controls="tab-generate">Generate with Claude</button>
+          <button class="tab" id="tab-btn-paste" data-tab="paste" type="button" role="tab" aria-selected="false" aria-controls="tab-paste">Bring Your Own PRD</button>
+          <button class="tab" id="tab-btn-skip" data-tab="skip" type="button" role="tab" aria-selected="false" aria-controls="tab-skip">Skip for Now</button>
         </div>
 
-        <div class="tab-panel active" id="tab-generate" role="tabpanel">
+        <div class="tab-panel active" id="tab-generate" role="tabpanel" aria-labelledby="tab-btn-generate">
           <div class="card">
             <p>Describe your idea and Claude will generate a production-ready PRD.</p>
 
@@ -159,7 +164,7 @@
           </div>
         </div>
 
-        <div class="tab-panel" id="tab-paste" role="tabpanel">
+        <div class="tab-panel" id="tab-paste" role="tabpanel" aria-labelledby="tab-btn-paste">
           <div class="card">
             <p>Already have a PRD, or prefer to generate one with a different AI? Paste the finished result below.</p>
 
@@ -179,7 +184,7 @@
           </div>
         </div>
 
-        <div class="tab-panel" id="tab-skip" role="tabpanel">
+        <div class="tab-panel" id="tab-skip" role="tabpanel" aria-labelledby="tab-btn-skip">
           <div class="card">
             <p>A blank PRD template will be included in your project at <code>docs/PRD.md</code>. You'll need to fill it out before running <code>/build</code>.</p>
             <div class="status-row info">This is fine if you want to set up the project structure first and write the PRD later.</div>
@@ -188,8 +193,8 @@
       </section>
 
       <!-- Step 4b: Project Credentials (PRD-driven) -->
-      <section class="step hidden" id="step-4b" data-step="4b">
-        <h1>Project Credentials</h1>
+      <section class="step hidden" id="step-4b" data-step="4b" aria-labelledby="step-4b-heading">
+        <h1 id="step-4b-heading">Project Credentials</h1>
         <p class="subtitle">Your PRD references these services. Add API keys now, or fill in <code>.env</code> later.</p>
 
         <div id="env-credentials-list"></div>
@@ -209,8 +214,8 @@
       <!-- Act 3: Equip Your Project -->
 
       <!-- Step 5: Operations Menu -->
-      <section class="step hidden" id="step-5" data-step="5">
-        <h1>Equip Your Project</h1>
+      <section class="step hidden" id="step-5" data-step="5" aria-labelledby="step-5-heading">
+        <h1 id="step-5-heading">Equip Your Project</h1>
         <p class="subtitle">Configure what you need. Skip what you don't.</p>
 
         <!-- Deploy Target Card -->
@@ -290,8 +295,8 @@
       </section>
 
       <!-- Step 6: Review -->
-      <section class="step hidden" id="step-6" data-step="6">
-        <h1>Review</h1>
+      <section class="step hidden" id="step-6" data-step="6" aria-labelledby="step-6-heading">
+        <h1 id="step-6-heading">Review</h1>
         <p class="subtitle">Confirm everything before we create your project.</p>
 
         <div class="card">

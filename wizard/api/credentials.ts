@@ -105,8 +105,9 @@ addRoute('POST', '/api/credentials/unlock', async (req: IncomingMessage, res: Se
     return;
   }
 
-  if (body.password.length < 4) {
-    sendJson(res, 400, { error: 'Password must be at least 4 characters' });
+  // QA-R3-017: Raise vault password minimum from 4 to 8 chars
+  if (body.password.length < 8) {
+    sendJson(res, 400, { error: 'Password must be at least 8 characters' });
     return;
   }
 

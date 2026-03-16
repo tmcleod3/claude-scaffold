@@ -93,6 +93,17 @@ Five domain specialists verify nobody broke anyone else's work:
 
 The Council re-runs until it finds zero issues (max 3 iterations). Troi only runs on the final iteration (or when `/assemble --skip-build` is used for campaign victory).
 
+### Cross-File Flow Tracing (Frontend)
+
+For every API call path in frontend code, trace the error handling chain across files:
+`component → store → api client → response handler`
+
+Verify no circular calls between store actions and API methods. Specifically check: does the error handler for endpoint X call a function that eventually calls endpoint X again?
+
+**Pattern to detect:** auth refresh → API call → 401 → refresh → API call → infinite recursion.
+
+(Field report #17: recursive 401 loop shipped past /assemble review because no agent traced the cross-file call chain.)
+
 ## Deliverables
 
 1. `/logs/assemble-state.md` — phase-by-phase completion log

@@ -17,6 +17,15 @@ import type { CreatedResource } from './provisioners/types.js';
 
 const RUNS_DIR = join(homedir(), '.voidforge', 'runs');
 
+/** QA-R2-004: Write queue to serialize manifest mutations and prevent race conditions */
+let writeQueue: Promise<void> = Promise.resolve();
+
+function serialized<T>(fn: () => Promise<T>): Promise<T> {
+  const result = writeQueue.then(fn, () => fn());
+  writeQueue = result.then(() => {}, () => {});
+  return result;
+}
+
 export interface ManifestResource {
   type: string;
   id: string;
@@ -38,63 +47,78 @@ async function ensureDir(): Promise<void> {
   await mkdir(RUNS_DIR, { recursive: true });
 }
 
+// SEC-R3-013: Validate runId is a UUID to prevent path traversal
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 function manifestPath(runId: string): string {
+  if (!UUID_RE.test(runId)) throw new Error('Invalid runId format');
   return join(RUNS_DIR, `${runId}.json`);
 }
 
 /** Create a new manifest for a provisioning run. */
-export async function createManifest(runId: string, target: string, region: string, projectName: string): Promise<ProvisionManifest> {
-  await ensureDir();
-  const manifest: ProvisionManifest = {
-    runId,
-    startedAt: new Date().toISOString(),
-    target,
-    region,
-    projectName,
-    status: 'in-progress',
-    resources: [],
-  };
-  await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
-  return manifest;
+export function createManifest(runId: string, target: string, region: string, projectName: string): Promise<ProvisionManifest> {
+  // QA-R3-004: Wrap in serialized() for consistency with other mutation functions
+  return serialized(async () => {
+    await ensureDir();
+    const manifest: ProvisionManifest = {
+      runId,
+      startedAt: new Date().toISOString(),
+      target,
+      region,
+      projectName,
+      status: 'in-progress',
+      resources: [],
+    };
+    await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+    return manifest;
+  });
 }
 
 /** Record that a resource is about to be created (write-ahead). */
-export async function recordResourcePending(runId: string, type: string, id: string, region: string): Promise<void> {
-  const manifest = await readManifest(runId);
-  if (!manifest) return;
-  manifest.resources.push({ type, id, region, status: 'pending' });
-  await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+export function recordResourcePending(runId: string, type: string, id: string, region: string): Promise<void> {
+  return serialized(async () => {
+    const manifest = await readManifest(runId);
+    if (!manifest) return;
+    manifest.resources.push({ type, id, region, status: 'pending' });
+    await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+  });
 }
 
 /** Record that a resource was successfully created. */
-export async function recordResourceCreated(runId: string, type: string, id: string, region: string): Promise<void> {
-  const manifest = await readManifest(runId);
-  if (!manifest) return;
+export function recordResourceCreated(runId: string, type: string, id: string, region: string): Promise<void> {
+  return serialized(async () => {
+    const manifest = await readManifest(runId);
+    if (!manifest) return;
 
-  const existing = manifest.resources.find((r) => r.type === type && r.id === id);
-  if (existing) {
-    existing.status = 'created';
-  } else {
-    manifest.resources.push({ type, id, region, status: 'created' });
-  }
-  await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+    const existing = manifest.resources.find((r) => r.type === type && r.id === id);
+    if (existing) {
+      existing.status = 'created';
+    } else {
+      manifest.resources.push({ type, id, region, status: 'created' });
+    }
+    await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+  });
 }
 
 /** Mark the overall run status. */
-export async function updateManifestStatus(runId: string, status: ProvisionManifest['status']): Promise<void> {
-  const manifest = await readManifest(runId);
-  if (!manifest) return;
-  manifest.status = status;
-  await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+export function updateManifestStatus(runId: string, status: ProvisionManifest['status']): Promise<void> {
+  return serialized(async () => {
+    const manifest = await readManifest(runId);
+    if (!manifest) return;
+    manifest.status = status;
+    await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+  });
 }
 
 /** Mark a resource as cleaned up. */
-export async function recordResourceCleaned(runId: string, type: string, id: string): Promise<void> {
-  const manifest = await readManifest(runId);
-  if (!manifest) return;
-  const resource = manifest.resources.find((r) => r.type === type && r.id === id);
-  if (resource) resource.status = 'cleaned';
-  await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+export function recordResourceCleaned(runId: string, type: string, id: string): Promise<void> {
+  return serialized(async () => {
+    const manifest = await readManifest(runId);
+    if (!manifest) return;
+    const resource = manifest.resources.find((r) => r.type === type && r.id === id);
+    if (resource) resource.status = 'cleaned';
+    await writeFile(manifestPath(runId), JSON.stringify(manifest, null, 2), 'utf-8');
+  });
 }
 
 /** Read a manifest by run ID. Returns null if not found. */

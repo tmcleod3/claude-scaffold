@@ -110,7 +110,8 @@ addRoute('POST', '/api/auth/login', async (req: IncomingMessage, res: ServerResp
   }
 
   // Cap field lengths to prevent DoS via oversized PBKDF2 input
-  if (username.length > 64 || password.length > 256 || totpCode.length > 6) {
+  // QA-R3-018 + CROSS-R4-010: TOTP must be exactly 6 digits per RFC 6238
+  if (username.length > 64 || password.length > 256 || totpCode.length !== 6 || !/^\d{6}$/.test(totpCode)) {
     sendJson(res, 400, { success: false, error: 'Field length exceeded' });
     return;
   }
