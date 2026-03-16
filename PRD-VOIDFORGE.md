@@ -45,7 +45,7 @@ deploy: "static"
 └────────┬────────────────────────────┬────────────┘
          │                            │
     Slash Commands               Browser Wizards
-    (/build, /campaign,          (Merlin, Haku)
+    (/build, /campaign,          (Gandalf, Haku)
      /assemble, etc.)                 │
          │                    ┌───────┴───────┐
          │                    │  Express API   │
@@ -79,7 +79,7 @@ deploy: "static"
 |-----------|---------|-------|
 | **Methodology** | Agent protocols, build phases, code patterns | CLAUDE.md, docs/methods/*.md, docs/patterns/*.ts |
 | **Commands** | 15 slash commands as executable prompts | .claude/commands/*.md |
-| **Merlin Wizard** | Browser-based setup: vault, credentials, PRD, scaffolding | wizard/ui/app.js, wizard/api/*.ts |
+| **Gandalf Wizard** | Browser-based setup: vault, credentials, PRD, scaffolding | wizard/ui/app.js, wizard/api/*.ts |
 | **Haku Wizard** | Browser-based deploy: provision infrastructure, deploy code | wizard/ui/deploy.js, wizard/lib/provisioners/*.ts |
 | **Vault** | AES-256-GCM encrypted credential storage | wizard/lib/vault.ts |
 | **Provisioners** | Create cloud resources for 6 deploy targets | wizard/lib/provisioners/*.ts |
@@ -143,15 +143,42 @@ deploy: "static"
 - No duplicate names across active sessions
 - Character traits encode behavioral directives
 
-### Feature 3: The Wizards (Merlin + Haku)
+### Feature 3: The Wizards (Gandalf + Haku)
 
-**Merlin (Setup):**
-1. Create encrypted vault
-2. Add cloud provider credentials (AWS, Vercel, Railway, Cloudflare, GitHub)
-3. Name project, set domain, configure hostname
-4. Generate PRD with Claude or paste custom
-5. Choose deploy target
-6. Scaffold project
+**Gandalf (Setup) — Three-Act Flow (v7.1 redesign):**
+
+The wizard is a conversation, not a form. Three natural acts: who are you, what are you building, how should it run. Each act has a distinct emotional register. Éowyn's enchantment principles: the first screen should feel like lighting a forge, the PRD step like describing a dream, the operations menu like choosing equipment before an adventure, and the creation moment like something coming to life.
+
+*Act 1 — "Secure Your Forge" (Identity):*
+1. Vault only. One password field, one button. The screen is mostly empty — dark background, a single glowing input. The subtitle fades in: "This password protects everything you build." When the vault unlocks, a subtle pulse ripples outward — the forge is lit. No progress bar yet. Just the moment.
+2. Anthropic API key. One field. "Claude needs a key to help you build." Skip link for users who'll add it later. When the key is stored, the progress bar appears for the first time — Act 1 complete, two segments lit.
+
+*Act 2 — "Describe Your Vision" (What you're building):*
+3. Project identity. Name + directory only. Domain and hostname moved to Act 3 where they're contextually relevant. The heading changes from "Gandalf — VoidForge Setup" to "Gandalf — [Project Name]" the moment they type a name. The project is already becoming real.
+4. PRD. Generate with Claude / paste / skip. If generating, the streaming response should feel like the project is being imagined into existence — not a loading spinner, but text flowing onto the screen like it's being written by hand. If the PRD defines env vars, Step 4b collects project-specific credentials (same as current).
+
+*Act 3 — "Equip Your Project" (Operations menu):*
+5. A single screen with expandable cards — NOT a sequence of steps. Each card is an independent choice. The user picks what they need and skips the rest. Cards are contextually smart: if the PRD says `deploy: "vercel"`, the deploy card is pre-selected and Vercel-specific options are shown.
+
+   Cards:
+   - **Deploy Target** — where does this ship? (Vercel / AWS / Railway / Cloudflare / S3 / Docker)
+   - **Cloud Credentials** — only shown if deploy target needs keys not yet in the vault
+   - **Domain & Hostname** — custom domain configuration (only shown if deploy target supports it)
+   - **The Resilience Pack** — opt-in operational hardening (see below)
+   - **Monitoring** — Sentry DSN, health endpoint (optional)
+
+   The Resilience Pack card expands to show toggles with smart defaults:
+   - Deploy resilience: multi-env, preview deploys, auto-rollback, migration automation, backups
+   - Runtime resilience: health check endpoint, graceful shutdown, error boundaries, rate limiting, dead letter queue
+   Each toggle shows a one-line explanation. Toggles are pre-set based on deploy target and framework.
+
+   Footer: "[Skip All — I'll configure later]" and "[Continue to Review]"
+
+*Finale:*
+6. Review. Clean summary of all choices grouped by act. Edit buttons per section.
+7. Create → Avengers Tower. The project is scaffolded, and the UI transitions to the terminal. The moment of creation should feel conclusive — not "redirecting..." but a brief animation of the project structure appearing, then the terminal filling the screen. You're home now.
+
+The old simple/advanced toggle is eliminated. Every user gets the same flow — Act 3's menu means "advanced" users configure more cards, "simple" users click "Skip All." Same path, different depth.
 
 **Haku (Deploy):**
 1. Unlock vault, scan project
@@ -186,9 +213,9 @@ deploy: "static"
 3. User sends prompts from Telegram → Claude Code executes → responses sent back
 4. Gom Jabbar re-authenticates after 60 minutes idle
 
-### Feature 6: Camelot (Browser Terminal + Multi-Project Operations Console)
+### Feature 6: Avengers Tower (Browser Terminal + Multi-Project Operations Console)
 
-**The vision:** Never leave the browser. Merlin creates the project (Steps 1-6), then the UI transitions to Camelot — a persistent browser workspace with real terminal sessions running Claude Code. The user types `/build`, `/campaign`, SSH commands, git pushes, everything — all inside the browser. After deploy, the terminal stays open. Camelot is where you live.
+**The vision:** Never leave the browser. Gandalf creates the project (Steps 1-6), then the UI transitions to Avengers Tower — a persistent browser workspace with real terminal sessions running Claude Code. The user types `/build`, `/campaign`, SSH commands, git pushes, everything — all inside the browser. After deploy, the terminal stays open. Avengers Tower is where you live.
 
 **Why a real terminal, not API-based build:** Claude Code in a PTY gives you the full experience — 1M context window, all tools (Read, Write, Bash, Grep, etc.), interactive conversation, user intervention. Reimplementing this via the Anthropic API would produce a worse version at twice the code. The browser terminal (xterm.js + node-pty) is the same stack VS Code, Gitpod, and GitHub Codespaces use. It renders Claude Code's full ANSI output correctly because it IS a real terminal.
 
@@ -200,7 +227,7 @@ deploy: "static"
 - Vault password required to establish PTY connection
 
 **Multi-project mode (v6.0):**
-- The Great Hall: dashboard showing all projects with status, health, deploy URL, cost
+- The Lobby: dashboard showing all projects with status, health, deploy URL, cost
 - Each project is a "room" — click in for the full terminal workspace
 - Project registry at `~/.voidforge/projects.json`
 - Background health poller
@@ -253,14 +280,15 @@ See `ROADMAP.md` for the full plan. Summary:
 | **v4.0** | The Reliability Release | Pre-deploy build step, CI/CD generation, env validation, Railway API fix, credential scoping |
 | **v4.1** | The Observability Release | Health monitoring, error tracking (Sentry), deploy logs, cost estimation |
 | **v4.2** | The DX Release | Type generation, API docs, ERD, integration templates (Stripe/Resend/S3), database seeding |
-| **v4.3** | The Resilience Release | Multi-environment, preview deployments, platform rollback, migration automation, backups |
+| **v4.3** | The Resilience Pack | Opt-in operational hardening in Gandalf's Act 3 menu: multi-env, preview deploys, rollback, migrations, backups, health checks, graceful shutdown, error boundaries, rate limiting, DLQ |
 | **v4.4** | The Imagination Release | `/imagine` (Celebrimbor — AI image generation) + `/debrief` (Bashir — post-mortem analysis, upstream feedback via GitHub issues) |
-| **v4.5** | The Seamless Release | PRD-driven credential collection in Merlin, headless deploy mode (`--headless`), PostgreSQL extension support |
+| **v4.5** | The Seamless Release | PRD-driven credential collection in Gandalf, headless deploy mode (`--headless`), PostgreSQL extension support |
 | **v5.0** | The Intelligence Release | Lessons integration, build analytics, smart scoping, template marketplace |
-| **v5.5** | Camelot Local | Browser terminal (xterm.js + node-pty), never leave the browser, Claude Code in the wizard |
-| **v6.0** | Camelot Multi | Project registry, Great Hall dashboard, multi-terminal per project, health poller |
-| **v6.5** | Camelot Remote | Self-hosted mode, 5-layer security (network + auth + vault + sandbox + audit), TOTP 2FA, two-password architecture |
-| **v7.0** | The Round Table | Multi-user RBAC, per-project permissions, linked services, coordinated deploys, rollback dashboard, cost tracker, agent memory |
+| **v5.5** | Avengers Tower Local | Browser terminal (xterm.js + node-pty), never leave the browser, Claude Code in the wizard |
+| **v6.0** | Avengers Tower Multi | Project registry, The Lobby dashboard, multi-terminal per project, health poller |
+| **v6.5** | Avengers Tower Remote | Self-hosted mode, 5-layer security (network + auth + vault + sandbox + audit), TOTP 2FA, two-password architecture |
+| **v7.0** | The Penthouse | Multi-user RBAC, per-project permissions, linked services, coordinated deploys, rollback dashboard, cost tracker, agent memory |
+| **v7.1** | The Redesign | Three-act wizard flow, operations menu replaces simple/advanced toggle, Resilience Pack as opt-in card, Éowyn's enchantment layer |
 
 ---
 
@@ -275,16 +303,16 @@ See `ROADMAP.md` for the full plan. Summary:
 - **SSH:** Ed25519 key pairs, StrictHostKeyChecking=accept-new, .gitignore protection
 - **SSE output:** Secret stripping loop removes any key containing password/secret/token
 
-### Camelot Local (v5.5)
+### Avengers Tower Local (v5.5)
 - WebSocket requires vault password to establish PTY connection
 - PTY idle timeout: 30 minutes (configurable)
 - Max 5 concurrent terminal sessions
 - Terminal output sanitization (XSS prevention if content reflected to HTML)
 - PTY spawns as current user (never root)
 
-### Camelot Remote (v6.5) — Threat Model
+### Avengers Tower Remote (v6.5) — Threat Model
 
-**What's behind the door:** Remote Camelot exposes Anthropic API keys, AWS credentials, GitHub tokens, Cloudflare tokens, all project-specific API keys, SSH access to every production server, source code for every project, database credentials, and a live terminal that can execute any command. This is root access to the user's entire digital infrastructure over HTTPS. A single password is wildly insufficient.
+**What's behind the door:** Remote Avengers Tower exposes Anthropic API keys, AWS credentials, GitHub tokens, Cloudflare tokens, all project-specific API keys, SSH access to every production server, source code for every project, database credentials, and a live terminal that can execute any command. This is root access to the user's entire digital infrastructure over HTTPS. A single password is wildly insufficient.
 
 **Attack vectors and mitigations:**
 
@@ -325,8 +353,8 @@ How to know VoidForge is working:
 3. **Session recovery rate** — how often build-state.md successfully resumes a multi-session build
 4. **Deploy success rate** — Haku provisions + deploys without manual intervention
 5. **Browser-only success rate** (v5.5+) — % of builds completed without opening a separate terminal
-6. **Zero-context-switch rate** (v5.5+) — from Merlin wizard to live URL, entirely in one browser tab
+6. **Zero-context-switch rate** (v5.5+) — from Gandalf wizard to live URL, entirely in one browser tab
 7. **Remote build rate** (v6.5+) — builds initiated from non-development devices (phone, tablet, borrowed laptop)
-8. **Multi-project health** (v6.0+) — % of deployed projects with passing health checks in the Great Hall
+8. **Multi-project health** (v6.0+) — % of deployed projects with passing health checks in The Lobby
 9. **Security incident rate** (v6.5+) — zero tolerance for credential exposure or unauthorized access
 5. **Branch sync consistency** — all 3 tiers have identical shared files at every release

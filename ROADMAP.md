@@ -36,7 +36,7 @@ The full vault is passed to every provisioner via `ctx.credentials`. Scope it so
 After the initial health check passes, generate a simple cron-based uptime monitor for VPS (`curl` every 5 minutes, alert on failure). For platform targets, add monitoring dashboard links to the Done screen (Vercel Analytics, Railway Metrics, Cloudflare Analytics).
 
 ### Error tracking integration
-Add Sentry as an optional integration in the Merlin wizard. If enabled, generate the Sentry SDK initialization code, configure source maps, and inject the DSN as an env var. Non-fatal — works without it.
+Add Sentry as an optional integration in the Gandalf wizard. If enabled, generate the Sentry SDK initialization code, configure source maps, and inject the DSN as an env var. Non-fatal — works without it.
 
 ### Structured deploy logs
 Store deploy results to `~/.voidforge/deploys/` with timestamps, targets, URLs, and resource IDs. Users can run `voidforge deploys` to see their deploy history. Haku's Done screen links to the log.
@@ -73,24 +73,42 @@ Generate `seed.ts` with factory functions for all schema models. Used by tests a
 
 ---
 
-## v4.3 — The Resilience Release
+## v4.3 — The Resilience Pack (opt-in, integrated into Gandalf)
 
-*From "it works" to "it stays working."*
+*From "it works" to "it stays working." Now an opt-in feature pack in Gandalf's Act 3 operations menu — not a standalone release.*
 
-### Multi-environment support
-Generate separate `.env.development`, `.env.staging`, `.env.production`. Haku wizard asks which environment to deploy. Platform deploys scope env vars per environment (Vercel already supports this — extend to Railway/Cloudflare).
+**Status:** Reclassified. Originally a standalone version, now integrated as the "Resilience Pack" card in the v7.1 wizard redesign. Users choose which features they want during project setup. All features are also addable after creation via `/campaign --plan add resilience`.
 
-### Preview deployments
-For Vercel and Cloudflare Pages, configure PR preview deployments automatically. Each pull request gets a unique URL. Links posted as PR comments via GitHub API.
+### Deploy Resilience (opt-in toggles)
+- **Multi-environment** — generate `.env.development`, `.env.staging`, `.env.production`. Platform deploys scope env vars per environment.
+- **Preview deployments** — for Vercel and Cloudflare Pages, configure PR preview deploys automatically. PR comments via GitHub API.
+- **Auto-rollback** — one-click rollback via platform API (Vercel/Railway/Cloudflare). Surface in Avengers Tower rollback panel.
+- **Migration automation** — run `prisma migrate deploy` (or framework equivalent) as part of deploy. For VPS, before symlink swap.
+- **Backup automation** — daily `pg_dump` to S3 for VPS+RDS. Platform-native backups documented for Railway/D1. S3 versioning for static.
 
-### Platform rollback
-Vercel, Railway, and Cloudflare all support rollback via API. Add a `/api/provision/rollback` endpoint that reverts to the previous deployment. Surface in the Haku UI as a "Rollback" button on the Done screen.
+### Runtime Resilience (opt-in toggles)
+- **Health check endpoint** — generates `/api/health` checking DB, Redis, disk. Framework-aware.
+- **Graceful shutdown** — `SIGTERM` → drain connections → close DB → exit. Critical for zero-downtime platform deploys.
+- **Error boundaries** — React error boundaries for frontend, global exception handler for backend.
+- **Rate limiting** — basic rate limiter on auth endpoints. Per-IP counter middleware.
+- **Dead letter queue** — for projects with `workers: yes`. Failed jobs to DLQ instead of silent drops.
 
-### Database migration automation
-Run `prisma migrate deploy` (or `rails db:migrate`, `python manage.py migrate`) as part of the deploy step. For VPS, include in the SSH deploy sequence before the symlink swap. For platforms, add as a build step.
+### PRD Frontmatter
+```yaml
+resilience:
+  multi-env: yes | no
+  preview-deploys: yes | no
+  rollback: yes | no
+  migrations: auto | manual | no
+  backups: daily | weekly | no
+  health-check: yes | no
+  graceful-shutdown: yes | no
+  error-boundaries: yes | no  # only if framework has UI
+  rate-limiting: yes | no
+  dead-letter-queue: yes | no  # only if workers: yes
+```
 
-### Backup automation
-For VPS + RDS: generate a daily backup cron (`pg_dump` to S3). For Railway/Cloudflare D1: document the platform's built-in backup features. For S3 static: enable versioning on the bucket.
+Smart defaults based on deploy target and framework — Vercel gets preview deploys on by default, static sites skip backups, API-only projects skip error boundaries.
 
 ---
 
@@ -105,8 +123,8 @@ Sub-agents: Nori (asset scanner), Ori (prompt engineer), Dori (integration check
 
 Command: `/imagine` (not `/forge` — avoids collision with VoidForge/Bombadil naming). Flags: `--scan`, `--asset "name"`, `--regen "name"`, `--style "override"`, `--provider model`.
 
-### Wizard integration — OpenAI API key in Merlin
-Add OpenAI API key as an optional credential in Merlin's Step 2 (Cloud Providers). Same vault, same AES-256-GCM encryption, same UX. Key name: `openai-api-key`. If not provided in wizard, `/imagine` prompts on first use. Non-blocking — projects work fine without it.
+### Wizard integration — OpenAI API key in Gandalf
+Add OpenAI API key as an optional credential in Gandalf's Step 2 (Cloud Providers). Same vault, same AES-256-GCM encryption, same UX. Key name: `openai-api-key`. If not provided in wizard, `/imagine` prompts on first use. Non-blocking — projects work fine without it.
 
 ### Pipeline integration
 - `/assemble` Phase 2b: Celebrimbor generates assets after build, before review
@@ -151,12 +169,12 @@ Command: `/debrief`. Flags: `--submit` (create GitHub issue), `--campaign` (anal
 
 ## v4.5 — The Seamless Release
 
-*From Merlin to live URL without leaving Claude Code.*
+*From Gandalf to live URL without leaving Claude Code.*
 
 ### PRD-driven credential collection
-Merlin currently collects cloud provider credentials (AWS, Vercel, etc.) in Step 2. But project-specific API keys (WhatsApp, Mapbox, Google Places, Resend, etc.) must be manually added to `.env` later. After the PRD is pasted in Step 4, Merlin should parse the env var section, identify which keys are needed, and present a dynamic credential form (Step 4.5). All keys stored in the vault with the same AES-256-GCM encryption. Grouped by urgency: required for build, required for deploy, optional enrichment sources.
+Gandalf currently collects cloud provider credentials (AWS, Vercel, etc.) in Step 2. But project-specific API keys (WhatsApp, Mapbox, Google Places, Resend, etc.) must be manually added to `.env` later. After the PRD is pasted in Step 4, Gandalf should parse the env var section, identify which keys are needed, and present a dynamic credential form (Step 4.5). All keys stored in the vault with the same AES-256-GCM encryption. Grouped by urgency: required for build, required for deploy, optional enrichment sources.
 
-New API endpoint: `POST /api/prd/env-requirements` — parses PRD content and returns structured list of required credentials with labels, placeholders, and help text. New Merlin step between PRD and deploy target selection.
+New API endpoint: `POST /api/prd/env-requirements` — parses PRD content and returns structured list of required credentials with labels, placeholders, and help text. New Gandalf step between PRD and deploy target selection.
 
 ### Headless deploy mode (`--headless`)
 Haku is a browser wizard. But `/build` Phase 12 already says "Kusanagi provisions and deploys." The vault has the credentials. The PRD has the target. There's no reason to context-switch to a browser. Add `npx voidforge deploy --headless` that runs the same provisioner code but outputs progress to terminal (stdout) instead of SSE to a browser. Phase 12 of `/build` calls this directly.
@@ -221,11 +239,11 @@ Curated project starters (SaaS, API, marketing site, admin dashboard) with pre-f
 
 ---
 
-## v5.5 — Camelot Local
+## v5.5 — Avengers Tower Local
 
-*Merlin builds Camelot. You never leave the browser.*
+*Gandalf builds Avengers Tower. You never leave the browser.*
 
-The insight: instead of reimplementing Claude Code's capabilities via the Anthropic API (custom tool executor, custom agentic loop), embed a real terminal in the browser. The user gets actual Claude Code — full tool access, 1M context window, interactive conversation — running inside an xterm.js terminal connected to the VoidForge server via WebSocket. After Merlin creates the project (Steps 1-6), the UI transitions to Camelot: a browser terminal that auto-launches Claude Code in the project directory. The user types `/build` or `/campaign` and the real 13-phase protocol executes. No terminal app needed. No context switch. And the terminal stays open after deploy — you can SSH into production, push hotfixes, run `/qa`, run `/debrief`, all from the same browser tab.
+The insight: instead of reimplementing Claude Code's capabilities via the Anthropic API (custom tool executor, custom agentic loop), embed a real terminal in the browser. The user gets actual Claude Code — full tool access, 1M context window, interactive conversation — running inside an xterm.js terminal connected to the VoidForge server via WebSocket. After Gandalf creates the project (Steps 1-6), the UI transitions to Avengers Tower: a browser terminal that auto-launches Claude Code in the project directory. The user types `/build` or `/campaign` and the real 13-phase protocol executes. No terminal app needed. No context switch. And the terminal stays open after deploy — you can SSH into production, push hotfixes, run `/qa`, run `/debrief`, all from the same browser tab.
 
 ### PTY Manager (`wizard/lib/pty-manager.ts`)
 Server-side component that spawns real pseudo-terminal processes using `node-pty` (the same library VS Code, Gitpod, and GitHub Codespaces use). Each PTY is a real shell (`zsh` or `bash`) with full capabilities. Manages multiple sessions per project (Claude Code in one tab, SSH in another, shell in a third). Auto-injects initial commands (`cd /path/to/project && claude`) when a session starts.
@@ -240,14 +258,14 @@ Key behaviors:
 ### WebSocket endpoint (`wizard/api/terminal.ts`)
 Bridges browser ↔ PTY. Bidirectional: keystrokes from xterm.js → PTY stdin, PTY stdout → xterm.js render. Requires vault password to establish connection (prevents unauthorized terminal access even in local mode). Binary frames for efficiency. Handles resize events (terminal dimension changes flow through to PTY).
 
-### Browser terminal UI (`wizard/ui/camelot.html` + `wizard/ui/camelot.js`)
+### Browser terminal UI (`wizard/ui/tower.html` + `wizard/ui/tower.js`)
 Uses xterm.js (the standard browser terminal renderer — same as VS Code web, Gitpod, Railway console). Renders full ANSI color, cursor positioning, scrollback. Fits to container with `xterm-addon-fit`. Clickable URLs with `xterm-addon-web-links`. Tabbed interface: multiple terminals per project. Tab bar shows session type: `[Claude Code] [SSH: prod] [Shell] [+ New]`.
 
 ### Navigation flow
-After Merlin Step 6 (Review) → Step 7 (Create Project) → **Step 8: Camelot**. The wizard header changes from "Merlin — VoidForge Setup" to "Camelot — [Project Name]". The progress bar is replaced by a phase status indicator (for builds in progress). Back navigation goes to the Great Hall (in v6.0+) or Merlin (single-project mode). The Merlin wizard and Camelot share the same Express server, same port, same vault session.
+After Gandalf Step 6 (Review) → Step 7 (Create Project) → **Step 8: Avengers Tower**. The wizard header changes from "Gandalf — VoidForge Setup" to "Avengers Tower — [Project Name]". The progress bar is replaced by a phase status indicator (for builds in progress). Back navigation goes to The Lobby (in v6.0+) or Gandalf (single-project mode). The Gandalf wizard and Avengers Tower share the same Express server, same port, same vault session.
 
 ### Security (local mode)
-Local Camelot binds to `localhost:3141`. No external exposure. The threat model is the same as Claude Code itself: physical access to the machine. Mitigations:
+Local Avengers Tower binds to `localhost:3141`. No external exposure. The threat model is the same as Claude Code itself: physical access to the machine. Mitigations:
 - WebSocket requires vault password to establish PTY connection (prevents rogue browser tabs from opening terminals)
 - PTY idle timeout: 30 min default, configurable
 - Max 5 concurrent terminal sessions (prevent resource exhaustion)
@@ -263,20 +281,20 @@ Local Camelot binds to `localhost:3141`. No external exposure. The threat model 
 ### Files to create
 - `wizard/lib/pty-manager.ts` (~200 lines) — PTY lifecycle management
 - `wizard/api/terminal.ts` (~100 lines) — WebSocket ↔ PTY bridge
-- `wizard/ui/camelot.html` (~100 lines) — terminal page
-- `wizard/ui/camelot.js` (~300 lines) — xterm.js setup, tab management, WebSocket client
-- Update: `wizard/server.ts` (WebSocket upgrade handling), `wizard/ui/app.js` (transition to Camelot after project creation), `scripts/voidforge.ts` (serve camelot.html)
+- `wizard/ui/tower.html` (~100 lines) — terminal page
+- `wizard/ui/tower.js` (~300 lines) — xterm.js setup, tab management, WebSocket client
+- Update: `wizard/server.ts` (WebSocket upgrade handling), `wizard/ui/app.js` (transition to Avengers Tower after project creation), `scripts/voidforge.ts` (serve tower.html)
 
 ### Estimated effort
 ~850 lines (including security), 2-3 sessions.
 
 ---
 
-## v6.0 — Camelot Multi
+## v6.0 — Avengers Tower Multi
 
-*Every project gets a room. The Great Hall shows them all.*
+*Every project gets a room. The Lobby shows them all.*
 
-Camelot expands from a single-project terminal to a multi-project operations console. The landing page becomes the Great Hall: a dashboard showing all VoidForge projects with status, health, deploy URL, and quick actions. Each project is a "room" you click into — opening the full terminal workspace for that project.
+Avengers Tower expands from a single-project terminal to a multi-project operations console. The landing page becomes The Lobby: a dashboard showing all VoidForge projects with status, health, deploy URL, and quick actions. Each project is a "room" you click into — opening the full terminal workspace for that project.
 
 ### Project Registry (`wizard/lib/project-registry.ts`)
 Simple JSON file at `~/.voidforge/projects.json`. Each entry:
@@ -298,15 +316,15 @@ Simple JSON file at `~/.voidforge/projects.json`. Each entry:
 }
 ```
 
-No database — VoidForge stays zero-dep for core. Registry auto-populated when Merlin creates a project. Updated when builds complete and deploys succeed. File permissions: `0600` (owner read/write only).
+No database — VoidForge stays zero-dep for core. Registry auto-populated when Gandalf creates a project. Updated when builds complete and deploys succeed. File permissions: `0600` (owner read/write only).
 
-### The Great Hall (`wizard/ui/hall.html` + `wizard/ui/hall.js`)
-Dashboard landing page. Cards for each project showing: name, status (building/deployed/errored), deploy URL (clickable), framework badge, deploy target badge, estimated monthly cost, health indicator (green/yellow/red), last activity timestamp. Quick actions per card: Open Room, SSH (if VPS), Logs, Deploy. Bottom bar: "The Round Table" — vault credential count, total projects, aggregate monthly cost, links to Manage Vault and Deploy History.
+### The Lobby (`wizard/ui/lobby.html` + `wizard/ui/lobby.js`)
+Dashboard landing page. Cards for each project showing: name, status (building/deployed/errored), deploy URL (clickable), framework badge, deploy target badge, estimated monthly cost, health indicator (green/yellow/red), last activity timestamp. Quick actions per card: Open Room, SSH (if VPS), Logs, Deploy. Bottom bar: "The Penthouse" — vault credential count, total projects, aggregate monthly cost, links to Manage Vault and Deploy History.
 
-"+ New Project" button launches Merlin wizard. On completion, returns to Great Hall with the new project card.
+"+ New Project" button launches Gandalf wizard. On completion, returns to The Lobby with the new project card.
 
 ### Import Existing Project
-"+ Import Project" button in the Great Hall for projects that were built with VoidForge before v6.0, or built on the scaffold/core branches without the wizard, or created on a different machine. The import flow:
+"+ Import Project" button in The Lobby for projects that were built with VoidForge before v6.0, or built on the scaffold/core branches without the wizard, or created on a different machine. The import flow:
 
 1. User provides the project directory path (text input or paste)
 2. VoidForge scans the directory — reuses the same scan logic from `wizard/api/deploy.ts`:
@@ -317,9 +335,9 @@ Dashboard landing page. Cards for each project showing: name, status (building/d
    - Auto-detects framework from `package.json` / `requirements.txt` / `Gemfile`
    - Reads `logs/build-state.md` (build progress, last phase)
    - Detects PostgreSQL extensions from Prisma schema
-3. Presents a confirmation card: "Found: [Name] ([framework], [deploy target]). Add to Camelot?"
+3. Presents a confirmation card: "Found: [Name] ([framework], [deploy target]). Add to Avengers Tower?"
 4. On confirm, project is added to `projects.json` with all discovered metadata
-5. Card appears in the Great Hall — user can open a terminal immediately
+5. Card appears in The Lobby — user can open a terminal immediately
 
 Validation: directory must exist, must contain `CLAUDE.md`, must not already be in the registry (check by directory path). If the project has a deploy history in `~/.voidforge/deploys/`, the import links those deploy records to the project.
 
@@ -329,10 +347,10 @@ New API endpoint: `POST /api/projects/import` — accepts `{ directory: string }
 Background service that pings each project's health check URL every 5 minutes. Updates project registry with last health status and timestamp. Runs only when the server is active. Non-blocking — uses `fetch` with 5-second timeout. Health states: `healthy` (200 OK), `degraded` (non-200 but responding), `down` (timeout or connection refused), `unchecked` (no health URL configured).
 
 ### Multi-terminal per project
-Each project room supports N terminal sessions (default max 5). Tabs show session type and can be renamed. Sessions persist across page navigation (go to Great Hall, come back, terminals are still running). Closing a terminal tab sends SIGHUP to the PTY. Creating "SSH: production" tab auto-runs `ssh user@host` using the SSH key from the vault (key never reaches the browser — server executes the SSH connection through the PTY).
+Each project room supports N terminal sessions (default max 5). Tabs show session type and can be renamed. Sessions persist across page navigation (go to The Lobby, come back, terminals are still running). Closing a terminal tab sends SIGHUP to the PTY. Creating "SSH: production" tab auto-runs `ssh user@host` using the SSH key from the vault (key never reaches the browser — server executes the SSH connection through the PTY).
 
 ### Shared vault awareness
-The vault is already global (not per-project) — AWS, GitHub, Cloudflare credentials work across all projects. Merlin's Step 4b (PRD-driven credentials) stores project-specific keys with `env:` prefix in the vault (e.g., `env:WHATSAPP_ACCESS_TOKEN`). When creating a second project that uses the same service (e.g., two projects both need Resend), the credential form pre-fills from the vault.
+The vault is already global (not per-project) — AWS, GitHub, Cloudflare credentials work across all projects. Gandalf's Step 4b (PRD-driven credentials) stores project-specific keys with `env:` prefix in the vault (e.g., `env:WHATSAPP_ACCESS_TOKEN`). When creating a second project that uses the same service (e.g., two projects both need Resend), the credential form pre-fills from the vault.
 
 ### Security (multi-project)
 - Project directory isolation: each PTY session is scoped to its project directory. The shell starts with `cd /path/to/project`. The user CAN navigate out (it's a real shell), but initial scope is correct.
@@ -344,21 +362,21 @@ The vault is already global (not per-project) — AWS, GitHub, Cloudflare creden
 ### Files to create
 - `wizard/lib/project-registry.ts` (~150 lines) — CRUD for projects.json
 - `wizard/api/projects.ts` (~150 lines) — REST endpoints for project list, status, health, import
-- `wizard/ui/hall.html` (~100 lines) — Great Hall dashboard
-- `wizard/ui/hall.js` (~250 lines) — project cards, health indicators, navigation
+- `wizard/ui/lobby.html` (~100 lines) — The Lobby dashboard
+- `wizard/ui/lobby.js` (~250 lines) — project cards, health indicators, navigation
 - `wizard/lib/health-poller.ts` (~100 lines) — background health checks
-- Update: `wizard/server.ts` (route hall.html as landing), `wizard/api/project.ts` (register project on creation), `wizard/ui/camelot.js` (back-to-hall navigation)
+- Update: `wizard/server.ts` (route lobby.html as landing), `wizard/api/project.ts` (register project on creation), `wizard/ui/tower.js` (back-to-lobby navigation)
 
 ### Estimated effort
 ~950 lines (including security + import), 2-3 sessions.
 
 ---
 
-## v6.5 — Camelot Remote
+## v6.5 — Avengers Tower Remote
 
 *Access your forge from anywhere. Phone, iPad, hotel business center, a friend's laptop.*
 
-Deploy VoidForge itself on a remote server. Access Camelot through a public URL behind serious authentication. The server becomes your build machine, production host, operations console, and development environment — all accessible from any browser. You could build and deploy an entire application from your phone in an Uber.
+Deploy VoidForge itself on a remote server. Access Avengers Tower through a public URL behind serious authentication. The server becomes your build machine, production host, operations console, and development environment — all accessible from any browser. You could build and deploy an entire application from your phone in an Uber.
 
 ### The architecture
 
@@ -367,7 +385,7 @@ Your device (just a browser)
   → https://forge.yourdomain.com (HTTPS + WSS)
     → Caddy (reverse proxy, auto-TLS, auth layer)
       → VoidForge Server (:3141)
-        → Wizard API (Merlin), PTY Manager, Vault, Provisioners
+        → Wizard API (Gandalf), PTY Manager, Vault, Provisioners
         → Claude Code (installed on this server, runs in PTY sessions)
         → All projects live at /home/forge/projects/
       → Also proxies deployed apps:
@@ -379,7 +397,7 @@ One VPS (t3.medium recommended, $30/mo) serves as your build server, production 
 
 ### Threat model — what's behind the door
 
-Remote Camelot exposes the following over the internet:
+Remote Avengers Tower exposes the following over the internet:
 - Anthropic API key (AI access, billed to the user)
 - AWS credentials (can provision EC2, RDS, S3 — significant cost exposure)
 - GitHub token (push to any repo, delete branches)
@@ -431,13 +449,13 @@ Every HTTP request checks: session valid? Every WebSocket upgrade checks: sessio
 
 **Layer 3: Vault — separate encryption from access**
 
-Two-password architecture. The login password gets you into Camelot (dashboard, terminals, project list). The vault password decrypts credentials. These are DIFFERENT passwords.
+Two-password architecture. The login password gets you into Avengers Tower (dashboard, terminals, project list). The vault password decrypts credentials. These are DIFFERENT passwords.
 
 Why: if someone compromises the login (session hijack, XSS, shoulder surfing), they can see the dashboard and interact with terminals where Claude Code is already running, but they CANNOT:
 - Read API keys or tokens
 - SSH into production (SSH keys are in the vault)
 - Deploy to new infrastructure (provisioners need vault credentials)
-- Create new projects (Merlin needs vault for credential storage)
+- Create new projects (Gandalf needs vault for credential storage)
 - View or edit stored credentials
 
 The vault password is NEVER stored on disk or in the session. It's held in server memory only while actively needed, then cleared. The user re-enters it for sensitive operations:
@@ -491,7 +509,7 @@ New provisioner that deploys VoidForge itself to a VPS. The user runs `npx voidf
 8. Reports the public URL
 
 ### Files to create
-- `wizard/lib/camelot-auth.ts` (~300 lines) — login flow, session management, TOTP verification, rate limiting, lockout
+- `wizard/lib/tower-auth.ts` (~300 lines) — login flow, session management, TOTP verification, rate limiting, lockout
 - `wizard/api/auth.ts` (~150 lines) — login/logout/session endpoints
 - `wizard/ui/login.html` + `wizard/ui/login.js` (~150 lines) — login page with password + TOTP fields
 - `wizard/lib/audit-log.ts` (~100 lines) — append-only JSON lines logger
@@ -504,28 +522,28 @@ New provisioner that deploys VoidForge itself to a VPS. The user runs `npx voidf
 
 ---
 
-## v7.0 — The Round Table
+## v7.0 — The Penthouse
 
 *Multi-user, multi-project, coordinated operations.*
 
-Camelot becomes a team tool. Multiple users, role-based access, per-project permissions, coordinated deploys across linked services, and a rollback dashboard. The Round Table is where the team manages their fleet.
+Avengers Tower becomes a team tool. Multiple users, role-based access, per-project permissions, coordinated deploys across linked services, and a rollback dashboard. The Penthouse is where the team manages their fleet.
 
 ### Role-based access
 Three roles: `admin` (full access — create projects, manage users, deploy, access vault), `deployer` (can build and deploy assigned projects, cannot manage vault or users), `viewer` (read-only — can see dashboards, logs, health, but cannot execute commands or deploy).
 
-User management stored in `~/.voidforge/users.json`. Each user: username, bcrypt password hash, TOTP secret (encrypted in vault), role, project access list, created timestamp, last login. Admin can create/remove users via Great Hall settings.
+User management stored in `~/.voidforge/users.json`. Each user: username, bcrypt password hash, TOTP secret (encrypted in vault), role, project access list, created timestamp, last login. Admin can create/remove users via The Lobby settings.
 
 ### Per-project access control
-Each project in the registry has an `access` field: list of usernames with their role for that project. Admin has implicit access to all projects. A deployer might have access to "Dialog Travel" but not "Widget API". A viewer can see all projects in the Great Hall but only open rooms they have access to.
+Each project in the registry has an `access` field: list of usernames with their role for that project. Admin has implicit access to all projects. A deployer might have access to "Dialog Travel" but not "Widget API". A viewer can see all projects in The Lobby but only open rooms they have access to.
 
 ### Monorepo / linked services
-Projects can be linked (via `linkedProjects` field in registry). Linked projects appear as sub-cards in the Great Hall. Coordinated deploys: when deploying "Dialog Travel — API", the system checks if "Dialog Travel — Workers" and "Dialog Travel — Web" also need redeployment (shared schema change, shared dependency update). Deploy order is configurable. Coordinated deploys require vault unlock + explicit confirmation for each service ("Deploy API first, then Workers, then Web? [Confirm all / Step through]").
+Projects can be linked (via `linkedProjects` field in registry). Linked projects appear as sub-cards in The Lobby. Coordinated deploys: when deploying "Dialog Travel — API", the system checks if "Dialog Travel — Workers" and "Dialog Travel — Web" also need redeployment (shared schema change, shared dependency update). Deploy order is configurable. Coordinated deploys require vault unlock + explicit confirmation for each service ("Deploy API first, then Workers, then Web? [Confirm all / Step through]").
 
 ### Rollback dashboard
 Deploy history per project, visible in the project room. Each deploy entry: timestamp, git commit, deploy target, success/failure, URL. One-click rollback to any previous version. For VPS: symlink swap to previous release directory. For platforms: Vercel/Railway/Cloudflare API rollback. Rollback requires deployer role + vault unlock.
 
 ### Cost tracker
-Aggregate monthly cost across all projects. Per-project breakdown. AWS billing API integration (optional — requires additional IAM permissions). For non-AWS targets: manual cost entry or platform API queries. Displayed in Great Hall footer and per-project room sidebar. Alerts when cost exceeds configurable threshold.
+Aggregate monthly cost across all projects. Per-project breakdown. AWS billing API integration (optional — requires additional IAM permissions). For non-AWS targets: manual cost entry or platform API queries. Displayed in The Lobby footer and per-project room sidebar. Alerts when cost exceeds configurable threshold.
 
 ### Agent memory (cross-project learning)
 Agents that remember across projects. After each build, key learnings are extracted and stored in `~/.voidforge/lessons.json`. When starting a new build, relevant lessons are loaded into the methodology context. "Last time you built a Next.js app with Stripe, Phase 6 failed because webhook signatures weren't verified in test mode. Adding that check proactively." Wong guards the knowledge. The Sanctum grows.
@@ -546,10 +564,42 @@ Agents that remember across projects. After each build, key learnings are extrac
 - `wizard/ui/rollback.js` (~150 lines) — deploy history and rollback UI
 - `wizard/lib/cost-tracker.ts` (~150 lines) — cost aggregation and alerts
 - `wizard/lib/agent-memory.ts` (~150 lines) — cross-project lesson storage and retrieval
-- Update: all auth and session code for role enforcement, PTY manager for user isolation, Great Hall for role-filtered views
+- Update: all auth and session code for role enforcement, PTY manager for user isolation, The Lobby for role-filtered views
 
 ### Estimated effort
 ~1,400 lines (including security), 3-4 sessions.
+
+---
+
+## v7.1 — The Redesign
+
+*The wizard becomes a conversation.*
+
+Gandalf's setup wizard is restructured from a 7-step linear form into a three-act conversation: identity, vision, operations. The simple/advanced toggle is eliminated — replaced by an operations menu where every user picks what they need.
+
+### Act 1 — "Secure Your Forge" (2 steps)
+Vault password alone on the first screen — clean, focused, one field. API key on the second screen. The forge is lit.
+
+### Act 2 — "Describe Your Vision" (2 steps + conditional)
+Project name + directory. Then PRD (generate/paste/skip). If PRD has env vars, collect credentials. The project is taking shape.
+
+### Act 3 — "Equip Your Project" (1 menu screen)
+A single screen with expandable cards — not a sequence of steps. Five cards: Deploy Target, Cloud Credentials (contextual), Domain & Hostname, The Resilience Pack (v4.3 features as opt-in toggles), Monitoring. Each card expands in-place. Smart defaults from PRD frontmatter. "Skip All" for lean setup.
+
+### Éowyn's Enchantment Notes
+- First screen: mostly empty, dark, one glowing input. The forge lighting moment.
+- Project name: header updates live as user types — the project is already becoming real.
+- PRD generation: text streams like it's being written by hand, not loaded from a server.
+- Operations menu: cards feel like choosing equipment before an adventure.
+- Creation moment: brief animation of project structure appearing, then terminal fills screen. You're home.
+
+### Files to modify
+- `wizard/ui/index.html` — restructure into 3 acts, add operations menu
+- `wizard/ui/app.js` — remove simple/advanced, add card expand/collapse, smart defaults
+- `wizard/ui/styles.css` — act transitions, card animations, enchantment styling
+
+### Estimated effort
+~400 lines changed (mostly restructuring existing code), 1-2 sessions.
 
 ---
 
