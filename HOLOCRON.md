@@ -35,7 +35,7 @@ It works with any tech stack: Next.js, Express, Django, Rails, Go, or whatever y
 VoidForge comes in three flavors, each on its own branch:
 
 #### Full (`main` branch)
-Everything. Two browser-based wizards, cloud provisioners for 6 deploy targets, encrypted credential vault, PRD generation with Claude.
+Everything. Two browser-based wizards, cloud provisioners for 6 deploy targets, encrypted credential vault, PRD generation with Claude, Avengers Tower (browser terminal + multi-project operations console), multi-user RBAC, and The Penthouse (team coordination).
 
 ```bash
 git clone https://github.com/tmcleod3/voidforge.git
@@ -44,7 +44,7 @@ npm install
 npm run wizard
 ```
 
-**Best for:** Users who want the guided experience. Gandalf walks you through setup, Haku handles deployment. Point-and-click where possible.
+**Best for:** Users who want the guided experience. Gandalf walks you through setup, Haku handles deployment. After creation, Avengers Tower gives you a full terminal in the browser — type `/build`, `/campaign`, SSH to production, all from one tab. The Lobby shows all your projects. The Penthouse adds team access.
 
 #### Scaffold (`scaffold` branch)
 The methodology without the tooling. CLAUDE.md, all 15 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
@@ -77,9 +77,9 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **15 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`, `/assemble`, `/campaign`, `/imagine`, `/debrief`
+- **16 slash commands** — `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/devops`, `/architect`, `/git`, `/void`, `/thumper`, `/assemble`, `/campaign`, `/imagine`, `/debrief`, `/gauntlet`
 - **13-phase build protocol** — PRD to production with verification gates
-- **13 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
+- **14 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **170+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, and Anime
 - **7 code patterns** — Reference implementations with framework adaptations
 - **This Holocron** — The guide you're reading now
@@ -89,6 +89,10 @@ The Full tier adds:
 - **Haku** — Browser-based deploy wizard (6 target provisioners with SSE streaming)
 - **Encrypted vault** — AES-256-GCM credential storage
 - **Cloud provisioners** — Docker, AWS VPS, Vercel, Railway, Cloudflare, S3
+- **Avengers Tower** — Browser terminal (xterm.js + node-pty). Real Claude Code in the browser. Multiple tabs: Claude Code, SSH, shell. Never leave the browser.
+- **The Lobby** — Multi-project dashboard. Health monitoring, cost tracking, deploy history. Import existing projects.
+- **Remote mode** — Deploy VoidForge on a VPS. Access from any browser, phone, iPad. 5-layer security: network + auth (TOTP 2FA) + vault + sandboxing + audit trail.
+- **The Penthouse (v7.0)** — Multi-user RBAC (admin/deployer/viewer), per-project access control, linked services for monorepo orchestration, coordinated deploys, rollback dashboard, cost tracker, cross-project agent memory.
 
 ---
 
@@ -113,7 +117,7 @@ npx voidforge init
 6. **Deploy target** — Choose where you'll deploy (Docker, AWS VPS, Vercel, Railway, Cloudflare, S3)
 7. **Review & Create** — Gandalf scaffolds your project
 
-Your project directory now contains the full VoidForge build system plus your PRD.
+Your project directory now contains the full VoidForge build system plus your PRD. In the Full tier, Gandalf transitions to **Avengers Tower** — a real terminal in your browser where you'll run `/build` and everything that follows.
 
 #### Step 2: Build
 
@@ -261,7 +265,7 @@ Long builds span multiple Claude Code sessions. The build journal system handles
 
 ### How the Agent System Works
 
-VoidForge uses 13 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
+VoidForge uses 14 lead agents across 7 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
 
 1. **Scope boundaries.** When Stark is leading, you're doing backend work. When Galadriel takes over, you're doing frontend. The character tells you which domain you're in.
 2. **Scannable logs.** Build journal entries tagged with agent names are instantly searchable. "What did Batman find?" is faster than "What happened during QA?"
@@ -281,6 +285,7 @@ VoidForge uses 13 lead agents across 7 fictional universes, each commanding a ro
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream | Ancient, joyful, sings while he works, tends the forge itself |
 | Worm Rider | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
 | The Initiative | **Fury** | Marvel | Full pipeline orchestration, crossfire, council | Assembles the team. Doesn't leave until the mission is complete. |
+| The Gauntlet | **Thanos** | Marvel | Comprehensive 5-round review, 30+ agents | "I am inevitable." Tests everything. The project survives or it doesn't. |
 | Campaign Command | **Sisko** | Star Trek | PRD-to-product campaign, mission sequencing | The builder, the prophet, the war commander. Reads the plan, picks the next fight. |
 | Forge Artist | **Celebrimbor** | Lord of the Rings | AI image generation from PRD descriptions | Hand of Silver. Greatest elven smith. Forges visual assets from prose. |
 | Field Medic | **Bashir** | Star Trek | Post-mortem analysis, upstream feedback | Genetically enhanced diagnostician. Traces root causes, sends field reports to Starfleet. |
@@ -367,7 +372,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Fifteen commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Sixteen commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.
@@ -444,6 +449,17 @@ Fury assembles every agent in VoidForge and runs the complete pipeline: architec
 13 phases, all 7 universes, 40+ agents. Checkpoints after every phase so you can resume across sessions with `/assemble --resume`. Skip the build with `--skip-build` to re-run reviews on existing code. Skip the Crossfire and Council with `--fast` for lower-stakes projects.
 
 This is the nuclear option. Use it when quality is non-negotiable.
+
+#### `/gauntlet` — Thanos's Comprehensive Review
+**When:** After a campaign completes, before shipping, or anytime you want absolute confidence.
+
+*"I am inevitable."*
+
+Five rounds of escalating intensity across every domain. Round 1: Discovery (architecture + code + UX + security + infrastructure in parallel). Round 2: First Strike (full domain audits — Batman, Galadriel, Kenobi, Stark). Round 3: Second Strike (re-probe all fixes, verify nothing regressed). Round 4: Crossfire (five adversarial agents attack each other's work — Maul, Deathstroke, Loki, Constantine, Éowyn). Round 5: Council (six domain experts converge — Spock, Ahsoka, Nightwing, Samwise, Padmé, Troi).
+
+Fix batches between rounds. Grep-for-siblings after every fix. Build-output verification. The project either survives or iterates.
+
+Flags: `--quick` (3 rounds — skip Crossfire + Council), `--security-only`, `--ux-only`, `--qa-only`, `--resume`.
 
 #### `/campaign` — Sisko's War Room
 **When:** You have a PRD and want VoidForge to build the whole thing, mission by mission, autonomously.
