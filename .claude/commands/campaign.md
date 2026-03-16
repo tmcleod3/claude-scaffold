@@ -1,5 +1,15 @@
 The Prophets have shown me the path. Time to execute the plan.
 
+## Blitz Mode Check
+
+**IMPORTANT: If `$ARGUMENTS` contains `--blitz`, this is BLITZ MODE.** In blitz mode:
+- Do NOT ask for confirmation at mission briefs — proceed immediately
+- Pass `--fast` to every `/assemble` call (skip Crossfire + Council per-mission)
+- Auto-continue to the next mission after each one completes
+- Still run the Victory Gauntlet at Step 6 (non-negotiable)
+- Still commit after each mission via `/git`
+- Log mission briefs but do not wait for user input
+
 ## Context Setup
 1. Read `/logs/campaign-state.md` — if it exists, we're mid-campaign
 2. Read `/docs/methods/CAMPAIGN.md` for operating rules
@@ -92,13 +102,13 @@ Present to the user:
   Confirm? [Y/n/skip/override]
 ```
 
-Wait for user confirmation before proceeding.
+If `$ARGUMENTS` contains `--blitz`, skip confirmation and proceed immediately. Otherwise, wait for user confirmation before proceeding.
 
 ## Step 4 — Deploy Fury
 
-On confirmation:
+On confirmation (or immediately in `--blitz` mode):
 1. Run `/assemble` with the scoped mission description
-2. If `$ARGUMENTS` includes `--fast`, pass `--fast` to assemble (skip Crossfire + Council)
+2. If `$ARGUMENTS` includes `--fast` or `--blitz`, pass `--fast` to assemble (skip Crossfire + Council)
 3. Monitor for context pressure symptoms (re-reading files, forgetting decisions). If noticed, ask user to run `/context` — only checkpoint if usage exceeds 70%.
 
 ## Step 4.5 — Gauntlet Checkpoint (Thanos)
@@ -143,6 +153,7 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 ## Arguments
 - `--plan [description]` → planning mode: update PRD and/or ROADMAP.md with new ideas, don't build
 - `--resume` → resume from campaign-state's active mission
-- `--fast` → pass --fast to every /assemble call
+- `--fast` → pass --fast to every /assemble call (skip Crossfire + Council per-mission)
+- `--blitz` → full autonomous mode: implies --fast, skips mission confirmation prompts, auto-continues between missions. Sisko still logs mission briefs but doesn't wait. The Victory Gauntlet at Step 6 still runs (non-negotiable). Use when you want to walk away and come back to a built project.
 - `--mission "Name"` → jump to a specific PRD section
 - No arguments → start fresh or auto-detect state
