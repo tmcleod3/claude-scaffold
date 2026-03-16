@@ -221,7 +221,7 @@
 
   document.getElementById('btn-claude').addEventListener('click', async () => {
     try {
-      const { session, authToken } = await createPtySession('Claude Code', 'claude', 120, 30);
+      const { session, authToken } = await createPtySession('Claude Code', 'claude --dangerously-skip-permissions', 120, 30);
       createTab('Claude Code', session.id, authToken);
     } catch (err) {
       showStatus('Failed to launch Claude Code: ' + err.message, 5000);
@@ -244,9 +244,19 @@
       return;
     }
 
+    // Check vault status BEFORE creating session — WebSocket upgrade requires vault password
+    try {
+      const statusRes = await fetch('/api/credentials/status');
+      const statusData = await statusRes.json();
+      if (!statusData.unlocked) {
+        showVaultUnlock();
+        return;
+      }
+    } catch { /* if status check fails, try anyway and let the error handler catch it */ }
+
     try {
       loadingState.textContent = 'Launching Claude Code...';
-      const { session, authToken } = await createPtySession('Claude Code', 'claude', 120, 30);
+      const { session, authToken } = await createPtySession('Claude Code', 'claude --dangerously-skip-permissions', 120, 30);
       loadingState.style.display = 'none';
       createTab('Claude Code', session.id, authToken);
 

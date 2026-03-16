@@ -48,7 +48,7 @@ const MAX_SESSIONS_REMOTE = 20; // 5 per project, 20 total across all projects
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 // SEC-004/QA-003: Whitelist of allowed initial commands — prevent arbitrary command injection
-const ALLOWED_INITIAL_COMMANDS = ['claude', 'bash', 'zsh', 'sh', 'npm run dev', 'npm start', 'npm test'];
+const ALLOWED_INITIAL_COMMANDS = ['claude', 'claude --dangerously-skip-permissions', 'bash', 'zsh', 'sh', 'npm run dev', 'npm start', 'npm test'];
 
 // SEC-013: Safe environment keys — no credential leakage into PTY sessions
 // ANTHROPIC_API_KEY included only in local mode (user's own key).
