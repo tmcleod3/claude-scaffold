@@ -228,7 +228,7 @@ async function findNodeFiles(dir: string): Promise<string[]> {
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = join(dir, entry.name);
-      if (entry.isDirectory()) {
+      if (entry.isDirectory() && !entry.isSymbolicLink()) {
         results.push(...await findNodeFiles(fullPath));
       } else if (entry.name.endsWith('.node')) {
         results.push(fullPath);
