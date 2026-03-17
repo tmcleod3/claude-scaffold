@@ -97,6 +97,26 @@ Pattern: `/api/photos/[...name]` that joins path segments into a Google API URL 
 
 **Security principle:** For security boundaries (tool access, URL allowlists, IP ranges, credential scopes), **always prefer whitelist (default-deny) over blocklist (default-allow)**. New entries should be blocked by default until explicitly allowed. Blocklists inevitably miss entries.
 
+### External API Transport
+
+Grep for all `fetch(`, `axios(`, `http.get(`, `https.get(`, and `new URL(` calls. Flag any that construct URLs with `http://` (not `https://`). External API calls over plain HTTP leak credentials, API keys, and user data to network observers. Common culprits: GeoIP services, analytics endpoints, webhook callbacks, development-mode URLs hardcoded for localhost that accidentally reach production.
+
+**Rule:** All external API calls must use HTTPS. No exceptions. If a service only offers HTTP, proxy it through your own HTTPS endpoint. (Field report #52: GeoIP service called over HTTP, leaking user IP addresses to network observers.)
+
+### IP Range Validation
+
+Never use string prefix matching for IP ranges. `ip.startsWith('172.2')` matches public IPs like `172.200.x.x` — the RFC 1918 private range is `172.16.0.0 - 172.31.255.255`, which requires integer comparison, not string operations.
+
+**Rule:** For IP range checks, parse octets to integers and compare numerically, or use a library (`ipaddr.js`, Python `ipaddress`). String prefix matching on dotted-decimal IPs is always wrong. (Field report #52: SSRF protection matched `172.200.x.x` as "private," allowing bypass.)
+
+### Internal Path Leakage
+
+API responses must never include server filesystem paths (`/home/`, `/opt/`, `/Users/`, `process.cwd()`), environment variable values, or internal configuration (database connection strings, internal hostnames, stack traces with file paths). Grep for `__dirname`, `__filename`, `process.cwd()`, `process.env` in response-building code. If error responses include stack traces, strip them in production (`NODE_ENV=production`). (Field report #52)
+
+### CORS Requirements (not just restrictions)
+
+CORS security checks typically verify restrictions — that endpoints don't have overly permissive `Access-Control-Allow-Origin`. But also check the inverse: **do endpoints that NEED cross-origin access actually have CORS headers?** If the application uses subdomains, embedded content, or published sites that call back to the main API, verify those endpoints return the required CORS headers for legitimate origins. Missing CORS headers cause silent failures — the browser blocks the request but the user sees no error. (Field report #46: cross-origin tracking endpoint had no CORS headers; sendBeacon masked the problem but fetch-based tracking silently failed.)
+
 ### Outbound URL Safety
 
 For any system that sends URLs to users (transactional emails, SMS, push notifications, webhook callbacks):

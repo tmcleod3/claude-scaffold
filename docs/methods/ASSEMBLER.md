@@ -61,7 +61,7 @@ Fury calls ALL of them. That's the point.
 | 1 | /architect | 1 | ADRs written, no critical concerns |
 | 2 | /build | 1 | All phase gates pass, tests green |
 | 2.5 | Smoke test (Hawkeye) | 1 | Endpoints return expected status, no route collisions, no render loops |
-| 3-5 | /review | 3 | Zero Must Fix items |
+| 3-5 | /review | 3 | Zero Must Fix items. **UI→server trace:** for every `fetch()` in UI code, verify the server route exists. |
 | 6 | /ux (usability + a11y) | 1 | Zero critical usability or a11y findings |
 | 7-8 | /security | 2 | Zero Critical/High findings |
 | 9 | /devops (+ deployment verification) | 1 | Deploy scripts, monitoring, smoke tests, live deploy status |
