@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.6.0] - 2026-03-16
+
+### Added
+- **`voidforge deploy --env-only`** — write vault credentials to `.env` without provisioning infrastructure. Reads all vault keys, maps both `env:`-prefixed and hyphenated keys to env vars, appends to `.env`. Supports `VOIDFORGE_VAULT_PASSWORD` env var for non-interactive use.
+- **`scripts/vault-read.ts`** — standalone vault reader. Read a single key (`--key`) or list all keys (`--list`). Supports non-interactive use via `VOIDFORGE_VAULT_PASSWORD`.
+- **Campaign vault auto-inject (Step 0.5)** — if vault has credentials not yet in `.env`, auto-run `deploy --env-only` before the first mission. Blitz mode auto-runs; normal mode asks for confirmation.
+- **Node.js `engines` field** in package.json — `>=20.0.0 <25.0.0`. Prevents silent ABI breaks with unsupported Node versions.
+
+### Changed
+- **Stale PTY session cleanup** — Tower auto-detects sessions that fail within 2 seconds of creation. Auto-removes the dead tab and retries once. Prevents dead sessions from consuming MAX_SESSIONS slots.
+- **Fallback model ID** updated from `claude-sonnet-4-5-20241022` to `claude-sonnet-4-6`.
+
+---
+
 ## [7.5.3] - 2026-03-16
 
 ### Added
