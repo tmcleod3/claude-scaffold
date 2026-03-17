@@ -11,7 +11,8 @@
 4. Extract from PRD: tech stack, database schema, API routes, page routes, integrations, env vars
 5. Read `/docs/LESSONS.md` — check for relevant lessons from previous projects. If any lessons match this project's tech stack (framework, database, auth, integrations), note them: "Lessons from prior builds: [list relevant ones]." These inform later phases — e.g., if a lesson says "React useEffect render loops escape review," trace render cycles proactively in Phase 4+.
 6. Flag any gaps or ambiguities — list them explicitly, don't guess
-7. Write initial ADRs to `/docs/adrs/`
+7. **Troi confirms PRD extraction:** Troi reads the PRD prose and verifies the extraction matches — catches misinterpretations before 8+ build phases propagate them.
+8. Write initial ADRs to `/docs/adrs/`
 8. Create `/logs/build-state.md` and `/logs/phase-00-orient.md` with extraction results + relevant lessons
 9. **Gate:** ADRs written, all PRD sections accounted for, skip rules documented in build-state.md
 

@@ -238,6 +238,14 @@ Even in `--fast` mode, each mission gets at least **1 review round** (not 3, but
 
 **UI→server route tracing (within review):** When a mission writes both UI code and server code, the review must trace every `fetch()` call in the UI to a registered server route. For each `fetch('/api/...')` in `.js`/`.ts` UI files, verify the path exists as an `addRoute()` call in the server. Missing routes produce silent 404s that are invisible in development. (Field report #50: UI button called `/api/server/restart` but no endpoint was created.)
 
+### Per-Mission Verification Agents
+
+After each mission's review round, two agents run quick checks:
+
+**Troi (PRD Compliance):** Spot-checks the PRD sections that this mission targeted. "Does what we just built match what the PRD said to build?" Not a full PRD read — just the relevant sections. Catches drift between intent and implementation before it compounds across missions.
+
+**Padmé (Functional Verification):** If the mission touched user-facing flows, Padmé verifies the affected flow still works end-to-end. "Open the app, complete the task, verify the output." Only triggered for missions that modify routes, components, or user-visible behavior — not for methodology-only or infrastructure missions.
+
 ### Step 4.5 — Gauntlet Checkpoint (Thanos)
 
 After every 4th completed mission (missions 4, 8, 12, etc.), Thanos runs a Gauntlet checkpoint:

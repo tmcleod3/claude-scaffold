@@ -18,6 +18,9 @@ Assign targets to each sub-agent:
 - **Lucius (config):** .env completeness, secrets not in git, prod vs dev mismatches
 - **Deathstroke (adversarial):** Penetration-style probing — bypass validations, chain interactions, exploit business logic
 - **Constantine (cursed code):** Unreachable branches, dead state, impossible conditions, logic that works by accident
+- **Cyborg (integration):** When 3+ modules connect, trace the full data path across boundaries. Missing imports, inconsistent response shapes, broken cross-module flows.
+- **Raven (deep analysis):** Bugs hidden beneath 3 layers of abstraction — follows data through transforms, closures, callbacks. Logic correct per function, wrong in composition.
+- **Wonder Woman (truth):** Code that says one thing and does another — misleading names, wrong comments, stale docs, functions that don't match their behavior.
 
 ## Step 2 — Baseline
 Get the project running. Verify manually: app starts, primary flow works, auth works (if applicable), data persists, error states display.

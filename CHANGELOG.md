@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [8.1.0] - 2026-03-16
+
+### Added
+- **Troi (PRD Compliance)** activated in `/build` Phase 0 (confirms PRD extraction), Phase 4/8 gates (spot-checks built features against PRD), and `/campaign` per-mission checks.
+- **Padmé (Functional Verification)** activated in `/build` Phase 4/6 gates (verifies primary user flow end-to-end) and `/campaign` per-mission for user-facing missions.
+- **Celeborn (Design System Governance)** activated in `/ux` Step 2 and `/build` Phase 5 — audits spacing tokens, typography scale, color palette consistency, component naming.
+- **Worf (Security Implications)** activated in `/architect` Step 1 — flags security implications of architectural decisions alongside Spock and Uhura.
+- **Riker (Decision Review)** activated in `/architect` Step 5 — reviews Picard's ADRs for trade-off validity and second-order effects.
+- **Torres (Performance Architecture)** activated in `/architect` Step 3 — identifies N+1 queries, missing indexes, caching gaps in design phase.
+- **Cyborg (System Integration)** activated in `/qa` Step 1 — traces full data paths across module boundaries when 3+ modules connect.
+- **Raven (Deep Analysis)** activated in `/qa` Step 1 — finds bugs hidden beneath layers of abstraction, data flowing through transforms.
+- **Wonder Woman (Truth Detector)** activated in `/qa` Step 1 — finds code that says one thing and does another.
+- **Valkyrie (Disaster Recovery)** activated in `/devops` — backup verification, restore testing, failover procedures.
+
+---
+
 ## [8.0.1] - 2026-03-16
 
 ### Fixed

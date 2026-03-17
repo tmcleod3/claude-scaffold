@@ -68,23 +68,28 @@ When running `/architect` or Phase 0.5 of `/build`, check every combination. Fla
 
 **Step 0 — System Discovery:** System identity, component inventory, data flow diagram, dependency graph.
 
-**Step 1 — Parallel Analysis (Spock + Uhura):**
+**Step 1 — Parallel Analysis (Spock + Uhura + Worf):**
 Use the Agent tool to run these in parallel — they are independent analysis tasks:
 - **Spock's Schema Review:** Normalization, relationships, indexes match queries, nullable intentional, audit fields, PII isolation, data lifecycle, backup/recovery plan.
 - **Uhura's Integration Review:** External service matrix (purpose, failure mode, fallback, cost, lock-in). API versions pinned. Responses validated. Abstraction layer exists.
+- **Worf's Security Implications:** For each architectural decision (schema, service boundaries, data flows), flag security implications. "This schema stores PII in the same table as public data — separate." "This service boundary allows unauthenticated access to internal state." Different from Kenobi (who audits code); Worf audits *design*.
 
-Synthesize findings from both agents.
+Synthesize findings from all three agents.
 
-**Step 2 — Scotty's Service Architecture:** Boundary assessment, monolith vs services (default: monolith until specific reason to split), async vs sync decisions. Informed by Spock's schema and Uhura's integration findings.
+**Step 2 — Scotty's Service Architecture:** Boundary assessment, monolith vs services (default: monolith until specific reason to split), async vs sync decisions. Informed by Spock's schema, Uhura's integrations, and Worf's security flags.
 
-**Step 3 — Scotty's Scaling Assessment:** First bottleneck analysis. Three-tier plan: Tier 1 (single server), Tier 2 (vertical + optimization, 10x), Tier 3 (horizontal, 100x). Cost analysis.
+**Step 3 — Scotty's Scaling Assessment + Torres's Performance Architecture:**
+- **Scotty:** First bottleneck analysis. Three-tier plan: Tier 1 (single server), Tier 2 (vertical + optimization, 10x), Tier 3 (horizontal, 100x). Cost analysis.
+- **Torres:** Performance architecture review — identifies N+1 query patterns in schema design, missing indexes for anticipated query patterns, connection pool sizing, caching strategy gaps. Catches performance problems *before code is written* (cheaper than finding them in QA).
 
 **Step 4 — Parallel Analysis (La Forge + Data):**
 Use the Agent tool to run these in parallel — they are independent analysis tasks:
 - **La Forge's Failure Analysis:** What happens when each component fails. Graceful degradation rules. Recovery procedures.
 - **Data's Tech Debt:** Wrong abstractions, missing abstractions, premature optimization, deferred decisions, dependency debt, documentation debt. Each with impact, risk, effort, urgency.
 
-**Step 5 — ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives.
+**Step 5 — ADRs + Riker's Decision Review:**
+- **Picard writes ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives.
+- **Riker reviews:** "Number One, does this hold up?" Riker challenges each ADR's trade-offs — are the alternatives truly worse? Are the consequences acceptable? Did we consider the second-order effects? Riker's review prevents architectural decisions made in a vacuum.
 
 ## Deliverables
 

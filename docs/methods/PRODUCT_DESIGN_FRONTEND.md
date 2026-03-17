@@ -151,6 +151,7 @@ Before hiding, relocating, or collapsing a UI container (dropdown, panel, menu, 
 **Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets.
 **Radagast:** Forms, validation, dangerous actions, confirmations, undo.
 **Éowyn:** Implements accepted enchantment opportunities from Step 1.75 during batch fixes.
+**Celeborn:** Design system governance — are spacing tokens consistent? Is the typography scale followed? Are colors from the palette? Are component naming conventions respected? Celeborn audits the *system* behind the components, not the components themselves. "Quiet authority." Catches when one component uses `gap-4` while another uses `gap-[18px]` for the same spacing, or when a color is hardcoded instead of using a design token.
 
 ## Step 3 — Manual Walkthroughs
 

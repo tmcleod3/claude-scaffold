@@ -84,9 +84,10 @@ Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md
 4. Flag missing items — list each gap explicitly with "inferred [assumption]" or "BLOCKED — needs answer"
 5. Check for VoidForge vault (`~/.voidforge/vault.enc`). If present, cross-reference env vars from the PRD against vault contents and provisioning state (`~/.voidforge/runs/*.json`). Distinguish "missing credential" (truly BLOCKED) from "vault-available credential" (resolvable via `voidforge deploy`). (Field report #40)
 6. **Wong loads lessons:** Read `/docs/LESSONS.md`. For each entry matching the current project's framework, database, auth pattern, or integration stack, note it: "Lesson from prior build: [summary]." These inform later phases — e.g., if a lesson says "React useEffect render loops escape review," trace render cycles proactively in Phase 4+. Log matched lessons in phase-00-orient.md.
-7. Produce initial ADRs in `/docs/adrs/`
-8. Create `/logs/build-state.md` and `/logs/phase-00-orient.md`
-9. If PRD has critical gaps (no schema, no stack, no features defined): **STOP. Flag to user. Do not proceed.**
+7. **Troi confirms PRD extraction:** Troi reads the PRD prose and verifies that Picard's extraction (routes, schema, features, integrations) matches what the PRD actually says. Catches misinterpretations before they propagate through 8+ build phases. Log discrepancies in phase-00-orient.md.
+8. Produce initial ADRs in `/docs/adrs/`
+9. Create `/logs/build-state.md` and `/logs/phase-00-orient.md`
+10. If PRD has critical gaps (no schema, no stack, no features defined): **STOP. Flag to user. Do not proceed.**
 
 **Phase 0.5 — Picard's Conflict Scan.**
 
@@ -201,11 +202,11 @@ Every phase must pass its gate before proceeding. Each gate requires BOTH manual
 | 1 | Directory structure looks right | `npm run build` passes, test runner works | Fix before proceeding |
 | 2 | Dev server starts in browser | `npm test` passes, DB connects | Fix infra |
 | 3 | Login/signup/logout flow works in browser | Auth integration tests pass | Fix auth |
-| 4 | Walk through core journey end-to-end | Core service tests pass (>80% coverage) | Fix before adding features |
+| 4 | Walk through core journey end-to-end. **Troi:** routes/components match PRD §4. **Padmé:** primary flow completes end-to-end. | Core service tests pass (>80% coverage) | Fix before adding features |
 | 5 | Each new feature works, previous flows still work | All tests pass, no regressions | Revert batch, fix |
-| 6 | Each integration works in test mode | Integration tests pass | Fix integration |
+| 6 | Each integration works in test mode. **Padmé:** integrations work in the primary flow. | Integration tests pass | Fix integration |
 | 7 | Admin views show real data, audit log works | Tests pass | Fix |
-| 8 | Pages render on mobile + desktop | Build passes | Fix |
+| 8 | Pages render on mobile + desktop. **Troi:** landing page matches PRD brand section. | Build passes | Fix |
 | 9-11 Pass 1 | All critical/high findings identified | All agents report | Fix in batch |
 | 9-11 Pass 2 | Fixes verified, no regressions | Re-verification clean | Fix new issues, re-verify |
 | 12 | App loads in production, health check passes | Monitoring receives data, backup runs | Rollback + fix |

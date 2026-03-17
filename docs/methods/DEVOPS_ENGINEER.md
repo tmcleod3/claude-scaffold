@@ -21,6 +21,7 @@
 | Monitoring | **L** | (honorary — Death Note energy) | Observes everything. Deduces the cause. |
 | Backup | **Bulma** | Dragon Ball Z | Engineering genius. Builds the recovery systems. |
 | Cost | **Holo** | Spice and Wolf | Wise wolf. Knows the true price of everything. |
+| Disaster Recovery | **Valkyrie** | Marvel | Rescue operations. Backup verification, restore testing, failover procedures. Verifies that the backup system actually works — not just that it runs. |
 
 **Need more?** Deep anime pool: Vegeta (relentless optimization), Goku (scales to any challenge), Erwin (strategic planning), Lelouch (orchestration), Mustang (controlled destruction/cleanup), Misato (operations commander), Gojo (limitless scale), Calcifer (the server daemon). See NAMING_REGISTRY.md for 70+ characters.
 

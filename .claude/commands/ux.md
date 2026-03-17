@@ -33,6 +33,7 @@ Use the Agent tool to run these simultaneously — all are read-only analysis:
 - **Agent 1 (Elrond — UX):** Review information architecture, navigation, task flows, friction points. Can users find things? Are flows intuitive?
 - **Agent 2 (Arwen — Visual):** Review spacing, typography, color usage, button hierarchy, visual consistency. Does it look intentional?
 - **Agent 3 (Samwise — A11y):** Check keyboard navigation, focus management, ARIA labels, color contrast, reduced motion. Test with keyboard-only navigation.
+- **Agent 4 (Celeborn — Design System):** Are spacing tokens consistent? Typography scale followed? Colors from the palette? Component naming conventions respected? Catches systemic inconsistencies (e.g., `gap-4` vs `gap-[18px]` for the same spacing).
 
 Synthesize findings from all three agents.
 

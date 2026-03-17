@@ -12,7 +12,7 @@ Before any deep analysis, scan the PRD frontmatter for structural contradictions
 Produce: system identity, component inventory, data flow diagram (ASCII), dependency graph.
 Write to `/logs/` (phase-00 if during orient, or a dedicated architecture log).
 
-## Step 1 — Parallel Analysis (Spock + Uhura)
+## Step 1 — Parallel Analysis (Spock + Uhura + Worf)
 Use the Agent tool to run these in parallel — they are independent analysis tasks:
 
 **Agent 1 (Spock — Schema Review):**
@@ -32,7 +32,10 @@ For each external service, produce:
 
 Verify: API versions pinned, responses validated, abstraction layer exists.
 
-Synthesize findings from both agents.
+**Agent 3 (Worf — Security Implications):**
+For each architectural decision (schema, service boundaries, data flows), flag security implications. PII colocation, unauthenticated access to internal state, overly permissive service boundaries. Worf audits *design*, not code.
+
+Synthesize findings from all three agents.
 
 ## Step 2 — Scotty's Service Architecture
 - Boundary assessment: is the boundary between services/modules clean?
@@ -40,12 +43,9 @@ Synthesize findings from both agents.
 - Async vs sync: which operations should be background jobs?
 - Informed by Spock's schema and Uhura's integration findings.
 
-## Step 3 — Scotty's Scaling Assessment
-Identify the first bottleneck. Produce three-tier plan:
-- **Tier 1 (current):** Single server. What works, what's the ceiling.
-- **Tier 2 (10x):** Vertical scaling + optimization. Add indexes, caching, connection pooling.
-- **Tier 3 (100x):** Horizontal scaling. Read replicas, CDN, queue-based processing, service splits.
-Include cost estimates at each tier.
+## Step 3 — Scotty's Scaling + Torres's Performance
+- **Scotty:** Identify the first bottleneck. Three-tier plan: Tier 1 (current), Tier 2 (10x, vertical), Tier 3 (100x, horizontal). Cost estimates.
+- **Torres:** Performance architecture — N+1 query patterns in schema design, missing indexes for anticipated queries, connection pool sizing, caching strategy gaps. Catches performance problems before code is written.
 
 ## Step 4 — Parallel Analysis (La Forge + Data)
 Use the Agent tool to run these in parallel — they are independent analysis tasks:
@@ -65,8 +65,8 @@ Catalog each item:
 
 Types: wrong abstraction, missing abstraction, premature optimization, deferred decision, dependency debt, documentation debt.
 
-## Step 5 — ADRs
-Write Architecture Decision Records to `/docs/adrs/` for every non-obvious choice:
+## Step 5 — ADRs + Riker's Decision Review
+Write Architecture Decision Records to `/docs/adrs/` for every non-obvious choice. After writing, **Riker reviews**: challenges trade-offs, verifies alternatives were truly considered, checks for second-order effects.
 ```
 # ADR-001: [Title]
 ## Status: Accepted
