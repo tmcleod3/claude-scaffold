@@ -248,7 +248,9 @@ After every 4th completed mission (missions 4, 8, 12, etc.), Thanos runs a Gaunt
 
 ### Lightweight Blitz Debrief (Alternative)
 
-If context pressure makes full `/debrief --submit` impractical mid-campaign, capture a **3-line mission summary** appended to `/logs/campaign-debriefs.md` instead:
+**Only valid when `/context` shows actual usage above 70% (~700k tokens).** You MUST report the actual context percentage to justify using the lightweight alternative. "Context is heavy" without a number is not valid justification.
+
+If actual usage exceeds 70%, capture a **3-line mission summary** appended to `/logs/campaign-debriefs.md` instead:
 
 ```
 ### Mission N — [Name] (vX.Y.Z)
@@ -270,6 +272,27 @@ Symptoms of real context pressure (NOT speculative):
 If these symptoms appear, run `/context` to check actual usage. If >70%, checkpoint. If <70%, the symptoms have a different cause — investigate instead of checkpointing.
 
 **Never suggest stopping a blitz based on mission count alone.** The field report #33 quality degradation was at ~800k tokens after 6 heavy missions with full /assemble pipelines, not at 3 lightweight missions. (Field report #45: blitz incorrectly paused at 172k/1000k — 17% usage — after 1 mission.)
+
+### Quality Reduction Anti-Pattern (MANDATORY — applies to all agents)
+
+**You MUST NOT reduce the quality or thoroughness of any review, Gauntlet, checkpoint, or debrief based on self-assessed "context pressure."** This is a hard rule, not a guideline.
+
+Specifically, you MUST NOT:
+- Run the Gauntlet "efficiently" or "focused on the changeset" instead of the full protocol
+- Use a "lightweight checkpoint" instead of the full Gauntlet checkpoint
+- Skip debrief because "context is heavy"
+- Reduce review rounds because "we've been building continuously"
+- Use phrases like "given context pressure," "to save context," or "running efficiently" to justify cutting any quality gate
+
+**If you believe context pressure justifies reducing quality:**
+1. Run `/context` (or ask the user to)
+2. Report the ACTUAL number: "Context is at X/1000k (Y%)"
+3. If below 70%: **you are wrong — continue at full quality**
+4. If above 70%: checkpoint state and suggest a fresh session — do NOT reduce quality in the current session
+
+**Why this rule exists:** In 3 separate sessions (field reports #45, #50, and prior campaigns), agents self-justified quality reductions at 17%, 28%, and 37% context usage. The Gauntlet was "run efficiently" at 284k. A checkpoint was made "lightweight" at 375k. Both decisions let bugs through that the full protocol would have caught. Self-assessed "context pressure" is the #1 cause of quality degradation in VoidForge campaigns — not actual context limits.
+
+**The Gauntlet is never reduced. Checkpoints are never lightweight. Debriefs are never skipped. Run `/context` or run the full protocol.**
 
 ### Step 5 — Debrief and Commit
 

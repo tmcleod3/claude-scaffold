@@ -147,6 +147,20 @@ Write progress to `/logs/gauntlet-state.md` after every round:
 | 5. Council | PENDING | — | — |
 ```
 
+## Quality Reduction Prohibition
+
+**The Gauntlet is NEVER reduced, abbreviated, or "run efficiently."** Every round runs the full protocol for that round. No exceptions.
+
+You MUST NOT:
+- "Focus on the changeset" instead of reviewing the full codebase
+- Run a "lightweight" version of any round
+- Skip agents within a round because "context is heavy"
+- Combine rounds to "save context"
+
+If you believe context is limited, run `/context` and report the actual number. Below 70%: continue full protocol. Above 70%: checkpoint and suggest a fresh session. Never reduce Gauntlet quality in the current session.
+
+This rule exists because agents self-justified "efficient" Gauntlets at 28% and 37% context usage, letting bugs through that full rounds would have caught.
+
 ## Flags
 
 - `--quick` — Skip Rounds 4 (Crossfire) and 5 (Council). For projects where a lighter review is acceptable. Still 3 rounds, still comprehensive.

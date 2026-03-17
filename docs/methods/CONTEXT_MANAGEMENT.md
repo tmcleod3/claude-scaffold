@@ -123,6 +123,8 @@ When context is genuinely running low, checkpoint to disk so the next session ca
 
 **Never preemptively suggest checkpoints based on file counts or tool calls.** The model cannot check its own context usage — only the user can via `/context`. Don't guess.
 
+**CRITICAL: Never use self-assessed "context pressure" to reduce quality.** You MUST NOT run Gauntlets "efficiently," use "lightweight checkpoints," skip debriefs, or reduce review rounds based on a feeling that context is heavy. Run `/context` and report the actual number, or run the full protocol. See CAMPAIGN.md "Quality Reduction Anti-Pattern" for the complete rule. This is the #1 source of shipped bugs in VoidForge campaigns.
+
 ### Checkpoint procedure:
 1. Update `/logs/build-state.md` with current state
 2. Write current findings/progress to the active phase log

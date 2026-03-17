@@ -159,7 +159,7 @@ After `/assemble` completes:
 1. Run `/git` to commit and version the mission
 2. Update `/logs/campaign-state.md` — mark mission complete, update stats. When updating, include the debrief issue number: "Debrief: #XX" or "Debrief: SKIPPED (not blitz)" or "Debrief: N/A (normal mode)".
 3. **BLITZ GATE:** If `$ARGUMENTS` contains `--blitz`, run `/debrief --submit` NOW. Do not proceed to the next step until the debrief is filed. This is non-negotiable — blitz captures learnings while context is fresh. Log the debrief issue number in campaign-state.md.
-   **Lightweight alternative:** If context is too heavy for full `/debrief --submit`, append a 3-line summary to `/logs/campaign-debriefs.md` instead (mission name, finding counts, key lesson). This satisfies the gate. Full debrief runs at campaign end.
+   **Lightweight alternative:** ONLY if `/context` shows actual usage above 70% (~700k tokens), append a 3-line summary to `/logs/campaign-debriefs.md` instead (mission name, finding counts, key lesson). You MUST report the actual context percentage to justify this. "Context is heavy" without a number is not valid justification.
 4. **Collect BLOCKED items** from this mission (assets, infrastructure, copy issues). For each:
    - If it's a future feature → append to `ROADMAP.md` under the appropriate version
    - If it's a missing asset the user must provide → add to a `## Blocked Items` section in campaign-state.md with what's needed and who can unblock it

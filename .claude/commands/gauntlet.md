@@ -125,7 +125,7 @@ Present them with severity and recommendation. The user decides whether to ship 
 - The Gauntlet does NOT build code — it reviews and hardens existing code
 - Fixes happen BETWEEN rounds, not batched at the end
 - Every finding must have: ID, severity, file, description, fix recommendation
-- If context pressure symptoms appear, ask user to run `/context`
+- If context pressure symptoms appear, ask user to run `/context`. Only checkpoint at >70%. NEVER reduce Gauntlet rounds, skip agents, or "run efficiently" based on self-assessed context pressure. See CAMPAIGN.md "Quality Reduction Anti-Pattern" — this is a hard rule.
 - The Gauntlet is the final test before shipping. Treat it with appropriate gravity.
 
 ## Handoffs
