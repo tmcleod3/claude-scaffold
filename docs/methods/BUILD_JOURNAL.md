@@ -81,6 +81,12 @@ This is the most important file. It's read at the start of every session. Keep i
 ## Current Blockers
 - [none or list]
 
+## Deployment
+- **Target:** [Vercel / Railway / VPS / none yet]
+- **Method:** [CLI (`npx vercel --prod`) / Git integration / manual]
+- **Last deployed commit:** [hash or "not yet deployed"]
+- **Production URL:** [url or "N/A"]
+
 ## Recent Decisions
 - [last 3-5 decisions with rationale]
 

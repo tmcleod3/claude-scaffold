@@ -73,9 +73,17 @@ Verify all random value generation uses `crypto.getRandomValues()` (browser) or 
 
 These require full codebase context — run sequentially:
 
-**Yoda — Auth:** Passwords (bcrypt ≥12), no plaintext anywhere, reset tokens single-use + expire, rate limited. OAuth state param, redirect whitelist, server-side exchange. Sessions: crypto random, httpOnly/secure/sameSite, invalidated on logout + password change, CSRF on mutations.
+**Yoda — Auth:** Passwords (bcrypt ≥12), no plaintext anywhere, reset tokens single-use + expire, rate limited. OAuth state param, redirect whitelist, server-side exchange. Sessions: crypto random, httpOnly/secure/sameSite, invalidated on logout + password change, CSRF on mutations. **Constant-time comparison:** All secret comparisons (OTP codes, CSRF tokens, API keys, reset tokens, webhook signatures) MUST use `crypto.timingSafeEqual()` (Node.js) or equivalent. Flag any `===`/`!==` comparison on secret values — timing attacks can leak the secret byte-by-byte. (Field report #36: OTP used `!==` while CSRF correctly used `timingSafeEqual` — inconsistent within the same codebase.)
 
 **Windu — Input:** SQL (parameterized queries), XSS (escaped output, no dangerouslySetInnerHTML, CSP), SSRF (URL allowlist, block internal IPs — check ALL bypass vectors: octal IPs `0177.0.0.1`, decimal IPs `2130706433`, IPv6-mapped `::ffff:127.0.0.1`, DNS rebinding, URL scheme bypass `file://`, double-encoding), Command (no user input in shell), Path traversal (sanitized filenames), Deserialization (schema validate all parsed data). **AI Output Sanitization:** If the app generates or executes AI output (LLM responses, code generation), verify: (1) regex sanitization handles nested structures (e.g., nested braces), (2) sanitization failure does NOT fall through to a less-secure path, (3) server-side code execution uses true sandboxing (isolated-vm), NOT Node.js `vm` module (test: `this.constructor.constructor('return globalThis')()` — if it returns the real global, the sandbox is broken), (4) script/iframe tags stripped, (5) event handlers stripped via catch-all rename, not just regex match. **Rename not strip:** When sanitizing JSX/HTML attributes, RENAME (prefix with `data-x-`) rather than STRIP (regex remove). Stripping with regex cannot handle nested structures (braces, quotes) and leaves partial values that break compilation. Renaming preserves the full attribute value while making the handler inert.
+
+**Sanitizer baseline checklist:** When auditing any HTML/JSX sanitizer, verify coverage against this reference list. Sanitizers built incrementally (adding patterns as discovered) inevitably miss entries. Check each category:
+- **Tags:** `script`, `iframe`, `object`, `embed`, `applet`, `base`, `meta[http-equiv]`, `form[action]`, `link[rel=import]`, `template`, `slot`, `portal`, `fencedframe`
+- **SVG/Math:** `svg[onload]`, `math`, any SVG element with event handlers
+- **Attributes:** all `on*` event handlers (catch-all pattern, not individual names)
+- **URIs:** `javascript:`, `data:`, `vbscript:` in `href`, `src`, `action`, `formaction`
+- **JS execution:** `eval()`, `Function()`, `setTimeout`/`setInterval` with string arguments
+(Field report #38: sanitizer missed `object`, `embed`, `applet`, `base`, `meta[http-equiv]` — 5 potential XSS vectors.)
 
 ### Proxy Route SSRF
 
@@ -89,7 +97,7 @@ Pattern: `/api/photos/[...name]` that joins path segments into a Google API URL 
 
 **Security principle:** For security boundaries (tool access, URL allowlists, IP ranges, credential scopes), **always prefer whitelist (default-deny) over blocklist (default-allow)**. New entries should be blocked by default until explicitly allowed. Blocklists inevitably miss entries.
 
-**Ahsoka — Access:** Every endpoint verifies ownership (no IDOR). UUIDs not sequential IDs. Admin verified server-side. Tier features verified server-side. User A can't access User B's anything. Rate limiting per-user and per-IP.
+**Ahsoka — Access:** Every endpoint verifies ownership (no IDOR). UUIDs not sequential IDs. Admin verified server-side. Tier features verified server-side. User A can't access User B's anything. Rate limiting per-user and per-IP. **Auth framework rate limiting:** Auth frameworks (NextAuth, Passport, Auth.js, Supabase Auth, etc.) may handle login routing internally. Verify that rate limiting is applied inside the framework's `authorize`/`verify` callback, not just at the API route level. The framework's handler may bypass route-level middleware entirely. (Field report #38: NextAuth's `authorize()` callback ran inside its own handler — route-level rate limiting never saw login attempts.)
 
 ### Direct-ID Entity Access
 
@@ -103,13 +111,25 @@ After adding role enforcement to a router, grep for ALL write operations: `@rout
 When adding new auth middleware, role checks, or authorization gates to a router or module, audit ALL existing endpoints in that same file/router for missing enforcement — not just the new ones. New auth patterns must be retrofitted to existing endpoints. Pre-existing write endpoints without role checks become privilege escalation vectors the moment auth is added to their neighbors.
 (Field report #21: `_require_admin` added to new endpoints but not retrofitted to existing `PUT /settings/*` routes — any viewer could modify system config.)
 
-**Padmé — Data:** PII identified. PII not in logs/errors/URLs. Deletion possible (GDPR). Export possible. Backups encrypted.
+**Padmé — Data:** PII identified. PII not in logs/errors/URLs. Deletion possible (GDPR). Export possible. Backups encrypted. **Anonymity invariant:** For apps with anonymous/alias features, verify BOTH response-level masking (alias shown instead of real name) AND query-level filtering (WHERE clauses must not match anonymous users by their real identity). Search endpoints, member lists, and autocomplete that filter by `displayName` or `email` create oracle attacks on anonymous identities. (Field report #36: response masking was correct but search WHERE clauses matched anonymous users by real displayName — 3 occurrences in one campaign.)
 
 ### No Secrets in Stored Data
 
 Verify that no data written to the database contains API keys, tokens, or credentials embedded in URLs or values. Common pattern: an API adapter builds a URL with `&key=${apiKey}` and stores it in a database column. When that URL is served to clients, the API key leaks.
 
 **Rule:** Stored URLs must never embed auth parameters. Proxy server-side instead — the client requests from your API, your API adds the credential at request time. (Field report #33: Google Places adapter stored photo URLs with embedded API key.)
+
+### Filesystem Access Check
+
+Flag any use of `readFile`, `readFileSync`, `writeFile`, `writeFileSync`, `createReadStream`, or `open` where the file path includes user-supplied input (request body, query params, URL segments). User-controlled paths enable path traversal — an attacker can read `/etc/passwd` or application secrets regardless of auth.
+
+**Required controls for user-controlled file paths:**
+1. `resolve()` + `normalize()` to canonicalize the path
+2. Verify the resolved path starts with the expected base directory (allowlist, not blocklist)
+3. Reject paths containing `..`, `~`, or null bytes
+4. Use `realpath()` to resolve symlinks (see Symlink Resolution below)
+
+(Field report #36: backfill endpoint accepted file path from request body, passed directly to `readFileSync`. Path traversal bypassed all auth.)
 
 ### Symlink Resolution
 

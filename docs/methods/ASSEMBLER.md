@@ -64,11 +64,21 @@ Fury calls ALL of them. That's the point.
 | 3-5 | /review | 3 | Zero Must Fix items |
 | 6 | /ux (usability + a11y) | 1 | Zero critical usability or a11y findings |
 | 7-8 | /security | 2 | Zero Critical/High findings |
-| 9 | /devops | 1 | Deploy scripts, monitoring, smoke tests |
+| 9 | /devops (+ deployment verification) | 1 | Deploy scripts, monitoring, smoke tests, live deploy status |
 | 10 | /qa | 1 | All critical/high bugs fixed |
 | 11 | /test | 1 | Suite green, coverage acceptable |
 | 12 | Crossfire | 1 | All 4 adversarial agents sign off |
 | 13 | Council | 1-3 | All 5 cross-domain agents sign off (incl. Troi PRD compliance) |
+
+### Deployment Verification (Phase 9 sub-step)
+
+For projects that are already deployed, Phase 9 (DevOps/Kusanagi) should verify the current live deployment status before proceeding:
+1. Check for `.vercel/project.json`, `fly.toml`, `railway.toml`, `Dockerfile`, or equivalent → project is linked to a deploy target
+2. Determine deploy method: CLI-only (`npx vercel --prod`) vs. Git integration (auto-deploy on push)
+3. Check when the last deploy happened (e.g., `npx vercel ls`, `fly status`)
+4. Record the production URL and deploy method in `assemble-state.md`
+
+Do NOT assume `git push` triggers a deploy — CLI-deployed projects require explicit deploy commands. Cross-reference actual deployment config (`.vercel/project.json`, PRD deploy section) against `build-state.md` — the build state may be stale from a prior session. (Field report #37: agent read stale build-state.md saying "awaiting Vercel connect" when the site was already live.)
 
 ## The Crossfire
 
@@ -103,6 +113,10 @@ Verify no circular calls between store actions and API methods. Specifically che
 **Pattern to detect:** auth refresh → API call → 401 → refresh → API call → infinite recursion.
 
 (Field report #17: recursive 401 loop shipped past /assemble review because no agent traced the cross-file call chain.)
+
+### Post-Pipeline: Deploy Offer
+
+After Phase 13 (Council sign-off), if a deployment target is configured (`.vercel/project.json`, `fly.toml`, `railway.toml`, or PRD deploy section), Fury offers: "Council has signed off. Deploy to production?" This closes the loop instead of leaving deployment as an implicit user action. In campaign blitz mode, auto-deploy if the deploy method is known. (Field report #37: user had to prompt three times before agent deployed to Vercel.)
 
 ## Deliverables
 

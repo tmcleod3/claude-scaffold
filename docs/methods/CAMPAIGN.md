@@ -96,6 +96,11 @@ Kira reads the battlefield:
 3. Read `/logs/assemble-state.md` — check for in-progress assemblies
 4. Check `git status` — uncommitted work?
 5. Read auto-memory for project context
+6. Check for VoidForge vault: `~/.voidforge/vault.enc`
+   - If vault exists → check if provisioning completed (`~/.voidforge/runs/*.json`)
+   - If vault exists + provisioning NOT done → flag: "Credentials collected but infrastructure not provisioned. Run `voidforge deploy` before continuing."
+   - If vault exists + provisioning done → verify `.env` is populated from vault. If not, suggest re-running provisioner.
+   - If no vault → proceed as today (manual credential management)
 
 ### Campaign State Auto-Sync
 
@@ -106,6 +111,7 @@ At the start of every campaign session, cross-reference `git log` against `campa
 - **RESUME BUILD** — build-state shows incomplete phases → `/build` (resume from phase)
 - **UNCOMMITTED** — git has unstaged changes → prompt user: commit first or continue?
 - **BLOCKED ITEMS** — campaign-state has unresolved BLOCKED items from previous missions → present them: "These items are still blocked: [list]. Resolve now, skip, or continue?"
+- **VAULT AVAILABLE** — vault exists but `.env` is sparse → offer: "The vault has credentials but infrastructure isn't provisioned. Run `voidforge deploy` now? [Y/n]" In `--blitz` mode: auto-run provisioner. In normal mode: ask user.
 - **CLEAR** — no in-progress work → proceed to Step 1
 
 ### Step 1 — Dax's Strategic Analysis
@@ -121,6 +127,7 @@ Dax reads the Prophets' plan:
    - **Asset** — images, illustrations, SVGs, OG images, custom icons (require external generation)
    - **Copy** — marketing text, metadata descriptions, numeric claims (buildable but need accuracy verification)
    - **Infrastructure** — DNS, env vars, deployments, third-party dashboard setup (require CLI/dashboard access)
+   - **Vault-Available** — infrastructure items where credentials exist in `~/.voidforge/vault.enc` but haven't been injected into `.env`. When scanning `.env.example` against `.env`, check if missing vars are in the vault before marking BLOCKED. Vault-backed credentials can be auto-resolved by running `voidforge deploy`. (Field report #40: 5 items classified as BLOCKED for an entire 10-mission campaign when the vault had the credentials.)
 6. Diff: PRD requirements vs. implemented features (structural AND semantic — not just "does the route exist?" but "does the component render what the PRD describes?")
 7. Produce: **The Prophecy Board** — ordered list of missions with scope, plus a separate list of BLOCKED items (assets, credentials, user decisions)
 
@@ -154,6 +161,7 @@ Before starting mission #1, Odo verifies:
 2. Are schema migrations needed?
 3. Are new integrations needed that require credentials?
 4. Are there blocking issues from previous missions?
+5. **Data model retrofit check:** If this campaign adds a new data model layer (e.g., ProjectVersion, WorkspaceScope), identify all existing endpoints that read/write the old model and flag them for review. Prior-campaign features that reference the old model directly will silently break or return stale data. (Field report #38: variant endpoint missed the version model because it was built in a prior campaign.)
 
 Flag blockers. Suggest resolutions.
 
@@ -206,6 +214,14 @@ When a mission involves DELETE or UPDATE cascade operations (user offboarding, b
 
 These issues are invisible to standard code review but Critical when found by the Gauntlet. (Field report #31: 3 HIGH findings in offboarding mission — all cascade issues.)
 
+### Cross-File Dependency Check
+
+After each mission's 1-round review, check: "Did this mission modify any file that was also modified by a prior mission in this campaign?" If so, verify that the prior mission's patterns (error handling, locking, validation) are preserved in the new changes. This is a 30-second scan per shared file — run `git log --name-only` to identify cross-mission file overlap. Cross-cutting bugs that span files modified in different missions are invisible to single-mission review. (Field report #38: 2 Critical findings — chat stream timeout and optimistic locking omission — both involved files modified across multiple missions.)
+
+### Pattern Replication Check
+
+When a mission duplicates or extends an existing code path (adding a version-aware path alongside a legacy path, adding a new endpoint that mirrors an existing one), verify that security patterns (locking, rate limiting, validation, sanitization) from the original path are replicated in the new path. Grep for the original pattern and confirm it exists in the new code. (Field report #38: optimistic locking in legacy chat edit was not replicated to the version-aware path.)
+
 ### Minimum Review Guarantee
 
 Even in `--fast` mode, each mission gets at least **1 review round** (not 3, but never 0). A single review catches ~80% of issues for 33% of the review cost. Zero reviews in blitz caused 7 Critical+High issues to accumulate undetected across 4 missions — all caught by the Victory Gauntlet but at much higher fix cost. (Field report #28)
@@ -252,7 +268,8 @@ The Victory Gauntlet catches issues from late-session missions, but at much high
    - Future feature → append to `ROADMAP.md` under the appropriate version
    - User-provided asset (illustrations, OG images) → add to `## Blocked Items` in campaign-state.md
    - PRD requirement beyond code → mark BLOCKED in the Prophecy Board with reason
-5. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
+5. **Troi pre-scan before "all complete" declaration:** Before declaring all requirements COMPLETE or BLOCKED, run a lightweight Troi check: read the PRD's testable sections (features, marketing, dashboard, tiers, emails) and verify semantic completeness — not just route existence. This catches "FAQ section missing" and "social proof not rendered" type gaps that structural diffs miss. Cheaper than deferring to the Victory Gauntlet. (Field report #38: 11 gaps found by Gauntlet that a prior session's "all complete" declaration missed.)
+6. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6 (victory)
 

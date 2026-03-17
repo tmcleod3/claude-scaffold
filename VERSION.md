@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 7.5.0
+**Current:** 7.5.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 7.5.1 | 2026-03-16 | 19 fixes from #36-#40 — vault awareness, anonymity invariant, deployment verification, cross-file deps, WCAG contrast |
 | 7.5.0 | 2026-03-16 | Thumper Command Center — inline keyboard, bot personalization, water-rings fix, command↔doc sync |
 | 7.4.1 | 2026-03-16 | 15 fixes from #31-#34 — thumper sync, parallel agents, cascade review, crypto check, proxy SSRF, campaign end debrief |
 | 7.4.0 | 2026-03-16 | The Field Hardening — 20 methodology fixes from 5 field reports, runtime smoke test, first-run checklist, campaign-mode pipeline |

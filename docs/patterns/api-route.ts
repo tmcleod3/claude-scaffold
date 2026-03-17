@@ -109,6 +109,43 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// --- Prisma Select on Mutations ---
+// RULE: Always use `select` on Prisma create/update responses. Never return
+// raw Prisma results from mutations — they include ALL columns by default,
+// silently leaking sensitive fields (phoneHash, email, tokens, internal IDs).
+//
+// BAD:  const user = await db.user.update({ where: { id }, data: { name } })
+//       return NextResponse.json({ user })  // leaks phoneHash, email, etc.
+//
+// GOOD: const user = await db.user.update({
+//         where: { id }, data: { name },
+//         select: { id: true, name: true, avatar: true }
+//       })
+//       return NextResponse.json({ user })  // only selected fields
+//
+// This applies to create(), update(), upsert(), and any mutation that returns data.
+// findMany/findUnique already use select in the service pattern — mutations must too.
+// (Field report #36: Prisma update() without select leaked phoneHash and whatsappId.)
+
+// --- Fire-and-Forget Endpoints (sendBeacon) ---
+// navigator.sendBeacon() cannot set custom headers — it sends a plain POST with
+// Content-Type: text/plain. This makes it incompatible with header-based CSRF
+// enforcement (X-CSRF-Token). For analytics/telemetry endpoints that use sendBeacon:
+//
+// 1. Exempt the endpoint from CSRF header checks
+// 2. Add compensating controls: per-IP rate limiting, session cookie validation,
+//    origin check via Referer/Origin header (browsers always send these on sendBeacon)
+// 3. Ensure the endpoint only WRITES (append-only) — never reads or mutates user data
+// 4. Log the exemption in the security audit
+//
+// Pattern:
+//   POST /api/analytics/event  — exempt from X-CSRF-Token
+//   Validation: session cookie + origin header + rate limit (100/min/IP)
+//   Data: append-only event log, no user data returned in response
+//
+// (Field report #36: analytics endpoint failed silently because sendBeacon
+// couldn't attach the CSRF header.)
+
 // --- Consistent error handler (shared across all routes) ---
 // Located in /lib/errors.ts — shown here for reference
 /*

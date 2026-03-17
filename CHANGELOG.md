@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.5.1] - 2026-03-16
+
+### Added
+- **Vault awareness in campaign** — Kira checks vault status in Step 0, Dax classifies credentials as "vault-available" instead of BLOCKED. (Field report #40)
+- **Troi pre-scan before Victory** — verifies all PRD claims before declaring "all complete." (Field report #38)
+- **Cross-file dependency check** in per-mission review — catch cross-module integration gaps. (Field report #38)
+- **Deployment verification** in Assembler Phase 9 — check if project is already live before suggesting deploy steps. (Field report #37)
+- **Deployment section** in build-state.md template. (Field report #37)
+
+### Changed
+- **Security audit** gains 5 new checklist items: anonymity invariant, filesystem access, constant-time comparison, sanitizer baseline, auth framework rate limiting. (Field reports #36, #38)
+- **API route pattern** gains Prisma select-on-mutations rule and fire-and-forget endpoint (sendBeacon/CSRF) guidance. (Field report #36)
+- **Service pattern** gains Prisma select-on-mutation example. (Field report #36)
+- **Campaign** gains data model retrofit check, pattern replication check, vault-aware Dax classification. (Field reports #38, #40)
+- **WCAG contrast verification** added to Galadriel's UX checklist. (Field report #38)
+- **Post-pipeline deploy offer** in Assembler after Phase 13. (Field report #37)
+
+---
+
 ## [7.5.0] - 2026-03-16
 
 ### Added

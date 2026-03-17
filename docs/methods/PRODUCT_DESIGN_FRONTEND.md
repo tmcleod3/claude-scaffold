@@ -17,7 +17,7 @@
 |-------|------|------|------|
 | UX Auditor | **Elrond** | Heuristics, user flows, information architecture | Can users find things? |
 | UI/Visual Designer | **Arwen** | Consistency, hierarchy, spacing, typography, color | Does it look intentional? |
-| Accessibility | **Samwise** | WCAG, keyboard, focus, ARIA, contrast, reduced motion | Never leaves anyone behind. |
+| Accessibility | **Samwise** | WCAG, keyboard, focus, ARIA, contrast verification, reduced motion | Never leaves anyone behind. |
 | Content Designer | **Bilbo** | Microcopy, error messages, empty states, tone | Does it speak clearly? |
 | Frontend Engineer | **Legolas** | Component architecture, CSS/layout, state handling | Clean and elegant code. |
 | Performance | **Gimli** | Loading states, perceived performance, mobile/tablet | Solid. No wasted motion. |
@@ -145,7 +145,7 @@ Before hiding, relocating, or collapsing a UI container (dropdown, panel, menu, 
 
 **Elrond:** IA, navigation, task flows, friction.
 **Arwen:** Spacing, typography, icons, button hierarchy, visual hierarchy.
-**Samwise:** Keyboard nav, focus rings, ARIA, contrast, reduced motion.
+**Samwise:** Keyboard nav, focus rings, ARIA, contrast, reduced motion. **WCAG contrast verification:** For the project's primary text/background combinations, verify WCAG AA contrast ratio (4.5:1 for normal text, 3:1 for large text). Check: primary text on primary bg, muted text on primary bg, accent text on primary bg. Opacity modifiers (e.g., `text-emerald-200/50`) halve the effective contrast — always compute the final rendered color, not the base color. A systematic check during the initial color system design prevents dozens of instances across the codebase. (Field report #38: 46 failing-contrast instances across 13 files, systemic from day 1.)
 **Bilbo:** Microcopy, labels, CTAs, error messages, empty states, tone.
 **Legolas:** Component architecture, CSS, semantic HTML, state management.
 **Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets.

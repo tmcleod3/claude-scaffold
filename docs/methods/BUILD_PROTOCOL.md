@@ -82,9 +82,10 @@ Every phase produces a log file in `/logs/`. See `/docs/methods/BUILD_JOURNAL.md
 2. Read entire PRD — extract: identity, stack, architecture, data model, routes, flows, tiers, integrations, env vars, deployment target
 3. Determine project profile and skip rules
 4. Flag missing items — list each gap explicitly with "inferred [assumption]" or "BLOCKED — needs answer"
-5. Produce initial ADRs in `/docs/adrs/`
-6. Create `/logs/build-state.md` and `/logs/phase-00-orient.md`
-7. If PRD has critical gaps (no schema, no stack, no features defined): **STOP. Flag to user. Do not proceed.**
+5. Check for VoidForge vault (`~/.voidforge/vault.enc`). If present, cross-reference env vars from the PRD against vault contents and provisioning state (`~/.voidforge/runs/*.json`). Distinguish "missing credential" (truly BLOCKED) from "vault-available credential" (resolvable via `voidforge deploy`). (Field report #40)
+6. Produce initial ADRs in `/docs/adrs/`
+7. Create `/logs/build-state.md` and `/logs/phase-00-orient.md`
+8. If PRD has critical gaps (no schema, no stack, no features defined): **STOP. Flag to user. Do not proceed.**
 
 **Phase 1 — Stark + Kusanagi Scaffold.**
 1. Initialize framework, configs, schema, directory structure, types, utils, root layout

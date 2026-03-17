@@ -61,11 +61,20 @@ export const projectService = {
       )
     }
 
+    // ALWAYS use `select` on mutations — raw Prisma results include ALL columns,
+    // silently leaking sensitive fields. See /docs/patterns/api-route.ts for the rule.
     return db.project.create({
       data: {
         name: input.name,
         description: input.description ?? null,
         ownerId: input.ownerId,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
       },
     })
   },

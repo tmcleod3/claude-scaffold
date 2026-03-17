@@ -58,6 +58,11 @@ Check for unfinished business:
 3. Read `/logs/assemble-state.md` — in-progress assemblies
 4. Run `git status` — uncommitted changes
 5. Check auto-memory for project context
+6. Check for VoidForge vault: `~/.voidforge/vault.enc`
+   - If vault exists → check provisioning state (`~/.voidforge/runs/*.json`)
+   - If vault exists + not provisioned → flag: "Run `voidforge deploy` before continuing."
+   - If vault exists + provisioned → verify `.env` is populated. If not, suggest re-running provisioner.
+   - If no vault → proceed normally
 
 **Verdicts:**
 - If assemble-state shows incomplete phases → run `/assemble --resume` first
@@ -65,6 +70,7 @@ Check for unfinished business:
 - If uncommitted changes exist → ask: "Commit first, or continue?"
 - If `/campaign --resume` was passed → resume from campaign-state's active mission
 - If campaign-state has unresolved BLOCKED items → present them: "These items from previous missions are still blocked: [list]. Resolve now, skip, or continue?"
+- If vault exists but `.env` is sparse → offer: "The vault has credentials but infrastructure isn't provisioned. Run `voidforge deploy` now?" In `--blitz` mode: auto-run provisioner.
 - If clear → proceed to Step 1
 
 ## Step 1 — Dax's Strategic Analysis
