@@ -84,6 +84,17 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Green Lantern (Scenario Construction):** Generates the test matrix before testing begins — what inputs × what states × what conditions should be tested? Called during Step 1 to produce the attack surface map.
 **Martian Manhunter (Cross-Environment):** Tests across environments — different Node versions, with and without optional dependencies, different OS behaviors. Called when the project targets multiple platforms.
 
+### Mobile QA Checklist (when `deploy: ios|android|cross-platform`)
+
+When the project targets mobile platforms, add these to the attack plan:
+- **Orientation:** Rotate between portrait/landscape mid-flow. Verify layout doesn't break, modals resize, keyboard dismisses.
+- **Deep links:** Test `yourapp://path` and universal links. Verify they resolve to the correct screen with correct params. Test with app cold-started vs already running.
+- **Push notifications:** Tap notification while app is in foreground, background, and killed. Verify navigation + data load.
+- **Offline mode:** Enable airplane mode mid-operation. Verify queued actions sync when reconnected. Verify error messages are clear.
+- **Battery/memory:** Profile with Instruments (iOS) or Android Profiler. Flag memory leaks in navigation (screens not deallocated), excessive re-renders, background task abuse.
+- **App lifecycle:** Background → foreground. Verify state restored (form input, scroll position, auth token). Test after 30min background.
+- **Platform differences:** Test on both iOS and Android if cross-platform. Verify platform-specific components render correctly.
+
 ### API Boundary Type Verification
 
 When the backend (Python, Go, Rust) and frontend (JavaScript) use different type systems, verify that types survive the API boundary correctly. Common gotcha: Python `bool` (`True`/`False`) becomes JSON `true`/`false` — but Python's string representation `"True"` is truthy in JS while `"False"` is also truthy. Check: Does the frontend compare API boolean values with `===` (strict) or `==` (loose)? Does the backend serialize booleans as JSON booleans or as strings? This catches "it works in Python tests but breaks in the browser" bugs. (Field report #66)

@@ -26,6 +26,25 @@
 - A specific framework/library has patterns that the built-in agents miss repeatedly
 - The project has a unique architectural pattern that needs dedicated review attention
 
+## Built-In Conditional Agents
+
+These activate automatically based on PRD frontmatter. You don't need to add them manually.
+
+### Uhura-Mobile
+**Universe:** Star Trek | **Reports to:** Picard
+**Domain:** Mobile architecture: navigation stacks, deep linking, universal links, app lifecycle, platform-specific patterns
+**Trigger:** `deploy: ios | android | cross-platform`
+
+### Samwise-Mobile
+**Universe:** Tolkien | **Reports to:** Galadriel
+**Domain:** Mobile accessibility: VoiceOver (iOS), TalkBack (Android), Dynamic Type, reduced motion, touch targets (44pt/48dp minimum)
+**Trigger:** `deploy: ios | android | cross-platform`
+
+### Rex-Mobile
+**Universe:** Star Wars | **Reports to:** Kenobi
+**Domain:** Mobile security: certificate pinning, Keychain/Keystore, jailbreak/root detection, transport security (ATS/NSC), bundle secret scanning
+**Trigger:** `deploy: ios | android | cross-platform`
+
 ## Custom Agents for This Project
 
 *None yet. Add your first custom agent using the template above.*

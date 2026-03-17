@@ -30,9 +30,14 @@ marketing: no       # yes | no — Phase 8
 email: none         # resend | sendgrid | ses | none — Phase 6
 
 # Deployment
-deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker
+deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker | ios | android | cross-platform
 instance_type: ""   # t3.micro | t3.small | t3.medium | t3.large — auto-recommended if blank (VPS only)
 hostname: ""        # your-domain.com — Cloudflare DNS wiring (optional)
+
+# Mobile (only if deploy: ios | android | cross-platform)
+mobile_framework: ""  # react-native | flutter | swiftui | kotlin
+app_store_id: ""      # Apple Team ID for code signing (iOS)
+bundle_id: ""         # com.yourcompany.appname
 ```
 
 ---

@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 9.1.0
+**Current:** 9.2.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 9.2.0 | 2026-03-17 | The Mobile Forge — iOS/Android methodology, mobile patterns, 3 conditional agents. Provisioner BLOCKED (needs real API integration). |
 | 9.1.0 | 2026-03-17 | The Multi-Language Forge (Python) — Django + FastAPI deep dives in all 8 patterns + build protocol Python path |
 | 9.0.0 | 2026-03-17 | The Field-Tested Forge — META_WORKFLOW.md, pattern evolution data collection, /imagine API key persistence |
 | 8.3.0 | 2026-03-16 | The Autonomy — /campaign --autonomous with git tags, critical-finding rollback, 5-mission checkpoints |

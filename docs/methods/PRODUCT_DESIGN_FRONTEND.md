@@ -154,6 +154,17 @@ Before hiding, relocating, or collapsing a UI container (dropdown, panel, menu, 
 **Éowyn:** Implements accepted enchantment opportunities from Step 1.75 during batch fixes.
 **Celeborn:** Design system governance — are spacing tokens consistent? Is the typography scale followed? Are colors from the palette? Are component naming conventions respected? Celeborn audits the *system* behind the components, not the components themselves. "Quiet authority." Catches when one component uses `gap-4` while another uses `gap-[18px]` for the same spacing, or when a color is hardcoded instead of using a design token.
 
+### Mobile UX Checklist (when `deploy: ios|android|cross-platform`)
+
+- **Safe area:** Content must respect safe area insets (notch, home indicator, status bar). Never place interactive elements under the notch.
+- **Touch targets:** Minimum 44pt (iOS) / 48dp (Android). Verify with fingers, not mouse cursor. Adjacent targets need 8pt minimum gap.
+- **Navigation:** Follow platform conventions — back swipe (iOS), hardware back button (Android). Don't fight the platform.
+- **Gestures:** Swipe-to-delete, pull-to-refresh, long-press menus. Verify they don't conflict with system gestures (edge swipe = back on iOS).
+- **Haptics:** Use appropriate haptic feedback for confirmations (success), errors (warning), and destructive actions (heavy impact). Don't overuse — haptics lose meaning if everything vibrates.
+- **Keyboard:** Verify keyboard avoidance on all forms. Test with hardware keyboard connected. Verify "Done" button dismisses keyboard.
+- **Dynamic Type / Font scaling:** Support system font size preferences. Verify layout doesn't break at largest size. Use relative units, not fixed pixel sizes.
+- **Reduced motion:** Respect `prefers-reduced-motion` (iOS) / "Remove animations" (Android). Replace animations with instant state changes.
+
 ### Extended Tolkien Roster (activate as needed)
 
 **Aragorn (UX Leadership):** Orchestrates the Tolkien team when Galadriel runs multiple parallel agents. Prioritizes which findings matter most for the user. "Not all who wander are lost — but some UX flows definitely are."
