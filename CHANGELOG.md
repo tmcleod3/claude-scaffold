@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [9.0.0] - 2026-03-17
+
+### Added
+- **`docs/META_WORKFLOW.md`** — How to use VoidForge to develop VoidForge. Documents the feedback loop, anti-patterns discovered across 4 campaigns, when to use each campaign mode, and version history of campaigns-on-self.
+- **Wong's Pattern Usage Log (Phase 12.5)** — After each build, logs which patterns were used, which framework adaptations applied, which custom modifications made. Feeds pattern evolution analysis in `/debrief`.
+- **Pattern Evolution Check** in FIELD_MEDIC.md — Wong checks pattern-usage data for recurring variations across projects. 10+ occurrences → propose as new pattern.
+
+### Changed
+- **`/imagine` API key persistence** — FORGE_ARTIST.md now instructs persisting the OpenAI API key to `.env.local` on first use, preventing key loss between sessions. (Field report #62)
+
+---
+
 ## [8.3.0] - 2026-03-16
 
 ### Added

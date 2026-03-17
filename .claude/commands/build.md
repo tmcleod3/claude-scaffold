@@ -93,6 +93,9 @@
 4. Log to `/logs/phase-12-deploy.md`
 5. **Gate:** Health check passes in production, monitoring active, backup tested
 
+## Phase 12.5 — Wong's Pattern Usage Log
+After build and before launch, log which patterns were used: pattern name, framework adaptation, custom mods. Store in `docs/pattern-usage.json`. Feeds Wong's promotion analysis in `/debrief`.
+
 ## Phase 13 — Launch (All agents)
 1. Full checklist: SSL, email, payments, analytics, monitoring, backups, security headers, legal, performance, mobile, accessibility, all tests passing
 2. Log final status to `/logs/phase-13-launch.md`

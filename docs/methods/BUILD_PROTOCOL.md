@@ -187,6 +187,13 @@ The review phases use a double-pass pattern: find → fix → re-verify. This ca
 2. Complete first-deploy pre-flight checklist (see `/devops` command)
 3. Log to `/logs/phase-12-deploy.md`
 
+**Phase 12.5 — Wong's Pattern Usage Log.**
+After build completes and before launch, Wong logs which patterns were used in this build:
+1. For each file created during the build, check if it follows a pattern from `docs/patterns/`
+2. Log: pattern name, framework adaptation used (if any), custom modifications made
+3. Store in project-level `docs/pattern-usage.json` (or append to existing)
+4. This data feeds Wong's promotion analysis in `/debrief` — recurring variations across 10+ projects become candidate patterns
+
 **Phase 13 — Launch Checklist.**
 All flows in production. SSL. Email. Payments. Analytics. Monitoring. Backups. Security headers. Legal. Performance. Mobile. Accessibility. Tests passing. Log final status to `/logs/phase-13-launch.md`.
 

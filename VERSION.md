@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 8.3.0
+**Current:** 9.0.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 9.0.0 | 2026-03-17 | The Field-Tested Forge — META_WORKFLOW.md, pattern evolution data collection, /imagine API key persistence |
 | 8.3.0 | 2026-03-16 | The Autonomy — /campaign --autonomous with git tags, critical-finding rollback, 5-mission checkpoints |
 | 8.2.0 | 2026-03-16 | The Evolution — self-improving methodology (Wong promotion analysis), custom sub-agents (CUSTOM_AGENTS.md) |
 | 8.1.2 | 2026-03-16 | Deep Roster command wiring — extended agents integrated into /qa, /security, /ux, /architect, /gauntlet, /assemble, /campaign commands |

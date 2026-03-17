@@ -36,7 +36,8 @@ Generate every visual asset the PRD describes, maintain style consistency, and v
 
 ## Operating Rules
 
-1. **Always show the plan before generating.** Cost estimate, image count, style prefix — user confirms before any API calls.
+1. **Persist the API key on first use.** When the user provides an OpenAI API key for the first time, write it to `.env.local` as `OPENAI_API_KEY` (gitignored by default in Next.js, Rails, Django, etc.). On subsequent sessions, read from `.env.local` instead of asking again. This prevents the key-loss-between-sessions problem. (Field report #62)
+2. **Always show the plan before generating.** Cost estimate, image count, style prefix — user confirms before any API calls.
 2. **Style consistency is non-negotiable.** Derive the style prefix from the PRD brand section. Apply it to every image. No per-image style decisions unless the user overrides.
 3. **Skip existing files.** Don't regenerate images that already exist on disk unless `--regen` is explicitly used.
 4. **Manifest everything.** Every generated image gets an entry in `manifest.json` with the prompt, model, timestamp, and hash. This enables regeneration and auditing. **Privacy note:** The manifest contains full prompts derived from PRD prose. If the repo is public, add `public/images/manifest.json` to `.gitignore` to avoid exposing brand strategy.

@@ -98,7 +98,9 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **The Campaign** | `/docs/methods/CAMPAIGN.md` | Sisko — when building the whole PRD mission by mission |
 | **Forge Artist** | `/docs/methods/FORGE_ARTIST.md` | Celebrimbor — when generating images from PRD descriptions |
 | **Field Medic** | `/docs/methods/FIELD_MEDIC.md` | Bashir — when running post-mortems and submitting upstream feedback |
-| **Patterns** | `/docs/patterns/` | When writing code (7 reference implementations) |
+| **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Sisko — when generating a PRD from scratch |
+| **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
+| **Patterns** | `/docs/patterns/` | When writing code (8 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team

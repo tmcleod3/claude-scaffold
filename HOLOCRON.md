@@ -82,6 +82,7 @@ Every tier includes:
 - **14 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **170+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, and Anime
 - **7 code patterns** — Reference implementations with framework adaptations
+- **Meta-Workflow** — How VoidForge uses itself to develop itself (`docs/META_WORKFLOW.md`)
 - **This Holocron** — The guide you're reading now
 
 The Full tier adds:

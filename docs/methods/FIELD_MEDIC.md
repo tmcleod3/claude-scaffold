@@ -166,6 +166,16 @@ After writing the report (Step 3), Wong checks if the findings should promote in
 
 **Why 3+ threshold:** A single lesson could be project-specific. Two could be coincidence. Three is a pattern worth encoding into the methodology. The user always has final say.
 
+### Pattern Evolution Check
+
+If `docs/pattern-usage.json` exists (logged by BUILD_PROTOCOL Phase 12.5), Wong checks for recurring pattern variations:
+1. Read the pattern-usage data across available projects
+2. If the same custom modification appears in 10+ projects → propose it as a new pattern or a pattern section update
+3. If a framework adaptation is consistently modified → propose updating the adaptation section
+4. Present to user: "This variation of api-route.ts appeared in 10 projects. Promote to pattern? [Y/n]"
+
+This is the long-game feedback loop: patterns evolve from data, not guesses.
+
 ## Deliverables
 
 1. Structured post-mortem document
