@@ -154,6 +154,15 @@ Before hiding, relocating, or collapsing a UI container (dropdown, panel, menu, 
 **Éowyn:** Implements accepted enchantment opportunities from Step 1.75 during batch fixes.
 **Celeborn:** Design system governance — are spacing tokens consistent? Is the typography scale followed? Are colors from the palette? Are component naming conventions respected? Celeborn audits the *system* behind the components, not the components themselves. "Quiet authority." Catches when one component uses `gap-4` while another uses `gap-[18px]` for the same spacing, or when a color is hardcoded instead of using a design token.
 
+### Game UX / Game Feel Checklist (when `type: game`)
+
+- **Game feel / juice:** Does hitting an enemy feel impactful? Check: screen shake (2-4px, 100ms), hit pause (50-100ms freeze frame), particle burst, audio cue, camera punch. These are mandatory for action games.
+- **Controller support:** If the game supports gamepads, verify: all menus navigable with D-pad, confirm = A/Cross, back = B/Circle. Show correct button icons for the connected controller.
+- **Accessibility options menu:** At minimum: rebindable keys, colorblind mode (pattern-based indicators, not just color), subtitle size options, screen shake toggle, difficulty options. See gameaccessibilityguidelines.com.
+- **Onboarding:** Does the first 30 seconds teach the controls? Interactive tutorial > text instructions > nothing. Never dump all controls at once.
+- **Death/failure:** Is the feedback clear? Can the player understand WHY they died? Is the retry loop fast? (<3 seconds from death to playing again for action games.)
+- **Loading:** Never show a static loading screen with no feedback. Progress bar, animated icon, or gameplay tips.
+
 ### Mobile UX Checklist (when `deploy: ios|android|cross-platform`)
 
 - **Safe area:** Content must respect safe area insets (notch, home indicator, status bar). Never place interactive elements under the notch.

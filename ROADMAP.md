@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v9.2.0 (2026-03-17)
-**Next:** v9.3 — The Game Forge
-**Status:** v9.2.0 shipped (methodology + patterns, provisioner BLOCKED). Next: v9.3 (Game) → v10.0 (War Room).
+**Current:** v9.3.0 (2026-03-17)
+**Next:** v10.0 — The War Room + The Frontier
+**Status:** v9.3.0 shipped. The v9.x line is complete. Next: v10.0 (War Room).
 
 ---
 

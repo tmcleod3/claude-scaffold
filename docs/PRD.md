@@ -13,7 +13,7 @@ Fill this out first. The Build Protocol reads these values to determine which ph
 ```yaml
 # Project identity
 name: "[PROJECT_NAME]"
-type: "full-stack"  # full-stack | api-only | static-site | prototype
+type: "full-stack"  # full-stack | api-only | static-site | prototype | game
 
 # Stack
 framework: ""       # next.js | django | rails | express | etc.
@@ -33,6 +33,11 @@ email: none         # resend | sendgrid | ses | none — Phase 6
 deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker | ios | android | cross-platform
 instance_type: ""   # t3.micro | t3.small | t3.medium | t3.large — auto-recommended if blank (VPS only)
 hostname: ""        # your-domain.com — Cloudflare DNS wiring (optional)
+
+# Game (only if type: game)
+game_engine: ""       # unity | godot | phaser | three.js | pixi
+game_genre: ""        # platformer | rpg | puzzle | simulation | fps | strategy
+deploy: "web"         # web (WebGL/HTML5) | steam | itch | mobile
 
 # Mobile (only if deploy: ios | android | cross-platform)
 mobile_framework: ""  # react-native | flutter | swiftui | kotlin
