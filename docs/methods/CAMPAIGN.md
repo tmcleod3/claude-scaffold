@@ -239,6 +239,12 @@ Even in `--fast` mode, each mission gets at least **1 review round** (not 3, but
 
 **UI→server route tracing (within review):** When a mission writes both UI code and server code, the review must trace every `fetch()` call in the UI to a registered server route. For each `fetch('/api/...')` in `.js`/`.ts` UI files, verify the path exists as an `addRoute()` call in the server. Missing routes produce silent 404s that are invisible in development. (Field report #50: UI button called `/api/server/restart` but no endpoint was created.)
 
+### One Mission, One Commit Anti-Pattern
+
+**Each mission gets its own commit.** Do NOT batch multiple missions into a single commit. The per-mission commit serves as evidence: the diff for Mission 3 should contain only Mission 3's deliverables. If the diff contains work from Missions 3-11 combined, the review is meaningless — you can't verify what changed for which mission.
+
+If a mission is small enough to merge with an adjacent one, that's fine — but explicitly acknowledge it: "Missions 3-4 combined (both methodology-only, same target file)." Never silently batch.
+
 ### Per-Mission Verification Agents
 
 After each mission's review round, two agents run quick checks:
