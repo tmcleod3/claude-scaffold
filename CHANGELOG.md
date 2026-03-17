@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.5.2] - 2026-03-16
+
+### Added
+- **Credentials flow documentation** in HOLOCRON — explains how vault credentials reach `.env` during build and deploy.
+- **v7.6 The Vault Pipeline** planned in ROADMAP — `deploy --env-only`, standalone vault reader, campaign auto-inject.
+
+---
+
 ## [7.5.1] - 2026-03-16
 
 ### Added
