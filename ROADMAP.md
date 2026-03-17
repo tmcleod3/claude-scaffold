@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v8.0.0 (2026-03-16)
-**Next:** v8.1 — The Evolution
-**Status:** v8.0.0 shipped. Next: v8.1 (Evolution) → v8.2 (Autonomy).
+**Current:** v8.0.1 (2026-03-16)
+**Next:** v8.1 — The Deep Roster
+**Status:** v8.0.1 shipped. Next: v8.1 (Deep Roster) → v8.2 (Evolution) → v8.3 (Autonomy).
 
 ---
 
@@ -733,7 +733,88 @@ Each act drafts that PRD section, shows it for confirmation. Output: complete `d
 
 ---
 
-## v8.1 — The Evolution
+## v8.1 — The Deep Roster
+
+*107 agents with names but no jobs. Time to put the full roster to work.*
+
+VoidForge has 170+ named characters across 7 universes, but only ~63 have protocol tasks. The remaining ~107 are pool names with no defined role. This release activates the deep roster in two phases — high-impact agents first, then the full bench.
+
+### Phase 1 — Core Protocol Integration (10 agents)
+
+**Troi (Star Trek) — PRD Compliance, expanded from Gauntlet-only to per-phase:**
+- `/build` Phase 0: after Orient, Troi confirms extraction matches PRD prose
+- `/build` Phase 4: after core features, Troi checks routes/components match PRD Section 4
+- `/build` Phase 8: after marketing, Troi checks landing page matches PRD brand section
+- `/campaign` per-mission: Troi spot-checks the PRD sections that mission targeted
+- `/architect --plan`: Troi validates the plan covers all PRD requirements
+
+**Padmé (Star Wars) — Functional Verification, expanded from Gauntlet-only to build gates:**
+- `/build` Phase 4 gate: "Can a user complete the primary flow end-to-end?"
+- `/build` Phase 6 gate: "Do the integrations work in the primary flow?"
+- `/assemble` Phase 2.5: functional verification alongside Hawkeye's endpoint checks
+- `/campaign` per-mission: if mission touches user flows, Padmé verifies the affected flow
+
+**Celeborn (Tolkien) — Design System Governance (NEW — currently unused):**
+- `/ux` Step 2: parallel agent — consistent spacing tokens, typography scale, color palette, component naming
+- `/build` Phase 5: after UI components, design system compliance check
+- `/gauntlet` Round 2: part of Galadriel's team
+
+**Worf (Star Trek) — Security Implications of Architecture:**
+- `/architect` Step 1: runs parallel with Spock and Uhura — flags schema/design decisions with security implications
+- "This schema stores PII in the same table as public data — separate."
+
+**Riker (Star Trek) — Decision Review:**
+- `/architect` Step 5 (ADRs): reviews Picard's decisions — "Number One, does this hold up?"
+- Second opinion on trade-offs before ADRs are finalized
+
+**Cyborg (DC) — System Integration Testing:**
+- `/qa` Step 1: when multiple services/modules connect, Cyborg traces the full path across boundaries
+- Activated when project has 3+ API files or cross-module data flows
+
+**Wonder Woman (DC) — Truth Detector:**
+- `/review` Step 1: finds where code says one thing and does another — misleading names, wrong comments, stale docs
+
+**Raven (DC) — Deep Static Analysis:**
+- `/qa` Step 1: bugs hidden beneath 3 layers of abstraction — follows data through transforms
+- `/gauntlet` Round 1: deep analysis during discovery
+
+**Valkyrie (Marvel) — Disaster Recovery:**
+- `/devops`: backup verification, restore testing, failover procedures
+
+**Torres (Star Trek) — Performance Architecture:**
+- `/architect` Step 3: identifies N+1 queries, missing indexes, connection pool sizing in design phase (before code)
+
+**What changes:** BUILD_PROTOCOL.md, CAMPAIGN.md, SYSTEMS_ARCHITECT.md, PRODUCT_DESIGN_FRONTEND.md, QA_ENGINEER.md, SECURITY_AUDITOR.md, DEVOPS_ENGINEER.md, ASSEMBLER.md + paired command files. NAMING_REGISTRY.md updated with protocol assignments for each activated agent.
+
+### Phase 2 — Extended Roster (40+ agents)
+
+**Extended DC roster for `/qa`:**
+- Flash (rapid smoke tests), Batgirl (detail audit), Green Arrow (precision targeting), Huntress (flaky test hunter), Aquaman (deep dive testing), Superman (standard enforcement), Green Lantern (test scenario construction), Martian Manhunter (cross-environment testing)
+
+**Extended Star Wars roster for `/security`:**
+- Qui-Gon (subtle vulnerabilities), Han (first-strike scanner), Anakin (dark-side exploitation), Bo-Katan (perimeter defense), Din Djarin (bug bounty hunter), Bail Organa (governance/compliance), Cassian (threat modeling/recon), Sabine (unconventional attack vectors)
+
+**Extended Tolkien roster for `/ux`:**
+- Aragorn (UX leadership), Faramir (quality-over-glory check), Pippin (edge case discovery), Boromir (hubris/overengineering check), Haldir (boundary/transition guard), Glorfindel (hardest rendering challenges), Frodo (dedicated to the hardest UX task), Merry (pair review with Pippin)
+
+**Extended Anime roster for `/devops`:**
+- Vegeta (monitoring), Trunks (migrations/rollback), Mikasa (critical system protection), Erwin (capacity planning), Mustang (cleanup scripts), Olivier (infra hardening), Hughes (logging/observability), Calcifer (daemon management), Duo (teardown/decommission)
+
+**Extended Marvel roster for `/build`:**
+- T'Challa (craft/elegance review), Wanda (state management), Strange (service architecture during auth), Thor (queue/worker review)
+
+**Extended Star Trek roster for `/architect`:**
+- Janeway (novel architectures), Tuvok (security architecture), Crusher (system health diagnostics), Archer (greenfield architecture), Kim (API design), Pike (bold mission planning in `/campaign`)
+
+**What changes:** Same files as Phase 1, plus each agent gets a one-line task definition in the relevant protocol step. Agents are activated conditionally — not every agent runs on every project. Trigger conditions defined per agent (e.g., "Cyborg activates when project has 3+ API files").
+
+### Estimated effort
+Phase 1: 2-3 sessions (10 agents across 8 method docs + 8 command files).
+Phase 2: 2-3 sessions (40+ agents, but each is a one-line addition to existing protocol steps).
+
+---
+
+## v8.2 — The Evolution (was v8.1)
 
 *The methodology improves itself. With permission.*
 
@@ -766,7 +847,7 @@ Custom agents run alongside built-in agents, not instead of them. Names must not
 
 ---
 
-## v8.2 — The Autonomy
+## v8.3 — The Autonomy (was v8.2)
 
 *Supervised autonomy with safety rails.*
 
@@ -779,7 +860,7 @@ Sisko executes missions without waiting for confirmation at every brief. Guardra
 4. Victory Gauntlet ALWAYS requires human confirmation
 5. Post-mission summary logged but not presented interactively
 
-**Why after v8.0-v8.1:** Autonomous campaigns are safer when Agent Memory catches known pitfalls and Conflict Prediction catches structural problems before they propagate through 10 unattended missions.
+**Why after v8.0-v8.2:** Autonomous campaigns are safer when Agent Memory catches known pitfalls, the Deep Roster catches more issues per review, and Conflict Prediction catches structural problems before they propagate through 10 unattended missions.
 
 **What changes:** CAMPAIGN.md gains `--autonomous` section with guardrails. `.claude/commands/campaign.md` gains flag handling.
 
