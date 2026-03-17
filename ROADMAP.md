@@ -869,21 +869,198 @@ Sisko executes missions without waiting for confirmation at every brief. Guardra
 
 ---
 
-## v9.0+ — The Horizon
+## v9.0 — The Field-Tested Forge
 
-*Exploring the frontier. Build order TBD based on user demand.*
+*Codify everything we learned into hardened methodology.*
 
-### Pattern Evolution (after v8.1 + 10+ projects with analytics data)
-After 10+ projects use the same pattern variation, Wong surfaces it as a proposed new pattern during `/debrief`. Advisory only. Requires build analytics data from `wizard/lib/build-analytics.ts` to identify recurring shapes.
+Four campaigns (v3.1 → v8.3) produced 60+ field reports, 20+ methodology fixes, and multiple lessons. This release consolidates field-tested knowledge into the methodology itself — not new features, but battle-hardened existing ones.
 
-### Cross-Project Orchestration (after Avengers Tower ships)
-A "fleet commander" layer above Sisko for monorepos and multi-service architectures. Reads a `meta-prd.md` defining the service graph. Each service's campaign runs independently; the commander gates cross-boundary changes. Requires v7.0 Penthouse (linked services) as infrastructure.
+### Meta-Workflow Documentation
 
-### Multi-Language Forge (based on user demand)
-Framework adapters for Python (Django/FastAPI), Go, Rust. Start with Python only — enhance the existing adaptation notes in each pattern file to full "Django Deep Dive" sections rather than separate files. Preserves single-file-per-pattern architecture. Only pursue if user demand evidence exists.
+Document how to use VoidForge to develop VoidForge. The "Forge Builds the Forge" exercise is complete (Campaigns 2-4). Write up:
+- How campaign-on-self works (methodology changes as missions, Gauntlet on methodology)
+- Anti-patterns discovered (context pressure false alarms, reduced pipeline skipping review)
+- The feedback loop: field reports → `/debrief --inbox` → methodology fixes → better field reports
+- When to blitz vs autonomous vs manual
 
-### The Forge Builds the Forge (supervised demonstration only)
-Run `/campaign` on VoidForge's own repo as a validation exercise. Never autonomous self-modification — the "user reviews everything" principle is non-negotiable for changes to the system's own methodology. Human approval gate at every step.
+**What changes:** New doc `docs/META_WORKFLOW.md`. Reference from HOLOCRON.md.
+
+### Pattern Evolution
+
+Wong now has the promotion analysis (v8.2). This release adds the data collection side: after each `/build`, log which patterns were used, which framework adaptations were applied, and which custom modifications were made. Stored in `~/.voidforge/pattern-usage.json`. When 10+ projects use the same variation, Wong surfaces it during `/debrief`.
+
+**What changes:** BUILD_PROTOCOL.md Phase 12 gains a pattern-usage logging step. FIELD_MEDIC.md gains a pattern-evolution check.
+
+### Estimated effort
+1-2 sessions.
+
+---
+
+## v9.1 — The Multi-Language Forge (Python)
+
+*"From nothing, everything" — in any language.*
+
+Expand each of the 8 pattern files from placeholder "Django/Rails adaptation notes" to full deep-dive sections. Start with Python (Django + FastAPI) because it's the most-requested non-JS stack.
+
+### Per-Pattern Django/FastAPI Sections
+
+| Pattern | Django Adaptation | FastAPI Adaptation |
+|---------|------------------|-------------------|
+| `api-route.ts` | Django REST Framework ViewSets, serializers, permissions | FastAPI path operations, Pydantic models, Depends() |
+| `service.ts` | Django services layer (not in views), QuerySet patterns | Service classes, repository pattern |
+| `component.tsx` | Django templates + HTMX for interactivity | Jinja2 + HTMX, or React SPA frontend |
+| `middleware.ts` | Django middleware classes, `process_request`/`process_response` | FastAPI middleware, dependency injection |
+| `error-handling.ts` | Django exception handler, DRF exception classes | FastAPI exception handlers, HTTPException |
+| `job-queue.ts` | Celery tasks, Django-Q, beat scheduler | Celery or ARQ with FastAPI |
+| `multi-tenant.ts` | Django-tenants, schema-per-tenant | Manual tenant scoping via Depends() |
+
+### Build Protocol Adaptations
+
+Phase 0 detects `framework: django` or `framework: fastapi` from PRD frontmatter and loads the Python-specific sections. Phase 1 scaffolds with `django-admin startproject` or `poetry init`. Phase 9-11 reviews use `pytest` instead of `jest`.
+
+### Estimated effort
+2-3 sessions. Pattern file updates + BUILD_PROTOCOL Python path.
+
+---
+
+## v9.2 — The Mobile Forge
+
+*Ship to pockets, not just browsers.*
+
+VoidForge builds web apps. This release adds iOS and Android as deploy targets — from PRD to App Store.
+
+### New Deploy Targets
+
+| Target | Framework | Build | Distribution |
+|--------|-----------|-------|-------------|
+| `ios` | React Native or SwiftUI | Xcode CLI (`xcodebuild`) | TestFlight → App Store Connect |
+| `android` | React Native or Kotlin | Gradle (`./gradlew assembleRelease`) | Google Play Console (internal track) |
+| `cross-platform` | React Native or Flutter | Both pipelines | TestFlight + Play Console |
+
+### PRD Frontmatter
+
+```yaml
+deploy: "ios"           # ios | android | cross-platform
+mobile_framework: ""    # react-native | flutter | swiftui | kotlin
+app_store_id: ""        # Apple Team ID (for code signing)
+bundle_id: ""           # com.yourcompany.appname
+```
+
+### What Changes
+
+**New provisioner:** `wizard/lib/provisioners/mobile.ts` — handles code signing, build configuration, and store submission. No infrastructure to provision (unlike VPS) — the "provisioning" is build + sign + upload.
+
+**Build protocol adaptation:**
+- Phase 1: scaffold with `npx react-native init` or `flutter create` or Xcode project
+- Phase 5: mobile-specific UI patterns (safe area, navigation stacks, gestures, haptics)
+- Phase 9: mobile QA additions (orientation, deep links, push notifications, offline mode, battery)
+- Phase 11: mobile security additions (certificate pinning, secure storage, jailbreak detection, obfuscation)
+- Phase 12: build + sign + upload to TestFlight/Play Console
+
+**New patterns:**
+- `mobile-screen.tsx` — React Native screen pattern (navigation, safe area, platform-specific behavior)
+- `mobile-service.ts` — Offline-first data pattern (local SQLite + sync, conflict resolution)
+
+**New agents (conditional — activate when `deploy: ios|android|cross-platform`):**
+- **Uhura-Mobile** (Star Trek) → Reports to Picard. Mobile architecture: navigation stacks, deep linking, universal links, app lifecycle.
+- **Samwise-Mobile** (Tolkien) → Reports to Galadriel. Mobile a11y: VoiceOver, TalkBack, Dynamic Type, reduced motion, touch targets (44pt minimum).
+- **Rex-Mobile** (Star Wars) → Reports to Kenobi. Mobile security: certificate pinning, Keychain/Keystore, jailbreak detection, transport security.
+
+### Estimated effort
+3-4 sessions. New provisioner + pattern files + build protocol mobile path + mobile agents.
+
+---
+
+## v9.3 — The Game Forge
+
+*From nothing, everything — including worlds.*
+
+VoidForge builds applications. This release adds game development as a project type — from PRD to playable build.
+
+### New Project Type
+
+```yaml
+type: "game"            # full-stack | api-only | static-site | prototype | game
+game_engine: ""         # unity | godot | phaser | three.js | pixi
+game_genre: ""          # platformer | rpg | puzzle | simulation | fps
+deploy: "web"           # web (WebGL/HTML5) | steam | itch | mobile
+```
+
+### What Changes
+
+**Build protocol adaptation for `type: game`:**
+- Phase 1: scaffold with engine-specific project structure (Godot project, Unity project, Phaser/webpack)
+- Phase 2: game infrastructure (asset pipeline, scene management, input system, audio system)
+- Phase 3: replaced by "Game Core" — game loop, ECS or component system, state machines, physics
+- Phase 4: replaced by "Gameplay" — core mechanics, player controller, enemies/AI, level design data
+- Phase 5: replaced by "Game UI" — HUD, menus, inventory, dialog system, transitions
+- Phase 6: replaced by "Polish" — particles, screen shake, juice, audio cues, game feel
+- Phase 7: replaced by "Content" — levels, balancing, progression, save/load
+- Phase 8: replaced by "Game Marketing" — store page, screenshots, trailer script, press kit
+- Phase 9-11: game-specific QA (frame rate profiling, input latency, memory leaks, platform testing)
+- Phase 12: build + export (WebGL, desktop, mobile)
+
+**New patterns:**
+- `game-loop.ts` — Core game loop pattern (fixed timestep, interpolation, pause/resume)
+- `game-state.ts` — State machine pattern (menu → playing → paused → game-over, with transition hooks)
+- `game-entity.ts` — Entity component system or scene-tree pattern (depending on engine)
+
+**New agents (conditional — activate when `type: game`):**
+- **Spike-GameDev** (Anime) → Reports to Kusanagi. Game architecture: frame budgets, memory pools, object pooling, asset streaming.
+- **Éowyn-GameFeel** (Tolkien) → Reports to Galadriel. Game juice: screen shake, hit pause, particle bursts, camera dynamics, audio cues. The enchantment pass, but for games.
+- **Deathstroke-Exploit** (DC) → Reports to Batman. Game QA: speedrun exploits, out-of-bounds, sequence breaks, economy exploits, save corruption.
+- **L-Profiler** (Anime) → Reports to Kusanagi. Performance profiling: frame time analysis, draw call optimization, garbage collection pressure, loading time budgets.
+
+### Estimated effort
+4-5 sessions. New build protocol path + pattern files + engine-specific scaffolding + game agents.
+
+---
+
+## v10.0 — The Frontier (Picard's 10 Ideas)
+
+*Ten things you didn't ask for, but the methodology wants.*
+
+### 1. Agent Confidence Scoring
+
+Each agent reports a confidence score (0-100) on their findings. Low-confidence findings (<60) get escalated to a second agent from a different universe instead of being presented as definitive. Reduces false positives. High-confidence findings (>90) skip re-verification in Pass 2. The system learns which agents are reliable in which domains.
+
+### 2. Live Session Replay
+
+Record every agent decision, file read, and code change as a replayable timeline. Stored in `/logs/session-replay-YYYY-MM-DD.json`. New team members can watch how a feature was built — not just read the diff, but see which agents ran, what they found, and why decisions were made. Like a DVR for development sessions.
+
+### 3. Adversarial PRD Review (`/prd --challenge`)
+
+Before building, an agent argues AGAINST the PRD. "This feature will be expensive to maintain." "This integration has a 40% chance of API deprecation." "Your schema doesn't support the multi-tenant use case you mentioned in Section 7." Forces the user to defend their choices before committing 8 phases of build time. Cheaper than discovering design flaws in Phase 9.
+
+### 4. Natural Language Deploy
+
+Instead of YAML frontmatter, describe deployment in prose: "I want this running on a $20/month server with a custom domain, automatic SSL, and daily backups." The system figures out the deploy target (VPS), instance type (t3.small), DNS provider (Cloudflare), backup schedule (pg_dump daily to S3), and generates the frontmatter. `/prd` already does this for features — extend it to infrastructure.
+
+### 5. The War Room Dashboard
+
+A real-time browser dashboard showing campaign progress: which mission is active, which agents are running, finding counts by severity, context usage percentage, estimated completion time. Hill and Jarvis feed the data; the dashboard renders it. Like mission control for builds. Runs alongside Avengers Tower — a new tab in the Lobby.
+
+### 6. Build Archaeology
+
+When debugging a production issue, trace it back through the build protocol. "This bug was introduced in Phase 4 (commit abc123), escaped QA in Phase 9 because Constantine's cursed-code check doesn't cover this pattern, and wasn't caught by the Gauntlet because Round 4 Crossfire focused on the wrong module." Post-mortem archaeology with actionable fixes to the methodology.
+
+### 7. Cross-Project Agent Memory
+
+When starting a new project, Wong queries lessons from ALL previous projects stored in `~/.voidforge/lessons-global.json` — not just the current project's `docs/LESSONS.md`. "You've built 3 Next.js apps with Stripe. Here's what broke every time: webhook signature verification in test mode, price ID mismatch between environments, and checkout session expiry." The global memory is opt-in and privacy-respecting (no source code, only lesson summaries).
+
+### 8. Methodology A/B Testing
+
+Run two versions of a methodology step on the same codebase and compare results. "Does the 17-agent QA pass find more real bugs than the 7-agent version? At what context cost?" Track true-positive rates per agent, per project type. Over time, tune the methodology based on data, not intuition. Wong manages the experiments; results feed into promotion analysis.
+
+### 9. The Prophecy Visualizer
+
+Render the campaign's Prophecy Board as a visual dependency graph in the browser. Nodes are PRD sections; edges are dependencies. Completed nodes are green, in-progress yellow, blocked red. Click a node to see which missions touched it, what agents reviewed it, and what findings remain. Sisko's war table, visualized.
+
+### 10. Voice-Driven Forge (`/prd --voice`)
+
+Instead of typing answers to Sisko's 5-act interview, speak them. Use the browser's Web Speech API for transcription. Sisko asks "What are you building?" — you describe it out loud while pacing your office. The PRD writes itself from conversation. Lower friction than typing for people who think by talking. The Gandalf wizard already runs in the browser; this adds a microphone button.
+
+---
 
 ### Deferred Indefinitely
 
