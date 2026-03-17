@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 7.6.0
+**Current:** 7.7.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 7.7.0 | 2026-03-16 | The Housekeeping — architecture doc refresh, server auto-restart detection, COMPATIBILITY.md, context pressure fix |
 | 7.6.0 | 2026-03-16 | The Vault Pipeline — deploy --env-only, standalone vault reader, PTY cleanup, engines field |
 | 7.5.3 | 2026-03-16 | Triage #42-#44 — vault key naming, outbound URL safety, accordion a11y, v7.7 roadmap |
 | 7.5.2 | 2026-03-16 | HOLOCRON credentials flow docs + v7.6 Vault Pipeline roadmap |

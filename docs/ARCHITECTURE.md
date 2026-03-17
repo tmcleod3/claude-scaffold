@@ -1,44 +1,64 @@
 # VoidForge — Architecture
 
-**Version:** 2.7.0
-**Last reviewed:** 2026-03-12
+**Version:** 7.7.0
+**Last reviewed:** 2026-03-16
 
 ## Overview
 
-VoidForge is a CLI-launched local web server that provides two browser-based wizards:
+VoidForge is a CLI-launched local web server with three subsystems:
 
-- **Gandalf** (`voidforge init`) — Project setup: credential vault, PRD generation, scaffold creation
+- **Gandalf** (`voidforge init`) — Three-act setup wizard: vault, PRD generation, project scaffolding
 - **Haku** (`voidforge deploy`) — Infrastructure provisioning for 6 deploy targets
+- **Avengers Tower** — Browser-based operations console: PTY terminals, multi-project dashboard, RBAC
 
-Single-process Node.js monolith. TypeScript strict mode. No framework (vanilla JS frontend). Zero runtime dependencies beyond AWS SDK.
+Single-process Node.js monolith. TypeScript strict mode. Vanilla JS frontend (no framework). Runtime dependencies: AWS SDK (lazy-loaded), `ws` (WebSocket), `node-pty` (terminal).
 
 ## System Diagram
 
 ```
-CLI (voidforge init | deploy)
+CLI (voidforge init | deploy | deploy --env-only)
   │
   ▼
-Node.js HTTP Server (127.0.0.1:3141)
+Node.js HTTP Server (:::3141, dual-stack IPv4/IPv6)
   │
-  ├─ Static files ──── wizard/ui/ (HTML, JS, CSS)
+  ├─ Static files ──────── wizard/ui/ (HTML, JS, CSS)
   │
-  ├─ /api/credentials ── Vault (AES-256-GCM)
-  ├─ /api/cloud ──────── Vault + Provider APIs
-  ├─ /api/prd ────────── Anthropic API (SSE)
-  ├─ /api/project ────── File system (scaffold copy)
-  ├─ /api/deploy ─────── File system (project scan)
-  └─ /api/provision ──── Provisioner interface (SSE)
-         ├─ Docker ────── File generation
-         ├─ AWS VPS ───── @aws-sdk (EC2/RDS/ElastiCache)
-         ├─ Vercel ────── HTTPS API
-         ├─ Railway ───── GraphQL API
-         ├─ Cloudflare ── HTTPS API
-         ├─ Static S3 ── @aws-sdk (S3)
-         └─ DNS (post) ── Cloudflare DNS API (zone lookup + record CRUD)
+  ├─ /api/credentials ──── Vault (AES-256-GCM)
+  ├─ /api/cloud ─────────── Vault + Provider APIs
+  ├─ /api/prd ───────────── Anthropic API (SSE)
+  ├─ /api/project ────────── File system (scaffold copy)
+  ├─ /api/deploy ─────────── File system (project scan)
+  ├─ /api/provision ──────── Provisioner interface (SSE)
+  │       ├─ Docker ──────── File generation
+  │       ├─ AWS VPS ─────── @aws-sdk (EC2/RDS/ElastiCache)
+  │       ├─ Vercel ──────── HTTPS API
+  │       ├─ Railway ─────── GraphQL API
+  │       ├─ Cloudflare ──── HTTPS API
+  │       ├─ Static S3 ───── @aws-sdk (S3)
+  │       └─ DNS (post) ──── Cloudflare DNS API
+  │
+  ├─ /api/terminal ────────── PTY Manager (node-pty + ws)
+  │       ├─ Sessions: max 5 local, 20 remote
+  │       ├─ Auth: per-session HMAC-SHA256 token
+  │       └─ Stale cleanup: auto-retry on <2s failure
+  │
+  ├─ /api/projects ────────── Project Registry (multi-project)
+  ├─ /api/users ───────────── User Manager (RBAC)
+  ├─ /api/auth ────────────── Tower Auth (TOTP 2FA)
+  └─ /api/server/status ───── Native module mtime detection
+
+  Avengers Tower:
+  ├─ The Lobby ──── Project grid, health badges, import/link
+  ├─ Tower Room ─── xterm.js + WebSocket → PTY sessions
+  └─ The Penthouse ── RBAC, coordinated deploys, rollback
 
 State:
   ~/.voidforge/vault.enc           Encrypted credentials
   ~/.voidforge/runs/<runId>.json   Provision manifests
+  ~/.voidforge/users.json          User accounts (remote mode)
+  ~/.voidforge/projects.json       Project registry
+  ~/.voidforge/deploys/            Deploy history
+  ~/.voidforge/audit.log           Security audit trail
 ```
 
 ## Key Design Decisions
@@ -52,9 +72,25 @@ State:
 | SSE keepalive for long operations | Survives proxies, VPNs, laptop sleep | ADR-004 |
 | PRD-driven instance type selection | Right-sized EC2/RDS/ElastiCache from project scope | ADR-005 |
 | DNS as post-provision step | Cross-cutting, needs provisioner outputs, non-fatal | ADR-006 |
-| "hostname" for DNS, "domain" for business | Avoids ambiguity between DNS hostname and business domain | ADR-007 |
+| "hostname" for DNS, "domain" for business | Avoids ambiguity | ADR-007 |
+| Dual-stack binding (::) | macOS resolves localhost to ::1 first; 127.0.0.1 fails | Field report #30 |
+| ws library for WebSocket | Custom RFC 6455 implementation failed on Node v24 after 8 debugging commits | Field report #30 |
+| node-pty for terminals | Same as VS Code, Gitpod. No alternative exists. | — |
+| Three-act wizard (not form) | Eliminates simple/advanced toggle; same path, different depth | v7.1 |
 | Monolith (not microservices) | Single user, single machine, same lifecycle | — |
 | No frontend framework | Keeps bundle at zero, avoids dependency churn | — |
+| Native module mtime detection | Detects when npm install changed .node files while server is running | Tech debt #11 |
+
+## Subsystem: Avengers Tower
+
+### The Lobby (`wizard/ui/lobby.js`)
+Project grid showing all registered projects with health badges (Live, Building, New). Import existing projects via directory path. Link related projects for coordinated deploys. Role-filtered views per user (admin sees all, deployer sees assigned, viewer sees read-only). Restart banner appears when native modules change on disk.
+
+### Tower Room (`wizard/ui/tower.js`)
+Real terminal in the browser: xterm.js frontend → WebSocket → node-pty backend. Auto-launches Claude Code on project open. Multiple tabs: Claude Code, SSH, shell. Session persistence across page navigation. Vault password required to establish PTY connection. Auto-cleanup: sessions failing within 2s are removed and retried once.
+
+### The Penthouse (RBAC + Multi-User)
+Three roles: admin (full access), deployer (build and deploy assigned projects), viewer (read-only). Per-project access control. Coordinated deploys across linked services. Rollback dashboard with deploy history. Cost tracker per project. Added in v7.0.
 
 ## Provisioner Interface
 
@@ -74,10 +110,14 @@ Adding a new deploy target = implement this interface + register in `wizard/api/
 
 - Credentials encrypted at rest with AES-256-GCM (PBKDF2 key derivation, 100k iterations)
 - Session password held in memory only — never written to disk
-- Server binds to 127.0.0.1 only — not exposed to network
+- Server binds to `::` (dual-stack) locally, `0.0.0.0` in remote mode
 - CORS scoped to wizard's own origin
-- Directory traversal prevented via `resolve()` + prefix check
+- CSRF protection via X-VoidForge-Request header on all POST requests
+- Directory traversal prevented via `resolve()` + prefix check + symlink resolution
 - Generated infrastructure scripts include: fail2ban, SSH hardening, HSTS, firewall lockdown
+- Remote mode: 5-layer security (network + TOTP 2FA + vault + sandboxing + audit trail)
+- PTY sessions: per-session HMAC-SHA256 auth tokens, user isolation in multi-user mode
+- Vault key naming: hyphenated keys for global creds, `env:`-prefixed for project-specific
 
 ## External Dependencies
 
@@ -88,6 +128,8 @@ Adding a new deploy target = implement this interface + register in `wizard/api/
 | `@aws-sdk/client-elasticache` | Redis provisioning | Lazy (VPS target only) |
 | `@aws-sdk/client-s3` | S3 provisioning | Lazy (S3 target only) |
 | `@aws-sdk/client-sts` | Credential validation | Lazy (AWS targets only) |
+| `ws` | WebSocket server | Always (Tower terminals) |
+| `node-pty` | PTY process spawning | Always (Tower terminals) |
 | `tsx` | TypeScript execution | Dev only |
 | `typescript` | Type checking | Dev only |
 
@@ -95,8 +137,12 @@ Adding a new deploy target = implement this interface + register in `wizard/api/
 
 The "zero runtime dependencies" principle applies to **business logic** — no ORM, no HTTP framework, no utility libraries for things Node.js handles natively. It does NOT apply to **protocol infrastructure**:
 
-- **WebSocket:** Use `ws` library (same as VS Code). Custom RFC 6455 implementations are tech debt — they look correct in code review but fail with runtime/platform differences.
+- **WebSocket:** Use `ws` library (same as VS Code). Custom RFC 6455 implementations are tech debt.
 - **Terminal:** Use `node-pty` (same as VS Code, Gitpod). No alternative.
 - **Crypto:** Use Node.js built-in `crypto` module. Never homegrown.
 
 Custom implementations of standard protocols save one dependency and cost days of debugging. (Field report #30: 200 lines of RFC-correct custom WebSocket code replaced by 2-line `ws` import after 8 debugging commits.)
+
+### Node.js Compatibility
+
+Engine requirement: `>=20.0.0 <25.0.0`. See `docs/COMPATIBILITY.md` for tested versions and the v7.2→v7.3 node-pty ABI incident.

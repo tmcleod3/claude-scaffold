@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.7.0] - 2026-03-16
+
+### Added
+- **Native module mtime detection** — server snapshots `.node` file mtimes at startup, checks on Lobby load. If changed (npm install while server running), shows "Restart Now" banner.
+- **`/api/server/status` endpoint** — returns `needsRestart` flag for native module detection.
+- **`docs/COMPATIBILITY.md`** — Node.js version testing doc with known ABI-breaking changes and engines field policy.
+- **Restart banner** in Lobby — appears when native modules changed on disk.
+
+### Changed
+- **ARCHITECTURE.md** rewritten from v2.7.0 to v7.7.0 — adds Avengers Tower, RBAC, Thumper, ws/node-pty, PTY manager, vault key naming, mtime detection.
+- **FAILURE_MODES.md** rewritten — adds WebSocket, PTY, Tower, Thumper, and native module failure modes.
+- **SCALING.md** rewritten — Tier 2 reflects shipped multi-user features, PTY sessions as bottleneck.
+- **Context pressure rule** fixed — removed "3 consecutive missions" heuristic. Checks actual usage, only checkpoints at 70%.
+
+---
+
 ## [7.6.0] - 2026-03-16
 
 ### Added

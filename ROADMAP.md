@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v7.6.0 (2026-03-16)
-**Next:** v7.7 — The Housekeeping
-**Status:** v7.6.0 shipped. v7.7 (Housekeeping) → v8.0 (Hive Mind).
+**Current:** v7.7.0 (2026-03-16)
+**Next:** v8.0 — The Hive Mind
+**Status:** v7.7.0 shipped. Next: v8.0 (Hive Mind).
 
 ---
 

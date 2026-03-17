@@ -168,7 +168,7 @@ After `/assemble` completes:
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6
 
-**Context pressure check:** After 3 consecutive build missions in this session, consider checkpointing and resuming in a fresh session. Context pressure after 3+ missions degrades review quality. If continuing, note this in campaign-state.md.
+**Context pressure check:** Do NOT checkpoint based on mission count. Check actual context usage via `/context`. Only checkpoint when usage exceeds 70% (~700k tokens). Never pause a blitz based on mission count alone.
 
 ## Step 6 — Victory Condition (Gauntlet + Troi's Compliance Check)
 

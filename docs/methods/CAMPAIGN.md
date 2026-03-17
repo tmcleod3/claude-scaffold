@@ -260,12 +260,16 @@ Full debrief runs once at campaign end (after Victory Gauntlet), covering all mi
 
 ### Context Pressure Limit
 
-After 3 consecutive build missions in a single session, checkpoint and consider resuming in a fresh session. Context pressure after 3+ missions causes measurable quality degradation:
-- Review rounds get skipped (Mission 6 in field report #33 received zero review)
-- Debriefs get skipped despite being mandatory gates
-- Agent coordination errors increase as the orchestrator loses track of conventions
+**Do NOT checkpoint based on mission count.** Check actual context usage via `/context`. The 1M context window supports 10+ missions easily. Only checkpoint when actual usage exceeds 70% (~700k tokens).
 
-The Victory Gauntlet catches issues from late-session missions, but at much higher fix cost than per-mission review. (Field report #33)
+Symptoms of real context pressure (NOT speculative):
+- Claude re-reads files it already read this session
+- Claude forgets decisions made earlier in the conversation
+- Review quality visibly degrades (skipped rounds, generic findings)
+
+If these symptoms appear, run `/context` to check actual usage. If >70%, checkpoint. If <70%, the symptoms have a different cause — investigate instead of checkpointing.
+
+**Never suggest stopping a blitz based on mission count alone.** The field report #33 quality degradation was at ~800k tokens after 6 heavy missions with full /assemble pipelines, not at 3 lightweight missions. (Field report #45: blitz incorrectly paused at 172k/1000k — 17% usage — after 1 mission.)
 
 ### Step 5 — Debrief and Commit
 
