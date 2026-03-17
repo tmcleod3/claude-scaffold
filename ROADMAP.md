@@ -1016,9 +1016,11 @@ deploy: "web"           # web (WebGL/HTML5) | steam | itch | mobile
 
 ---
 
-## v10.0 — The Frontier (Picard's 10 Ideas)
+## v10.0 — The War Room + The Frontier
 
-*Ten things you didn't ask for, but the methodology wants.*
+*The War Room is the surface. The Frontier features are what it displays.*
+
+**Ship order:** Build the War Room dashboard FIRST (it's the platform). Then add Frontier features one at a time — each one gets a new panel on the dashboard.
 
 ### 1. Agent Confidence Scoring
 
@@ -1036,9 +1038,44 @@ Before building, an agent argues AGAINST the PRD. "This feature will be expensiv
 
 Instead of YAML frontmatter, describe deployment in prose: "I want this running on a $20/month server with a custom domain, automatic SSL, and daily backups." The system figures out the deploy target (VPS), instance type (t3.small), DNS provider (Cloudflare), backup schedule (pg_dump daily to S3), and generates the frontmatter. `/prd` already does this for features — extend it to infrastructure.
 
-### 5. The War Room Dashboard
+### 5. The War Room Dashboard — THE CENTERPIECE
 
-A real-time browser dashboard showing campaign progress: which mission is active, which agents are running, finding counts by severity, context usage percentage, estimated completion time. Hill and Jarvis feed the data; the dashboard renders it. Like mission control for builds. Runs alongside Avengers Tower — a new tab in the Lobby.
+**This is not just one of ten ideas. It is the surface that makes every other idea visible.** Agent debates, confidence scores, build archaeology, the living PRD, the prophecy graph — they all need somewhere to live. The War Room is the connective tissue. Promote to its own version (v9.5 or v10.0 foundation) and build it BEFORE the other v10.0 features so they have a surface to render on.
+
+**Architecture:** New tab in Avengers Tower Lobby (`/war-room.html`). Real-time updates via WebSocket (same `ws` infrastructure as Tower terminals). Data fed by Hill (phase tracking) and Jarvis (status summaries). Vanilla JS frontend — no framework, same as the rest of the wizard UI.
+
+**Core Panels (from existing system data):**
+
+| Panel | Data Source | What It Shows |
+|-------|-----------|---------------|
+| **Campaign Timeline** | campaign-state.md | Horizontal timeline of missions: completed (green), active (yellow), pending (gray), blocked (red). Click to expand details. |
+| **Phase Pipeline** | assemble-state.md | 13-phase vertical pipeline with status badges. Active phase pulses. Failed phases show error. |
+| **Active Agents** | Agent tool invocations | Grid of agent avatars currently running. Universe color-coded (Tolkien=gold, Marvel=red, DC=blue, etc.). |
+| **Finding Scoreboard** | Phase logs | Real-time counters: Critical / High / Medium / Low. Grouped by domain (QA, Security, UX, Architecture, DevOps). |
+| **Context Gauge** | `/context` output | Circular gauge showing token usage: green (<50%), yellow (50-70%), red (>70%). Updates per phase. |
+| **PRD Coverage** | Prophecy Board | PRD sections as a checklist: complete, in-progress, blocked, not started. Percentage bar. |
+| **Test Suite** | `npm test` output | Pass / Fail / Skip counts. Flaky test list (Huntress). Last run timestamp. |
+| **Deploy Status** | deploy-log.json | Last deploy: URL, timestamp, target, health check status. Green dot = live. |
+| **Version & Branch** | VERSION.md + git | Current version, branch, last commit. Sync status across main/scaffold/core. |
+| **Cost Tracker** | Holo's data | Monthly cost per project. Budget alerts. |
+
+**v10.0 Feature Panels (added as each feature ships):**
+
+| Panel | Feature | What It Shows |
+|-------|---------|---------------|
+| **Confidence Heat Map** | Agent Confidence (#1) | Grid of findings color-coded by confidence score. Low-confidence findings pulsate. Click to see which agent escalated to whom. |
+| **Debate Arena** | Agent Debates (#2) | Live and archived debates. Two agent avatars face each other. Transcript scrolls. Verdict badge (pending/resolved). Click to read full debate. |
+| **PRD Challenge Log** | Adversarial PRD (#3) | Which PRD claims were challenged, which survived, which were modified. Risk flags. |
+| **Infra Config** | Natural Language Deploy (#4) | Generated infrastructure config with cost estimate. "Approve" button. Diff against current. |
+| **Bug Trace Timeline** | Build Archaeology (#6) | Click a production bug → visual timeline tracing it back through phases, agents, commits. Animated path through the pipeline. |
+| **Global Lessons** | Cross-Project Memory (#7) | Lesson cards from all projects. Frequency badges. "This pattern broke in 3 of 5 projects." |
+| **Experiment Dashboard** | A/B Testing (#8) | Active experiments. Side-by-side agent accuracy charts. Context cost comparison. |
+| **Prophecy Graph** | Prophecy Visualizer (#9) | Interactive dependency graph. Nodes = PRD sections. Edges = dependencies. Color = status. Click to drill into missions and findings. |
+| **PRD Drift View** | Living PRD (#10) | Side-by-side diff: original PRD vs current. Drift score. Highlighted evolution points. |
+
+**Layout:** Responsive grid. Main area shows the active context (campaign timeline during campaign, phase pipeline during assemble, finding scoreboard during gauntlet). Sidebar shows persistent panels (context gauge, version, deploy status). Bottom ticker shows agent activity feed ("Maul probing /api/auth... Nightwing running test suite... Constantine found cursed code in utils.ts").
+
+**Data Layer:** All panels read from existing files (campaign-state.md, assemble-state.md, phase logs, VERSION.md, deploy-log.json) via REST endpoints + WebSocket push for real-time updates. No new data storage — the War Room is a VIEW layer over existing state.
 
 ### 6. Build Archaeology
 
