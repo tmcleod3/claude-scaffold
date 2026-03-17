@@ -173,7 +173,7 @@ export async function envOnlyDeploy(projectDir?: string): Promise<void> {
   /** Quote a value for .env — escape newlines, quotes, and backslashes */
   function quoteValue(val: string): string {
     if (/[\n\r"\\$`#\s]/.test(val)) {
-      return `"${val.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r')}"`;
+      return `"${val.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`').replace(/\n/g, '\\n').replace(/\r/g, '\\r')}"`;
     }
     return val;
   }

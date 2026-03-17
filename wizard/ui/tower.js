@@ -291,7 +291,7 @@
         const banner = document.createElement('div');
         banner.className = 'auto-command-banner';
         banner.setAttribute('role', 'status');
-        banner.innerHTML = `<span>Sending <strong>${cmdLabel}</strong> in <span id="auto-countdown">3</span>s...</span> <button class="btn btn-secondary" id="auto-cmd-cancel">Cancel</button>`;
+        banner.innerHTML = `<span>Sending <strong>${escapeHtml(cmdLabel)}</strong> in <span id="auto-countdown">3</span>s...</span> <button class="btn btn-secondary" id="auto-cmd-cancel">Cancel</button>`;
         document.querySelector('.tower-header').after(banner);
 
         let cancelled = false;
