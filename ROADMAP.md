@@ -895,6 +895,9 @@ Add the data collection side for Wong's promotion analysis. Deliverables:
 - Update `.claude/commands/build.md`: add Phase 12 pattern logging instruction
 - Update `.claude/commands/debrief.md`: add pattern-evolution check instruction
 
+**Bolt-on from field report #62:**
+- Update `docs/methods/FORGE_ARTIST.md` Step 0: persist OpenAI API key to `.env.local` on first use, not just shell env. Prevents key loss between sessions.
+
 ### Estimated effort
 1-2 sessions. 2 missions.
 
