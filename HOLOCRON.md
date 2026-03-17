@@ -119,6 +119,8 @@ npx voidforge init
 
 Your project directory now contains the full VoidForge build system plus your PRD. In the Full tier, Gandalf transitions to **Avengers Tower** — a real terminal in your browser where you'll run `/build` and everything that follows.
 
+**Credentials flow:** Gandalf stores all credentials (API keys, cloud tokens, project-specific env vars) in the encrypted vault at `~/.voidforge/vault.enc`. These are available to the deploy wizard (Haku) and provisioners. During `/build`, Claude Code reads project-specific env vars from `docs/PRD.md` frontmatter and the `.env` file. If your PRD references APIs (WhatsApp, Stripe, Resend, etc.) and you provided keys in Gandalf's Step 4b, they're in the vault — the build and deploy phases will inject them into `.env` when provisioning. For local development before deploy, add them to `.env` manually or run the deploy wizard with just the env-writing step.
+
 #### Step 2: Build
 
 ```bash

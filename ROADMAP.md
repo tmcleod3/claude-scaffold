@@ -604,6 +604,45 @@ A single screen with expandable cards — not a sequence of steps. Five cards: D
 
 ---
 
+## v7.6 — The Vault Pipeline
+
+*Credentials flow from vault to project without provisioning.*
+
+The missing link between "Gandalf collected my API keys" and "my project can use them." Currently, vault credentials only reach `.env` during full provisioning (Haku deploy). But many projects need env vars for local development, testing, or non-VPS deploy targets. This release adds a standalone vault-to-env pipeline.
+
+### `voidforge deploy --env-only` Flag
+
+Run the deploy wizard's env-writing step without provisioning infrastructure:
+```bash
+npx voidforge deploy --env-only
+```
+
+Reads the PRD frontmatter, identifies required env vars, pulls matching values from the vault, and writes them to `.env`. No AWS, no GitHub, no DNS — just the env file. This is the "I just want my API keys in .env" command.
+
+**What changes:** `scripts/voidforge.ts` gains `--env-only` flag. `wizard/lib/headless-deploy.ts` gains an env-only code path that calls `vaultGet()` for each PRD-referenced key and appends to `.env` via `appendEnvSection()`.
+
+### Standalone Vault Reader (`scripts/vault-read.ts`)
+
+A zero-dependency script that reads a single key from the vault:
+```bash
+npx tsx scripts/vault-read.ts --key "env:WHATSAPP_ACCESS_TOKEN"
+```
+
+Useful for CI/CD scripts, custom deploy flows, and debugging. Prompts for vault password (or reads from env var `VOIDFORGE_VAULT_PASSWORD` for non-interactive use).
+
+**What changes:** New file `scripts/vault-read.ts` (~50 lines). Imports directly from `wizard/lib/vault.ts`.
+
+### Campaign Vault Integration
+
+Kira's Step 0 already checks vault status (v7.5.1). This release adds: if Dax classifies env vars as "vault-available but not in .env," Sisko auto-runs `deploy --env-only` before the first mission. No manual step needed.
+
+**What changes:** `docs/methods/CAMPAIGN.md` Step 0.5 (new), `.claude/commands/campaign.md` Step 0.5.
+
+### Estimated effort
+1 session. ~150 lines of new code + methodology doc updates.
+
+---
+
 ## v8.0 — The Hive Mind
 
 *VoidForge remembers, predicts, and generates.*
