@@ -1,13 +1,12 @@
 #!/bin/bash
 # water-rings.sh — The Water Rings — Chani's stop hook
-# Sends task completion signals to Telegram when Claude Code finishes
+# Sends Claude Code's response to Telegram when a turn completes.
 # "Among the Fremen, water rings record the dead — and the debts of the living."
 #
-# The Stop hook receives metadata JSON on stdin with a transcript_path field.
-# We read the transcript file (JSONL) to extract the last assistant message.
+# The Stop hook receives JSON on stdin with `last_assistant_message` — the
+# actual response text. No need to read transcript files.
 #
-# Note: -e (errexit) intentionally omitted — this hook must never fail
-# with a non-zero exit that could affect Claude Code's operation.
+# Note: -e (errexit) intentionally omitted — this hook must never fail.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,88 +22,32 @@ CHANNEL_FLAG="$CONFIG_DIR/.thumper.active"
 source "$CONFIG_FILE"
 [ "${SETUP_COMPLETE:-}" = "true" ] || exit 0
 
-# Read stop hook metadata from stdin (contains transcript_path)
+# Read stop hook metadata from stdin
 HOOK_INPUT=""
 if ! [ -t 0 ]; then
     HOOK_INPUT=$(perl -e 'alarm 5; local $/; print <STDIN>' 2>/dev/null || head -c 65536 2>/dev/null || echo "")
 fi
 
-# Extract transcript_path from the hook metadata
-TRANSCRIPT_PATH=""
-if [ -n "$HOOK_INPUT" ] && command -v python3 >/dev/null 2>&1; then
-    TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | python3 -c "
+# Extract last_assistant_message directly from hook metadata
+MESSAGE=""
+if [ -n "$HOOK_INPUT" ]; then
+    if command -v python3 >/dev/null 2>&1; then
+        MESSAGE=$(echo "$HOOK_INPUT" | python3 -c "
 import sys, json
 try:
     data = json.load(sys.stdin)
-    print(data.get('transcript_path', ''))
+    text = data.get('last_assistant_message', '')
+    if text:
+        if len(text) > 3600:
+            text = text[:3600] + '\n\n[...truncated]'
+        print(text)
 except Exception:
     pass
 " 2>/dev/null)
-elif [ -n "$HOOK_INPUT" ] && command -v jq >/dev/null 2>&1; then
-    TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
-fi
-
-# Extract last assistant message from the transcript (JSONL format)
-extract_from_transcript() {
-    local path="$1"
-    [ -z "$path" ] && return
-    [ -f "$path" ] || return
-
-    if command -v python3 >/dev/null 2>&1; then
-        python3 -c "
-import sys, json
-
-last_text = ''
-try:
-    with open(sys.argv[1], 'r') as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                entry = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-
-            role = entry.get('role', '')
-            if role != 'assistant':
-                continue
-
-            content = entry.get('message', entry.get('content', ''))
-            if isinstance(content, dict):
-                content = content.get('content', '')
-
-            if isinstance(content, list):
-                text = ' '.join(
-                    block.get('text', '')
-                    for block in content
-                    if isinstance(block, dict) and block.get('type') == 'text'
-                )
-            elif isinstance(content, str):
-                text = content
-            else:
-                continue
-
-            if text.strip():
-                last_text = text.strip()
-
-except Exception:
-    pass
-
-if last_text:
-    if len(last_text) > 3600:
-        last_text = last_text[:3600] + '\n\n[...truncated]'
-    print(last_text)
-" "$path" 2>/dev/null
     elif command -v jq >/dev/null 2>&1; then
-        # JSONL: each line is a separate JSON object
-        tail -50 "$path" | \
-            jq -r 'select(.role == "assistant") | .message.content // .content | if type == "array" then [.[] | select(.type == "text") | .text] | join(" ") else tostring end' 2>/dev/null | \
-            tail -1 | head -c 3600
+        MESSAGE=$(echo "$HOOK_INPUT" | jq -r '.last_assistant_message // empty' 2>/dev/null | head -c 3600)
     fi
-}
-
-MESSAGE=$(extract_from_transcript "$TRANSCRIPT_PATH")
+fi
 
 if [ -n "$MESSAGE" ]; then
     NOTIFICATION="$(printf '✅ Task complete\n\n%s\n\n─────────────────\n📡 Reply to continue' "$MESSAGE")"

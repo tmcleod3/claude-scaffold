@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.5.0] - 2026-03-16
+
+### Added
+- **Thumper Command Center** — `/help` in Telegram shows an interactive inline keyboard grid of all 15 VoidForge commands. Tap a command → submenu shows all flag variants (e.g., `/campaign --blitz`, `/gauntlet --quick`, `/debrief --inbox`). Tap a variant to send immediately. ← Back returns to grid.
+- **Bot personalization** in `/thumper setup` — auto-sets bot name (project-branded), Bilbo writes description from PRD, registers 15+1 commands in Telegram menu, generates DALL-E avatar (if OpenAI key in vault).
+- **Command↔doc sync check** in `/git` Step 5.5 — flags when method docs change but paired command files don't. 13 pairs tracked.
+
+### Fixed
+- **Thumper response relay** — water-rings.sh now reads `last_assistant_message` from Stop hook stdin metadata. Previously tried to read conversation JSON from stdin (which doesn't exist), always falling back to "no summary available."
+- **scan.sh non-interactive** — all `read -r -p` prompts skipped when `--token` and `--chat-id` provided. Environment confirmation and "Start now?" prompts were still blocking.
+
+### Changed
+- **`/thumper setup` is Claude-native** — conversational flow guides through BotFather, validates token via API, auto-detects chat ID, runs scan.sh non-interactive. No interactive stdin needed.
+- **9 Gauntlet consistency fixes** — command files synced with method docs: Kusanagi in Round 1, Hawkeye smoke test, Lucius in Round 2 Batman, --ux-extra flag, VERSION.md/CHANGELOG.md in shared file lists, 3-mission context limit, minimum 1 review guarantee.
+
+---
+
 ## [7.4.1] - 2026-03-16
 
 ### Added

@@ -284,7 +284,12 @@ fi
 echo "🔍 Terrain: $ENV_LABEL"
 echo "⚡ Worm path: $INJECT_METHOD"
 
-read -r -p "Does this look right? (yes/no): " CONFIRM_ENV
+# Skip confirmation in non-interactive mode
+if [[ -n "$ARG_TOKEN" ]] && [[ -n "$ARG_CHAT_ID" ]]; then
+    CONFIRM_ENV="yes"
+else
+    read -r -p "Does this look right? (yes/no): " CONFIRM_ENV
+fi
 
 if [[ "$CONFIRM_ENV" != "yes" ]]; then
     echo ""
@@ -340,7 +345,12 @@ echo "  Vault:     $CONFIG_FILE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-read -r -p "Speak The Voice now? (yes/no): " START_NOW
+# Skip prompt in non-interactive mode — don't auto-start, let user /thumper on
+if [[ -n "$ARG_TOKEN" ]] && [[ -n "$ARG_CHAT_ID" ]]; then
+    START_NOW="no"
+else
+    read -r -p "Speak The Voice now? (yes/no): " START_NOW
+fi
 
 if [[ "$START_NOW" == "yes" ]]; then
     bash "$SCRIPT_DIR/thumper.sh" on
