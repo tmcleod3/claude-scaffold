@@ -234,6 +234,10 @@ When a mission duplicates or extends an existing code path (adding a version-awa
 
 Even in `--fast` mode, each mission gets at least **1 review round** (not 3, but never 0). A single review catches ~80% of issues for 33% of the review cost. Zero reviews in blitz caused 7 Critical+High issues to accumulate undetected across 4 missions — all caught by the Victory Gauntlet but at much higher fix cost. (Field report #28)
 
+**Node API compatibility check (within review):** When the review finds new Node.js API calls (`fs.globSync`, `readdir({ recursive: true })`, `import.meta.dirname`, etc.), verify the API exists in the minimum version declared in `engines`. Check the Node.js docs for "Added in:" version. The `engines` field is a contract — code that uses APIs above the minimum version crashes for users on the minimum. (Field report #50: `fs.globSync` requires Node 22+ but engines declared >=20.)
+
+**UI→server route tracing (within review):** When a mission writes both UI code and server code, the review must trace every `fetch()` call in the UI to a registered server route. For each `fetch('/api/...')` in `.js`/`.ts` UI files, verify the path exists as an `addRoute()` call in the server. Missing routes produce silent 404s that are invisible in development. (Field report #50: UI button called `/api/server/restart` but no endpoint was created.)
+
 ### Step 4.5 — Gauntlet Checkpoint (Thanos)
 
 After every 4th completed mission (missions 4, 8, 12, etc.), Thanos runs a Gauntlet checkpoint:
@@ -321,12 +325,15 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
    - Are non-code requirements flagged as BLOCKED? (illustrations, OG images, assets)
 4. If Troi finds discrepancies → fix code requirements, flag asset requirements as BLOCKED
 5. Present final report: COMPLETE items, BLOCKED items (with reasons), deviations from PRD
-6. Victory only if: **Gauntlet Council signs off** AND user acknowledges all BLOCKED items
-7. Sisko signs off:
+6. **Run `/debrief --submit`** — mandatory end-of-campaign post-mortem covering all missions together. Captures cross-cutting learnings that per-mission debriefs miss. This runs BEFORE the sign-off so learnings are captured while context is fresh. (Field reports #31, #53)
+7. **Victory Checklist** — ALL must be true before sign-off:
+   - [ ] Gauntlet Council signed off (6/6 or all domains pass)
+   - [ ] All BLOCKED items acknowledged by user
+   - [ ] `/debrief --submit` filed (issue number recorded)
+   - [ ] Campaign-state.md updated with final status
+8. Sisko signs off (ONLY after checklist is complete):
 
 > *"The Prophets' plan is fulfilled. The campaign is complete."*
-
-8. **Run `/debrief --submit`** — mandatory end-of-campaign post-mortem covering all missions together. Captures cross-cutting learnings that per-mission debriefs miss. In blitz mode, auto-submits per FIELD_MEDIC.md rule 2 exception. This is non-negotiable, like the Victory Gauntlet itself. (Field report #31)
 
 **Victory does NOT mean "everything was built." It means "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 
