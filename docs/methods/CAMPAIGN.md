@@ -346,6 +346,8 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 
 **Victory does NOT mean "everything was built." It means "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 
+**The Victory Gauntlet is NEVER skipped.** Not for methodology-only campaigns. Not for "no code changes." Not for single-mission campaigns. The Gauntlet checks methodology consistency (cross-references, command↔doc sync, agent assignments, version drift) in ADDITION to code quality. Five consecutive campaigns (v8.1-v9.2) shipped without Gauntlets because the first skip was self-justified as "methodology-only" and the pattern stuck. This is a protocol violation on the same level as the Quality Reduction Anti-Pattern.
+
 ### Periodic Architecture Health Check
 
 After every 2-3 campaigns (or when transitioning between major project phases), run a full `/architect` with all agents deployed (Spock, Uhura, Worf, Tuvok, La Forge, Data, Torres, Riker). This catches systemic issues that per-mission reviews and Gauntlets miss:
@@ -397,6 +399,18 @@ After each mission, Sisko updates `/logs/campaign-state.md`.
 - **Fast mode:** `/campaign --fast` — passes `--fast` to every `/assemble` call (skips Crossfire + Council)
 - **Blitz mode:** `/campaign --blitz` — fully autonomous execution: skips mission confirmation, auto-debriefs after each mission, auto-continues. Does NOT imply `--fast`. Combine: `--blitz --fast`
 - **Autonomous mode:** `/campaign --autonomous` — supervised autonomy with safety rails (see below)
+- **Continuous mode:** `/campaign --continuous` — after Victory, auto-start the next roadmap version (see below)
+
+### Continuous Mode (`--continuous`)
+
+After the current campaign completes (Victory Gauntlet passes, debrief filed, sign-off done), Sisko checks the ROADMAP for the next unbuilt version. If one exists, start a new campaign immediately — same session, no user prompt needed. If the roadmap is empty, stop.
+
+Combinable with other flags:
+- `--blitz --continuous` — blitz through all remaining roadmap versions without stopping
+- `--autonomous --continuous` — autonomous with checkpoints, auto-chaining versions
+- `--fast --continuous` — fast reviews across all versions
+
+**The Victory Gauntlet still runs between versions.** Continuous mode does NOT skip the Gauntlet — it runs the Gauntlet, then starts the next campaign. The Gauntlet is the gate between versions.
 
 ### Autonomous Mode (`--autonomous`)
 

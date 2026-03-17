@@ -193,5 +193,8 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 - `--fast` → pass --fast to every /assemble call (skip Crossfire + Council per-mission). Minimum: 1 review round per mission even in --fast mode. Never 0.
 - `--blitz` → full autonomous mode: skips mission confirmation prompts, auto-continues between missions, auto-debriefs after each mission. Does NOT imply `--fast` — full review quality is preserved. Combine with `--fast` explicitly if you want reduced reviews. Use when you want to walk away and come back to a built project.
 - `--autonomous` → supervised autonomy: same as blitz PLUS `git tag` before each mission, critical-finding rollback, 5-mission human checkpoints. Safer for 10+ mission campaigns. See CAMPAIGN.md "Autonomous Mode" for full guardrails.
+- `--continuous` → after Victory, auto-start the next roadmap version. Combinable: `--blitz --continuous` blitzes all remaining versions. Victory Gauntlet still runs between versions — it's the gate.
 - `--mission "Name"` → jump to a specific PRD section
 - No arguments → start fresh or auto-detect state
+
+**VICTORY GAUNTLET IS NEVER SKIPPED.** Not for methodology-only campaigns. Not for "no code changes." The Gauntlet checks methodology consistency (cross-references, command↔doc sync, agent assignments, version drift) in addition to code. Five campaigns (v8.1-v9.2) shipped without Gauntlets — this is a protocol violation.
