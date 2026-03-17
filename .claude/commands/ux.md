@@ -1,5 +1,7 @@
 # /ux — Galadriel's UX/UI Pass
 
+**AGENT DEPLOYMENT IS MANDATORY.** Step 2 specifies parallel agent launches via the Agent tool. You MUST launch Elrond, Arwen, Samwise, and Celeborn as separate sub-processes. Do NOT shortcut to inline analysis. (Field report #68)
+
 ## Context Setup
 1. Read `/logs/build-state.md` — understand current project state
 2. Read `/docs/methods/PRODUCT_DESIGN_FRONTEND.md`

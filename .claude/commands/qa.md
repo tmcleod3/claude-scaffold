@@ -1,5 +1,7 @@
 # /qa — Batman's QA Pass
 
+**AGENT DEPLOYMENT IS MANDATORY.** Step 3 specifies parallel agent launches via the Agent tool. You MUST launch Oracle, Red Hood, Alfred, Deathstroke, Constantine, Cyborg, Raven, Wonder Woman, Batgirl, and Aquaman as separate sub-processes — do NOT shortcut to inline analysis. (Field report #68)
+
 ## Context Setup
 1. Read `/logs/build-state.md` — understand current project state
 2. Read `/docs/methods/QA_ENGINEER.md`

@@ -1,5 +1,7 @@
 # /security — Kenobi's Security Audit
 
+**AGENT DEPLOYMENT IS MANDATORY.** Phase 1 specifies parallel agent launches via the Agent tool. You MUST launch Leia, Chewie, Rex+Bo-Katan, and Maul as separate sub-processes. Phase 2 agents (Yoda, Windu, Ahsoka, Padmé, Qui-Gon) run sequentially but each MUST be a separate agent invocation. Do NOT shortcut to inline analysis. (Field report #68)
+
 ## Context Setup
 1. Read `/logs/build-state.md` — understand current project state
 2. Read `/docs/methods/SECURITY_AUDITOR.md`

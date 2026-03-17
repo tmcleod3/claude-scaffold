@@ -137,6 +137,10 @@ For any system that sends URLs to users (transactional emails, SMS, push notific
 
 This is the outbound mirror of SSRF prevention: SSRF stops external URLs from reaching internal services, outbound URL safety stops internal URLs from reaching external users. (Field report #44: verification email sent with `localhost:5005` URL — worked on same machine, broke from any other device.)
 
+### Credentials Never in API Responses
+
+API responses must NEVER include credentials, tokens, or secrets — even in "admin-only" or "internal" endpoints. Grep for responses that include: `password`, `secret`, `token`, `api_key`, `private_key`, `credentials`. Common violations: user profile endpoints returning the password hash, API key management endpoints including the full key in GET responses (show only last 4 characters), internal debug endpoints returning environment variables. (Field report #66: API settings endpoint returned full MCP connection credentials in the response body.)
+
 ### Response Header Injection
 
 Verify that user-controlled data is never injected into HTTP response headers without sanitization. Check: `Content-Disposition` (filename from user input), `Location` (redirect URL from user input), `Set-Cookie` (values from user input). A newline in a header value (`\r\n`) can inject arbitrary headers or split the response. Sanitize by stripping `\r` and `\n` from any user data placed in headers, or use framework-provided header-setting functions that handle escaping. (Field report #57)

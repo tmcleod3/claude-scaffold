@@ -96,7 +96,8 @@ Kira reads the battlefield:
 3. Read `/logs/assemble-state.md` — check for in-progress assemblies
 4. Check `git status` — uncommitted work?
 5. Read auto-memory for project context
-6. Check for VoidForge vault: `~/.voidforge/vault.enc`
+6. **State file freshness check:** If `build-state.md` or `campaign-state.md` exists, verify the version/commit matches the current `git log -1` and `package.json` version. If stale (from a previous session that didn't clean up), warn and offer to reset. (Field report #67)
+7. Check for VoidForge vault: `~/.voidforge/vault.enc`
    - If vault exists → check if provisioning completed (`~/.voidforge/runs/*.json`)
    - If vault exists + provisioning NOT done → flag: "Credentials collected but infrastructure not provisioned. Run `voidforge deploy` before continuing."
    - If vault exists + provisioning done → verify `.env` is populated from vault. If not, suggest re-running provisioner.
@@ -344,6 +345,16 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 > *"The Prophets' plan is fulfilled. The campaign is complete."*
 
 **Victory does NOT mean "everything was built." It means "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
+
+### Periodic Architecture Health Check
+
+After every 2-3 campaigns (or when transitioning between major project phases), run a full `/architect` with all agents deployed (Spock, Uhura, Worf, Tuvok, La Forge, Data, Torres, Riker). This catches systemic issues that per-mission reviews and Gauntlets miss:
+- Missing database indexes for query patterns that emerged over multiple campaigns
+- PII that accumulated without isolation
+- Integration failure modes never tested
+- Architecture decisions made in Campaign 1 that no longer fit Campaign 4's reality
+
+Individual campaigns catch bugs. The health check catches drift. (Field report #67: full architecture review after 4 campaigns found 2 CRITICAL + 3 HIGH issues that no Gauntlet had caught.)
 
 ## The Prophecy Board
 

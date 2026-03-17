@@ -84,6 +84,10 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Green Lantern (Scenario Construction):** Generates the test matrix before testing begins — what inputs × what states × what conditions should be tested? Called during Step 1 to produce the attack surface map.
 **Martian Manhunter (Cross-Environment):** Tests across environments — different Node versions, with and without optional dependencies, different OS behaviors. Called when the project targets multiple platforms.
 
+### API Boundary Type Verification
+
+When the backend (Python, Go, Rust) and frontend (JavaScript) use different type systems, verify that types survive the API boundary correctly. Common gotcha: Python `bool` (`True`/`False`) becomes JSON `true`/`false` — but Python's string representation `"True"` is truthy in JS while `"False"` is also truthy. Check: Does the frontend compare API boolean values with `===` (strict) or `==` (loose)? Does the backend serialize booleans as JSON booleans or as strings? This catches "it works in Python tests but breaks in the browser" bugs. (Field report #66)
+
 ### Delegation Pattern Trace
 
 When a function delegates to another function (e.g., `handleRequest` calls `processItem` which calls `applyTransform`), trace the full chain. Verify that configuration set at the top of the chain actually reaches the bottom. Common failure: `json.dumps(default=str)` computed but a framework's `JSONResponse` used instead, silently dropping the custom serializer. For every sweep/batch operation, verify the per-item function receives the same configuration as the orchestrating function. (Field report #57)
