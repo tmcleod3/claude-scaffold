@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v8.2.0 (2026-03-16)
-**Next:** v8.3 — The Autonomy
-**Status:** v8.2.0 shipped. Next: v8.3 (Autonomy) → v9.0+ (Horizon).
+**Current:** v8.3.0 (2026-03-16)
+**Next:** v9.0+ — The Horizon
+**Status:** v8.3.0 shipped. The v8.x line is complete. Next: v9.0+ (Horizon).
 
 ---
 

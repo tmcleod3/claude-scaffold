@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [8.3.0] - 2026-03-16
+
+### Added
+- **`/campaign --autonomous`** — supervised autonomy with safety rails: git tag before each mission, critical-finding rollback, 5-mission human checkpoints, Victory Gauntlet requires human confirmation. Safer than `--blitz` for long campaigns (10+ missions).
+
+---
+
 ## [8.2.0] - 2026-03-16
 
 ### Added
