@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [10.0.0] - 2026-03-17
+
+### Added
+- **War Room dashboard** — `war-room.html` + `war-room.js`. 5 core panels (Campaign Timeline, Phase Pipeline, Finding Scoreboard, Context Gauge, PRD Coverage), sidebar (Version, Deploy, Tests, Cost), Agent Activity Ticker. WebSocket real-time feed with auto-reconnect.
+- **`/api/war-room/*` REST endpoints** in server.ts.
+- **War Room button** in Lobby navigation.
+
+---
+
 ## [9.3.0] - 2026-03-17
 
 ### Added

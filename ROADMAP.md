@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v9.3.0 (2026-03-17)
-**Next:** v10.0 — The War Room + The Frontier
-**Status:** v9.3.0 shipped. The v9.x line is complete. Next: v10.0 (War Room).
+**Current:** v10.0.0 (2026-03-17)
+**Next:** v10.0.x — Frontier feature panels (confidence, debates, archaeology, etc.)
+**Status:** v10.0.0 shipped (War Room foundation). Frontier features ship as patches.
 
 ---
 
