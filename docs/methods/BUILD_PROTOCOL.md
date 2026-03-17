@@ -54,6 +54,21 @@ When `framework` is `django` or `fastapi`:
 - **Patterns:** Load the Django/FastAPI Deep Dive sections from each pattern file (api-route, service, middleware, error-handling, component, job-queue, multi-tenant)
 - **Security:** Check Django-specific settings (SECRET_KEY, DEBUG=True in prod, ALLOWED_HOSTS, CSRF)
 
+### Game Project Detection
+
+When `type` is `game`:
+- **Phase 1:** Scaffold with engine-specific project structure: Godot project (`godot --path`), Phaser + webpack, Three.js + vite, or Pixi.js
+- **Phase 2:** Game infrastructure: asset pipeline (sprites, audio, fonts), scene management, input system (keyboard/gamepad/touch), audio system
+- **Phase 3:** Replaced by "Game Core" — game loop (fixed timestep + interpolation), ECS or component system, state machines, physics (if applicable)
+- **Phase 4:** Replaced by "Gameplay" — core mechanics, player controller, enemies/AI, level design data structures, collision handling
+- **Phase 5:** Replaced by "Game UI" — HUD, menus, inventory, dialog system, screen transitions, pause overlay
+- **Phase 6:** Replaced by "Polish" — particles, screen shake, hit pause, juice, audio cues, camera dynamics, game feel
+- **Phase 7:** Replaced by "Content" — levels, balancing, progression curves, save/load, difficulty scaling
+- **Phase 8:** Replaced by "Game Marketing" — store page copy, screenshots, trailer script, press kit, itch.io/Steam page
+- **Phase 9-11:** Game-specific QA: frame rate profiling, input latency, memory leaks, speedrun exploit testing, save corruption, platform testing
+- **Phase 12:** Build + export: WebGL, desktop (Electron), mobile, Steam/itch.io distribution
+- **Agents activated:** Spike-GameDev (architecture), Éowyn-GameFeel (juice), Deathstroke-Exploit (game QA), L-Profiler (performance)
+
 ### Mobile Framework Detection
 
 When `deploy` is `ios`, `android`, or `cross-platform`:

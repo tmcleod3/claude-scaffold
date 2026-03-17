@@ -45,6 +45,26 @@ These activate automatically based on PRD frontmatter. You don't need to add the
 **Domain:** Mobile security: certificate pinning, Keychain/Keystore, jailbreak/root detection, transport security (ATS/NSC), bundle secret scanning
 **Trigger:** `deploy: ios | android | cross-platform`
 
+### Spike-GameDev
+**Universe:** Anime | **Reports to:** Kusanagi
+**Domain:** Game architecture: frame budgets, memory pools, object pooling, asset streaming, ECS patterns, scene management
+**Trigger:** `type: game`
+
+### Éowyn-GameFeel
+**Universe:** Tolkien | **Reports to:** Galadriel
+**Domain:** Game juice: screen shake, hit pause, particle bursts, camera dynamics, audio cues, impact feedback. The enchantment pass, but for games.
+**Trigger:** `type: game`
+
+### Deathstroke-Exploit
+**Universe:** DC | **Reports to:** Batman
+**Domain:** Game QA: speedrun exploits, out-of-bounds, sequence breaks, economy exploits, save corruption, input buffering abuse
+**Trigger:** `type: game`
+
+### L-Profiler
+**Universe:** Anime | **Reports to:** Kusanagi
+**Domain:** Game performance profiling: frame time analysis, draw call optimization, garbage collection pressure, loading time budgets, memory leak detection
+**Trigger:** `type: game`
+
 ## Custom Agents for This Project
 
 *None yet. Add your first custom agent using the template above.*

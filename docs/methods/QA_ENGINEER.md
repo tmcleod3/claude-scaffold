@@ -84,6 +84,17 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Green Lantern (Scenario Construction):** Generates the test matrix before testing begins — what inputs × what states × what conditions should be tested? Called during Step 1 to produce the attack surface map.
 **Martian Manhunter (Cross-Environment):** Tests across environments — different Node versions, with and without optional dependencies, different OS behaviors. Called when the project targets multiple platforms.
 
+### Game QA Checklist (when `type: game`)
+
+- **Frame rate:** Profile with browser DevTools (WebGL) or engine profiler. Target: 60 FPS stable. Flag any frame that takes >20ms.
+- **Input latency:** Measure time from keypress to visible response. Target: <50ms for action games, <100ms for strategy/puzzle.
+- **Memory leaks:** Monitor heap over 10 minutes of gameplay. Heap should plateau, not climb. Common culprits: particles not recycled, event listeners not removed on scene exit, textures not disposed.
+- **Speedrun exploits:** Can the player skip intended content? Clip through walls? Stack buffs infinitely? Duplicate items? Test with adversarial intent.
+- **Out-of-bounds:** Walk into every wall, corner, and edge. Jump in unexpected places. What happens at the world boundary?
+- **Save corruption:** Save mid-transition (loading screen, death animation). Load the save. Is the game state valid? Corrupt a save file manually — does the game crash or show an error?
+- **Economy exploits:** If the game has currency/items: can you sell and rebuy at profit? Can you duplicate via network lag? Can you overflow counters?
+- **Platform testing:** WebGL on Chrome, Firefox, Safari. Desktop if Electron. Mobile if exported. Gamepad + keyboard + touch.
+
 ### Mobile QA Checklist (when `deploy: ios|android|cross-platform`)
 
 When the project targets mobile platforms, add these to the attack plan:

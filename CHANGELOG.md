@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [9.3.0] - 2026-03-17
+
+### Added
+- **Game build protocol** — 12-phase adaptation for `type: game`.
+- **3 game patterns:** `game-loop.ts`, `game-state.ts`, `game-entity.ts`.
+- **Game QA + UX checklists** — frame rate, input latency, game feel, accessibility.
+- **4 game agents:** Spike-GameDev, Éowyn-GameFeel, Deathstroke-Exploit, L-Profiler.
+
+---
+
 ## [9.2.0] - 2026-03-17
 
 ### Added
