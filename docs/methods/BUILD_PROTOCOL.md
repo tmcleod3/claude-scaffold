@@ -54,6 +54,16 @@ When `framework` is `django` or `fastapi`:
 - **Patterns:** Load the Django/FastAPI Deep Dive sections from each pattern file (api-route, service, middleware, error-handling, component, job-queue, multi-tenant)
 - **Security:** Check Django-specific settings (SECRET_KEY, DEBUG=True in prod, ALLOWED_HOSTS, CSRF)
 
+### Mobile Framework Detection
+
+When `deploy` is `ios`, `android`, or `cross-platform`:
+- **Phase 1:** Scaffold with `npx react-native init` (React Native), `flutter create` (Flutter), or Xcode project (SwiftUI)
+- **Phase 5:** Mobile-specific UI: safe area insets, navigation stacks (React Navigation / Navigator), gestures, haptic feedback, platform-specific components (`Platform.select`)
+- **Phase 9 QA additions:** Orientation changes, deep link handling, push notification delivery, offline mode, battery optimization, app backgrounding/foregrounding, memory pressure
+- **Phase 11 Security additions:** Certificate pinning, Keychain (iOS) / Keystore (Android) for secrets, jailbreak/root detection, transport security (ATS/NSC), code obfuscation, no secrets in bundle
+- **Phase 12:** Build + code sign + upload: `xcodebuild` → TestFlight (iOS), `./gradlew assembleRelease` → Play Console (Android)
+- **Agents activated:** Uhura-Mobile (architecture), Samwise-Mobile (a11y), Rex-Mobile (security)
+
 ### Conditional Skip Rules
 
 | PRD Frontmatter | Phase to Skip | Reason |

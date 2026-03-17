@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [9.2.0] - 2026-03-17
+
+### Added
+- **Mobile methodology** — BUILD_PROTOCOL, QA_ENGINEER, SECURITY_AUDITOR, PRODUCT_DESIGN_FRONTEND all gain mobile-specific checklists.
+- **2 mobile patterns:** `mobile-screen.tsx` (React Native, safe area, a11y) + `mobile-service.ts` (offline-first, sync queue).
+- **3 conditional agents:** Uhura-Mobile, Samwise-Mobile, Rex-Mobile.
+- **PRD template** updated with mobile frontmatter.
+
+### Blocked
+- Mobile provisioner deferred (needs Xcode CLI + Play Console API).
+
+---
+
 ## [9.1.0] - 2026-03-17
 
 ### Added
