@@ -9,6 +9,20 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CONFIG_DIR="$PROJECT_ROOT/.voidforge/thumper"
 CONFIG_FILE="$CONFIG_DIR/sietch.env"
 
+# ─── Non-Interactive Mode (--token and --chat-id args) ───────
+# Allows /thumper setup to run from Claude Code's Bash tool,
+# which doesn't support interactive stdin (read -r -p).
+# Usage: scan.sh --token 123:ABC --chat-id 456
+ARG_TOKEN=""
+ARG_CHAT_ID=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --token) ARG_TOKEN="$2"; shift 2 ;;
+        --chat-id) ARG_CHAT_ID="$2"; shift 2 ;;
+        *) shift ;;
+    esac
+done
+
 if ! command -v curl >/dev/null 2>&1; then
     echo "❌ curl is required but not found. Install curl and re-run."
     exit 1
@@ -43,6 +57,27 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🏜️ Reading the Sand — Chani's Scanner"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
+
+# ─── Non-Interactive Fast Path ────────────────────────────────
+# Skip all prompts when --token and --chat-id are both provided
+if [[ -n "$ARG_TOKEN" ]] && [[ -n "$ARG_CHAT_ID" ]]; then
+    BOT_TOKEN="$ARG_TOKEN"
+    CHAT_ID="$ARG_CHAT_ID"
+    HAS_BOT="yes"
+
+    echo "🏜️ Non-interactive mode — validating credentials..."
+    API_BASE="https://api.telegram.org/bot${BOT_TOKEN}"
+    VALIDATE=$(curl -s --connect-timeout 5 --max-time 10 "${API_BASE}/getMe" 2>/dev/null || echo "")
+    if echo "$VALIDATE" | grep -q '"ok":true'; then
+        BOT_NAME=$(json_extract "$VALIDATE" "result.username" 2>/dev/null || echo "unknown")
+        echo "✅ Voice validated: @${BOT_NAME}"
+        echo "✅ Chat ID: $CHAT_ID"
+    else
+        echo "❌ Invalid bot token or Telegram unreachable."
+        exit 1
+    fi
+else
+    # ─── Interactive Mode ──────────────────────────────────────
 
 if [[ -f "$CONFIG_FILE" ]]; then
     echo "⚠️  Existing sietch vault found at $CONFIG_FILE"
@@ -152,6 +187,8 @@ fi
 
 echo "✅ Presence confirmed. Chat ID: $CHAT_ID"
 
+fi  # end interactive mode (else branch of non-interactive check)
+
 # ─── Step 2: Environment Scan ─────────────────────────────────
 
 echo ""
@@ -247,7 +284,12 @@ fi
 echo "🔍 Terrain: $ENV_LABEL"
 echo "⚡ Worm path: $INJECT_METHOD"
 
-read -r -p "Does this look right? (yes/no): " CONFIRM_ENV
+# Skip confirmation in non-interactive mode
+if [[ -n "$ARG_TOKEN" ]] && [[ -n "$ARG_CHAT_ID" ]]; then
+    CONFIRM_ENV="yes"
+else
+    read -r -p "Does this look right? (yes/no): " CONFIRM_ENV
+fi
 
 if [[ "$CONFIRM_ENV" != "yes" ]]; then
     echo ""
@@ -303,7 +345,12 @@ echo "  Vault:     $CONFIG_FILE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-read -r -p "Speak The Voice now? (yes/no): " START_NOW
+# Skip prompt in non-interactive mode — don't auto-start, let user /thumper on
+if [[ -n "$ARG_TOKEN" ]] && [[ -n "$ARG_CHAT_ID" ]]; then
+    START_NOW="no"
+else
+    read -r -p "Speak The Voice now? (yes/no): " START_NOW
+fi
 
 if [[ "$START_NOW" == "yes" ]]; then
     bash "$SCRIPT_DIR/thumper.sh" on

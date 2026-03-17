@@ -150,6 +150,193 @@ except Exception:
     fi
 }
 
+# ─── Command Center (Inline Keyboard) ─────────────────────────
+
+send_command_menu() {
+    local keyboard='{"inline_keyboard":[
+        [{"text":"🚀 Campaign","callback_data":"menu:campaign"},{"text":"🔨 Build","callback_data":"menu:build"},{"text":"🛡️ Gauntlet","callback_data":"menu:gauntlet"}],
+        [{"text":"🦇 QA","callback_data":"menu:qa"},{"text":"🧝 UX","callback_data":"menu:ux"},{"text":"⚔️ Security","callback_data":"menu:security"}],
+        [{"text":"🏗️ Architect","callback_data":"menu:architect"},{"text":"📦 DevOps","callback_data":"menu:devops"},{"text":"🧪 Test","callback_data":"menu:test"}],
+        [{"text":"📋 Review","callback_data":"menu:review"},{"text":"🔖 Git","callback_data":"menu:git"},{"text":"🩺 Debrief","callback_data":"menu:debrief"}],
+        [{"text":"🌀 Void","callback_data":"menu:void"},{"text":"🪱 Thumper","callback_data":"menu:thumper"},{"text":"🎨 Imagine","callback_data":"menu:imagine"}]
+    ]}'
+    curl -s --connect-timeout 5 --max-time 10 \
+        -X POST "${API_BASE}/sendMessage" \
+        -H "Content-Type: application/json" \
+        -d "{\"chat_id\":\"$CHAT_ID\",\"text\":\"🏜️ *VoidForge Command Center*\n\nTap a command to see its options:\",\"parse_mode\":\"Markdown\",\"reply_markup\":$keyboard}" >/dev/null 2>&1 || true
+}
+
+get_submenu() {
+    local cmd="$1"
+    case "$cmd" in
+        campaign)
+            echo '{"text":"🚀 *Campaign* — Sisko'\''s War Room\n\nBuild the entire PRD mission by mission.","keyboard":{"inline_keyboard":[
+                [{"text":"/campaign","callback_data":"run:/campaign"}],
+                [{"text":"/campaign --blitz","callback_data":"run:/campaign --blitz"}],
+                [{"text":"/campaign --blitz --fast","callback_data":"run:/campaign --blitz --fast"}],
+                [{"text":"/campaign --resume","callback_data":"run:/campaign --resume"}],
+                [{"text":"/campaign --plan","callback_data":"run:/campaign --plan"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        build)
+            echo '{"text":"🔨 *Build* — Execute Protocol\n\nFull 13-phase build from PRD.","keyboard":{"inline_keyboard":[
+                [{"text":"/build","callback_data":"run:/build"}],
+                [{"text":"/build --phase 6-7","callback_data":"run:/build --phase 6-7"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        gauntlet)
+            echo '{"text":"🛡️ *Gauntlet* — Thanos'\''s Review\n\n5 rounds, 30+ agents, every domain.","keyboard":{"inline_keyboard":[
+                [{"text":"/gauntlet","callback_data":"run:/gauntlet"}],
+                [{"text":"/gauntlet --quick","callback_data":"run:/gauntlet --quick"}],
+                [{"text":"/gauntlet --ux-extra","callback_data":"run:/gauntlet --ux-extra"}],
+                [{"text":"/gauntlet --security-only","callback_data":"run:/gauntlet --security-only"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        qa)
+            echo '{"text":"🦇 *QA* — Batman'\''s Pass\n\nEvery edge case, every boundary.","keyboard":{"inline_keyboard":[
+                [{"text":"/qa","callback_data":"run:/qa"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        ux)
+            echo '{"text":"🧝 *UX* — Galadriel'\''s Pass\n\nUsability, a11y, enchantment.","keyboard":{"inline_keyboard":[
+                [{"text":"/ux","callback_data":"run:/ux"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        security)
+            echo '{"text":"⚔️ *Security* — Kenobi'\''s Audit\n\nOWASP, injection, auth, secrets.","keyboard":{"inline_keyboard":[
+                [{"text":"/security","callback_data":"run:/security"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        architect)
+            echo '{"text":"🏗️ *Architect* — Picard'\''s Review\n\nSchema, scaling, boundaries.","keyboard":{"inline_keyboard":[
+                [{"text":"/architect","callback_data":"run:/architect"}],
+                [{"text":"/architect --plan","callback_data":"run:/architect --plan"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        devops)
+            echo '{"text":"📦 *DevOps* — Kusanagi'\''s Audit\n\nDeploy, monitor, backup.","keyboard":{"inline_keyboard":[
+                [{"text":"/devops","callback_data":"run:/devops"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        test)
+            echo '{"text":"🧪 *Test* — Batman'\''s Test Mode\n\nCoverage, architecture, write tests.","keyboard":{"inline_keyboard":[
+                [{"text":"/test","callback_data":"run:/test"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        review)
+            echo '{"text":"📋 *Review* — Picard'\''s Code Review\n\nPattern compliance, quality.","keyboard":{"inline_keyboard":[
+                [{"text":"/review","callback_data":"run:/review"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        git)
+            echo '{"text":"🔖 *Git* — Coulson'\''s Release\n\nVersion, changelog, commit.","keyboard":{"inline_keyboard":[
+                [{"text":"/git","callback_data":"run:/git"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        debrief)
+            echo '{"text":"🩺 *Debrief* — Bashir'\''s Analysis\n\nPost-mortem and upstream feedback.","keyboard":{"inline_keyboard":[
+                [{"text":"/debrief","callback_data":"run:/debrief"}],
+                [{"text":"/debrief --submit","callback_data":"run:/debrief --submit"}],
+                [{"text":"/debrief --inbox","callback_data":"run:/debrief --inbox"}],
+                [{"text":"/debrief --campaign","callback_data":"run:/debrief --campaign"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        void)
+            echo '{"text":"🌀 *Void* — Bombadil'\''s Sync\n\nUpdate methodology from upstream.","keyboard":{"inline_keyboard":[
+                [{"text":"/void","callback_data":"run:/void"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        thumper)
+            echo '{"text":"🪱 *Thumper* — Bridge Control\n\nTelegram ↔ Claude Code.","keyboard":{"inline_keyboard":[
+                [{"text":"/thumper on","callback_data":"run:/thumper on"}],
+                [{"text":"/thumper off","callback_data":"run:/thumper off"}],
+                [{"text":"/thumper status","callback_data":"run:/thumper status"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+        imagine)
+            echo '{"text":"🎨 *Imagine* — Celebrimbor'\''s Forge\n\nAI image generation from PRD.","keyboard":{"inline_keyboard":[
+                [{"text":"/imagine","callback_data":"run:/imagine"}],
+                [{"text":"/imagine --scan","callback_data":"run:/imagine --scan"}],
+                [{"text":"← Back","callback_data":"menu:back"}]
+            ]}}';;
+    esac
+}
+
+handle_callback_query() {
+    local callback_id="$1" data="$2" message_id="$3"
+
+    # Acknowledge the callback immediately (removes loading spinner)
+    curl -s --connect-timeout 5 --max-time 5 \
+        -X POST "${API_BASE}/answerCallbackQuery" \
+        -d "callback_query_id=$callback_id" >/dev/null 2>&1 || true
+
+    if [[ "$data" == "menu:back" ]]; then
+        # Edit message back to main menu
+        local keyboard='{"inline_keyboard":[
+            [{"text":"🚀 Campaign","callback_data":"menu:campaign"},{"text":"🔨 Build","callback_data":"menu:build"},{"text":"🛡️ Gauntlet","callback_data":"menu:gauntlet"}],
+            [{"text":"🦇 QA","callback_data":"menu:qa"},{"text":"🧝 UX","callback_data":"menu:ux"},{"text":"⚔️ Security","callback_data":"menu:security"}],
+            [{"text":"🏗️ Architect","callback_data":"menu:architect"},{"text":"📦 DevOps","callback_data":"menu:devops"},{"text":"🧪 Test","callback_data":"menu:test"}],
+            [{"text":"📋 Review","callback_data":"menu:review"},{"text":"🔖 Git","callback_data":"menu:git"},{"text":"🩺 Debrief","callback_data":"menu:debrief"}],
+            [{"text":"🌀 Void","callback_data":"menu:void"},{"text":"🪱 Thumper","callback_data":"menu:thumper"},{"text":"🎨 Imagine","callback_data":"menu:imagine"}]
+        ]}'
+        curl -s --connect-timeout 5 --max-time 10 \
+            -X POST "${API_BASE}/editMessageText" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"$CHAT_ID\",\"message_id\":$message_id,\"text\":\"🏜️ *VoidForge Command Center*\n\nTap a command to see its options:\",\"parse_mode\":\"Markdown\",\"reply_markup\":$keyboard}" >/dev/null 2>&1 || true
+
+    elif [[ "$data" == menu:* ]]; then
+        # Show submenu for the selected command
+        local cmd="${data#menu:}"
+        local submenu_json
+        submenu_json=$(get_submenu "$cmd")
+        if [[ -n "$submenu_json" ]]; then
+            local sub_text sub_keyboard
+            sub_text=$(echo "$submenu_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['text'])" 2>/dev/null)
+            sub_keyboard=$(echo "$submenu_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d['keyboard']))" 2>/dev/null)
+            curl -s --connect-timeout 5 --max-time 10 \
+                -X POST "${API_BASE}/editMessageText" \
+                -H "Content-Type: application/json" \
+                -d "{\"chat_id\":\"$CHAT_ID\",\"message_id\":$message_id,\"text\":\"$sub_text\",\"parse_mode\":\"Markdown\",\"reply_markup\":$sub_keyboard}" >/dev/null 2>&1 || true
+        fi
+
+    elif [[ "$data" == run:* ]]; then
+        # Send the command as a text message, then inject into Claude Code
+        local run_cmd="${data#run:}"
+        log "COMMAND CENTER: $run_cmd"
+        send_telegram "⚡ Sending: \`$run_cmd\`"
+        local sanitized
+        sanitized=$(sanitize_text "$run_cmd")
+        if [[ -n "$sanitized" ]]; then
+            inject_text "$sanitized"
+        fi
+    fi
+}
+
+# Parse callback queries from updates (outputs: update_id \t callback_id \t message_id \t data)
+parse_callback_queries() {
+    local json="$1"
+    if command -v python3 >/dev/null 2>&1; then
+        echo "$json" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    if data.get('ok') and data.get('result'):
+        for update in data['result']:
+            cb = update.get('callback_query')
+            if cb:
+                uid = update.get('update_id', 0)
+                cb_id = cb.get('id', '')
+                msg = cb.get('message', {})
+                msg_id = msg.get('message_id', 0)
+                cb_data = cb.get('data', '')
+                if cb_data:
+                    print(f'{uid}\t{cb_id}\t{msg_id}\t{cb_data}')
+except Exception:
+    pass
+" 2>/dev/null
+    fi
+}
+
 # ─── Transport Vector Injection ────────────────────────────────
 
 inject_text() {
@@ -369,6 +556,14 @@ while true; do
 
         log "THUMPER BEAT received (update $update_id, ${#text} chars)"
 
+        # Intercept /help — show command center instead of injecting into Claude
+        if [[ "$text" == "/help" ]] || [[ "$text" == "/help@"* ]]; then
+            log "COMMAND CENTER requested (update $update_id)"
+            send_command_menu
+            advance_offset "$update_id"
+            continue
+        fi
+
         if inject_text "$text"; then
             log "VOICE CARRIED via $INJECT_METHOD (update $update_id)"
             advance_offset "$update_id"
@@ -378,4 +573,12 @@ while true; do
         fi
 
     done < <(parse_updates "$RESPONSE")
+
+    # Process callback queries (inline keyboard button taps)
+    while IFS=$'\t' read -r cb_update_id cb_id cb_msg_id cb_data; do
+        [[ -z "$cb_update_id" ]] && continue
+        [[ -z "$cb_data" ]] && continue
+        handle_callback_query "$cb_id" "$cb_data" "$cb_msg_id"
+        advance_offset "$cb_update_id"
+    done < <(parse_callback_queries "$RESPONSE")
 done

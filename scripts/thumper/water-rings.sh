@@ -1,10 +1,12 @@
 #!/bin/bash
 # water-rings.sh — The Water Rings — Chani's stop hook
-# Sends task completion signals to Telegram when Claude Code finishes
+# Sends Claude Code's response to Telegram when a turn completes.
 # "Among the Fremen, water rings record the dead — and the debts of the living."
 #
-# Note: -e (errexit) intentionally omitted — this hook must never fail
-# with a non-zero exit that could affect Claude Code's operation.
+# The Stop hook receives JSON on stdin with `last_assistant_message` — the
+# actual response text. No need to read transcript files.
+#
+# Note: -e (errexit) intentionally omitted — this hook must never fail.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,73 +22,32 @@ CHANNEL_FLAG="$CONFIG_DIR/.thumper.active"
 source "$CONFIG_FILE"
 [ "${SETUP_COMPLETE:-}" = "true" ] || exit 0
 
-# Read session data from stdin (with timeout to prevent blocking)
-INPUT=""
+# Read stop hook metadata from stdin
+HOOK_INPUT=""
 if ! [ -t 0 ]; then
-    # perl for timeout (ships on macOS+Linux); head -c bounds if perl absent
-    INPUT=$(perl -e 'alarm 5; local $/; print <STDIN>' 2>/dev/null || head -c 65536 2>/dev/null || echo "")
+    HOOK_INPUT=$(perl -e 'alarm 5; local $/; print <STDIN>' 2>/dev/null || head -c 65536 2>/dev/null || echo "")
 fi
 
-extract_message() {
-    local input="$1"
-    [ -z "$input" ] && return
-
+# Extract last_assistant_message directly from hook metadata
+MESSAGE=""
+if [ -n "$HOOK_INPUT" ]; then
     if command -v python3 >/dev/null 2>&1; then
-        echo "$input" | python3 -c "
+        MESSAGE=$(echo "$HOOK_INPUT" | python3 -c "
 import sys, json
 try:
     data = json.load(sys.stdin)
-    if isinstance(data, list):
-        messages = data
-    elif isinstance(data, dict):
-        messages = data.get('messages', [])
-    else:
-        messages = []
-
-    assistant_msgs = [m for m in messages if m.get('role') == 'assistant']
-    if not assistant_msgs:
-        sys.exit(0)
-
-    last = assistant_msgs[-1]
-    content = last.get('content', '')
-
-    if isinstance(content, list):
-        text = ' '.join(
-            block.get('text', '')
-            for block in content
-            if isinstance(block, dict) and block.get('type') == 'text'
-        )
-    else:
-        text = str(content)
-
-    if not text.strip():
-        sys.exit(0)
-
-    if len(text) > 3600:
-        text = text[:3600] + '\n\n[...truncated, ' + str(len(text)) + ' chars total]'
-
-    print(text)
-except SystemExit:
-    pass
+    text = data.get('last_assistant_message', '')
+    if text:
+        if len(text) > 3600:
+            text = text[:3600] + '\n\n[...truncated]'
+        print(text)
 except Exception:
     pass
-" 2>/dev/null
+" 2>/dev/null)
     elif command -v jq >/dev/null 2>&1; then
-        echo "$input" | jq -r '
-            (if type == "array" then . else (.messages // []) end) |
-            [.[] | select(.role == "assistant")] |
-            last |
-            .content |
-            if type == "array" then
-                [.[] | select(.type == "text") | .text] | join(" ")
-            else
-                tostring
-            end
-        ' 2>/dev/null | head -c 3600
+        MESSAGE=$(echo "$HOOK_INPUT" | jq -r '.last_assistant_message // empty' 2>/dev/null | head -c 3600)
     fi
-}
-
-MESSAGE=$(extract_message "$INPUT")
+fi
 
 if [ -n "$MESSAGE" ]; then
     NOTIFICATION="$(printf '✅ Task complete\n\n%s\n\n─────────────────\n📡 Reply to continue' "$MESSAGE")"
@@ -96,6 +57,7 @@ fi
 
 _send_notification() {
     local api_base="https://api.telegram.org/bot${BOT_TOKEN}"
+    # Try with Markdown first, fall back to plain text
     curl -s --connect-timeout 5 --max-time 10 \
         -X POST \
         -d chat_id="$CHAT_ID" \
