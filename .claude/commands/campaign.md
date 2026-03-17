@@ -71,7 +71,15 @@ Check for unfinished business:
 - If `/campaign --resume` was passed → resume from campaign-state's active mission
 - If campaign-state has unresolved BLOCKED items → present them: "These items from previous missions are still blocked: [list]. Resolve now, skip, or continue?"
 - If vault exists but `.env` is sparse → offer: "The vault has credentials but infrastructure isn't provisioned. Run `voidforge deploy` now?" In `--blitz` mode: auto-run provisioner.
-- If clear → proceed to Step 1
+- If clear → proceed to Step 0.5
+
+## Step 0.5 — Vault Auto-Inject
+
+If vault exists and `.env` is sparse (missing keys that the vault has):
+1. Run `voidforge deploy --env-only` to write vault credentials to `.env`
+2. In `--blitz` mode: auto-run without confirmation
+3. In normal mode: show what will be written, ask for confirmation
+4. This runs BEFORE Dax's full analysis so the populated `.env` is visible
 
 ## Step 1 — Dax's Strategic Analysis
 

@@ -61,9 +61,11 @@
 
   // ── Tab management ─────────────────────────────────
   let tabIdCounter = 0;
+  let hasRetried = false;
 
   function createTab(label, sessionId, authToken) {
     const tabId = ++tabIdCounter;
+    const tabCreatedAt = Date.now();
 
     // Create terminal
     const terminal = new Terminal({
@@ -129,6 +131,26 @@
 
     ws.onclose = () => {
       terminal.write('\r\n\x1b[90m[Session ended — close this tab or open a new one above]\x1b[0m\r\n');
+      // Auto-cleanup: if session ended within 2s of creation, it likely failed to start.
+      // Mark the tab for cleanup instead of leaving a dead session consuming MAX_SESSIONS.
+      const elapsed = Date.now() - tabCreatedAt;
+      if (elapsed < 2000) {
+        terminal.write('\x1b[33m[Session failed to start — cleaning up...]\x1b[0m\r\n');
+        // Remove the tab after a brief delay so the user can see the message
+        setTimeout(() => {
+          const tabEl = document.querySelector(`[data-tab-id="${sessionId}"]`);
+          if (tabEl) tabEl.remove();
+          const panelEl = document.getElementById(`panel-${sessionId}`);
+          if (panelEl) panelEl.remove();
+          tabs = tabs.filter(t => t.id !== sessionId);
+          // If this was the auto-created first tab, retry once
+          if (tabs.length === 0 && !hasRetried) {
+            hasRetried = true;
+            terminal.dispose();
+            initTower();
+          }
+        }, 1500);
+      }
     };
 
     // Forward keystrokes to WebSocket

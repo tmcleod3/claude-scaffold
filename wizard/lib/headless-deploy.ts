@@ -102,6 +102,124 @@ async function promptPassword(): Promise<string> {
   });
 }
 
+/**
+ * Env-only deploy — write vault credentials to .env without provisioning infrastructure.
+ * Reads PRD frontmatter to identify required env vars, pulls matching values from the vault,
+ * and appends them to the project's .env file.
+ * Called by: `npx voidforge deploy --env-only`
+ */
+export async function envOnlyDeploy(projectDir?: string): Promise<void> {
+  const dir = projectDir || process.cwd();
+
+  console.log('');
+  console.log('  \x1b[1mVoidForge — Env-Only Deploy (Vault → .env)\x1b[0m');
+  console.log('');
+
+  // Verify this is a VoidForge project
+  try {
+    await access(join(dir, 'CLAUDE.md'));
+  } catch {
+    log('✗', 'Not a VoidForge project — no CLAUDE.md found');
+    process.exit(1);
+  }
+
+  // Read PRD frontmatter to identify required env vars
+  let prdContent = '';
+  try {
+    prdContent = await readFile(join(dir, 'docs', 'PRD.md'), 'utf-8');
+  } catch {
+    log('✗', 'No PRD found at docs/PRD.md — cannot identify required env vars');
+    process.exit(1);
+  }
+
+  // Unlock vault
+  const password = process.env['VOIDFORGE_VAULT_PASSWORD'] || await promptPassword();
+  const valid = await vaultUnlock(password);
+  if (!valid) {
+    log('✗', 'Wrong vault password');
+    process.exit(1);
+  }
+  log('🔓', 'Vault unlocked');
+
+  // Load all vault keys
+  const keys = await vaultKeys(password);
+  const envKeys = keys.filter(k => k.startsWith('env:'));
+  const infraKeys = keys.filter(k => !k.startsWith('env:'));
+
+  if (envKeys.length === 0 && infraKeys.length === 0) {
+    log('→', 'Vault is empty — nothing to write');
+    return;
+  }
+
+  // Read existing .env to avoid duplicates
+  const envPath = join(dir, '.env');
+  let existingEnv = '';
+  try {
+    existingEnv = await readFile(envPath, 'utf-8');
+  } catch { /* no .env yet */ }
+
+  // Build env entries from vault
+  const lines: string[] = [];
+  let written = 0;
+  let skipped = 0;
+
+  // env:-prefixed keys → strip prefix, use as env var name directly
+  for (const key of envKeys) {
+    const envName = key.slice(4); // strip "env:"
+    if (existingEnv.includes(`${envName}=`)) {
+      skipped++;
+      continue;
+    }
+    const val = await vaultGet(password, key);
+    if (val) {
+      lines.push(`${envName}=${val}`);
+      written++;
+    }
+  }
+
+  // Hyphenated infra keys → map to env var equivalents
+  const infraMap: Record<string, string> = {
+    'anthropic-api-key': 'ANTHROPIC_API_KEY',
+    'aws-access-key-id': 'AWS_ACCESS_KEY_ID',
+    'aws-secret-access-key': 'AWS_SECRET_ACCESS_KEY',
+    'aws-region': 'AWS_REGION',
+    'vercel-token': 'VERCEL_TOKEN',
+    'railway-token': 'RAILWAY_TOKEN',
+    'cloudflare-api-token': 'CLOUDFLARE_API_TOKEN',
+    'cloudflare-account-id': 'CLOUDFLARE_ACCOUNT_ID',
+    'cloudflare-zone-id': 'CLOUDFLARE_ZONE_ID',
+    'github-token': 'GITHUB_TOKEN',
+    'sentry-dsn': 'SENTRY_DSN',
+  };
+
+  for (const key of infraKeys) {
+    const envName = infraMap[key];
+    if (!envName) continue; // unknown infra key, skip
+    if (existingEnv.includes(`${envName}=`)) {
+      skipped++;
+      continue;
+    }
+    const val = await vaultGet(password, key);
+    if (val) {
+      lines.push(`${envName}=${val}`);
+      written++;
+    }
+  }
+
+  if (lines.length === 0) {
+    log('→', `All ${skipped} vault keys already in .env — nothing to write`);
+    return;
+  }
+
+  // Append to .env
+  const section = `\n# --- VoidForge vault (${new Date().toISOString().slice(0, 10)}) ---\n${lines.join('\n')}\n`;
+  const { writeFile: writeFileAsync } = await import('node:fs/promises');
+  await writeFileAsync(envPath, existingEnv + section, 'utf-8');
+
+  log('✓', `Wrote ${written} env vars to .env (${skipped} already present)`);
+  console.log('');
+}
+
 export async function headlessDeploy(projectDir?: string): Promise<void> {
   const dir = projectDir || process.cwd();
 

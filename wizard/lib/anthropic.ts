@@ -100,11 +100,11 @@ export async function resolveBestModel(apiKey: string): Promise<string> {
   } catch {
     // If we can't reach the models endpoint, fall back to a known-good model.
     // This is the one hardcoded fallback — everything else is dynamic.
-    return 'claude-sonnet-4-5-20241022';
+    return 'claude-sonnet-4-6';
   }
 
   if (models.length === 0) {
-    return 'claude-sonnet-4-5-20241022';
+    return 'claude-sonnet-4-6';
   }
 
   // Sort each model into preference buckets, newest first within each bucket

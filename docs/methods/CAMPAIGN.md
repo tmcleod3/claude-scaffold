@@ -114,6 +114,14 @@ At the start of every campaign session, cross-reference `git log` against `campa
 - **VAULT AVAILABLE** — vault exists but `.env` is sparse → offer: "The vault has credentials but infrastructure isn't provisioned. Run `voidforge deploy` now? [Y/n]" In `--blitz` mode: auto-run provisioner. In normal mode: ask user.
 - **CLEAR** — no in-progress work → proceed to Step 1
 
+### Step 0.5 — Vault Auto-Inject
+
+If Dax's classification (Step 1, run ahead as a pre-check) finds env vars that are "vault-available but not in .env," auto-run `voidforge deploy --env-only` before the first mission. This writes vault credentials to `.env` without provisioning infrastructure. No manual step needed.
+
+In `--blitz` mode: auto-run without confirmation. In normal mode: present the list of env vars that will be written and ask for confirmation.
+
+This step runs AFTER Step 0 (vault status known) and BEFORE Step 1 (so Dax's full analysis sees the populated `.env`).
+
 ### Step 1 — Dax's Strategic Analysis
 
 Dax reads the Prophets' plan:

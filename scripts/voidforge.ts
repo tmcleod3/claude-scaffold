@@ -6,6 +6,7 @@
  *        npx voidforge init --remote           — Launch in remote mode (0.0.0.0 + auth)
  *        npx voidforge deploy                  — Launch Haku (deploy wizard)
  *        npx voidforge deploy --headless       — Deploy from CLI (no browser)
+ *        npx voidforge deploy --env-only       — Write vault credentials to .env (no provisioning)
  *        npx voidforge deploy --self           — Deploy VoidForge itself to a VPS
  *        npx voidforge templates               — List available project templates
  */
@@ -29,6 +30,7 @@ if (command === 'templates') {
   console.log('  npx voidforge init --template saas    Start from a project template');
   console.log('  npx voidforge deploy              Launch Haku — the deploy wizard');
   console.log('  npx voidforge deploy --headless   Deploy from CLI without a browser');
+  console.log('  npx voidforge deploy --env-only   Write vault credentials to .env (no provisioning)');
   console.log('');
   process.exit(command === '--help' || command === '-h' ? 0 : 1);
 }
@@ -36,10 +38,19 @@ if (command === 'templates') {
 const isHeadless = args.includes('--headless');
 const isRemote = args.includes('--remote');
 const isSelfDeploy = args.includes('--self');
+const isEnvOnly = args.includes('--env-only');
 const projectDirFlag = args.find((a, i) => args[i - 1] === '--dir');
 const hostFlag = args.find((a, i) => args[i - 1] === '--host');
 
-if (command === 'deploy' && isSelfDeploy) {
+if (command === 'deploy' && isEnvOnly) {
+  // Env-only deploy — write vault credentials to .env without provisioning
+  import('../wizard/lib/headless-deploy.js')
+    .then(({ envOnlyDeploy }) => envOnlyDeploy(projectDirFlag))
+    .catch((err: unknown) => {
+      console.error('Env deploy failed:', (err as Error).message);
+      process.exit(1);
+    });
+} else if (command === 'deploy' && isSelfDeploy) {
   // Self-deploy — deploy VoidForge itself to a remote VPS
   import('../wizard/lib/provisioners/self-deploy.js')
     .then(({ generateCaddyTemplate }) => {
