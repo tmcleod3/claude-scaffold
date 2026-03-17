@@ -873,26 +873,30 @@ Sisko executes missions without waiting for confirmation at every brief. Guardra
 
 *Codify everything we learned into hardened methodology.*
 
-Four campaigns (v3.1 → v8.3) produced 60+ field reports, 20+ methodology fixes, and multiple lessons. This release consolidates field-tested knowledge into the methodology itself — not new features, but battle-hardened existing ones.
+### Campaign Missions
 
-### Meta-Workflow Documentation
+**Mission 1 — Meta-Workflow Documentation**
 
-Document how to use VoidForge to develop VoidForge. The "Forge Builds the Forge" exercise is complete (Campaigns 2-4). Write up:
-- How campaign-on-self works (methodology changes as missions, Gauntlet on methodology)
-- Anti-patterns discovered (context pressure false alarms, reduced pipeline skipping review)
-- The feedback loop: field reports → `/debrief --inbox` → methodology fixes → better field reports
-- When to blitz vs autonomous vs manual
+Document how to use VoidForge to develop VoidForge. Deliverables:
+- New `docs/META_WORKFLOW.md` (~200 lines):
+  - How campaign-on-self works (methodology changes as missions)
+  - Anti-patterns discovered: context pressure false alarms, reduced pipeline skipping review, `const` reassignment in strict mode, `globSync` API availability
+  - The feedback loop: field reports → `/debrief --inbox` → methodology fixes → better field reports
+  - When to blitz vs autonomous vs manual
+  - Version table: which campaigns shipped which versions
+- Update `HOLOCRON.md`: add META_WORKFLOW.md reference
+- Update `CLAUDE.md` Docs Reference table: add META_WORKFLOW.md row
 
-**What changes:** New doc `docs/META_WORKFLOW.md`. Reference from HOLOCRON.md.
+**Mission 2 — Pattern Evolution Data Collection**
 
-### Pattern Evolution
-
-Wong now has the promotion analysis (v8.2). This release adds the data collection side: after each `/build`, log which patterns were used, which framework adaptations were applied, and which custom modifications were made. Stored in `~/.voidforge/pattern-usage.json`. When 10+ projects use the same variation, Wong surfaces it during `/debrief`.
-
-**What changes:** BUILD_PROTOCOL.md Phase 12 gains a pattern-usage logging step. FIELD_MEDIC.md gains a pattern-evolution check.
+Add the data collection side for Wong's promotion analysis. Deliverables:
+- Update `docs/methods/BUILD_PROTOCOL.md` Phase 12: add pattern-usage logging step — after build completes, log which patterns were used, which framework adaptations applied, which custom mods made
+- Update `docs/methods/FIELD_MEDIC.md`: add pattern-evolution check in promotion analysis — when pattern-usage data exists, check for recurring variations
+- Update `.claude/commands/build.md`: add Phase 12 pattern logging instruction
+- Update `.claude/commands/debrief.md`: add pattern-evolution check instruction
 
 ### Estimated effort
-1-2 sessions.
+1-2 sessions. 2 missions.
 
 ---
 
@@ -900,26 +904,33 @@ Wong now has the promotion analysis (v8.2). This release adds the data collectio
 
 *"From nothing, everything" — in any language.*
 
-Expand each of the 8 pattern files from placeholder "Django/Rails adaptation notes" to full deep-dive sections. Start with Python (Django + FastAPI) because it's the most-requested non-JS stack.
+### Campaign Missions
 
-### Per-Pattern Django/FastAPI Sections
+**Mission 1 — Core Pattern Adaptations (4 patterns)**
 
-| Pattern | Django Adaptation | FastAPI Adaptation |
-|---------|------------------|-------------------|
-| `api-route.ts` | Django REST Framework ViewSets, serializers, permissions | FastAPI path operations, Pydantic models, Depends() |
-| `service.ts` | Django services layer (not in views), QuerySet patterns | Service classes, repository pattern |
-| `component.tsx` | Django templates + HTMX for interactivity | Jinja2 + HTMX, or React SPA frontend |
-| `middleware.ts` | Django middleware classes, `process_request`/`process_response` | FastAPI middleware, dependency injection |
-| `error-handling.ts` | Django exception handler, DRF exception classes | FastAPI exception handlers, HTTPException |
-| `job-queue.ts` | Celery tasks, Django-Q, beat scheduler | Celery or ARQ with FastAPI |
-| `multi-tenant.ts` | Django-tenants, schema-per-tenant | Manual tenant scoping via Depends() |
+Add full Django + FastAPI deep-dive sections to the 4 most critical patterns:
+- `docs/patterns/api-route.ts` → Django REST Framework ViewSets + FastAPI path operations (~80 lines each)
+- `docs/patterns/service.ts` → Django services layer + FastAPI repository pattern (~60 lines each)
+- `docs/patterns/middleware.ts` → Django middleware + FastAPI dependency injection (~60 lines each)
+- `docs/patterns/error-handling.ts` → Django exception handler + FastAPI HTTPException (~50 lines each)
 
-### Build Protocol Adaptations
+**Mission 2 — Supporting Pattern Adaptations (4 patterns)**
 
-Phase 0 detects `framework: django` or `framework: fastapi` from PRD frontmatter and loads the Python-specific sections. Phase 1 scaffolds with `django-admin startproject` or `poetry init`. Phase 9-11 reviews use `pytest` instead of `jest`.
+- `docs/patterns/component.tsx` → Django templates + HTMX / Jinja2 + HTMX (~60 lines each)
+- `docs/patterns/job-queue.ts` → Celery tasks + Django-Q / ARQ with FastAPI (~60 lines each)
+- `docs/patterns/multi-tenant.ts` → Django-tenants + FastAPI Depends() scoping (~50 lines each)
+- `docs/patterns/third-party-script.ts` → Python equivalent (script loading, initialization) (~40 lines)
+
+**Mission 3 — Build Protocol Python Path**
+
+- Update `docs/methods/BUILD_PROTOCOL.md`: Phase 0 detects `framework: django|fastapi`, Phase 1 scaffolds with `django-admin startproject` / `poetry init`, Phase 9-11 use `pytest`
+- Update `.claude/commands/build.md`: Python-specific phase instructions
+- Update `docs/methods/TESTING.md`: pytest setup, Django test client, FastAPI TestClient
+- Update `docs/methods/QA_ENGINEER.md`: Python-specific attack vectors (Django ORM injection, Pydantic validation bypass)
+- Update `docs/methods/SECURITY_AUDITOR.md`: Python-specific checks (Django settings, SECRET_KEY, DEBUG=True, ALLOWED_HOSTS)
 
 ### Estimated effort
-2-3 sessions. Pattern file updates + BUILD_PROTOCOL Python path.
+2-3 sessions. 3 missions.
 
 ---
 
@@ -966,8 +977,30 @@ bundle_id: ""           # com.yourcompany.appname
 - **Samwise-Mobile** (Tolkien) → Reports to Galadriel. Mobile a11y: VoiceOver, TalkBack, Dynamic Type, reduced motion, touch targets (44pt minimum).
 - **Rex-Mobile** (Star Wars) → Reports to Kenobi. Mobile security: certificate pinning, Keychain/Keystore, jailbreak detection, transport security.
 
+### Campaign Missions
+
+**Mission 1 — Mobile Methodology (methodology-only, no wizard code)**
+- Update `docs/methods/BUILD_PROTOCOL.md`: mobile-specific phase adaptations (Phases 1, 5, 9, 11, 12)
+- Update `.claude/commands/build.md`: mobile detection from `deploy: ios|android|cross-platform`
+- Update `docs/methods/QA_ENGINEER.md`: mobile QA additions (orientation, deep links, push, offline, battery)
+- Update `docs/methods/SECURITY_AUDITOR.md`: mobile security additions (cert pinning, secure storage, jailbreak)
+- Update `docs/methods/PRODUCT_DESIGN_FRONTEND.md`: mobile UX additions (safe area, gestures, haptics)
+- Add 3 custom agents to `docs/CUSTOM_AGENTS.md`: Uhura-Mobile, Samwise-Mobile, Rex-Mobile
+- Update `docs/PRD.md` template: add mobile frontmatter fields
+
+**Mission 2 — Mobile Patterns (new pattern files)**
+- Create `docs/patterns/mobile-screen.tsx` (~150 lines): React Native screen with navigation, safe area, platform branching, loading/error/empty states, keyboard avoidance
+- Create `docs/patterns/mobile-service.ts` (~150 lines): offline-first data pattern with local SQLite, sync queue, conflict resolution, optimistic UI
+- Update `docs/patterns/README.md`: add mobile pattern descriptions
+
+**Mission 3 — Mobile Provisioner (wizard code — main branch only)**
+- Create `wizard/lib/provisioners/mobile.ts` (~200 lines): code signing config, build invocation, TestFlight/Play Console upload
+- Update `scripts/voidforge.ts`: add `deploy: ios|android|cross-platform` to headless deploy
+- Update `wizard/lib/headless-deploy.ts`: mobile provisioner registration
+- Update `docs/ARCHITECTURE.md`: add mobile provisioner to system diagram
+
 ### Estimated effort
-3-4 sessions. New provisioner + pattern files + build protocol mobile path + mobile agents.
+3-4 sessions. 3 missions.
 
 ---
 
@@ -1011,8 +1044,34 @@ deploy: "web"           # web (WebGL/HTML5) | steam | itch | mobile
 - **Deathstroke-Exploit** (DC) → Reports to Batman. Game QA: speedrun exploits, out-of-bounds, sequence breaks, economy exploits, save corruption.
 - **L-Profiler** (Anime) → Reports to Kusanagi. Performance profiling: frame time analysis, draw call optimization, garbage collection pressure, loading time budgets.
 
+### Campaign Missions
+
+**Mission 1 — Game Build Protocol (methodology adaptation)**
+- Update `docs/methods/BUILD_PROTOCOL.md`: add `type: game` conditional path with all 12 phase adaptations (game core, gameplay, game UI, polish, content, game marketing)
+- Update `.claude/commands/build.md`: game detection from `type: game`, engine-specific scaffolding instructions
+- Update `docs/PRD.md` template: add game frontmatter fields (game_engine, game_genre)
+- Update `docs/methods/SYSTEMS_ARCHITECT.md`: add game architecture section (ECS, scene graph, game loop patterns, asset pipeline architecture)
+
+**Mission 2 — Game Patterns (new pattern files)**
+- Create `docs/patterns/game-loop.ts` (~120 lines): fixed timestep with interpolation, pause/resume, frame budget tracking
+- Create `docs/patterns/game-state.ts` (~120 lines): hierarchical state machine (menu → playing → paused → game-over) with transition hooks and history
+- Create `docs/patterns/game-entity.ts` (~120 lines): ECS pattern (entities, components, systems) with pooling and lifecycle
+- Update `docs/patterns/README.md`: add game pattern descriptions
+
+**Mission 3 — Game Review Methodology**
+- Update `docs/methods/QA_ENGINEER.md`: game QA additions (frame rate profiling, input latency, memory leaks, speedrun exploits, out-of-bounds, save corruption)
+- Update `docs/methods/SECURITY_AUDITOR.md`: game security (anti-cheat, save file tampering, network protocol validation for multiplayer)
+- Update `docs/methods/PRODUCT_DESIGN_FRONTEND.md`: game UX (game feel, juice, screen shake, controller support, accessibility options menu)
+- Update `docs/methods/DEVOPS_ENGINEER.md`: game DevOps (build pipelines for WebGL/Steam/itch.io, asset optimization, platform-specific builds)
+- Add 4 custom agents to `docs/CUSTOM_AGENTS.md`: Spike-GameDev, Éowyn-GameFeel, Deathstroke-Exploit, L-Profiler
+
+**Mission 4 — Game Distribution (wizard code — main branch only)**
+- Engine-specific scaffolding scripts (Godot, Phaser/webpack, Three.js)
+- Build + export automation for WebGL, desktop, mobile targets
+- Steam/itch.io distribution support in headless deploy
+
 ### Estimated effort
-4-5 sessions. New build protocol path + pattern files + engine-specific scaffolding + game agents.
+4-5 sessions. 4 missions.
 
 ---
 
@@ -1096,6 +1155,79 @@ Render the campaign's Prophecy Board as a visual dependency graph in the browser
 ### 10. The Living PRD
 
 The PRD is currently static — read at Phase 0, checked at the end by Troi. Make it a living document that evolves with the build. Phase 4 reveals the schema needs a field the PRD didn't mention? The PRD's data model section updates. Feature gets BLOCKED? PRD marks it inline. Gauntlet finds the implementation deviates from the PRD? The user chooses: fix the code OR update the PRD. Troi's compliance check becomes a two-way sync, not a one-way audit. The PRD stays true because it evolves with reality instead of fossilizing at Phase 0.
+
+### Campaign Missions
+
+**Mission 1 — War Room Foundation (wizard code + methodology)**
+- Create `wizard/ui/war-room.html` + `wizard/ui/war-room.js` + `wizard/ui/war-room.css`
+- Core layout: responsive grid, main area + sidebar + bottom ticker
+- 5 panels from existing data: Campaign Timeline, Phase Pipeline, Finding Scoreboard, Context Gauge, Version & Branch
+- WebSocket integration for real-time updates (reuse Tower ws infrastructure)
+- REST endpoints for reading campaign-state.md, assemble-state.md, phase logs
+- Add War Room tab to Lobby navigation
+- Update `docs/ARCHITECTURE.md`: add War Room to system diagram
+
+**Mission 2 — War Room Extended Panels**
+- 5 more panels: Active Agents (universe-colored avatars), PRD Coverage, Test Suite status, Deploy Status, Cost Tracker
+- Agent activity ticker (bottom bar): parse agent tool invocations into "Maul probing /api/auth..." feed
+- Hill + Jarvis data feed: phase completion timestamps, status summaries piped to War Room
+
+**Mission 3 — Agent Confidence Scoring (#1)**
+- Update all agent protocol sections: add confidence score (0-100) to finding format
+- Update `docs/methods/GAUNTLET.md`: low-confidence findings (<60) escalated to second agent
+- Create Confidence Heat Map panel for War Room
+- Update finding log format across all method docs
+
+**Mission 4 — Agent Debates (#2)**
+- Update `docs/methods/SUB_AGENTS.md`: add Debate Protocol (Agent A states → Agent B responds → Agent A rebuts → Arbiter decides, 3 exchanges max)
+- Update `docs/methods/ASSEMBLER.md`: when review agents disagree, trigger debate instead of listing both
+- Create Debate Arena panel for War Room (live transcripts, verdict badges)
+- Log debates as ADRs
+
+**Mission 5 — Adversarial PRD Review (#3)**
+- Create `.claude/commands/prd-challenge.md` or add `--challenge` flag to `/prd` command
+- Update `docs/methods/CAMPAIGN.md`: optional PRD challenge before first mission
+- Create PRD Challenge Log panel for War Room
+- Define the adversarial agent (Boromir-PRD? "One does not simply ship this feature")
+
+**Mission 6 — Natural Language Deploy (#4)**
+- Update `/prd` command Act 5: deploy section accepts prose description
+- Create infra-resolver logic: prose → frontmatter mapping (instance type, DNS, backup schedule)
+- Create Infra Config panel for War Room (generated config, cost estimate, approve button)
+- Update `docs/methods/DEVOPS_ENGINEER.md`: natural language deploy section
+
+**Mission 7 — Build Archaeology (#6)**
+- Create `/archaeology` command or `--trace` flag on `/debrief`
+- Data model: link production bugs → git commits → build phases → agent findings
+- Create Bug Trace Timeline panel for War Room (animated path through pipeline)
+- Update `docs/methods/FIELD_MEDIC.md`: archaeology mode in debrief
+
+**Mission 8 — Cross-Project Memory (#7)**
+- Create `~/.voidforge/lessons-global.json` schema
+- Update Wong's promotion analysis: after each debrief, write lesson summary to global store
+- Update Phase 0 Orient: Wong loads global lessons matching current framework/domain
+- Create Global Lessons panel for War Room (frequency badges, cross-project patterns)
+
+**Mission 9 — Methodology A/B Testing (#8)**
+- Create experiment framework: define experiment (agent count, protocol variant), run both, compare
+- Track true-positive rates per agent per project type
+- Create Experiment Dashboard panel for War Room (side-by-side accuracy charts)
+- Update `docs/methods/FIELD_MEDIC.md`: experiment analysis in debrief
+
+**Mission 10 — Prophecy Visualizer (#9)**
+- Create interactive dependency graph renderer (vanilla JS + canvas or SVG)
+- Parse campaign-state.md into node/edge graph
+- Create Prophecy Graph panel for War Room (clickable nodes, color-coded status)
+- Drill-down: click node → show missions, findings, agent reviews
+
+**Mission 11 — The Living PRD (#10)**
+- Update BUILD_PROTOCOL.md: Phase 4/6/8 gates include PRD update step when implementation deviates
+- Update Troi's compliance check: two-way sync (fix code OR update PRD)
+- Create PRD Drift View panel for War Room (side-by-side diff, drift score)
+- Store Phase 0 PRD snapshot for diff comparison
+
+### Estimated effort
+8-12 sessions. 11 missions. The War Room foundation (Missions 1-2) ships first; frontier features (Missions 3-11) add panels incrementally.
 
 ---
 
