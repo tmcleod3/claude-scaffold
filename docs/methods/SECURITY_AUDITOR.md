@@ -117,6 +117,16 @@ API responses must never include server filesystem paths (`/home/`, `/opt/`, `/U
 
 CORS security checks typically verify restrictions — that endpoints don't have overly permissive `Access-Control-Allow-Origin`. But also check the inverse: **do endpoints that NEED cross-origin access actually have CORS headers?** If the application uses subdomains, embedded content, or published sites that call back to the main API, verify those endpoints return the required CORS headers for legitimate origins. Missing CORS headers cause silent failures — the browser blocks the request but the user sees no error. (Field report #46: cross-origin tracking endpoint had no CORS headers; sendBeacon masked the problem but fetch-based tracking silently failed.)
 
+### Vault Password Delivery
+
+When a project uses the VoidForge vault (or any encrypted credential store) with non-interactive access:
+- **Never accept passwords via command-line arguments** — visible in `ps`, shell history, and process listings
+- **Prefer `VAULT_PASSWORD_FILE`** over `VAULT_PASSWORD` env var — file can have `0o600` permissions and doesn't persist in process environment
+- **If env var is the only option**, document the risk: env vars are visible to same-UID processes (`/proc/<pid>/environ`), child processes, crash reporters, and APM agents
+- **Never log or echo the vault password** — even in debug mode
+
+(Field report #54: vault password accepted via `VOIDFORGE_VAULT_PASSWORD` env var with no file-based alternative and no documentation of the exposure surface.)
+
 ### Outbound URL Safety
 
 For any system that sends URLs to users (transactional emails, SMS, push notifications, webhook callbacks):
@@ -126,6 +136,10 @@ For any system that sends URLs to users (transactional emails, SMS, push notific
 - Test: send a transactional email in dev mode, inspect the link — does it point to localhost? If yes, the guard is missing
 
 This is the outbound mirror of SSRF prevention: SSRF stops external URLs from reaching internal services, outbound URL safety stops internal URLs from reaching external users. (Field report #44: verification email sent with `localhost:5005` URL — worked on same machine, broke from any other device.)
+
+### Response Header Injection
+
+Verify that user-controlled data is never injected into HTTP response headers without sanitization. Check: `Content-Disposition` (filename from user input), `Location` (redirect URL from user input), `Set-Cookie` (values from user input). A newline in a header value (`\r\n`) can inject arbitrary headers or split the response. Sanitize by stripping `\r` and `\n` from any user data placed in headers, or use framework-provided header-setting functions that handle escaping. (Field report #57)
 
 **Ahsoka — Access:** Every endpoint verifies ownership (no IDOR). UUIDs not sequential IDs. Admin verified server-side. Tier features verified server-side. User A can't access User B's anything. Rate limiting per-user and per-IP. **Auth framework rate limiting:** Auth frameworks (NextAuth, Passport, Auth.js, Supabase Auth, etc.) may handle login routing internally. Verify that rate limiting is applied inside the framework's `authorize`/`verify` callback, not just at the API route level. The framework's handler may bypass route-level middleware entirely. (Field report #38: NextAuth's `authorize()` callback ran inside its own handler — route-level rate limiting never saw login attempts.)
 

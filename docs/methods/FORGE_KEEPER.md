@@ -59,9 +59,16 @@ docs/methods/*                     ← All agent protocols
 docs/patterns/*                    ← All reference implementations
 docs/NAMING_REGISTRY.md            ← Character registry
 scripts/thumper/*                  ← Shared VoidForge runtime for /thumper command
-VERSION.md                         ← Current version + history
 CHANGELOG.md                       ← Release changelog
 ```
+
+**Conditional sync (check before overwriting):**
+```
+VERSION.md                         ← Only sync the "Current:" line. If the project has its own version
+                                     history rows, preserve them. Never overwrite project-specific entries.
+```
+
+**CLAUDE.md path detection:** Some projects use `.claude/CLAUDE.md` instead of root `CLAUDE.md`. Before syncing, check both locations. If `.claude/CLAUDE.md` exists and root `CLAUDE.md` does not, sync to `.claude/CLAUDE.md`. If both exist, warn the user — do not create a duplicate. (Field report #58)
 
 **Never touched by Bombadil:**
 ```

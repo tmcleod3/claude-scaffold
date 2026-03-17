@@ -84,6 +84,10 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Green Lantern (Scenario Construction):** Generates the test matrix before testing begins — what inputs × what states × what conditions should be tested? Called during Step 1 to produce the attack surface map.
 **Martian Manhunter (Cross-Environment):** Tests across environments — different Node versions, with and without optional dependencies, different OS behaviors. Called when the project targets multiple platforms.
 
+### Delegation Pattern Trace
+
+When a function delegates to another function (e.g., `handleRequest` calls `processItem` which calls `applyTransform`), trace the full chain. Verify that configuration set at the top of the chain actually reaches the bottom. Common failure: `json.dumps(default=str)` computed but a framework's `JSONResponse` used instead, silently dropping the custom serializer. For every sweep/batch operation, verify the per-item function receives the same configuration as the orchestrating function. (Field report #57)
+
 **Client-Side Reliability:** When a client flow sends multiple network requests (beacon pairs, multi-step forms, chained API calls), test: "What happens when request 1 of N succeeds but request 2 fails?" Verify the system doesn't reach an inconsistent state (e.g., record created but counter not incremented, payment charged but order not confirmed). Test with network throttling and selective request blocking. (Field report #46: dual-beacon tracking — sendBeacon succeeded but fetch failed due to CORS, creating records without incrementing view counts.)
 
 **Copy Accuracy Pass:** Grep for numeric claims in rendered content (e.g., "10 lead agents", "12 commands", "53 pages"). Cross-reference against actual data counts. Any mismatch is a bug — inaccurate numbers undermine credibility. This is automatable and should run on every QA pass.

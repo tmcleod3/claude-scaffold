@@ -35,6 +35,16 @@
 **Calcifer (Daemon Management):** The fire that powers everything — process supervision, graceful restart, health checks, watchdog timers. Keeps the server alive.
 **Duo (Teardown):** The God of Death — decommissions old infrastructure, deletes orphaned resources, handles clean shutdown of deprecated services.
 
+### Child Process Sandboxing
+
+When the application spawns child processes (workers, background jobs, PTY sessions, build scripts), verify they inherit appropriate restrictions:
+- Environment variables: filter sensitive vars before passing to child (e.g., don't pass `ANTHROPIC_API_KEY` to user-spawned PTY sessions)
+- Filesystem access: use systemd `ReadWritePaths`/`ProtectSystem` or equivalent to restrict write access
+- Network access: child processes should not have broader network access than the parent
+- Resource limits: set memory/CPU limits on spawned processes to prevent resource exhaustion
+
+(Field report #57: shell profiles re-injected environment variables that were explicitly filtered from the PTY environment.)
+
 See NAMING_REGISTRY.md for 70+ additional characters.
 
 ## Goal

@@ -9,11 +9,13 @@ Orient to the current state:
 1. Read `VERSION.md` — identify the current VoidForge version
 2. Run `git status` — note any uncommitted changes (warn if shared files are dirty)
 3. Check which shared files exist locally:
-   - `CLAUDE.md`, `HOLOCRON.md`
+   - `CLAUDE.md` (check both root and `.claude/CLAUDE.md` — if `.claude/CLAUDE.md` exists and root does not, use that path. If both exist, warn and don't create a duplicate.)
+   - `HOLOCRON.md`
    - `.claude/commands/*`
    - `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
    - `scripts/thumper/*`
-   - `VERSION.md`, `CHANGELOG.md`
+   - `VERSION.md` (conditional — only sync the "Current:" line, preserve project-specific version history rows)
+   - `CHANGELOG.md`
 4. Announce the current version and that you're checking for updates
 
 ## Step 1 — Listen to the River (Goldberry)
