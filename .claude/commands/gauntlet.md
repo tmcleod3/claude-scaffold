@@ -119,6 +119,7 @@ Present them with severity and recommendation. The user decides whether to ship 
 - `--qa-only` → 4 rounds of QA only (Batman marathon)
 - `--resume` → resume from last completed round (reads gauntlet state from logs)
 - `--ux-extra` → Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y.
+- `--infinity` → **The Infinity Gauntlet.** 10 rounds (2x full pass). Every active agent deployed as its own dedicated sub-process — not combined, not summarized. ~60-80 agent launches across all 7 universes. The full ~110 active roster called off the bench. See GAUNTLET.md "The Infinity Gauntlet" section for the complete wave structure. Use after completing a major version or before first production ship.
 
 ## Operating Rules
 - Update `/logs/gauntlet-state.md` after EVERY round
