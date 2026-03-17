@@ -178,8 +178,13 @@ export async function envOnlyDeploy(projectDir?: string): Promise<void> {
   }
 
   // env:-prefixed keys → strip prefix, use as env var name directly
+  const envNamePattern = /^[A-Z_][A-Z0-9_]*$/;
   for (const key of envKeys) {
     const envName = key.slice(4); // strip "env:"
+    if (!envNamePattern.test(envName)) {
+      log('→', `Skipping malformed vault key: ${key} (name must match [A-Z_][A-Z0-9_]*)`);
+      continue;
+    }
     if (envExists(envName) || writtenNames.has(envName)) {
       skipped++;
       continue;
