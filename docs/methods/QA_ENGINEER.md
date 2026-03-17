@@ -66,7 +66,7 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Red Hood (Dynamic):** Empty/huge/unicode inputs, network failures, malformed JSON, partial data, concurrent requests, rapid clicking, double submissions.
 **Alfred (Dependencies):** Outdated libs, known vulns, deprecated APIs, version conflicts.
 **Lucius (Config):** .env completeness, secrets not hardcoded, no secrets in git history, prod vs dev mismatches.
-**Deathstroke (Adversarial):** Penetration-style probing — exploit business logic, bypass validations, chain unexpected interactions, test authorization boundaries.
+**Deathstroke (Adversarial):** Penetration-style probing — exploit business logic, bypass validations, chain unexpected interactions, test authorization boundaries. **Query-param state trust:** For every URL query parameter that changes client-side state (`?verified=true`, `?role=admin`, `?step=complete`), test: can you achieve the state change by manually constructing the URL without going through the intended flow? If the UI trusts the param without server validation, it's a bypass — the component must confirm against the server before rendering the privileged state. (Field report #44: dashboard hid verification banner on `?verified=true` without checking DB — any user could dismiss security prompts via URL.)
 **Constantine (Cursed Code):** Unreachable branches, dead state, impossible conditions, logic that only works by accident, tautological checks, shadowed variables.
 **Nightwing (Regression):** Smoke validation, high-value manual flows, "break it on purpose" probes, exact commands.
 

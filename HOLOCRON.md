@@ -121,6 +121,8 @@ Your project directory now contains the full VoidForge build system plus your PR
 
 **Credentials flow:** Gandalf stores all credentials (API keys, cloud tokens, project-specific env vars) in the encrypted vault at `~/.voidforge/vault.enc`. These are available to the deploy wizard (Haku) and provisioners. During `/build`, Claude Code reads project-specific env vars from `docs/PRD.md` frontmatter and the `.env` file. If your PRD references APIs (WhatsApp, Stripe, Resend, etc.) and you provided keys in Gandalf's Step 4b, they're in the vault — the build and deploy phases will inject them into `.env` when provisioning. For local development before deploy, add them to `.env` manually or run the deploy wizard with just the env-writing step.
 
+**Vault key naming:** The vault uses two key formats. **Hyphenated keys** are for global/infrastructure credentials stored by the wizard: `anthropic-api-key`, `aws-access-key-id`, `aws-secret-access-key`, `vercel-token`, `railway-token`, `cloudflare-api-token`, `cloudflare-zone-id`. **`env:`-prefixed keys** are for project-specific environment variables: `env:WHATSAPP_ACCESS_TOKEN`, `env:STRIPE_SECRET_KEY`, `env:DATABASE_URL`. When resolving a vault key, check the `env:` prefix first (exact match), then fall back to the hyphenated format. The provisioners map hyphenated keys to their `.env` equivalents during deployment (e.g., `anthropic-api-key` → `ANTHROPIC_API_KEY`).
+
 #### Step 2: Build
 
 ```bash
