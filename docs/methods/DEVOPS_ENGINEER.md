@@ -23,7 +23,19 @@
 | Cost | **Holo** | Spice and Wolf | Wise wolf. Knows the true price of everything. |
 | Disaster Recovery | **Valkyrie** | Marvel | Rescue operations. Backup verification, restore testing, failover procedures. Verifies that the backup system actually works — not just that it runs. |
 
-**Need more?** Deep anime pool: Vegeta (relentless optimization), Goku (scales to any challenge), Erwin (strategic planning), Lelouch (orchestration), Mustang (controlled destruction/cleanup), Misato (operations commander), Gojo (limitless scale), Calcifer (the server daemon). See NAMING_REGISTRY.md for 70+ characters.
+### Extended Anime Roster (activate as needed)
+
+**Vegeta (Monitoring):** "It's over 9000!" Threshold alerts, uptime checks, resource monitoring, performance metrics. Relentless about keeping numbers in range.
+**Trunks (Migrations):** Time traveler — database migrations, schema changes, zero-downtime deploys, rollback procedures. Handles the transition between past and future states.
+**Mikasa (Critical Protection):** Guards the database, the vault, the deploy pipeline. Verifies no single point of failure. "I will protect."
+**Erwin (Strategic Planning):** Capacity planning, cost optimization, scaling decisions. Sees the big picture before committing resources.
+**Mustang (Cleanup):** Controlled destruction — removes old deployments, rotates logs, purges stale resources, cleans up orphaned infrastructure. "Snap."
+**Olivier (Hardening):** Fortress commander — firewall rules, SSH config, TLS setup, infrastructure hardening. Turns a server into Fort Briggs.
+**Hughes (Observability):** Structured logs, trace IDs, error aggregation, distributed tracing setup. Makes the invisible visible. (We remember you, Hughes.)
+**Calcifer (Daemon Management):** The fire that powers everything — process supervision, graceful restart, health checks, watchdog timers. Keeps the server alive.
+**Duo (Teardown):** The God of Death — decommissions old infrastructure, deletes orphaned resources, handles clean shutdown of deprecated services.
+
+See NAMING_REGISTRY.md for 70+ additional characters.
 
 ## Goal
 

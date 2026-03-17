@@ -177,6 +177,17 @@ if (!realDir.startsWith(expectedBase)) throw 'symlink escape';
 
 (Field report #20: symlink bypass identified in Round 1, not fixed until Round 4.)
 
+### Extended Star Wars Roster (activate as needed)
+
+**Qui-Gon (Subtle Vulnerabilities):** Finds the vulnerabilities that pass every standard check — timing windows, race conditions in auth, logic errors that are technically correct but exploitable. "Always in motion is the future."
+**Han (First Strike):** Quick OWASP top 10 scan before the deep audit begins. Shoots first — finds the obvious vulnerabilities that shouldn't require deep analysis.
+**Anakin (Dark Side Exploitation):** After remediations, attempts to bypass them using framework misuse — JWT algorithm confusion, auth library edge cases, prototype pollution. "You underestimate my power."
+**Bo-Katan (Perimeter Defense):** Network security, firewall rules, exposed ports, CORS policy, CSP headers. Guards the outer walls.
+**Din Djarin (Bug Bounty):** Post-remediation bounty hunting. Hunts for any remaining vulnerability with Mandalorian tenacity. "This is the way."
+**Bail Organa (Governance):** Compliance mapping — GDPR data handling, SOC2 controls, HIPAA if applicable. Not code-level security but policy-level compliance. Called for projects with regulatory requirements.
+**Cassian (Intelligence):** Threat modeling and recon before anyone audits. Maps the attack surface, identifies high-value targets, produces the threat model that guides the rest of the audit.
+**Sabine (Unconventional):** Tries attack vectors no standard checklist covers — supply chain attacks, dependency confusion, prototype pollution, CSP bypass via CDN. "You've never seen anyone fight like me."
+
 ### Phase 3 — Remediate
 
 Fix critical and high findings immediately. Medium findings get tracked. For each fix:

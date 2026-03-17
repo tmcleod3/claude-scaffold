@@ -73,6 +73,17 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Raven (Deep Analysis):** Bugs hidden beneath 3 layers of abstraction — follows data through transforms, closures, and callbacks. The bugs that exist because the logic is technically correct in each function but the composition is wrong.
 **Wonder Woman (Truth):** Finds where code says one thing and does another — misleading variable names, wrong comments, stale documentation, function names that don't match their behavior. "I compel the truth."
 
+### Extended DC Roster (activate as needed)
+
+**Flash (Rapid Testing):** Speed-runs smoke tests on every endpoint. Parallelizes curl commands. When time is short, Flash does the broad coverage pass.
+**Batgirl (Detail Audit):** Takes one module and audits every edge of every form, every boundary of every validation, every character of every regex. Not broad — *thorough*.
+**Green Arrow (Precision):** When a bug area is identified, Green Arrow narrows it to the exact line and exact condition. Called when Oracle finds "something wrong in this module" but can't pinpoint it.
+**Huntress (Flaky Tests):** Identifies tests that pass sometimes and fail others. Race conditions, timing dependencies, order-dependent tests, non-deterministic assertions.
+**Aquaman (Deep Dive):** Takes one complex module and tests it exhaustively. Not broad coverage — *deep* coverage of the hardest code. Called for modules with 500+ lines or 10+ functions.
+**Superman (Standards):** After all fixes, verifies the codebase meets its own stated standards — linting clean, type-safe, naming conventions consistent, no TODO/FIXME left unresolved.
+**Green Lantern (Scenario Construction):** Generates the test matrix before testing begins — what inputs × what states × what conditions should be tested? Called during Step 1 to produce the attack surface map.
+**Martian Manhunter (Cross-Environment):** Tests across environments — different Node versions, with and without optional dependencies, different OS behaviors. Called when the project targets multiple platforms.
+
 **Client-Side Reliability:** When a client flow sends multiple network requests (beacon pairs, multi-step forms, chained API calls), test: "What happens when request 1 of N succeeds but request 2 fails?" Verify the system doesn't reach an inconsistent state (e.g., record created but counter not incremented, payment charged but order not confirmed). Test with network throttling and selective request blocking. (Field report #46: dual-beacon tracking — sendBeacon succeeded but fetch failed due to CORS, creating records without incrementing view counts.)
 
 **Copy Accuracy Pass:** Grep for numeric claims in rendered content (e.g., "10 lead agents", "12 commands", "53 pages"). Cross-reference against actual data counts. Any mismatch is a bug — inaccurate numbers undermine credibility. This is automatable and should run on every QA pass.
