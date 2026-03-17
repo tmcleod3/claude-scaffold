@@ -385,6 +385,25 @@ After each mission, Sisko updates `/logs/campaign-state.md`.
 - **Skip to mission:** `/campaign --mission "Payments"` — jumps to that PRD section
 - **Fast mode:** `/campaign --fast` — passes `--fast` to every `/assemble` call (skips Crossfire + Council)
 - **Blitz mode:** `/campaign --blitz` — fully autonomous execution: skips mission confirmation, auto-debriefs after each mission, auto-continues. Does NOT imply `--fast`. Combine: `--blitz --fast`
+- **Autonomous mode:** `/campaign --autonomous` — supervised autonomy with safety rails (see below)
+
+### Autonomous Mode (`--autonomous`)
+
+Sisko executes missions without waiting for confirmation at every brief. Stronger guardrails than `--blitz`:
+
+1. **Git checkpoint before each mission:** `git tag campaign-mission-N-start` before building. If things go wrong, rollback is one `git reset --hard` away.
+2. **Critical finding gate:** If `/assemble` produces Critical findings that can't be auto-fixed → rollback to the tag, pause for human review. Do NOT continue.
+3. **5-mission human checkpoint:** Maximum 5 consecutive autonomous missions before a mandatory human checkpoint. Present progress summary, ask to continue.
+4. **Victory Gauntlet requires human confirmation** — even in autonomous mode. The final Gauntlet is too important to skip human review.
+5. **Post-mission summaries logged, not presented** — mission briefs and debrief summaries go to campaign-state.md without interactive display.
+6. **Debrief is still mandatory** — `/debrief --submit` runs after each mission (same as blitz).
+
+**`--autonomous` vs `--blitz`:**
+- `--blitz` = no human interaction, full quality, auto-continue. The user walks away.
+- `--autonomous` = same as blitz PLUS git tags, critical-finding rollback, and 5-mission human checkpoints. The user checks in periodically.
+- `--autonomous` is safer for long campaigns (10+ missions) where unattended errors can compound.
+
+**Why after v8.0-v8.2:** Autonomous campaigns are safer when Agent Memory catches known pitfalls (v8.0), the Deep Roster catches more issues per review (v8.1), the methodology self-improves from lessons (v8.2), and Conflict Prediction catches structural problems before they propagate through unattended missions.
 
 ## Deliverables
 
