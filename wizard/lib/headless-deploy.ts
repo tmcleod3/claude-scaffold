@@ -123,12 +123,11 @@ export async function envOnlyDeploy(projectDir?: string): Promise<void> {
     process.exit(1);
   }
 
-  // Read PRD frontmatter to identify required env vars
-  let prdContent = '';
+  // Verify PRD exists (env-only still requires a project with a PRD)
   try {
-    prdContent = await readFile(join(dir, 'docs', 'PRD.md'), 'utf-8');
+    await access(join(dir, 'docs', 'PRD.md'));
   } catch {
-    log('✗', 'No PRD found at docs/PRD.md — cannot identify required env vars');
+    log('✗', 'No PRD found at docs/PRD.md');
     process.exit(1);
   }
 
@@ -230,7 +229,7 @@ export async function envOnlyDeploy(projectDir?: string): Promise<void> {
 
   // Append to .env with restricted permissions (0o600 — owner only, matches vault.ts)
   const section = `\n# --- VoidForge vault (${new Date().toISOString().slice(0, 10)}) ---\n${lines.join('\n')}\n`;
-  const { writeFile: writeFileSync, open: openFile } = await import('node:fs/promises');
+  const { open: openFile } = await import('node:fs/promises');
   const content = existingEnv + section;
   const fh = await openFile(envPath, 'w', 0o600);
   try {

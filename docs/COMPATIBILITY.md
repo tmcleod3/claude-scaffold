@@ -1,7 +1,7 @@
 # VoidForge — Node.js Compatibility
 
-**Version:** 7.7.0
-**Engines:** `>=20.0.0 <25.0.0`
+**Version:** 8.0.0
+**Engines:** `>=20.11.0 <25.0.0`
 
 ## Tested Versions
 

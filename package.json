@@ -4,7 +4,7 @@
   "description": "From nothing, everything. A methodology framework for building with Claude Code.",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0 <25.0.0"
+    "node": ">=20.11.0 <25.0.0"
   },
   "bin": {
     "voidforge": "./scripts/voidforge.ts"

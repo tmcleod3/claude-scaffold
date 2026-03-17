@@ -1,6 +1,6 @@
 # VoidForge — Scaling Assessment
 
-**Version:** 7.7.0
+**Version:** 8.0.0
 **Last reviewed:** 2026-03-16
 
 ## Context
