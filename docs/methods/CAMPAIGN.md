@@ -403,14 +403,19 @@ After each mission, Sisko updates `/logs/campaign-state.md`.
 
 ### Continuous Mode (`--continuous`)
 
-After the current campaign completes (Victory Gauntlet passes, debrief filed, sign-off done), Sisko checks the ROADMAP for the next unbuilt version. If one exists, start a new campaign immediately — same session, no user prompt needed. If the roadmap is empty, stop.
+After the current campaign completes (Victory Gauntlet passes, debrief filed, sign-off done), Sisko checks the ROADMAP for the next unbuilt version. **By default, continuous mode only chains within the current major version.** At v9.2, it continues to v9.3, v9.4, etc. but STOPS before v10.0 — a major version is a natural checkpoint that deserves a deliberate decision to start.
+
+**Scope rules:**
+- `--continuous` (default) → chain through remaining minor/patch versions in the current major. v9.2 → v9.3 → v9.4 → STOP at v10.0 boundary.
+- `--continuous --major` → cross major version boundaries. v9.3 → v10.0 → v10.1 → never stops cooking until the roadmap is empty.
 
 Combinable with other flags:
-- `--blitz --continuous` — blitz through all remaining roadmap versions without stopping
-- `--autonomous --continuous` — autonomous with checkpoints, auto-chaining versions
-- `--fast --continuous` — fast reviews across all versions
+- `--blitz --continuous` — blitz through remaining dot releases, stop at next major
+- `--blitz --continuous --major` — blitz everything on the roadmap, no stops
+- `--autonomous --continuous` — autonomous with checkpoints, chaining within major
+- `--fast --continuous` — fast reviews across dot releases
 
-**The Victory Gauntlet still runs between versions.** Continuous mode does NOT skip the Gauntlet — it runs the Gauntlet, then starts the next campaign. The Gauntlet is the gate between versions.
+**The Victory Gauntlet still runs between versions.** Continuous mode does NOT skip the Gauntlet — it runs the Gauntlet, then starts the next campaign. The Gauntlet is the gate between versions, whether or not continuous mode chains them.
 
 ### Autonomous Mode (`--autonomous`)
 
