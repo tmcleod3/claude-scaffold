@@ -169,6 +169,66 @@ This rule exists because agents self-justified "efficient" Gauntlets at 28% and 
 - `--qa-only` — Run 4 rounds of QA only: discovery, full pass, re-probe, adversarial. Batman's marathon.
 - `--resume` — Resume from the last completed round (reads from gauntlet-state.md).
 - `--ux-extra` — Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y. Produced 7 shipped enchantments in the v7.1.0 Gauntlet.
+- `--infinity` — **The Infinity Gauntlet.** 10 rounds (2x full pass). Every active agent deployed as its own sub-process — not combined, not summarized. The full ~110 agent roster across 7 universes. See below.
+
+### The Infinity Gauntlet (`--infinity`)
+
+*"I used the stones to destroy the stones."*
+
+This is the ultimate test. Every active agent in VoidForge runs as its own dedicated sub-process. No combining agents into single prompts. No "Picard + Stark combined." Each agent gets its own launch, its own context, its own findings.
+
+**10 rounds (2 full passes):**
+
+**Pass 1 — Discovery + Strike + Crossfire + Council (Rounds 1-5):**
+
+Round 1 — Discovery (launch 5+ agents in parallel):
+- Agent 1: **Picard** (Architecture) — with Crusher (diagnostics) + Archer (greenfield assessment)
+- Agent 2: **Stark** (Code Review) — with Spock (pattern compliance) + Seven (integration tracing)
+- Agent 3: **Galadriel** (UX Surface Map) — with Éowyn (enchantment scan) + Celeborn (design system)
+- Agent 4: **Kenobi** (Security Inventory) — with Han (first strike) + Cassian (threat modeling)
+- Agent 5: **Kusanagi** (Infrastructure) — with Senku + Levi + Spike
+
+Round 2 — First Strike (launch full domain teams as separate agents):
+- Agent 1: **Batman** → Oracle, Red Hood, Alfred, Lucius (core QA)
+- Agent 2: **Batman** → Deathstroke, Constantine, Cyborg, Raven, Wonder Woman (adversarial QA)
+- Agent 3: **Batman** → Green Lantern (test matrix), Flash (smoke tests), Batgirl (detail), Aquaman (deep dive)
+- Agent 4: **Galadriel** → Elrond, Arwen, Samwise, Bilbo, Legolas, Gimli, Radagast, Éowyn, Celeborn
+- Agent 5: **Galadriel** → Aragorn, Faramir, Pippin, Boromir, Haldir, Frodo, Merry (extended Tolkien)
+- Agent 6: **Kenobi** → Leia, Chewie, Rex, Bo-Katan, Maul (parallel security)
+- Agent 7: **Kenobi** → Yoda, Windu, Ahsoka, Padmé, Qui-Gon, Sabine (sequential + extended)
+- Agent 8: **Stark** → Rogers, Banner, Strange, Barton, Romanoff, Thor, T'Challa, Wanda (full backend)
+- Agent 9: **Picard** → Spock, Uhura, Worf, Tuvok, Scotty, Torres, Kim, Janeway, Riker (full architecture)
+- Agent 10: **Kusanagi** → Senku, Levi, Spike, L, Bulma, Holo, Valkyrie, Vegeta, Trunks, Mikasa, Erwin, Mustang, Olivier, Hughes, Calcifer, Duo (full DevOps)
+
+Round 3 — Second Strike (re-probe all domains with fresh agents):
+- Nightwing, Red Hood, Deathstroke (QA re-probe)
+- Samwise, Radagast, Merry (UX re-verify)
+- Maul, Ahsoka, Padmé, Anakin, Din Djarin (security re-probe)
+- Kusanagi full team (DevOps re-verify)
+- Superman (standards enforcement), Huntress (flaky tests)
+
+Round 4 — Crossfire (5 adversarial agents, each as own sub-process):
+- **Maul** — attacks reviewed code
+- **Deathstroke** — bypasses security remediations
+- **Loki** — chaos-tests cleared features
+- **Constantine** — hunts cursed code in fixed areas
+- **Éowyn** — final enchantment on hardened product
+
+Round 5 — Council (6+ agents, each as own sub-process):
+- **Spock** — pattern/quality verification
+- **Ahsoka** — access control verification
+- **Nightwing** — full regression
+- **Samwise** — final a11y audit
+- **Padmé** — critical path functional verification
+- **Troi** — PRD compliance section-by-section
+
+**Pass 2 — Repeat (Rounds 6-10):** Same structure, all agents re-deployed on the fixed codebase. Pass 2 should find zero issues if Pass 1 fixes were correct.
+
+**Agent count:** ~60-80 agent sub-process launches across 10 rounds (some agents run in both passes). This is the most thorough review possible within a single session.
+
+**When to use:** After completing a major version (v8.x, v9.x). Before v1.0 of a real product. When shipping to production for the first time. When the cost of a missed bug exceeds the cost of the review.
+
+**ENFORCEMENT:** Every agent named above MUST be launched as its own Agent tool invocation. Do NOT combine agents. Do NOT shortcut to inline analysis. If context reaches 70%, checkpoint and resume in a fresh session — do NOT reduce the agent count. The Infinity Gauntlet is the one protocol where "too thorough" is impossible.
 
 ## Integration Points
 
