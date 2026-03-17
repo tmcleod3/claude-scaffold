@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [10.0.1] - 2026-03-17
+
+### Added
+- **Agent Confidence Scoring** — findings report 0-100 confidence, low-confidence escalated.
+- **Agent Debate Protocol** — structured 3-exchange debates, logged as ADRs.
+- **Adversarial PRD Review** (`/prd --challenge`) — Boromir challenges the PRD before building.
+- **The Living PRD** — PRD evolves at phase gates, Phase 0 snapshot for drift view.
+- **Cross-Project Memory** — global lessons file across all projects.
+- **Build Archaeology** — trace production bugs back through the build protocol.
+
+---
+
 ## [10.0.0] - 2026-03-17
 
 ### Added

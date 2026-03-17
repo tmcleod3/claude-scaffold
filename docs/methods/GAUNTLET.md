@@ -230,6 +230,19 @@ Round 5 — Council (6+ agents, each as own sub-process):
 
 **ENFORCEMENT:** Every agent named above MUST be launched as its own Agent tool invocation. Do NOT combine agents. Do NOT shortcut to inline analysis. If context reaches 70%, checkpoint and resume in a fresh session — do NOT reduce the agent count. The Infinity Gauntlet is the one protocol where "too thorough" is impossible.
 
+## Agent Confidence Scoring
+
+Each agent reports a confidence score (0-100) on their findings. The score reflects how certain the agent is that the finding is a real issue (not a false positive).
+
+**Score ranges:**
+- **90-100:** High confidence — agent is very sure. Skip re-verification in Pass 2.
+- **60-89:** Medium confidence — standard handling. Include in findings, verify in next round.
+- **0-59:** Low confidence — escalate to a second agent from a DIFFERENT universe before presenting. If the second agent disagrees, drop the finding. If the second agent agrees, upgrade to medium confidence.
+
+**How to report:** Every finding includes a confidence field: `[ID] [SEVERITY] [CONFIDENCE: XX] [FILE] [DESCRIPTION]`
+
+**Why this matters:** In the v8.0 Gauntlet, several "findings" were false positives that wasted fix time. Confidence scoring lets agents express uncertainty instead of presenting everything as definitive. Low-confidence findings get a second opinion before reaching the user.
+
 ## Integration Points
 
 ### With `/campaign`

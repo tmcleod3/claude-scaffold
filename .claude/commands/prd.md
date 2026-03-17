@@ -57,9 +57,19 @@ Ask:
 
 **Draft:** PRD Sections 5-8 (remaining sections). Present for confirmation.
 
+## Act 6 — Challenge (optional: `--challenge`)
+
+If `--challenge` is passed, Boromir argues AGAINST the PRD before it's finalized:
+- "This feature will be expensive to maintain because..."
+- "This integration has a high chance of API deprecation..."
+- "Your schema doesn't support the multi-tenant use case you mentioned..."
+- "The deploy target can't handle the real-time features you described..."
+
+The user defends their choices or adjusts the PRD. This is cheaper than discovering design flaws in Phase 9. Boromir's challenges are adversarial but constructive — he's testing the plan's strength, not rejecting it.
+
 ## Output
 
-After all 5 acts are confirmed:
+After all 5 (or 6) acts are confirmed:
 1. Assemble the complete PRD from all confirmed sections
 2. Write to `/docs/PRD.md`
 3. Verify YAML frontmatter is valid and complete

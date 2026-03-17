@@ -118,6 +118,21 @@ RISKS: [Side effects]
 REGRESSION: [How to verify]
 ```
 
+## Agent Debate Protocol
+
+When two agents disagree on a finding, run a structured debate instead of listing both opinions:
+
+1. **Agent A states the finding** with evidence (file, line, reasoning)
+2. **Agent B responds** with counter-evidence or alternative interpretation
+3. **Agent A rebuts** — addresses Agent B's counter-evidence
+4. **Arbiter decides** — Picard (for architecture), Batman (for QA), Kenobi (for security), or the user
+
+**3 exchanges maximum.** If not resolved after the rebuttal, the arbiter decides.
+
+**Log the debate** as an ADR in `/docs/adrs/` with both positions, evidence, and the decision. This is better than a one-line finding because future developers can understand WHY the decision was made.
+
+**When to trigger:** When `/review`, `/qa`, or `/security` produces conflicting findings on the same code — e.g., Spock says "this is correct" and Kenobi says "this is a vulnerability." Don't debate on matters of fact (a missing import is a missing import). Debate on matters of judgment (is this pattern secure enough? is this abstraction worth the complexity?).
+
 ## Custom Sub-Agents
 
 Users can create project-specific sub-agents that carry domain knowledge. Define them in `docs/CUSTOM_AGENTS.md`:

@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 10.0.0
+**Current:** 10.0.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 10.0.1 | 2026-03-17 | Frontier features: confidence scoring, agent debates, adversarial PRD, living PRD, cross-project memory, build archaeology |
 | 10.0.0 | 2026-03-17 | The War Room — mission control dashboard with 5 core panels, WebSocket real-time feed, agent activity ticker |
 | 9.3.0 | 2026-03-17 | The Game Forge — game build protocol, 3 game patterns, game QA/UX checklists, 4 game agents. Distribution BLOCKED. |
 | 9.2.0 | 2026-03-17 | The Mobile Forge — iOS/Android methodology, mobile patterns, 3 conditional agents. Provisioner BLOCKED (needs real API integration). |

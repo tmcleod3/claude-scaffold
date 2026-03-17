@@ -176,6 +176,26 @@ If `docs/pattern-usage.json` exists (logged by BUILD_PROTOCOL Phase 12.5), Wong 
 
 This is the long-game feedback loop: patterns evolve from data, not guesses.
 
+### Cross-Project Memory
+
+After each debrief, Wong writes a lesson summary to `~/.voidforge/lessons-global.json` (global, not project-specific). The summary includes: project framework, the lesson category, and a one-line takeaway. No source code — only patterns.
+
+When Phase 0 Orient runs on a NEW project, Wong queries the global lessons file for entries matching the new project's framework and domain. "You've built 3 Next.js apps with Stripe. Here's what broke every time." This gives every new project the benefit of all prior experience.
+
+**Privacy:** The global file contains lesson summaries only. No filenames, no code, no credentials. Opt-in — the user can delete `~/.voidforge/lessons-global.json` at any time.
+
+### Build Archaeology
+
+When debugging a production issue, trace it back through the build protocol:
+1. Start with the bug (file, line, symptom)
+2. `git blame` → find which commit introduced it
+3. Map the commit to a build phase (Phase 4 core? Phase 6 integration?)
+4. Check which agents reviewed that phase (did QA catch it? did security? why not?)
+5. Identify the methodology gap: "This bug escaped because Constantine's checklist doesn't cover this pattern"
+6. Propose a fix to the methodology — a new checklist item, a new agent role, or a new review step
+
+**Output:** Bug Trace Timeline — animated path from bug → commit → phase → agent → methodology gap. The War Room's Build Archaeology panel visualizes this.
+
 ## Deliverables
 
 1. Structured post-mortem document
@@ -183,6 +203,8 @@ This is the long-game feedback loop: patterns evolve from data, not guesses.
 3. Local copy saved to `/logs/debrief-YYYY-MM-DD.md`
 4. (Inbox mode) Triage comments on upstream issues, applied fixes
 5. (Promotion) Method doc updates from lesson clusters (user-approved)
+6. (Cross-Project) Global lesson summary written to `~/.voidforge/lessons-global.json`
+7. (Archaeology) Bug trace timeline when debugging production issues
 
 ## Handoffs
 

@@ -221,6 +221,17 @@ The review phases use a double-pass pattern: find → fix → re-verify. This ca
 2. Complete first-deploy pre-flight checklist (see `/devops` command)
 3. Log to `/logs/phase-12-deploy.md`
 
+### The Living PRD
+
+The PRD evolves with the build. At each phase gate (4, 6, 8), Troi checks: does the implementation match the PRD? If it deviates:
+1. **Code bug** — the code is wrong, fix it to match the PRD
+2. **PRD drift** — the PRD was wrong or incomplete. Update the PRD section to match what was actually built. Mark the change: `<!-- Updated in Phase N: [reason] -->`
+3. **Intentional deviation** — log as ADR: "PRD said X, we built Y, because Z"
+
+**Troi's compliance check is two-way:** fix the code OR update the PRD. The PRD stays true because it evolves with reality. At the end of the build, diff the final PRD against the Phase 0 snapshot — the diff is the "PRD Drift View" that shows how the plan evolved during execution.
+
+Store the Phase 0 PRD snapshot as `docs/PRD-snapshot-phase0.md` (or a git tag). The diff between snapshot and final PRD is the living document's evolution record.
+
 **Phase 12.5 — Wong's Pattern Usage Log.**
 After build completes and before launch, Wong logs which patterns were used in this build:
 1. For each file created during the build, check if it follows a pattern from `docs/patterns/`
