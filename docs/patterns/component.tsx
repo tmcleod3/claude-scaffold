@@ -48,6 +48,35 @@
  * RULE: Never call panelRef.current?.focus() in a useEffect without a
  * ref guard. Arrow function callbacks in parent components change identity
  * on every render, causing the effect to re-run and steal focus.
+ *
+ * === Collapsible / Accordion Pattern ===
+ *
+ * When building any expand/collapse UI (accordions, dropdowns, FAQ sections,
+ * expandable cards), this ARIA checklist is required:
+ *
+ *   <button
+ *     type="button"                    // Not "submit" — prevents form submission
+ *     aria-expanded={isOpen}           // Announces open/closed state
+ *     aria-controls={contentId}        // Links trigger to content panel
+ *     className="focus-visible:ring-2" // Keyboard focus indicator
+ *     onClick={() => setIsOpen(!isOpen)}
+ *   >
+ *     Section Title
+ *   </button>
+ *   {isOpen && (
+ *     <div id={contentId}>            // Must match aria-controls value
+ *       Panel content
+ *     </div>
+ *   )}
+ *
+ * Use useId() (React 18+) or a stable ID generator for contentId.
+ * Keyboard: Enter/Space toggles. This is automatic with <button>.
+ *
+ * Common mistake: adding aria-expanded but forgetting aria-controls + id.
+ * The three are a unit — aria-expanded alone tells screen readers the
+ * state but not WHAT content it controls.
+ * (Field report #43: custom accordions had aria-expanded but no
+ * aria-controls or content id — a11y violation caught in review.)
  */
 
 'use client'

@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v7.1.0 (2026-03-15)
-**Next:** v8.0 — The Hive Mind (Agent Memory, Conflict Prediction, Auto-PRD)
-**Status:** v7.1 shipped. Gauntlet passed (6/6 council sign-off). Planning v8.0.
+**Current:** v7.5.2 (2026-03-16)
+**Next:** v7.6 — The Vault Pipeline
+**Status:** v7.5.2 shipped. v7.6 (Vault Pipeline) → v7.7 (Housekeeping) → v8.0 (Hive Mind).
 
 ---
 
@@ -638,8 +638,47 @@ Kira's Step 0 already checks vault status (v7.5.1). This release adds: if Dax cl
 
 **What changes:** `docs/methods/CAMPAIGN.md` Step 0.5 (new), `.claude/commands/campaign.md` Step 0.5.
 
+### Bolt-ons (from architecture review)
+
+**Stale PTY session cleanup (tech debt #12).** Tower `init()` checks if the auto-created session actually connected. If "Session ended" appears within 2 seconds, auto-close and retry once. After 2 failures: "Terminal failed to start. The VoidForge server may need to restart." with a Lobby link. ~30 lines.
+
+**Node.js `engines` field.** Add `"engines": { "node": ">=20.0.0 <25.0.0" }` to package.json. Prevents the v7.2→v7.3 crisis (node-pty ABI break on Node v24) from recurring silently. Update when node-pty ships Node 25 support. ~1 line.
+
+**Fallback model ID update.** Tech debt #6: replace `claude-sonnet-4-5-20241022` with `claude-sonnet-4-6` in the model resolution fallback. ~1 line.
+
 ### Estimated effort
-1 session. ~150 lines of new code + methodology doc updates.
+1 session. ~200 lines of new code + methodology doc updates.
+
+---
+
+## v7.7 — The Housekeeping
+
+*Catch the docs up to reality. Fix the runtime papercuts.*
+
+The architecture docs are stuck at v2.7.0 while the system is at v7.5+. Avengers Tower, RBAC, Thumper, the ws/node-pty migration, three-act wizard — none of it is documented in ARCHITECTURE.md. This release closes the gap and addresses the two highest-impact runtime bugs.
+
+### Architecture Doc Refresh
+
+Bring ARCHITECTURE.md, FAILURE_MODES.md, and SCALING.md from v2.7.0 to v7.7.0:
+
+- **ARCHITECTURE.md:** Add Avengers Tower (Lobby, Penthouse, Tower), Thumper, RBAC, three-act wizard, ws/node-pty dependencies, WebSocket subsystem, project registry, PTY manager, multi-user session isolation.
+- **FAILURE_MODES.md:** Add WebSocket connection failures (IPv6/IPv4, ws upgrade), PTY session failures (node-pty ABI, stale sessions, MAX_SESSIONS), Tower crash modes (vault lock on restart, cache invalidation), Thumper failure modes (bot token invalid, webhook timeout).
+- **SCALING.md:** Update Tier 2 to reflect the multi-project registry and Penthouse features that already shipped in v7.0. Note that Avengers Tower's PTY sessions are the new practical ceiling (MAX_SESSIONS=5).
+
+### Server Auto-Restart (tech debt #11)
+
+Native module updates (`npm install` for node-pty/ws) change the `.node` binary on disk, but the running process keeps the old binary in memory. The server must be manually killed and restarted. Users see "Session ended" with no explanation.
+
+Fix: On each request to the Lobby, compare mtime of `node_modules/**/**.node` files against a startup snapshot. If changed, show banner: "VoidForge updated — restart required. [Restart Now]". The restart button calls a server endpoint that executes graceful shutdown (kill PTY sessions, close WebSocket connections, 2s drain) then `process.execve()` to replace the process in-place.
+
+**What changes:** `wizard/server.ts` gains startup mtime snapshot + comparison endpoint. `wizard/ui/lobby.js` gains restart banner. ~100 lines.
+
+### Node.js Version Testing Note
+
+Add `COMPATIBILITY.md` to `docs/` documenting: tested Node.js versions, known ABI-breaking changes (v24 node-pty incident), and the `engines` field policy. When upgrading the `engines` range, this doc is the checklist.
+
+### Estimated effort
+1-2 sessions. Doc rewrites + ~100 lines server code + 1 new doc.
 
 ---
 
@@ -648,6 +687,11 @@ Kira's Step 0 already checks vault status (v7.5.1). This release adds: if Dax cl
 *VoidForge remembers, predicts, and generates.*
 
 The first release where VoidForge learns from experience. Three features that compound: agents read past lessons before reviewing, Phase 0 catches structural contradictions before building, and a new command generates production-ready PRDs from conversation.
+
+**Ship order:** These three features are independent. If scope pressure hits, ship in this order:
+1. **Agent Memory** (foundation — v8.1 and v8.2 depend on it)
+2. **Conflict Prediction** (highest time-savings per line of methodology)
+3. **Auto-PRD** (highest user-facing value but not a dependency for anything else)
 
 ### Agent Memory — Active Lessons Read-Back
 

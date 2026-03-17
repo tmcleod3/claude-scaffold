@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [7.5.3] - 2026-03-16
+
+### Added
+- **Vault key naming convention** in HOLOCRON — documents hyphenated keys (global/infra) vs `env:`-prefixed keys (project-specific), with resolver order and provisioner mapping.
+- **Outbound URL Safety** checklist in security audit — verify transactional emails never send localhost/private IP URLs, production fallback requirement, dedicated `EMAIL_BASE_URL` recommendation. (Field report #44)
+- **Query-param state trust** attack vector in QA — Deathstroke tests whether URL parameters controlling client state are validated server-side before rendering. (Field report #44)
+- **Collapsible/Accordion ARIA pattern** in component reference — `aria-expanded` + `aria-controls` + `id` triple checklist with code example. (Field report #43)
+- **v7.7 The Housekeeping** planned in ROADMAP — architecture doc refresh, server auto-restart (tech debt #11), Node.js compatibility doc.
+- **v7.6 bolt-ons** planned in ROADMAP — stale PTY cleanup (#12), Node.js `engines` field, fallback model ID update.
+- **v8.0 ship order** in ROADMAP — Agent Memory first, then Conflict Prediction, then Auto-PRD.
+
+### Fixed
+- **Stale roadmap header** — updated from v7.1.0 to v7.5.2 with correct next version (v7.6).
+- **Field reports #42-#44** triaged and closed — 4 fixes applied, 2 already-fixed, 2 deferred to v7.6, 2 wontfix.
+
+---
+
 ## [7.5.2] - 2026-03-16
 
 ### Added

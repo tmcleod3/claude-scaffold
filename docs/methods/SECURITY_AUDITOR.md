@@ -97,6 +97,16 @@ Pattern: `/api/photos/[...name]` that joins path segments into a Google API URL 
 
 **Security principle:** For security boundaries (tool access, URL allowlists, IP ranges, credential scopes), **always prefer whitelist (default-deny) over blocklist (default-allow)**. New entries should be blocked by default until explicitly allowed. Blocklists inevitably miss entries.
 
+### Outbound URL Safety
+
+For any system that sends URLs to users (transactional emails, SMS, push notifications, webhook callbacks):
+- Verify outbound URLs never resolve to `localhost`, `127.0.0.1`, `::1`, or private IP ranges (`10.*`, `172.16-31.*`, `192.168.*`)
+- The app URL used in emails should have a production-only fallback — if `APP_URL` is unset or contains a loopback address, refuse to send rather than send broken links
+- Consider a dedicated server-only env var for email links (e.g., `EMAIL_BASE_URL`) separate from `NEXT_PUBLIC_APP_URL` — client-side and email URL requirements differ
+- Test: send a transactional email in dev mode, inspect the link — does it point to localhost? If yes, the guard is missing
+
+This is the outbound mirror of SSRF prevention: SSRF stops external URLs from reaching internal services, outbound URL safety stops internal URLs from reaching external users. (Field report #44: verification email sent with `localhost:5005` URL — worked on same machine, broke from any other device.)
+
 **Ahsoka — Access:** Every endpoint verifies ownership (no IDOR). UUIDs not sequential IDs. Admin verified server-side. Tier features verified server-side. User A can't access User B's anything. Rate limiting per-user and per-IP. **Auth framework rate limiting:** Auth frameworks (NextAuth, Passport, Auth.js, Supabase Auth, etc.) may handle login routing internally. Verify that rate limiting is applied inside the framework's `authorize`/`verify` callback, not just at the API route level. The framework's handler may bypass route-level middleware entirely. (Field report #38: NextAuth's `authorize()` callback ran inside its own handler — route-level rate limiting never saw login attempts.)
 
 ### Direct-ID Entity Access
