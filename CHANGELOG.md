@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [8.1.2] - 2026-03-16
+
+### Changed
+- **`/qa` command** gains Green Lantern (test matrix), Flash (smoke tests), Batgirl (detail audit), Aquaman (deep dive), Huntress (flaky tests), Green Arrow (precision), Superman (standards).
+- **`/security` command** gains Han + Cassian (Phase 0.5 first strike + recon), Bo-Katan (perimeter alongside Rex), Qui-Gon + Sabine + Bail Organa (Phase 2 extended), Anakin + Din Djarin (Phase 4 bypass + bounty).
+- **`/ux` command** gains Aragorn (orchestrator), Pippin + Frodo (Step 3 edge cases + hardest flow), Faramir (Step 5 quality focus), Boromir + Glorfindel (Step 6 hubris + hard rendering), Haldir (Step 7 boundaries), Merry (Step 7.5 pair verification).
+- **`/architect` command** gains Crusher + Archer (Step 0 diagnostics + greenfield), Tuvok (Step 1 security architecture), Kim + Janeway (Step 2 API design + novel architectures).
+- **`/gauntlet` command** Round 3 now explicitly names DevOps team (Senku, Levi, Spike, L, Bulma, Holo, Valkyrie).
+- **`/assemble` command** gains Hill (phase tracking) + Jarvis (status summaries).
+- **`/campaign` command** gains Pike (Step 1 — bold ordering challenge to Dax).
+
+---
+
 ## [8.1.1] - 2026-03-16
 
 ### Added

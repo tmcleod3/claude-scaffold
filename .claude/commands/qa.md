@@ -11,7 +11,7 @@
 2. Create `/logs/phase-09-qa-audit.md` (or appropriate phase log)
 
 ## Step 1 — Attack Plan
-Assign targets to each sub-agent:
+**Green Lantern** generates the test matrix first — what inputs × what states × what conditions should be tested. Then assign targets:
 - **Oracle (static):** Critical flows, missing awaits, null checks, type mismatches, race conditions
 - **Red Hood (dynamic):** Empty/huge/unicode inputs, network failures, malformed JSON, rapid clicking
 - **Alfred (deps):** `npm audit`, outdated libs, deprecated APIs, version conflicts
@@ -25,8 +25,8 @@ Assign targets to each sub-agent:
 ## Step 2 — Baseline
 Get the project running. Verify manually: app starts, primary flow works, auth works (if applicable), data persists, error states display.
 
-## Step 2.5 — Smoke Tests (hit the server)
-After build + restart, for each new or modified feature, execute actual requests against the running server (not just read the code):
+## Step 2.5 — Smoke Tests (**Flash** speed-runs these)
+After build + restart, **Flash** parallelizes curl commands against the running server for each new or modified feature:
 - **Primary user flow:** Execute via curl/fetch against localhost — verify the end-to-end path works
 - **File uploads:** Upload a file, then fetch the returned URL and verify HTTP 200 + correct content-type
 - **Form submissions:** Submit valid data (verify 200), then submit invalid/duplicate data (verify error message is specific, not generic)
@@ -42,13 +42,15 @@ Use the Agent tool to run these in parallel — these are read-only analysis tas
 - **Agent 3 (Alfred):** Run `npm audit`, check package.json for deprecated/vulnerable packages
 - **Agent 4 (Deathstroke):** Adversarial probing — bypass validations, chain unexpected interactions, test authorization boundaries
 - **Agent 5 (Constantine):** Hunt cursed code — dead branches, impossible conditions, accidental correctness, shadowed variables
+- **Agent 6 (Batgirl):** Deep per-module audit — every edge of every form, every boundary of every validation, every regex. Not broad — *thorough*.
+- **Agent 7 (Aquaman):** Deep dive on the hardest/largest module (500+ lines or 10+ functions). Exhaustive testing of one complex area.
 
-Synthesize findings from all five agents into a unified list.
+Synthesize findings from all agents into a unified list.
 
 Lucius reviews config separately (reads .env files — sensitive, don't delegate to sub-agent).
 
 ## Step 3.5 — Automated Tests
-Run `npm test`. Analyze failures. Cross-reference with findings from Step 3. For every bug found, ask: "Can this be caught by an automated test?" If yes, write the test.
+Run `npm test`. Analyze failures. Cross-reference with findings from Step 3. **Huntress** identifies flaky/non-deterministic tests — race conditions, timing dependencies, order-dependent assertions. For every bug found, ask: "Can this be caught by an automated test?" If yes, write the test.
 
 ## Step 4 — Bug Tracker
 Log all findings in this format in the phase log:
@@ -58,15 +60,15 @@ Log all findings in this format in the phase log:
 
 Severity: Critical (security/data loss) > High (broken flow) > Medium (degraded) > Low (cosmetic)
 
-## Step 5 — Fix (small batches)
-One batch = fixes for one area or severity level. After each batch:
+## Step 5 — Fix (small batches — **Green Arrow** pinpoints exact lines)
+One batch = fixes for one area or severity level. **Green Arrow** narrows vague findings to exact lines and conditions. After each batch:
 1. Re-run `npm test`
 2. Re-verify affected manual flows
 3. Update bug tracker in phase log
 4. Add new test for each fix where applicable
 
-## Step 6 — Harden
-Normalize error handling (reference `/docs/patterns/error-handling.ts`). Add guardrails. Improve structured logging.
+## Step 6 — Harden (**Superman** enforces standards)
+Normalize error handling (reference `/docs/patterns/error-handling.ts`). Add guardrails. Improve structured logging. **Superman** verifies the codebase meets its own stated standards — linting clean, type-safe, naming conventions consistent, no unresolved TODOs.
 
 ## Step 6.5 — Pass 2: Re-Verify Fixes
 After all fixes are applied, run a verification pass:

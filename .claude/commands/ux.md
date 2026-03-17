@@ -35,12 +35,18 @@ Use the Agent tool to run these simultaneously — all are read-only analysis:
 - **Agent 3 (Samwise — A11y):** Check keyboard navigation, focus management, ARIA labels, color contrast, reduced motion. Test with keyboard-only navigation.
 - **Agent 4 (Celeborn — Design System):** Are spacing tokens consistent? Typography scale followed? Colors from the palette? Component naming conventions respected? Catches systemic inconsistencies (e.g., `gap-4` vs `gap-[18px]` for the same spacing).
 
-Synthesize findings from all three agents.
+**Aragorn** orchestrates when multiple findings conflict — prioritizes which matter most for users.
+
+Synthesize findings from all agents.
 
 ## Step 3 — Sequential Reviews
 These require interactive testing:
 
 **Bilbo (Copy):** Review all microcopy — labels, buttons, error messages, empty states, confirmations, destructive action warnings. Does the product speak clearly and consistently?
+
+**Pippin (Edge Cases):** Does the unexpected — resizes to 320px, pastes emoji in search, clicks back mid-flow, opens the same page in two tabs, toggles between light/dark mid-animation.
+
+**Frodo (Hardest Flow):** If the project has one flow that is both the most critical AND the most complex, Frodo gets dedicated attention on that single flow. Conditional — skip if no single flow dominates.
 
 **Legolas (Code):** Review component architecture — semantic HTML, CSS organization, state management patterns. Reference `/docs/patterns/component.tsx`.
 
@@ -64,18 +70,18 @@ Log all findings to `/logs/phase-10-ux-audit.md`:
 Categories: UX, Visual, A11y, Copy, Performance, Edge Case
 
 ## Step 5 — Enhancement Specs (before coding)
-For each fix: problem statement, proposed solution, acceptance criteria, a11y requirements (Samwise signs off), copy (Bilbo signs off).
+For each fix: problem statement, proposed solution, acceptance criteria, a11y requirements (Samwise signs off), copy (Bilbo signs off). **Faramir** checks whether polish effort targets the right screens — high-traffic core flows, not low-traffic edge pages.
 
-## Step 6 — Implement (small batches)
-One batch = one flow or component cluster (max ~200 lines changed). After each batch:
+## Step 6 — Implement (small batches — **Boromir** guards against hubris)
+One batch = one flow or component cluster (max ~200 lines changed). **Boromir** checks: is the polish overengineered? Too many animations? Does complexity hurt performance? **Glorfindel** handles the hardest rendering (canvas, WebGL, SVG — conditional, only if the project has visual complexity). After each batch:
 1. Re-run the app
 2. Re-walk the affected flow
 3. Test keyboard navigation
 4. Update issue tracker status
 5. Run `npm test` to catch regressions
 
-## Step 7 — Harden Design System
-Arwen leads. Audit shared components (buttons, inputs, cards, modals, toasts) for:
+## Step 7 — Harden Design System (**Haldir** guards boundaries)
+Arwen leads. **Haldir** checks transitions between pages, states, and components — loading→success, error→retry, navigate→return. Are they smooth or jarring? Audit shared components (buttons, inputs, cards, modals, toasts) for:
 - Consistent variants (primary, secondary, danger, ghost)
 - Responsive behavior
 - Keyboard focus styles
@@ -85,8 +91,9 @@ Arwen leads. Audit shared components (buttons, inputs, cards, modals, toasts) fo
 After all fixes are applied, run a verification pass:
 - **Samwise** re-audits accessibility on all modified components — verify a11y fixes didn't break other a11y properties
 - **Radagast** re-checks edge cases on fixed flows — verify fixes hold under adversarial input
+- **Merry** pair-verifies Pippin's edge case resolutions — one found it, the other confirms the fix
 
-If Pass 2 finds new issues, fix and re-verify until Samwise and Radagast sign off.
+If Pass 2 finds new issues, fix and re-verify until Samwise, Radagast, and Merry sign off.
 
 ## Step 8 — Regression Checklist
 Add UX-specific items to the regression checklist in `/docs/qa-prompt.md`:

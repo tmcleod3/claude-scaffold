@@ -92,7 +92,8 @@ Read the PRD and diff against the codebase:
 5. **Classify every requirement by type:** Code (buildable), Asset (needs external generation — images, illustrations, OG cards), Copy (text accuracy), Infrastructure (DNS, env vars, dashboards)
 6. Diff: what the PRD describes vs. what's implemented — **structural AND semantic** (not just "does the route exist?" but "does the component render what the PRD describes?")
 7. Produce the ordered mission list — each mission is 1-3 PRD sections, scoped to be buildable in one `/assemble` run
-8. **Separately list BLOCKED items** — asset/infrastructure requirements that code can't satisfy
+8. **Pike challenges the ordering:** "Should we attempt a harder mission first while context is fresh?" Bold counterbalance to Dax's dependency-based ordering. If Pike's argument is stronger, reorder.
+9. **Separately list BLOCKED items** — asset/infrastructure requirements that code can't satisfy
 
 **Priority cascade:**
 1. Section 16 phases (if defined by user)

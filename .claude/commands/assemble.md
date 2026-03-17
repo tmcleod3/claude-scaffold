@@ -5,6 +5,8 @@ Avengers, assemble. Full pipeline from architecture to launch — one command to
 2. If no assemble state exists, start fresh from Phase 1
 3. Read `/docs/methods/ASSEMBLER.md` for operating rules
 
+**Hill** tracks phase completion — logs each gate pass to `assemble-state.md`. **Jarvis** provides status summaries between phases.
+
 ## Phase 1 — Architecture (Picard has the conn)
 **Fury:** "Picard, you're up. Review the architecture before we build anything."
 

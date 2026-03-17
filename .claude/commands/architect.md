@@ -8,7 +8,9 @@
 ## Pre-Analysis — Conflict Scan
 Before any deep analysis, scan the PRD frontmatter for structural contradictions (see SYSTEMS_ARCHITECT.md Conflict Checklist). Check: auth+database, payments+auth, websockets+deploy, workers+deploy, database+deploy, cache+deploy, admin+auth, email+credentials. Flag any contradictions immediately — these cost hours if caught late.
 
-## Step 0 — System Discovery
+## Step 0 — System Discovery (**Crusher** + **Archer**)
+**Crusher** assesses system health first — test coverage, build time, dependency age, code complexity. Baseline before changes.
+**Archer** (for greenfield projects) proposes initial directory structure, module boundaries, naming conventions.
 Produce: system identity, component inventory, data flow diagram (ASCII), dependency graph.
 Write to `/logs/` (phase-00 if during orient, or a dedicated architecture log).
 
@@ -35,13 +37,18 @@ Verify: API versions pinned, responses validated, abstraction layer exists.
 **Agent 3 (Worf — Security Implications):**
 For each architectural decision (schema, service boundaries, data flows), flag security implications. PII colocation, unauthenticated access to internal state, overly permissive service boundaries. Worf audits *design*, not code.
 
-Synthesize findings from all three agents.
+**Agent 4 (Tuvok — Security Architecture):**
+Auth flow design, token storage strategy, session architecture, encryption at rest vs in transit. Where Worf flags implications, Tuvok designs the solutions.
 
-## Step 2 — Scotty's Service Architecture
+Synthesize findings from all four agents.
+
+## Step 2 — Scotty's Service Architecture + Kim's API Design
 - Boundary assessment: is the boundary between services/modules clean?
 - Monolith vs services: default monolith. Only split if there's a specific operational reason (different scaling profile, different team, different deploy cadence).
 - Async vs sync: which operations should be background jobs?
-- Informed by Spock's schema and Uhura's integration findings.
+- **Kim** reviews API surface: REST conventions, consistent error shapes, pagination patterns, versioning strategy.
+- **Janeway** (conditional): when the standard monolith doesn't fit, proposes event-sourcing, CQRS, serverless, edge computing.
+- Informed by Spock's schema, Uhura's integrations, and Worf/Tuvok's security findings.
 
 ## Step 3 — Scotty's Scaling + Torres's Performance
 - **Scotty:** Identify the first bottleneck. Three-tier plan: Tier 1 (current), Tier 2 (10x, vertical), Tier 3 (100x, horizontal). Cost estimates.

@@ -7,11 +7,16 @@
 
 ## Audit Sequence
 
+### Phase 0.5 — First Strike (**Han** + **Cassian**)
+Before the deep audits, two agents do fast recon:
+- **Han (First Strike):** Quick OWASP top 10 scan — finds the obvious vulnerabilities that shouldn't require deep analysis. Shoots first.
+- **Cassian (Intelligence):** Threat modeling and attack surface mapping — maps all endpoints, identifies high-value targets, produces the threat model that guides the rest of the audit.
+
 ### Phase 1 — Independent audits (parallel analysis)
 Use the Agent tool to run these simultaneously — all are read-only analysis:
 - **Agent 1 (Leia — Secrets):** Scan source code for hardcoded secrets, check .env is gitignored, check git history for leaked keys (`git log -p --all -S 'password' -S 'secret' -S 'api_key'`), verify different secrets dev/prod
 - **Agent 2 (Chewie — Dependencies):** Run `npm audit`, check for critical/high vulns, verify lock file committed, check for deprecated packages
-- **Agent 3 (Rex — Infrastructure):** Check security headers (HSTS, CSP, X-Frame-Options, CORS), verify TLS config, check for exposed ports/debug endpoints
+- **Agent 3 (Rex + Bo-Katan — Infrastructure + Perimeter):** Check security headers (HSTS, CSP, X-Frame-Options, CORS), verify TLS config, check for exposed ports/debug endpoints. **Bo-Katan** focuses on network perimeter: firewall rules, exposed ports, CORS policy enforcement.
 - **Agent 4 (Maul — Red Team):** For each endpoint and flow, ask: "How would I exploit this?" Chain vulnerabilities. Test trust boundaries. Attempt privilege escalation. **RUNTIME EXPLOITATION (mandatory):** When the server is running, Maul must execute actual attack requests via curl/fetch — not just theorize. Upload a file then fetch the URL. Submit conflicting data. Send requests with stolen/expired tokens. If the server isn't running, document what couldn't be runtime-tested.
 
 ### Phase 2 — Sequential audits (depend on understanding the codebase)
@@ -46,6 +51,16 @@ These require full codebase context — run sequentially:
 - Deletion possible (GDPR right to erasure)
 - Backups encrypted
 
+**Qui-Gon — Subtle Vulnerabilities** (after sequential audits):
+- Timing-based attacks, race conditions in auth flows, logic errors that are technically correct but exploitable
+- The vulnerabilities that pass every standard check
+
+**Sabine — Unconventional** (conditional — if project has external dependencies):
+- Supply chain attacks, dependency confusion, prototype pollution, CSP bypass via CDN
+
+**Bail Organa — Governance** (conditional — if project has regulatory requirements):
+- GDPR data handling, SOC2 controls, HIPAA mapping
+
 ### Phase 3 — Remediate
 Write all findings to `/logs/phase-11-security-audit.md` (or appropriate phase log):
 
@@ -60,14 +75,13 @@ Fix critical and high findings immediately. Medium findings get tracked. For eac
 3. Check it didn't break anything (`npm test`)
 4. Update the finding status in the log
 
-### Phase 4 — Maul's Re-Verification
-After remediations are applied, Maul re-probes:
-- Re-test all remediated vulnerabilities — verify fixes hold under adversarial conditions
-- Check that fixes didn't introduce new attack vectors
-- Attempt to bypass the remediations
-- **Execute actual HTTP requests against the running server** to verify fixes hold at runtime, not just in code
+### Phase 4 — Re-Verification (Maul + Anakin + Din Djarin)
+After remediations are applied:
+- **Maul** re-probes all remediated vulnerabilities — verify fixes hold under adversarial conditions. Execute actual HTTP requests against the running server.
+- **Anakin** attempts to bypass remediations using dark-side techniques — JWT algorithm confusion, auth library edge cases, prototype pollution, framework misuse.
+- **Din Djarin** bounty-hunts for anything Maul and Anakin missed — post-remediation sweep with Mandalorian tenacity.
 
-If Maul finds new issues, fix and re-verify until clean.
+If any agent finds new issues, fix and re-verify until clean.
 
 ### Phase 5 — Deliverables
 1. SECURITY_AUDIT.md — prioritized findings with evidence
