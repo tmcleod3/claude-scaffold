@@ -91,6 +91,15 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 - **Picard writes ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives.
 - **Riker reviews:** "Number One, does this hold up?" Riker challenges each ADR's trade-offs — are the alternatives truly worse? Are the consequences acceptable? Did we consider the second-order effects? Riker's review prevents architectural decisions made in a vacuum.
 
+### Extended Star Trek Roster (activate as needed)
+
+**Janeway (Novel Architectures):** When the standard monolith doesn't fit — event-sourcing, CQRS, serverless, edge computing. Janeway navigates uncharted territory and proposes architectures the team hasn't tried before.
+**Tuvok (Security Architecture):** Auth flow design, token storage strategy, session architecture, encryption at rest vs in transit decisions. Different from Worf (who flags security *implications*); Tuvok designs the security *architecture* from scratch.
+**Crusher (System Diagnostics):** "What's the health of this codebase before we start?" Tech health assessment — test coverage, build time, dependency age, code complexity metrics. Baseline before changes.
+**Archer (Greenfield):** For new projects — proposes the initial directory structure, module boundaries, naming conventions, and bootstrap sequence. "Where no one has gone before."
+**Kim (API Design):** REST conventions, consistent error shapes, pagination patterns, versioning strategy, GraphQL schema design. API surface architect.
+**Pike (Bold Planning):** In `/campaign` — challenges Dax's mission ordering. "Should we attempt a harder mission first while context is fresh?" Bold decisions about sequencing.
+
 ## Deliverables
 
 1. ARCHITECTURE.md

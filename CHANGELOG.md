@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [8.1.1] - 2026-03-16
+
+### Added
+- **Extended DC roster for `/qa`** — Flash (rapid testing), Batgirl (detail audit), Green Arrow (precision), Huntress (flaky tests), Aquaman (deep dive), Superman (standards), Green Lantern (scenario construction), Martian Manhunter (cross-environment).
+- **Extended Star Wars roster for `/security`** — Qui-Gon (subtle vulns), Han (first strike), Anakin (dark-side exploitation), Bo-Katan (perimeter), Din Djarin (bug bounty), Bail Organa (governance), Cassian (threat modeling), Sabine (unconventional attacks).
+- **Extended Tolkien roster for `/ux`** — Aragorn (UX leadership), Faramir (quality focus), Pippin (edge cases), Boromir (hubris check), Haldir (boundary guard), Glorfindel (hard rendering), Frodo (hardest task), Merry (pair review).
+- **Extended Anime roster for `/devops`** — Vegeta (monitoring), Trunks (migrations), Mikasa (critical protection), Erwin (planning), Mustang (cleanup), Olivier (hardening), Hughes (observability), Calcifer (daemons), Duo (teardown).
+- **Extended Star Trek roster for `/architect`** — Janeway (novel architectures), Tuvok (security architecture), Crusher (diagnostics), Archer (greenfield), Kim (API design), Pike (bold planning).
+- **Extended Marvel roster for `/build`** — T'Challa (craft), Wanda (state), Shuri (innovation), Rocket (scrappy), Okoye (data integrity), Falcon (migrations), Bucky (legacy).
+
+---
+
 ## [8.1.0] - 2026-03-16
 
 ### Added
