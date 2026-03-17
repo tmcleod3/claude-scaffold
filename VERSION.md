@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 8.0.0
+**Current:** 8.0.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 8.0.1 | 2026-03-16 | Victory Gauntlet hardening — 16 fixes, engines >=20.11.0, Quality Reduction Anti-Pattern, 9 methodology fixes from #46-#53 |
 | 8.0.0 | 2026-03-16 | The Hive Mind — Agent Memory (active LESSONS.md read-back), Conflict Prediction (Phase 0.5), /prd command |
 | 7.7.0 | 2026-03-16 | The Housekeeping — architecture doc refresh, server auto-restart detection, COMPATIBILITY.md, context pressure fix |
 | 7.6.0 | 2026-03-16 | The Vault Pipeline — deploy --env-only, standalone vault reader, PTY cleanup, engines field |

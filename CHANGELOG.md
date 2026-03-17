@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [8.0.1] - 2026-03-16
+
+### Fixed
+- **Victory Gauntlet hardening** — 16 fixes across 2 Gauntlet runs: PTY stale session cleanup (3 compounding bugs), .env newline/shell injection, globSync Node 22+ compat replaced with recursive readdir, restart banner dead endpoint + CSP violation, symlink cycle guard, XSS in auto-command banner, dead code cleanup.
+- **Node.js `engines` field** tightened from `>=20.0.0` to `>=20.11.0` — `import.meta.dirname` requires 20.11+.
+- **Quality Reduction Anti-Pattern** — hard methodology rule: agents MUST NOT reduce Gauntlet, checkpoint, or debrief quality based on self-assessed "context pressure." Must run `/context` and report actual usage. Below 70% = continue full protocol.
+- **9 methodology fixes** from field reports #46-#53: CORS requirements check, external API HTTPS enforcement, IP range validation warning, internal path leakage check, client-side partial failure testing, const/let audit, Node API compatibility check, UI→server route tracing, Victory Checklist with debrief-before-sign-off.
+- **CLAUDE.md** — added PRD_GENERATOR to Docs Reference, corrected pattern count (7→8).
+- **Architecture docs** version headers updated to 8.0.0.
+
+---
+
 ## [8.0.0] - 2026-03-16
 
 ### Added
