@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v9.0.0 (2026-03-17)
-**Next:** v9.1 — The Multi-Language Forge (Python)
-**Status:** v9.0.0 shipped. Next: v9.1 (Python) → v9.2 (Mobile) → v9.3 (Game) → v10.0 (War Room).
+**Current:** v9.1.0 (2026-03-17)
+**Next:** v9.2 — The Mobile Forge
+**Status:** v9.1.0 shipped. Next: v9.2 (Mobile) → v9.3 (Game) → v10.0 (War Room).
 
 ---
 

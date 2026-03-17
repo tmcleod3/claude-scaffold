@@ -45,6 +45,15 @@ Check these values exist and are valid:
 
 If a value is missing or invalid, log it and use the default. If the entire frontmatter block is missing, flag it as a Phase 0 gap and use all defaults.
 
+### Python Framework Detection
+
+When `framework` is `django` or `fastapi`:
+- **Phase 1:** Scaffold with `django-admin startproject` or `poetry init` + FastAPI boilerplate
+- **Phase 2:** Use `python manage.py migrate` (Django) or Alembic (FastAPI) for database setup
+- **Phase 9-11:** Use `pytest` instead of `jest/vitest`. Django test client or FastAPI TestClient for endpoint testing.
+- **Patterns:** Load the Django/FastAPI Deep Dive sections from each pattern file (api-route, service, middleware, error-handling, component, job-queue, multi-tenant)
+- **Security:** Check Django-specific settings (SECRET_KEY, DEBUG=True in prod, ALLOWED_HOSTS, CSRF)
+
 ### Conditional Skip Rules
 
 | PRD Frontmatter | Phase to Skip | Reason |

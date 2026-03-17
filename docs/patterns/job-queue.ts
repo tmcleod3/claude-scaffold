@@ -16,6 +16,42 @@
  *   Django: Celery + Redis/RabbitMQ
  *   Rails: Sidekiq + Redis, or ActiveJob
  *   Express: BullMQ + Redis, or Agenda + MongoDB
+ *
+ * === Django + Celery Deep Dive ===
+ *
+ *   # app/tasks.py
+ *   from celery import shared_task
+ *   from .services import EmailService
+ *
+ *   @shared_task(bind=True, max_retries=3, default_retry_delay=60)
+ *   def send_welcome_email(self, user_id: int):
+ *       try:
+ *           EmailService.send_welcome(user_id)
+ *       except Exception as exc:
+ *           self.retry(exc=exc)
+ *
+ *   # Idempotency: use task_id or a dedupe key in the DB to prevent re-processing
+ *   # Dead letter: configure task_reject_on_worker_lost=True + dlx in broker
+ *   # Monitoring: Flower (celery monitor) or Sentry integration
+ *   # Beat scheduler: periodic tasks via django-celery-beat
+ *
+ * === FastAPI + ARQ Deep Dive ===
+ *
+ *   # app/tasks.py
+ *   from arq import create_pool
+ *   from arq.connections import RedisSettings
+ *
+ *   async def send_welcome_email(ctx, user_id: int):
+ *       await EmailService.send_welcome(user_id)
+ *
+ *   class WorkerSettings:
+ *       functions = [send_welcome_email]
+ *       redis_settings = RedisSettings()
+ *       max_tries = 3
+ *       retry_delay = 60
+ *
+ *   # ARQ is async-native (matches FastAPI). Alternative: Celery still works with FastAPI.
+ *   # Same principles: idempotency, retry with backoff, dead letter, monitoring.
  */
 
 // --- Job definition (enqueue side) ---

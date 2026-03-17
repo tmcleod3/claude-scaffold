@@ -18,6 +18,36 @@
  *   Django templates: Conditional blocks for each state, HTMX for loading
  *   Rails: Turbo Frames for loading states, partials for each state
  *
+ * === Django Templates + HTMX Deep Dive ===
+ *
+ *   {# templates/projects/list.html — same 4-state pattern, no JS framework #}
+ *   {% if loading %}
+ *     <div role="status" aria-label="Loading projects">
+ *       {% for _ in "123" %}<div class="skeleton h-16 rounded-lg bg-gray-100 animate-pulse"></div>{% endfor %}
+ *     </div>
+ *   {% elif error %}
+ *     <div role="alert" class="border border-red-200 bg-red-50 p-4">
+ *       <p>Couldn't load projects: {{ error }}</p>
+ *       <button hx-get="{% url 'project-list' %}" hx-target="#project-list">Try again</button>
+ *     </div>
+ *   {% elif not projects %}
+ *     <div class="border-dashed p-8 text-center">No projects yet.</div>
+ *   {% else %}
+ *     {% for project in projects %}{% include "projects/_card.html" %}{% endfor %}
+ *   {% endif %}
+ *
+ *   {# HTMX: loading states via hx-indicator, partial swaps via hx-target #}
+ *   {# Keyboard: ensure HTMX-swapped content gets focus management via hx-on::after-swap #}
+ *
+ * === FastAPI + Jinja2 + HTMX Deep Dive ===
+ *
+ *   Same template pattern as Django. FastAPI serves templates via:
+ *     from fastapi.templating import Jinja2Templates
+ *     templates = Jinja2Templates(directory="templates")
+ *
+ *   For SPA frontends: FastAPI serves JSON API, React/Vue/Svelte handles the 4 states.
+ *   For HTMX: same pattern as Django templates above, endpoint returns HTML fragments.
+ *
  * The framework changes, the principle doesn't:
  * EVERY data-driven component handles loading, empty, error, and success.
  *

@@ -15,6 +15,50 @@
  *   Express: app.use(authMiddleware), app.use(requestLogger) — (err, req, res, next) for errors
  *   Django: MIDDLEWARE list in settings.py, or decorators (@login_required, @permission_required)
  *   Rails: before_action in controllers, Rack middleware for logging
+ *
+ * === Django Deep Dive ===
+ *
+ *   # app/middleware.py
+ *   import time, json, logging, uuid
+ *
+ *   class RequestLoggingMiddleware:
+ *       def __init__(self, get_response):
+ *           self.get_response = get_response
+ *       def __call__(self, request):
+ *           request.request_id = str(uuid.uuid4())
+ *           start = time.monotonic()
+ *           response = self.get_response(request)
+ *           duration = time.monotonic() - start
+ *           logging.info(json.dumps({
+ *               "request_id": request.request_id, "method": request.method,
+ *               "path": request.path, "status": response.status_code,
+ *               "duration_ms": round(duration * 1000),
+ *               "user_id": getattr(request.user, "id", None),
+ *           }))
+ *           return response
+ *
+ *   # settings.py: MIDDLEWARE = ['app.middleware.RequestLoggingMiddleware', ...]
+ *   # Order matters: logging before auth, auth before rate limiting
+ *   # @login_required is per-view — use for fine-grained control, not global middleware
+ *
+ * === FastAPI Deep Dive ===
+ *
+ *   from fastapi import Request
+ *   from starlette.middleware.base import BaseHTTPMiddleware
+ *   import time, uuid
+ *
+ *   class RequestLoggingMiddleware(BaseHTTPMiddleware):
+ *       async def dispatch(self, request: Request, call_next):
+ *           request.state.request_id = str(uuid.uuid4())
+ *           start = time.monotonic()
+ *           response = await call_next(request)
+ *           duration = time.monotonic() - start
+ *           # structured log here
+ *           return response
+ *
+ *   # app.add_middleware(RequestLoggingMiddleware)
+ *   # For auth: prefer Depends() over middleware — dependency injection is more testable
+ *   # For rate limiting: slowapi or custom Depends() with Redis
  */
 
 import { NextRequest, NextResponse } from 'next/server'

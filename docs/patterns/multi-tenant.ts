@@ -15,6 +15,39 @@
  *   Django: Middleware + thread-local or django-tenants
  *   Rails: ActsAsTenant gem, or Current.workspace pattern
  *   Express: Middleware + req.workspace
+ *
+ * === Django Deep Dive (django-tenants) ===
+ *
+ *   # Schema-per-tenant: each org gets its own Postgres schema
+ *   # pip install django-tenants
+ *   # settings.py: DATABASE_ROUTERS, TENANT_MODEL, SHARED_APPS, TENANT_APPS
+ *
+ *   # Alternative: shared schema with org_id filtering
+ *   class TenantMiddleware:
+ *       def __call__(self, request):
+ *           request.org = get_org_from_subdomain(request)
+ *           return self.get_response(request)
+ *
+ *   # Every QuerySet filtered by org: Project.objects.filter(org=request.org)
+ *   # Custom manager: class TenantManager: def for_org(self, org): return self.filter(org=org)
+ *   # CRITICAL: never use .all() on tenant-scoped models — always .for_org(org)
+ *
+ * === FastAPI Deep Dive ===
+ *
+ *   # Depends() for tenant scoping — injected into every route
+ *   async def get_current_org(request: Request, user = Depends(get_current_user)):
+ *       org_id = request.headers.get("X-Org-Id") or user.default_org_id
+ *       org = await OrgService.get(org_id)
+ *       if not org or user.id not in org.member_ids:
+ *           raise HTTPException(403, "Not a member of this organization")
+ *       return org
+ *
+ *   @router.get("/projects")
+ *   async def list_projects(org = Depends(get_current_org), db = Depends(get_db)):
+ *       return await db.execute(select(Project).where(Project.org_id == org.id))
+ *
+ *   # Same principle: every query scoped by org. Never trust client-provided org_id
+ *   # without verifying membership.
  */
 
 // --- Tenant resolution middleware ---

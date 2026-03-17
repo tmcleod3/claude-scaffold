@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [9.1.0] - 2026-03-17
+
+### Added
+- **Django + FastAPI deep dives** in all 8 pattern files — full code examples for DRF ViewSets, Pydantic models, Celery tasks, django-tenants, HTMX templates, FastAPI dependency injection, SQLAlchemy services, ARQ workers.
+- **Python framework detection** in BUILD_PROTOCOL.md — Phase 0 detects `framework: django|fastapi`, adapts scaffold, migrations, testing, and security checks.
+
+---
+
 ## [9.0.0] - 2026-03-17
 
 ### Added

@@ -17,6 +17,64 @@
  *   Django: DRF ViewSet with serializer validation, permission_classes, service call
  *   Rails: Controller action with strong_params, before_action :authenticate, service call
  *
+ * === Django Deep Dive (DRF) ===
+ *
+ *   from rest_framework import viewsets, serializers, permissions, status
+ *   from rest_framework.response import Response
+ *   from .services import ProjectService
+ *
+ *   class ProjectSerializer(serializers.Serializer):
+ *       name = serializers.CharField(max_length=200)
+ *       description = serializers.CharField(required=False, allow_blank=True)
+ *
+ *   class ProjectViewSet(viewsets.ViewSet):
+ *       permission_classes = [permissions.IsAuthenticated]
+ *
+ *       def create(self, request):
+ *           serializer = ProjectSerializer(data=request.data)
+ *           serializer.is_valid(raise_exception=True)  # DRF handles 400 automatically
+ *           project = ProjectService.create(
+ *               user=request.user,
+ *               **serializer.validated_data
+ *           )
+ *           return Response(ProjectSerializer(project).data, status=status.HTTP_201_CREATED)
+ *
+ *   # Key differences from TypeScript pattern:
+ *   # - Validation: DRF serializers replace Zod schemas
+ *   # - Auth: permission_classes replaces getSession() — declarative, not imperative
+ *   # - Ownership: service receives request.user, enforces ownership internally
+ *   # - Errors: DRF exception handler maps service exceptions to HTTP responses
+ *   # - SELECT control: Use serializer fields to control response shape, not Prisma select
+ *   #   For mutations, always SELECT only the fields you need (serializer.fields controls this)
+ *
+ * === FastAPI Deep Dive ===
+ *
+ *   from fastapi import APIRouter, Depends, HTTPException
+ *   from pydantic import BaseModel
+ *   from .services import ProjectService
+ *   from .auth import get_current_user, User
+ *
+ *   router = APIRouter(prefix="/api/projects")
+ *
+ *   class CreateProjectRequest(BaseModel):
+ *       name: str
+ *       description: str | None = None
+ *
+ *   @router.post("/", status_code=201)
+ *   async def create_project(
+ *       body: CreateProjectRequest,
+ *       user: User = Depends(get_current_user),
+ *   ):
+ *       project = await ProjectService.create(user=user, **body.model_dump())
+ *       return project
+ *
+ *   # Key differences from TypeScript pattern:
+ *   # - Validation: Pydantic models replace Zod schemas (validated before handler runs)
+ *   # - Auth: Depends(get_current_user) replaces getSession() — dependency injection
+ *   # - Ownership: service receives user, enforces ownership internally
+ *   # - Errors: HTTPException or custom exception handlers map to HTTP responses
+ *   # - Fire-and-forget: Use BackgroundTasks for sendBeacon-style endpoints
+ *
  * See /docs/patterns/error-handling.ts for the canonical error strategy.
  */
 

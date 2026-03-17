@@ -19,6 +19,74 @@
  *   Django: Custom exception handler in DRF, or middleware
  *   Rails: rescue_from in ApplicationController
  *   Express: Error-handling middleware (err, req, res, next)
+ *
+ * === Django Deep Dive (DRF) ===
+ *
+ *   # app/exceptions.py — domain exceptions (same shape as TypeScript ApiError)
+ *   class AppError(Exception):
+ *       def __init__(self, message, status_code=500, code="INTERNAL_ERROR"):
+ *           self.message = message
+ *           self.status_code = status_code
+ *           self.code = code
+ *
+ *   class NotFoundError(AppError):
+ *       def __init__(self, message="Not found"):
+ *           super().__init__(message, 404, "NOT_FOUND")
+ *
+ *   class ForbiddenError(AppError):
+ *       def __init__(self, message="Forbidden"):
+ *           super().__init__(message, 403, "FORBIDDEN")
+ *
+ *   class ValidationError(AppError):
+ *       def __init__(self, message="Validation failed"):
+ *           super().__init__(message, 400, "VALIDATION_ERROR")
+ *
+ *   # settings.py — register custom handler
+ *   REST_FRAMEWORK = {
+ *       'EXCEPTION_HANDLER': 'app.exception_handler.custom_exception_handler'
+ *   }
+ *
+ *   # app/exception_handler.py
+ *   def custom_exception_handler(exc, context):
+ *       if isinstance(exc, AppError):
+ *           return Response(
+ *               {"success": False, "error": exc.message, "code": exc.code},
+ *               status=exc.status_code
+ *           )
+ *       # Fall through to DRF default for validation errors, auth errors, etc.
+ *       response = exception_handler(exc, context)
+ *       if response: return response
+ *       # Unhandled — log and return 500 (never leak internals)
+ *       logger.error(f"Unhandled: {exc}", exc_info=True)
+ *       return Response({"success": False, "error": "Internal error"}, status=500)
+ *
+ * === FastAPI Deep Dive ===
+ *
+ *   # app/exceptions.py — same domain exceptions
+ *   class AppError(Exception):
+ *       def __init__(self, message: str, status_code: int = 500, code: str = "INTERNAL_ERROR"):
+ *           self.message = message
+ *           self.status_code = status_code
+ *           self.code = code
+ *
+ *   # app/main.py — register handler
+ *   @app.exception_handler(AppError)
+ *   async def app_error_handler(request, exc: AppError):
+ *       return JSONResponse(
+ *           status_code=exc.status_code,
+ *           content={"success": False, "error": exc.message, "code": exc.code}
+ *       )
+ *
+ *   @app.exception_handler(Exception)
+ *   async def unhandled_error_handler(request, exc):
+ *       logger.error(f"Unhandled: {exc}", exc_info=True)
+ *       return JSONResponse(
+ *           status_code=500,
+ *           content={"success": False, "error": "Internal error"}
+ *       )
+ *
+ *   # Pydantic validation errors are handled automatically by FastAPI (422)
+ *   # Never leak stack traces — the unhandled handler catches everything
  */
 
 // ============================================================

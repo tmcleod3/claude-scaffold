@@ -16,6 +16,75 @@
  *   Django: Service functions in app/services.py, called by views, raise custom exceptions
  *   Rails: Service objects in app/services/, called by controllers, raise custom errors
  *
+ * === Django Deep Dive ===
+ *
+ *   # app/services/project_service.py
+ *   from django.db import transaction
+ *   from .models import Project
+ *   from .exceptions import NotFoundError, ForbiddenError
+ *
+ *   class ProjectService:
+ *       @staticmethod
+ *       def create(user, name, description=None):
+ *           return Project.objects.create(owner=user, name=name, description=description)
+ *
+ *       @staticmethod
+ *       def get(user, project_id):
+ *           try:
+ *               project = Project.objects.get(id=project_id)
+ *           except Project.DoesNotExist:
+ *               raise NotFoundError("Project not found")
+ *           if project.owner_id != user.id:
+ *               raise NotFoundError("Project not found")  # 404 not 403 — no IDOR
+ *           return project
+ *
+ *       @staticmethod
+ *       @transaction.atomic
+ *       def delete(user, project_id):
+ *           project = ProjectService.get(user, project_id)
+ *           project.delete()
+ *
+ *   # Key principles (same as TypeScript):
+ *   # - Business logic in services, not views
+ *   # - Ownership checks on every user-scoped query (return 404, not 403)
+ *   # - Use QuerySet methods (filter, get, select_related) — never raw SQL
+ *   # - Wrap multi-step mutations in @transaction.atomic
+ *   # - Raise domain exceptions (NotFoundError, ForbiddenError) — views map to HTTP
+ *
+ * === FastAPI Deep Dive ===
+ *
+ *   # app/services/project_service.py
+ *   from sqlalchemy.ext.asyncio import AsyncSession
+ *   from sqlalchemy import select
+ *   from .models import Project
+ *   from .exceptions import NotFoundError
+ *
+ *   class ProjectService:
+ *       def __init__(self, db: AsyncSession):
+ *           self.db = db
+ *
+ *       async def create(self, user, name, description=None):
+ *           project = Project(owner_id=user.id, name=name, description=description)
+ *           self.db.add(project)
+ *           await self.db.commit()
+ *           await self.db.refresh(project)
+ *           return project
+ *
+ *       async def get(self, user, project_id):
+ *           result = await self.db.execute(
+ *               select(Project).where(Project.id == project_id, Project.owner_id == user.id)
+ *           )
+ *           project = result.scalar_one_or_none()
+ *           if not project:
+ *               raise NotFoundError("Project not found")
+ *           return project
+ *
+ *   # Key principles:
+ *   # - Services receive db session via dependency injection (Depends)
+ *   # - Async by default — all DB operations use await
+ *   # - Repository pattern: service wraps SQLAlchemy queries
+ *   # - Same ownership enforcement: filter by owner_id in query, not after fetch
+ *
  * See /docs/patterns/error-handling.ts for the canonical error strategy.
  */
 
