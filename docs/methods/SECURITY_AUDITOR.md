@@ -117,6 +117,16 @@ API responses must never include server filesystem paths (`/home/`, `/opt/`, `/U
 
 CORS security checks typically verify restrictions — that endpoints don't have overly permissive `Access-Control-Allow-Origin`. But also check the inverse: **do endpoints that NEED cross-origin access actually have CORS headers?** If the application uses subdomains, embedded content, or published sites that call back to the main API, verify those endpoints return the required CORS headers for legitimate origins. Missing CORS headers cause silent failures — the browser blocks the request but the user sees no error. (Field report #46: cross-origin tracking endpoint had no CORS headers; sendBeacon masked the problem but fetch-based tracking silently failed.)
 
+### Mobile Security Checklist (when `deploy: ios|android|cross-platform`)
+
+- **Certificate pinning:** Verify the app pins TLS certificates for API endpoints. Without pinning, MITM attacks can intercept API traffic even over HTTPS.
+- **Secure storage:** Secrets (tokens, keys) must use Keychain (iOS) or EncryptedSharedPreferences/Keystore (Android) — never AsyncStorage, UserDefaults, or SharedPreferences.
+- **Jailbreak/root detection:** Detect and warn (or block) on jailbroken/rooted devices. Attackers on jailbroken devices can read app sandbox, intercept SSL, and modify app behavior.
+- **Transport security:** iOS requires App Transport Security (ATS) — verify no `NSAllowsArbitraryLoads` exception. Android requires Network Security Config — verify no `cleartextTrafficPermitted`.
+- **No secrets in bundle:** Grep the built IPA/APK for hardcoded API keys, secrets, or credentials. Use `strings` on the binary. Anything in the bundle is extractable.
+- **Code obfuscation:** For Android, verify ProGuard/R8 is enabled. For React Native, verify Hermes is used (bytecode, not readable JS).
+- **Deep link validation:** Verify deep link handlers validate parameters before navigating. A crafted deep link (`yourapp://admin?bypass=true`) should not reach privileged screens.
+
 ### Vault Password Delivery
 
 When a project uses the VoidForge vault (or any encrypted credential store) with non-interactive access:
