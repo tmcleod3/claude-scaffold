@@ -294,6 +294,8 @@ See `ROADMAP.md` for the full plan. Summary:
 | **v8.1** | The Evolution | Self-Improving Methodology (auto-draft from lesson clusters), Agent Specialization (custom sub-agents) |
 | **v8.2** | The Autonomy | Autonomous Campaigns (`/campaign --autonomous` with guardrails and git checkpoints) |
 | **v9.0+** | The Horizon | Pattern Evolution, Cross-Project Orchestration, Multi-Language Forge, The Forge Builds the Forge |
+| **v10.0** | The War Room | Mission control dashboard, agent confidence scoring, agent debates, Living PRD, A/B testing, Prophecy Visualizer |
+| **v11.0** | The Consciousness | 8th universe (Cosmere — Sanderson), `/grow` growth pipeline, `/treasury` financial ops, ad platforms, site optimization |
 
 ---
 

@@ -3,8 +3,8 @@
 > The plan for the plan-maker.
 
 **Current:** v10.2.0 (2026-03-17)
-**Next:** v11.0 — TBD (v10.x complete)
-**Status:** v10.2 shipped (Natural Language Deploy, Methodology A/B Testing, Prophecy Visualizer). All v10.x remaining work is complete.
+**Next:** v11.0 — The Consciousness (Cosmere Growth Universe)
+**Status:** v10.x complete. v11.0 adds the 8th universe (Cosmere/Sanderson), growth/marketing pipeline, financial operations.
 
 ---
 
@@ -1285,6 +1285,73 @@ The PRD is currently static — read at Phase 0, checked at the end by Troi. Mak
 ### Estimated effort
 v10.1: 2-3 sessions (4 missions — data feeds + 3 enforcement missions)
 v10.2: 3-4 sessions (3 missions — all require real implementation code)
+
+---
+
+## v11.0 — The Consciousness (Cosmere Growth Universe)
+
+*"There's always another secret." — Kelsier*
+
+**The thesis:** VoidForge has the build/review/deploy pipeline. v11.0 adds the growth/marketing/money pipeline. The 8th universe (Cosmere — Brandon Sanderson) brings 18 agents led by Kelsier, the 15th Council member.
+
+**Inspired by:** Polsia (autonomous AI business operations, $2M ARR), Paperclip (open-source zero-human company orchestration).
+
+### The 8th Universe: The Cosmere
+
+| Agent | Character | Source | Role |
+|-------|-----------|--------|------|
+| **Kelsier** | The Survivor | Mistborn | **Lead** — Growth strategy, campaign orchestration |
+| **Vin** | Mistborn Ascendant | Mistborn | Analytics — attribution, metrics, pattern detection |
+| **Shallan** | Lightweaver | Stormlight | Content & creative — copy, brand, visual identity |
+| **Hoid** | Wit | Cosmere-wide | Copywriting — the storyteller with the perfect words |
+| **Kaladin** | Windrunner | Stormlight | Organic growth — community, word-of-mouth, trust |
+| **Dalinar** | The Blackthorn | Stormlight | Positioning — competitive analysis, market strategy |
+| **Navani** | Scholar-Queen | Stormlight | Technical SEO — schema, CWV, structured data |
+| **Raoden** | Prince of Elantris | Elantris | Conversion optimization — fixes broken funnels |
+| **Sarene** | Princess of Teod | Elantris | Outreach — cold email, influencer, co-marketing |
+| **Wax** | Allomantic Lawman | Mistborn Era 2 | Paid ads — targeting, campaigns, ROAS |
+| **Wayne** | Master of Disguise | Mistborn Era 2 | A/B testing — tries every variation |
+| **Steris** | The Planner | Mistborn Era 2 | Budget & forecasting — contingency plans |
+| **Dockson** | The Bookkeeper | Mistborn | Treasury — bank connections, payments, spend execution |
+| **Breeze** | The Soother | Mistborn | Platform relations — API credentials, platform ToS |
+| **Lift** | Edgedancer | Stormlight | Social media — fast, irreverent, audience voice |
+| **Szeth** | Truthless | Stormlight | Compliance — GDPR, CAN-SPAM, ad policies |
+| **Adolin** | Highprince | Stormlight | Brand ambassador — launches, PR, charm |
+| **Marsh** | The Inquisitor | Mistborn | Competitive intel — deep monitoring of competitors |
+
+### `/grow` Command — 6-Phase Growth Protocol
+
+Phase 1 — Reconnaissance (Kelsier + Vin + Marsh): Product audit, site audit, competitive analysis → Growth Brief
+Phase 2 — Foundation (Navani + Raoden): Technical SEO, conversion optimization, analytics setup
+Phase 3 — Content (Shallan + Hoid): Blog, changelog, case studies, social content, visual assets
+Phase 4 — Distribution: Organic (Kaladin, Lift, Adolin) + Paid (Wax, Wayne, Steris) + Outreach (Sarene)
+Phase 5 — Compliance (Szeth): GDPR, CAN-SPAM, platform ToS, privacy, ad creative compliance
+Phase 6 — Measure & Iterate (Vin + Kelsier): Track, identify, report, loop
+
+### The Treasury — `/treasury` Command
+
+Dockson manages real money. Revenue ingest (Stripe, Paddle, Mercury/Brex) → budget allocation → spend execution → reconciliation.
+
+Safety tiers: <$25/day auto-approve, $25-100 agent approval (Dockson + Steris), >$100 human confirm, >$500 hard stop. `/treasury --freeze` kills all automated spending. Immutable spend log.
+
+### Ad Platform Integration
+
+Meta, Google Ads, TikTok, LinkedIn, Twitter/X, Reddit (paid). Product Hunt, Hacker News (organic launches). Wax creates → Wayne A/B tests → Vin measures → optimize or kill.
+
+### Site Optimization (Navani's Pipeline)
+
+`/grow --seo`: Core Web Vitals, technical SEO (sitemap, robots, JSON-LD, OG), page speed, conversion optimization (Raoden).
+
+### Implementation Phases
+
+| Version | Codename | Focus | Effort |
+|---------|----------|-------|--------|
+| v11.0 | The Consciousness | Cosmere universe (18 agents) + Kelsier (15th lead) + `/grow` (audit, SEO, content) + budget flags + method docs | 3-4 sessions |
+| v11.1 | The Distribution | Ad platforms (Meta, Google) + Wax/Wayne/Steris active + social (Lift) + outreach (Sarene) | 2-3 sessions |
+| v11.2 | The Treasury | Dockson + Stripe/Mercury revenue + spend tiers + `/treasury` command | 2-3 sessions |
+| v11.3 | The Heartbeat | Heartbeat mode + `/portfolio` + cross-project financials + daily optimization | 2-3 sessions |
+
+---
 
 ### Deferred Indefinitely
 
