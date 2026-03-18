@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 12.2.0
+**Current:** 12.4.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,8 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 12.4.0 | 2026-03-18 | The Autonomy — route optimizer, Tier 2/3 autonomy, circuit breakers, kill switch, deploy freeze |
+| 12.3.0 | 2026-03-18 | The Navigator — Paris's route optimization (included in v12.4 release) |
 | 12.2.0 | 2026-03-18 | The Bridge — Chakotay's correlation engine, prediction tracking, cross-pipeline data flow |
 | 12.1.0 | 2026-03-18 | The Analyst — Seven's gap analysis, campaign proposal generator, Tier 1 advisory, Deep Current Danger Room tab |
 | 12.0.0 | 2026-03-18 | The Scanner — Deep Current: autonomous campaign intelligence, /current command, site scanner, situation model, cold start intake |
