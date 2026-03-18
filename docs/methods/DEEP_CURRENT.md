@@ -98,7 +98,7 @@ After every campaign:
 
 ```
 GREENFIELD  — no codebase, no PRD, just an idea
-IDEA+PRD    — PRD exists, no code yet
+IDEA_PRD    — PRD exists, no code yet
 PARTIAL     — some code, may or may not have PRD
 DEPLOYED    — code exists and is live
 OPERATING   — deployed AND has growth/revenue data

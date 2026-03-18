@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.0.0] - 2026-03-18
+
+### Added — The Scanner (Deep Current: Autonomous Campaign Intelligence)
+- **`/current` command** — Tuvok's Deep Current: scan → analyze → propose → gate → execute → learn. Cold start intake for greenfield projects. Status display with 5-dimension radar.
+- **`docs/methods/DEEP_CURRENT.md`** — Tuvok's method doc: the Loop (SENSE→ANALYZE→PROPOSE→GATE→EXECUTE→LEARN), 3-tier autonomy, cold start sequence, situation model schema, security constraints, circuit breakers
+- **`wizard/lib/site-scanner.ts`** — Torres's HTTP-based site scanner: performance (TTFB, compression, cache), SEO (meta tags, sitemap, JSON-LD), security (HTTPS, HSTS, CSP), growth (analytics detection, email capture, social meta). SSRF protection + redirect depth limit.
+- **`wizard/lib/deep-current.ts`** — Situation model: 5-dimension scoring (feature, quality, performance, growth, revenue), project state classifier (GREENFIELD → OPERATING), cold start intake with per-state recommendations, persistent JSON state
+- **5 Voyager agent roles** — Tuvok (strategic intelligence), Seven (optimization), Chakotay (cross-pipeline bridge), Paris (route planning), Torres (site scanning). Updated in naming registry.
+
+### Fixed
+- SSRF protection in site scanner (private IP blocking)
+- Redirect depth limit (max 5, was unbounded)
+- IDEA+PRD → IDEA_PRD naming consistency
+
+---
+
 ## [11.3.0] - 2026-03-18
 
 ### Added — The Heartbeat (Portfolio, Anomaly Detection, Service Management)

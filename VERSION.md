@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 11.3.0
+**Current:** 12.0.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 12.0.0 | 2026-03-18 | The Scanner — Deep Current: autonomous campaign intelligence, /current command, site scanner, situation model, cold start intake |
 | 11.3.0 | 2026-03-18 | The Heartbeat — /portfolio command, Mercury/Brex adapters, anomaly detection, encrypted backup, service install, desktop notifications, Heartbeat tab |
 | 11.2.0 | 2026-03-18 | The Distribution — 6 ad platform adapters, campaign state machine, spend execution pipeline, compliance framework, Ad Campaigns tab |
 | 11.1.0 | 2026-03-18 | The Treasury — Dockson's financial operations: heartbeat daemon, reconciliation engine, revenue adapters, /treasury command, Treasury tab |

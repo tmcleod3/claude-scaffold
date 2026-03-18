@@ -81,8 +81,24 @@ interface HealthScan {
 
 // ── HTTP Helper ───────────────────────────────────────
 
-function fetchUrl(url: string, timeoutMs: number = 10000): Promise<{ statusCode: number; headers: Record<string, string>; body: string; ttfbMs: number; totalMs: number }> {
+/** SSRF protection: reject private/internal IP ranges */
+function isPrivateUrl(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname;
+    // Block loopback, private ranges, link-local, metadata endpoints
+    if (/^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.|::1|fd|fe80)/i.test(hostname)) return true;
+    if (hostname === 'localhost' || hostname === '[::1]') return true;
+    return false;
+  } catch { return true; } // Malformed URL = reject
+}
+
+function fetchUrl(url: string, timeoutMs: number = 10000, maxRedirects: number = 5): Promise<{ statusCode: number; headers: Record<string, string>; body: string; ttfbMs: number; totalMs: number }> {
   return new Promise((resolve, reject) => {
+    if (isPrivateUrl(url)) {
+      reject(new Error(`SSRF blocked: ${new URL(url).hostname} is a private/internal address`));
+      return;
+    }
+
     const parsedUrl = new URL(url);
     const getter = parsedUrl.protocol === 'https:' ? httpsGet : httpGet;
     const start = Date.now();
@@ -92,10 +108,11 @@ function fetchUrl(url: string, timeoutMs: number = 10000): Promise<{ statusCode:
       ttfb = Date.now() - start;
       let body = '';
 
-      // Follow redirects (up to 5)
+      // Follow redirects with depth limit
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        if (maxRedirects <= 0) { reject(new Error('Too many redirects (max 5)')); return; }
         const redirectUrl = new URL(res.headers.location, url).toString();
-        fetchUrl(redirectUrl, timeoutMs).then(resolve).catch(reject);
+        fetchUrl(redirectUrl, timeoutMs, maxRedirects - 1).then(resolve).catch(reject);
         return;
       }
 
