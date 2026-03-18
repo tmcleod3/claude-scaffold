@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v10.1.0 (2026-03-17)
-**Next:** v10.2 — Unbuilt Features (Natural Language Deploy, Methodology A/B Testing, Prophecy Visualizer)
-**Status:** v10.1 shipped (data feeds, confidence scoring, agent debates, Living PRD). v10.2 builds the remaining v10.x features. See "Remaining v10.x Work" below.
+**Current:** v10.2.0 (2026-03-17)
+**Next:** v11.0 — TBD (v10.x complete)
+**Status:** v10.2 shipped (Natural Language Deploy, Methodology A/B Testing, Prophecy Visualizer). All v10.x remaining work is complete.
 
 ---
 

@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [10.2.0] - 2026-03-17
+
+### Added
+- **Natural Language Deploy** — `wizard/lib/natural-language-deploy.ts`. Prose description → YAML deploy frontmatter. Budget parsing, platform detection, resilience config inference. Integrated into `/prd` Act 5 as optional input.
+- **Methodology A/B Testing** — `wizard/lib/experiment.ts`. Experiment CRUD + evaluation framework at `~/.voidforge/experiments.json`. True-positive rate + context efficiency comparison. Per-agent accuracy tracking. War Room Experiment Dashboard panel.
+- **Prophecy Visualizer** — `wizard/ui/war-room-prophecy.js`. Interactive SVG dependency graph. Color-coded mission nodes (green/yellow/red/gray/purple). Clickable with keyboard support. Legend and detail panel. War Room integration.
+
+### Fixed
+- SVG focus indicators for keyboard navigation (Gauntlet G-UX-001)
+- SVG role changed to `group` for assistive technology compatibility (G-UX-002)
+- XSS defense-in-depth: escape mission status/number in prophecy detail panel (G-SEC-001)
+- Atomic write + restricted permissions (0o600) for experiments.json (G-QA-001)
+- Experiment panel aria-labelledby linked to title (G-UX-003)
+
+---
+
 ## [10.1.0] - 2026-03-17
 
 ### Added

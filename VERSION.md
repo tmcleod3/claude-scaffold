@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 10.1.0
+**Current:** 10.2.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 10.2.0 | 2026-03-17 | Unbuilt features: Natural Language Deploy, Methodology A/B Testing, Prophecy Visualizer |
 | 10.1.0 | 2026-03-17 | War Room data feeds + feature enforcement: live WebSocket, confidence scoring in commands, agent debates, Living PRD gates |
 | 10.0.1 | 2026-03-17 | Frontier features: confidence scoring, agent debates, adversarial PRD, living PRD, cross-project memory, build archaeology |
 | 10.0.0 | 2026-03-17 | The War Room — mission control dashboard with 5 core panels, WebSocket real-time feed, agent activity ticker |
