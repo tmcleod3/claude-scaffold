@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [11.0.0] - 2026-03-18
+
+### Added — The Consciousness (Cosmere Growth Universe)
+- **8th Universe: Cosmere (Brandon Sanderson)** — 18 agents led by Kelsier. Growth, marketing, analytics, and financial operations.
+- **`/grow` command** — 6-phase growth protocol: Reconnaissance → Foundation → Content → Distribution → Compliance → Measure. CLI-driven initial setup transitioning to autonomous daemon monitoring.
+- **`/cultivation install` command** — installs the heartbeat daemon, financial vault, TOTP 2FA, and adds Growth tabs to the Danger Room.
+- **`docs/methods/GROWTH_STRATEGIST.md`** — Kelsier's growth methodology with 3-tier autonomous execution model (deterministic daemon jobs, on-demand AI, opt-in scheduled AI).
+- **`docs/patterns/ad-platform-adapter.ts`** — Split interface pattern: `AdPlatformSetup` (interactive OAuth), `AdPlatformAdapter` (daemon runtime), `ReadOnlyAdapter` (Tier 1 jobs). Reference Meta Marketing API implementation. Token bucket rate limiter.
+- **`docs/patterns/financial-transaction.ts`** — Branded `Cents`/`Percentage`/`Ratio` types, hash-chained append-only log, atomic write with macOS `F_FULLFSYNC` awareness, number formatting per §9.15.4.
+- **`wizard/lib/financial-vault.ts`** — Separate encrypted vault for ad platform and bank credentials. scrypt KDF (memory-hard). AES-256-GCM. Different password from infrastructure vault.
+- **`wizard/lib/totp.ts`** — RFC 6238 TOTP for financial 2FA. macOS Keychain storage (ADR-4). Replay protection tracking all used codes within window. 5-minute session TTL.
+- **`wizard/lib/safety-tiers.ts`** — Budget authorization with half-open interval tiers ($25/$100/$500). Aggregate $100/day cap. Campaign creation rate limits. Autonomous scope enforcement.
+- **Danger Room tab navigation system** — ARIA-compliant tablist/tab/tabpanel with arrow key navigation, hash routing. Tabs shown conditionally when Cultivation is installed.
+- **Danger Room Growth tab** — KPI cards (revenue/spend/net), ROAS by Platform, Traffic Sources, Conversion Funnel panels. Read-only placeholder data for v11.0.
+- **Financial CSS color tokens** — 8 semantic tokens for financial data display (positive, negative, warning, neutral, healthy, error, inactive, frozen).
+- **Global freeze button** — Emergency spend freeze in Danger Room header (desktop) and FAB (mobile). CSP-compliant event handlers.
+- **WebSocket reconnection** — Exponential backoff (1s→30s cap), reconnection banner, full state refresh on reconnect.
+- **PRD §9.19** — 16 subsections: Cultivation architecture clarification, process model, install commands, autonomous execution model, autonomous scope, code modification policy, authentication, CLI-to-autonomous handoff, WebSocket reconnection, adapter interface update, campaign state machine events, system state type, backup scope, rate limits, token rotation, API response sanitization.
+- **PRD §9.20** — 14 subsections: Network binding fix, tab architecture, A/B test group data model, daemon authorization guard, autonomous rule thresholds, approval queue UX, agent voice in autonomous loop, freeze button spec, symlink guard, prompt injection mitigation, socket API contract, CampaignConfig schema, data propagation model, proxy token re-read.
+
+### Changed
+- **Danger Room rename complete** — War Room → Danger Room across all remaining PRD references (lines 1607-1609, component contract)
+- **PRD §9.1 Vision rewritten** — Cultivation is the engine (daemon + rules), not a separate web app
+- **PRD §9.3 /grow rewritten** — aligned with §9.19 execution model
+- **ROADMAP.md v11 deliverables expanded** — Danger Room tab system, §9.19/§9.20 references, per-version tab additions
+- **10 methodology improvements from inbox triage** — BUILD_PROTOCOL (+4 wiring checks), SECURITY_AUDITOR (+fail-closed), TESTING (+constraint smoke test), BACKEND_ENGINEER (+2 gotchas), CAMPAIGN (+consumer verification), FIELD_MEDIC (+--submit clarification)
+
+---
+
 ## [10.2.0] - 2026-03-17
 
 ### Added
