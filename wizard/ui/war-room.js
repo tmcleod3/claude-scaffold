@@ -212,6 +212,9 @@
     renderGauge(context);
     renderPrdCoverage(campaign);
     renderExperiments(experiments);
+    if (typeof window.renderProphecyGraph === 'function') {
+      window.renderProphecyGraph(document.getElementById('prophecy-graph'), campaign);
+    }
   }
 
   // ── WebSocket for real-time updates ──────────────
