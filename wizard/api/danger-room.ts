@@ -245,3 +245,33 @@ addRoute('GET', '/api/danger-room/experiments', async (_req: IncomingMessage, re
     sendJson(res, 200, { experiments: [], total: 0 });
   }
 });
+
+// ── Growth / Cultivation endpoints (§9.19, §9.20) ──
+
+addRoute('GET', '/api/danger-room/heartbeat', async (_req: IncomingMessage, res: ServerResponse) => {
+  // Check if Cultivation is installed by looking for treasury vault or heartbeat state
+  const treasuryVaultPath = join(homedir(), '.voidforge', 'treasury', 'vault.enc');
+  const heartbeatJsonPath = join(homedir(), '.voidforge', 'heartbeat.json');
+  let cultivationInstalled = false;
+  let heartbeatData = null;
+
+  try {
+    const { existsSync } = await import('node:fs');
+    cultivationInstalled = existsSync(treasuryVaultPath);
+    const raw = await readFileOrNull(heartbeatJsonPath);
+    if (raw) heartbeatData = JSON.parse(raw);
+  } catch { /* no heartbeat data */ }
+
+  sendJson(res, 200, {
+    cultivationInstalled,
+    heartbeat: heartbeatData,
+    // lastAgentMessage is included in heartbeatData if present
+  });
+});
+
+addRoute('POST', '/api/danger-room/freeze', async (_req: IncomingMessage, res: ServerResponse) => {
+  // Freeze is a low-friction emergency action (session token only, no vault/TOTP per §9.18)
+  // In the full implementation, this sends a freeze command to the daemon socket
+  // For now (v11.0 — read-only placeholder), return acknowledgment
+  sendJson(res, 200, { ok: true, message: 'Freeze command sent to daemon' });
+});

@@ -84,12 +84,76 @@
     /* Focus management */
     a:focus-visible, .panel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-    /* Responsive — stack on narrow viewports */
+    /* ── Tab Navigation (§9.20.2) ── */
+    .tab-bar { display: none; gap: 2px; padding: 0 20px; border-bottom: 1px solid var(--border); background: var(--bg); }
+    .tab-bar.active { display: flex; }
+    .tab-bar [role="tab"] {
+      padding: 8px 16px; font-size: 12px; font-weight: 600; color: var(--text-dim);
+      background: none; border: none; border-bottom: 2px solid transparent;
+      cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .tab-bar [role="tab"]:hover { color: var(--text); }
+    .tab-bar [role="tab"][aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-bar [role="tab"]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+
+    /* ── Financial Color Tokens (§9.15.3) ── */
+    :root {
+      --fin-positive: #22c55e;
+      --fin-negative: #ef4444;
+      --fin-warning: #f59e0b;
+      --fin-neutral: #94a3b8;
+      --fin-healthy: #22c55e;
+      --fin-error: #ef4444;
+      --fin-inactive: #475569;
+      --fin-frozen: #3b82f6;
+    }
+
+    /* ── Growth Tab Panels ── */
+    .kpi-row { display: flex; gap: 12px; grid-column: 1 / -1; }
+    .kpi-card { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+    .kpi-value { font-size: 22px; font-weight: 700; }
+    .kpi-label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+    .kpi-trend { font-size: 11px; margin-top: 2px; }
+    .kpi-trend.up { color: var(--fin-positive); }
+    .kpi-trend.down { color: var(--fin-negative); }
+    .kpi-trend.flat { color: var(--fin-neutral); }
+
+    .empty-state { grid-column: 1 / -1; text-align: center; padding: 48px 24px; color: var(--text-dim); font-size: 14px; }
+    .empty-state-action { margin-top: 12px; color: var(--accent); text-decoration: none; font-size: 13px; }
+
+    /* ── Freeze Button (§9.20.8) ── */
+    .freeze-btn { display: none; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; }
+    .freeze-btn.visible { display: inline-flex; align-items: center; gap: 6px; }
+    .freeze-btn:not(.frozen) { background: none; border: 1px solid var(--fin-negative); color: var(--fin-negative); }
+    .freeze-btn:not(.frozen):hover { background: var(--fin-negative); color: white; }
+    .freeze-btn.frozen { background: var(--fin-frozen); border: 1px solid var(--fin-frozen); color: white; }
+    .freeze-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Reconnection Banner (§9.19.9) ── */
+    .reconnect-banner { display: none; grid-column: 1 / -1; padding: 8px 20px; font-size: 12px; text-align: center; }
+    .reconnect-banner.reconnecting { display: block; background: var(--fin-warning); color: #000; }
+    .reconnect-banner.failed { display: block; background: var(--fin-negative); color: white; }
+
+    /* ── System Status Summary ── */
+    .system-status { font-size: 11px; color: var(--text-dim); padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+    /* ── Responsive ── */
     @media (max-width: 700px) {
       .danger-room { grid-template-columns: 1fr; }
       .sidebar { border-left: none; border-top: 1px solid var(--border); }
       .main-panels { grid-template-columns: 1fr; }
+      .tab-panel.active { grid-template-columns: 1fr; }
+      .kpi-row { flex-direction: column; }
+      .tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      /* Mobile freeze FAB (§9.20.8) */
+      .freeze-fab { display: none; position: fixed; bottom: max(16px, env(safe-area-inset-bottom, 16px)); right: 16px; width: 56px; height: 56px; border-radius: 50%; font-size: 20px; z-index: 100; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+      .freeze-fab.visible { display: flex; align-items: center; justify-content: center; }
+      .freeze-fab:not(.frozen) { background: var(--fin-negative); color: white; }
+      .freeze-fab.frozen { background: var(--fin-frozen); color: white; }
     }
+    @media (min-width: 701px) { .freeze-fab { display: none !important; } }
 
     /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
@@ -105,14 +169,33 @@
         <div class="danger-room-title">Danger Room</div>
         <div class="danger-room-version" id="version-display">VoidForge v—</div>
       </div>
-      <nav class="danger-room-nav" aria-label="Danger Room navigation">
-        <a href="lobby.html">Lobby</a>
-        <a href="danger-room.html" aria-current="page" style="background:var(--bg-card);color:var(--text);">Danger Room</a>
-      </nav>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="freeze-btn" id="freeze-btn" role="button"
+          aria-label="Emergency freeze: pause all automated spending" aria-pressed="false"
+          onclick="handleFreeze()">❄ Freeze Spend</button>
+        <nav class="danger-room-nav" aria-label="Danger Room navigation">
+          <a href="lobby.html">Lobby</a>
+          <a href="danger-room.html" aria-current="page" style="background:var(--bg-card);color:var(--text);">Danger Room</a>
+        </nav>
+      </div>
     </header>
+
+    <!-- Tab Bar (§9.20.2 — shown when Cultivation is installed) -->
+    <div class="tab-bar" id="tab-bar" role="tablist" aria-label="Danger Room tabs">
+      <button role="tab" id="tab-ops" aria-selected="true" aria-controls="panel-ops" onclick="switchTab('ops')">Ops</button>
+      <button role="tab" id="tab-growth" aria-selected="false" aria-controls="panel-growth" onclick="switchTab('growth')">Growth</button>
+    </div>
+
+    <!-- Reconnection Banner (§9.19.9) -->
+    <div class="reconnect-banner" id="reconnect-banner" role="status" aria-live="polite"></div>
+
+    <!-- Mobile Freeze FAB (§9.20.8) -->
+    <button class="freeze-fab" id="freeze-fab" aria-label="Emergency freeze: pause all automated spending" onclick="handleFreeze()">❄</button>
 
     <!-- Main Panels -->
     <main class="main-panels">
+      <!-- ═══ OPS TAB ═══ -->
+      <div class="tab-panel active" id="panel-ops" role="tabpanel" aria-labelledby="tab-ops">
       <!-- Campaign Timeline -->
       <div class="panel panel-full" role="region" aria-label="Campaign Timeline">
         <div class="panel-title" id="title-timeline">Campaign Timeline</div>
@@ -158,6 +241,59 @@
         <div id="prophecy-graph" style="min-height:100px;"></div>
         <div id="prophecy-detail" style="font-size:12px;margin-top:6px;min-height:40px;color:var(--text-dim);"></div>
       </div>
+      </div><!-- /panel-ops -->
+
+      <!-- ═══ GROWTH TAB (§9.10 — read-only, placeholder data) ═══ -->
+      <div class="tab-panel" id="panel-growth" role="tabpanel" aria-labelledby="tab-growth">
+        <!-- System Status Summary (§9.20.2) -->
+        <div class="system-status" id="growth-system-status" aria-live="polite" style="grid-column:1/-1;">
+          Cultivation: not installed — run <code>/cultivation install</code> to begin
+        </div>
+
+        <!-- Empty State (§9.15.7) -->
+        <div class="empty-state" id="growth-empty-state">
+          <div>No growth data yet.</div>
+          <div style="margin-top:8px;">Run <code>/grow</code> to start your first growth campaign.</div>
+          <a href="#" class="empty-state-action" onclick="return false;">Learn about /grow →</a>
+        </div>
+
+        <!-- KPI Cards (hidden until data exists) -->
+        <div class="kpi-row" id="growth-kpi-row" style="display:none;">
+          <div class="kpi-card">
+            <div class="kpi-value" id="kpi-revenue">$0</div>
+            <div class="kpi-label">Revenue</div>
+            <div class="kpi-trend flat" id="kpi-revenue-trend">— MoM</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" id="kpi-spend">$0</div>
+            <div class="kpi-label">Spend</div>
+            <div class="kpi-trend flat" id="kpi-spend-trend">— MoM</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" id="kpi-net">$0</div>
+            <div class="kpi-label">Net</div>
+            <div class="kpi-trend flat" id="kpi-roas">0.0x</div>
+          </div>
+        </div>
+
+        <!-- ROAS by Platform (placeholder) -->
+        <div class="panel panel-full" id="growth-roas-panel" style="display:none;" role="region" aria-label="ROAS by Platform">
+          <div class="panel-title">ROAS by Platform</div>
+          <div style="font-size:13px;color:var(--text-dim);">No platform data</div>
+        </div>
+
+        <!-- Traffic Sources (placeholder) -->
+        <div class="panel" id="growth-traffic-panel" style="display:none;" role="region" aria-label="Traffic Sources">
+          <div class="panel-title">Traffic Sources</div>
+          <div style="font-size:13px;color:var(--text-dim);">No traffic data</div>
+        </div>
+
+        <!-- Conversion Funnel (placeholder) -->
+        <div class="panel" id="growth-funnel-panel" style="display:none;" role="region" aria-label="Conversion Funnel">
+          <div class="panel-title">Conversion Funnel</div>
+          <div style="font-size:13px;color:var(--text-dim);">No conversion data</div>
+        </div>
+      </div><!-- /panel-growth -->
     </main>
 
     <!-- Sidebar -->

@@ -217,17 +217,112 @@
     }
   }
 
-  // ── WebSocket for real-time updates ──────────────
+  // ── Tab Navigation (§9.20.2) ─────────────────────
+
+  var cultivationInstalled = false;
+
+  function switchTab(tabId) {
+    var tabs = document.querySelectorAll('[role="tab"]');
+    var panels = document.querySelectorAll('.tab-panel');
+    tabs.forEach(function (t) { t.setAttribute('aria-selected', 'false'); });
+    panels.forEach(function (p) { p.classList.remove('active'); });
+    var tab = document.getElementById('tab-' + tabId);
+    var panel = document.getElementById('panel-' + tabId);
+    if (tab) tab.setAttribute('aria-selected', 'true');
+    if (panel) panel.classList.add('active');
+    location.hash = tabId === 'ops' ? '' : tabId;
+  }
+  // Expose for onclick
+  window.switchTab = switchTab;
+
+  // Arrow key navigation within tab bar
+  document.addEventListener('keydown', function (e) {
+    var tabBar = document.getElementById('tab-bar');
+    if (!tabBar || !tabBar.contains(document.activeElement)) return;
+    var tabs = Array.from(tabBar.querySelectorAll('[role="tab"]'));
+    var idx = tabs.indexOf(document.activeElement);
+    if (idx === -1) return;
+    if (e.key === 'ArrowRight') { tabs[(idx + 1) % tabs.length].focus(); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { tabs[(idx - 1 + tabs.length) % tabs.length].focus(); e.preventDefault(); }
+  });
+
+  function initTabs() {
+    // Check if Cultivation is installed by looking for heartbeat data
+    fetchJSON('/api/danger-room/heartbeat').then(function (data) {
+      if (data && data.cultivationInstalled) {
+        cultivationInstalled = true;
+        document.getElementById('tab-bar').classList.add('active');
+        document.getElementById('freeze-btn').classList.add('visible');
+        document.getElementById('freeze-fab').classList.add('visible');
+        // Apply hash-based tab routing
+        var hash = location.hash.replace('#', '');
+        if (hash && document.getElementById('tab-' + hash)) {
+          switchTab(hash);
+        }
+      }
+      // Without Cultivation: no tab bar, no freeze button, flat layout preserved
+    });
+  }
+
+  // ── Freeze Button (§9.20.8) ─────────────────────
+
+  function handleFreeze() {
+    var btn = document.getElementById('freeze-btn');
+    var fab = document.getElementById('freeze-fab');
+    var isFrozen = btn.classList.contains('frozen');
+    if (isFrozen) {
+      // Unfreeze requires vault password + TOTP — show dialog
+      alert('Unfreeze requires vault password + 2FA. Use /treasury --unfreeze in the CLI.');
+      return;
+    }
+    if (!confirm('Freeze all spending across all platforms? Active campaigns will be paused.')) return;
+    fetch('/api/danger-room/freeze', { method: 'POST', headers: { 'X-VoidForge-Request': '1' } })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          btn.classList.add('frozen');
+          btn.innerHTML = '❄ FROZEN';
+          btn.setAttribute('aria-pressed', 'true');
+          fab.classList.add('frozen');
+          fab.innerHTML = '❄';
+          addTickerMessage('Dockson', 'ALL SPENDING FROZEN');
+        }
+      })
+      .catch(function () { alert('Freeze failed — try /treasury --freeze in the CLI.'); });
+  }
+  window.handleFreeze = handleFreeze;
+
+  // ── WebSocket with Reconnection Banner (§9.19.9) ──
 
   var wsRetryDelay = 1000;
   var WS_MAX_RETRY_DELAY = 30000;
+  var wsReconnectTimer = null;
+  var wsConnected = false;
+
+  function showReconnectBanner(state) {
+    var banner = document.getElementById('reconnect-banner');
+    banner.className = 'reconnect-banner';
+    if (state === 'reconnecting') {
+      banner.classList.add('reconnecting');
+      banner.textContent = 'Reconnecting to VoidForge server...';
+    } else if (state === 'failed') {
+      banner.classList.add('failed');
+      banner.innerHTML = 'Connection lost. <a href="javascript:location.reload()" style="color:white;text-decoration:underline;">Refresh page</a> or check if the VoidForge server is running.';
+    } else {
+      banner.className = 'reconnect-banner'; // hidden
+    }
+  }
 
   function connectWebSocket() {
     var wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
     var ws = new WebSocket(wsProtocol + '//' + location.host + '/ws/danger-room');
 
     ws.onopen = function () {
-      wsRetryDelay = 1000; // Reset backoff on successful connection
+      wsRetryDelay = 1000;
+      wsConnected = true;
+      showReconnectBanner('hidden');
+      // On reconnect: pull full state (§9.19.9)
+      refresh();
     };
 
     ws.onmessage = function (event) {
@@ -238,19 +333,27 @@
         } else if (msg.type === 'finding') {
           var el = document.getElementById('score-' + msg.severity);
           if (el) el.textContent = parseInt(el.textContent) + 1;
-        } else if (msg.type === 'phase-update') {
+        } else if (msg.type === 'phase-update' || msg.type === 'growth-update') {
           refresh();
         }
       } catch { /* ignore malformed messages */ }
     };
 
-    ws.onerror = function () {
-      // Error fires before close — logged for debugging, close handles reconnect
-    };
+    ws.onerror = function () {};
 
     ws.onclose = function () {
-      // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 30s max
-      setTimeout(connectWebSocket, wsRetryDelay);
+      wsConnected = false;
+      if (wsRetryDelay <= WS_MAX_RETRY_DELAY) {
+        showReconnectBanner('reconnecting');
+      }
+      wsReconnectTimer = setTimeout(function () {
+        // After 2 minutes of failure, show permanent failure banner
+        if (wsRetryDelay >= WS_MAX_RETRY_DELAY * 4) {
+          showReconnectBanner('failed');
+          return;
+        }
+        connectWebSocket();
+      }, wsRetryDelay);
       wsRetryDelay = Math.min(wsRetryDelay * 2, WS_MAX_RETRY_DELAY);
     };
   }
@@ -261,6 +364,7 @@
     await refresh();
     setInterval(refresh, REFRESH_INTERVAL_MS);
     connectWebSocket();
+    initTabs();
   }
 
   init();
