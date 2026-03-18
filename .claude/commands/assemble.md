@@ -109,9 +109,9 @@ Use the Agent tool to run these in parallel — all are adversarial, read-only a
 - **Loki** (Marvel) — chaos-tests features that /qa cleared. Finds what breaks under unexpected conditions.
 - **Constantine** (DC) — hunts cursed code in FIXED areas specifically. Code that works by accident.
 
-Synthesize findings. Fix all Must Fix items. If any fixes were applied, re-run the four agents on the fixed areas only.
+Synthesize findings. **Conflict detection:** If any two agents produce conflicting findings on the same code (one says "fix," another says "by design" or "not exploitable"), trigger the debate protocol instead of listing both. See SUB_AGENTS.md "Agent Debate Protocol": Agent A states finding → Agent B responds → Agent A rebuts → Arbiter (Picard or user) decides. 3 exchanges max. Log the debate transcript as an ADR. Fix all Must Fix items. If any fixes were applied, re-run the four agents on the fixed areas only.
 
-**Gate:** All four adversarial agents sign off. Update assemble-state.
+**Gate:** All four adversarial agents sign off. All conflicts resolved via debate (no unresolved disagreements). Update assemble-state.
 
 ## Phase 13 — The Council (Convergence)
 **Fury:** "Last call. One agent from each domain — verify nobody broke anyone else's work."
@@ -124,10 +124,13 @@ Use the Agent tool to run these in parallel:
 - **Samwise** (Tolkien) — Did any fix break accessibility?
 - **Troi** (Star Trek) — PRD compliance: read the PRD prose section-by-section, verify every claim against the implementation. Not just "does the route exist?" but "does the component render what the PRD describes?" Check numeric claims, visual treatments, copy accuracy. Flag asset gaps as BLOCKED. (Troi runs on the final Council iteration, or always when `--skip-build` is used for campaign victory gates.)
 
+**Conflict detection:** If Council members disagree (e.g., Spock says a fix broke patterns but Ahsoka says it's necessary for access control), trigger the debate protocol. Do not list both opinions — resolve via debate. Arbiter: Picard for code/architecture conflicts, Troi for PRD compliance conflicts.
+
 If the Council finds issues:
 1. Fix code discrepancies. Flag asset requirements as BLOCKED.
-2. Re-run the Council (max 3 iterations)
-3. If not converged after 3 rounds, present remaining findings to the user
+2. Resolve conflicts via debate protocol (see SUB_AGENTS.md). Log debate transcripts as ADRs.
+3. Re-run the Council (max 3 iterations)
+4. If not converged after 3 rounds, present remaining findings to the user
 
 **Gate:** All five Council members sign off. Zero cross-domain regressions. Update assemble-state.
 

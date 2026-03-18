@@ -65,8 +65,16 @@ For every `useEffect` in new/modified components:
 - Generic fallback messages are only used when the server truly returns no useful error info
 - The UI form state after error allows retry without losing user input
 
+## Step 1.5 — Conflict Detection
+After parallel analysis completes, scan findings from all agents for conflicts:
+- **Same code, different verdicts:** Spock says "pattern violation" but Data says "intentional trade-off"
+- **Severity disagreements:** Seven says "Must Fix" but Spock says "Consider"
+- **Contradictory fixes:** One agent's fix would break another agent's recommendation
+
+For each conflict, trigger the debate protocol (see SUB_AGENTS.md "Agent Debate Protocol"): Agent A states finding → Agent B responds → Agent A rebuts → Arbiter (Picard) decides. 3 exchanges max. Log the debate transcript as an ADR. The winning position becomes the canonical finding in Step 2. Do NOT list both opinions — resolve them.
+
 ## Step 2 — Synthesize Findings
-Merge all findings into a review table:
+Merge all findings into a review table (conflicts already resolved via Step 1.5):
 
 | # | File | Line | Category | Severity | Confidence | Finding | Suggestion |
 |---|------|------|----------|----------|------------|---------|-----------|
