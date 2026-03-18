@@ -54,6 +54,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `game-loop.ts` — Fixed timestep game loop with interpolation, pause/resume
 - `game-state.ts` — Hierarchical state machine with history, save/load
 - `game-entity.ts` — Entity Component System with component stores and systems
+- `sse-endpoint.ts` — Server-Sent Events: lifecycle, keepalive, timeout, React hook (+ FastAPI, Django)
 
 ## Slash Commands
 

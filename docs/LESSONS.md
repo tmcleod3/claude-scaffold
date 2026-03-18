@@ -65,3 +65,10 @@
 **Lesson:** Filtering environment variables from a PTY's initial env only controls what's explicitly passed. If the PTY spawns a login shell that sources `.zshrc`/`.bashrc`, any `export` statements in the profile will re-inject variables. This is an accepted design tradeoff — you can't control user shell configuration without breaking their environment.
 **Action:** Document this limitation. For true isolation, use containerized environments or non-login shells with `--noprofile --norc`.
 **Promoted to:** Not yet
+
+### Iframe stacking context defeats z-index
+**Agent:** Galadriel (UX) | **Category:** gotcha
+**Context:** Dialog Travel map overlay (field report #79)
+**Lesson:** Iframes with `allow-same-origin` create impenetrable stacking contexts. z-index has no effect across stacking context boundaries — a `z-index: 9999` overlay inside the main document cannot appear above an iframe's stacking context.
+**Action:** Use `createPortal(element, document.body)` for any overlay that coexists with iframes. See `docs/patterns/component.tsx` Portal Pattern.
+**Promoted to:** docs/patterns/component.tsx (Portal Pattern)

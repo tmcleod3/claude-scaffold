@@ -154,6 +154,15 @@ When classifying a PRD requirement as "needs building," verify with a codebase s
 | OG images per page | Asset | No — design needed | BLOCKED |
 ```
 
+### Data Contract Verification
+
+When a mission reads data written by a previous mission (or a pre-existing module), verify the contract:
+1. For each database field the new code reads, trace back to the write path — does the producing module actually populate it?
+2. For each API response field the new UI consumes, verify the endpoint returns it
+3. For shared utilities introduced in earlier missions, verify the new mission uses them (not inline reimplementations)
+
+Cross-module data contracts are invisible to single-mission review. A field that "should exist" because the schema defines it may never be populated if the write path skips it. (Field report #77: Dialog Travel trip page read `placeContext` but the place creation flow never set it.)
+
 **Priority cascade for mission ordering:**
 1. Section 16 (Launch Sequence) — if the user defined phases, follow them
 2. Dependency graph — Auth before gated features, Schema before API, API before UI
@@ -346,6 +355,18 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
    - [ ] All BLOCKED items acknowledged by user
    - [ ] `/debrief --submit` filed (issue number recorded)
    - [ ] Campaign-state.md updated with final status
+
+### The Reckoning (Optional Pre-Launch Audit)
+
+Before declaring victory, Sisko may invoke The Reckoning — a 5-wave parallel parity audit focused on launch readiness rather than code quality:
+1. **Marketing parity** — does the site say what the product does?
+2. **UI parity** — do all pages/flows match the PRD?
+3. **Backend parity** — are all endpoints wired and functional?
+4. **Gate parity** — auth, payments, error handling all working?
+5. **Cross-cutting** — a11y, SEO, performance, mobile
+
+This is lighter than a Victory Gauntlet (~13 agents vs 30+) and focused on "can we ship?" rather than "is the code perfect?" Use when the campaign built a user-facing product and you want to verify parity between PRD and reality before the Gauntlet runs. (Field report #85)
+
 8. Sisko signs off (ONLY after checklist is complete):
 
 > *"The Prophets' plan is fulfilled. The campaign is complete."*

@@ -104,6 +104,13 @@ Fix batches happen between rounds:
 
 **Grep for siblings:** After EVERY fix, grep the entire codebase for the same pattern. When fixing `aria-controls` in one component, grep all components. When adding SSRF protection to one endpoint, check all endpoints that accept URLs. Fix ALL instances — not just the one that was reported. This is the #1 source of rework across field reports.
 
+**Concrete examples of sibling patterns to grep:**
+- Same ARIA attribute value in the same file (e.g., `role="option"` → grep for `"option"` in that file)
+- Same endpoint pattern in sibling router files (e.g., fixed `/api/trips/:id` → check `/api/places/:id`, `/api/bookings/:id`)
+- Same SQL pattern in sibling store functions (e.g., added `AND org_id = ?` → check all `WHERE id = ?` queries)
+- Same CSS class or animation name across component files
+- Same error handling pattern across API routes (e.g., added try/catch → check all routes in the same router)
+
 **Execution order check:** For every fix, verify not just that the code exists, but that it executes in the correct order relative to the code that consumes its output. Specifically: if a fix sanitizes/validates a value, verify the sanitization happens BEFORE the value is captured by any object construction, function call, or closure. (Field report #20: PTY clamping placed after spawnOptions construction — caught in Round 3.)
 
 **Encoding variant check:** For every security filter that operates on tool names, function names, or identifiers, verify it handles all encoding variants (`:`, `__`, URL-encoded, dot-notation, etc.). MCP tool names, API paths, and permission identifiers may use different encodings across layers.
@@ -170,6 +177,8 @@ This rule exists because agents self-justified "efficient" Gauntlets at 28% and 
 - `--resume` — Resume from the last completed round (reads from gauntlet-state.md).
 - `--ux-extra` — Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y. Produced 7 shipped enchantments in the v7.1.0 Gauntlet.
 - `--infinity` — **The Infinity Gauntlet.** 10 rounds (2x full pass). Every active agent deployed as its own sub-process — not combined, not summarized. The full ~110 agent roster across 7 universes. See below.
+- `--blitz` — Autonomous execution: no pause between rounds, auto-apply fixes, auto-continue. Combine with `--infinity` for fully autonomous maximum review. Does NOT reduce agent count or skip rounds — only removes human interaction between rounds.
+- `--reckoning` — Pre-launch parity audit: 5-wave parallel review (Marketing → UI → Backend → Gates → Cross-cutting) with ~13 agents. Lighter than `--infinity`, focused on launch readiness rather than code quality. See CAMPAIGN.md "The Reckoning" for the full wave structure.
 
 ### The Infinity Gauntlet (`--infinity`)
 
@@ -242,6 +251,27 @@ Each agent reports a confidence score (0-100) on their findings. The score refle
 **How to report:** Every finding includes a confidence field: `[ID] [SEVERITY] [CONFIDENCE: XX] [FILE] [DESCRIPTION]`
 
 **Why this matters:** In the v8.0 Gauntlet, several "findings" were false positives that wasted fix time. Confidence scoring lets agents express uncertainty instead of presenting everything as definitive. Low-confidence findings get a second opinion before reaching the user.
+
+## Sub-agent Failure Fallback
+
+If a sub-agent launch fails (API error, timeout, context exhaustion):
+1. **Retry once** with 5-second backoff.
+2. If retry fails, **run the analysis inline** (in the current context) with a logged warning: "Agent [name] failed to launch — running inline. Findings may be less thorough."
+3. Log the failure to the gauntlet state file with the agent name and error.
+4. Never skip an agent entirely. Inline analysis is degraded but better than a blind spot.
+
+## Alternative Patterns
+
+### The Reckoning (Pre-Launch Parity Audit)
+
+When the goal is "can we ship this?" rather than "is this code perfect?", the Reckoning runs 5 parallel waves focused on launch readiness:
+1. **Marketing parity** — does the site say what the product does?
+2. **UI parity** — do all pages/flows match the PRD?
+3. **Backend parity** — are all endpoints wired and functional?
+4. **Gate parity** — auth, payments, error handling all working?
+5. **Cross-cutting** — a11y, SEO, performance, mobile
+
+~13 agents, 30-60 minutes. Complements the Gauntlet (which is code-focused) with a product-focused lens. Reference: field report #85.
 
 ## Integration Points
 

@@ -204,6 +204,17 @@ export async function GET(req: NextRequest) {
 // (Field report #36: analytics endpoint failed silently because sendBeacon
 // couldn't attach the CSRF header.)
 
+// ── Anti-pattern: Raw Prisma spread ──────────────────
+// NEVER spread raw ORM/Prisma objects into API responses:
+//   ❌ res.json({ ...record })           — leaks internal fields (userId, rawMessageId, FK columns)
+//   ❌ res.json({ ...record, extra: 1 }) — still leaks everything from the spread
+//   ✅ res.json({ id: record.id, name: record.name, context: record.context })
+//
+// Prisma `include` without `select` returns ALL columns.
+// Spreading passes them to the client, exposing internal schema.
+// Always whitelist fields explicitly.
+// (Field report #77: Dialog Travel leaked 12 internal fields via ...rec spread)
+
 // --- Consistent error handler (shared across all routes) ---
 // Located in /lib/errors.ts — shown here for reference
 /*

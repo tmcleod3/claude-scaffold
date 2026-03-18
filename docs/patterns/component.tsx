@@ -109,6 +109,26 @@
  * aria-controls or content id — a11y violation caught in review.)
  */
 
+// ── Portal Pattern (iframe-safe overlays) ────────────
+// Any dropdown, popover, modal, or tooltip that must render ABOVE an iframe
+// MUST use createPortal to document.body.
+//
+// Why: Iframes with allow-same-origin create impenetrable stacking contexts.
+// z-index alone will NOT work — the iframe's stacking context always wins.
+//
+// import { createPortal } from 'react-dom';
+//
+// function Dropdown({ children, isOpen }: { children: React.ReactNode; isOpen: boolean }) {
+//   if (!isOpen) return null;
+//   return createPortal(
+//     <div style={{ position: 'fixed', zIndex: 9999 }}>{children}</div>,
+//     document.body
+//   );
+// }
+//
+// Django/HTMX equivalent: render the overlay in a top-level <div> outside the iframe container.
+// (Field report #79: iframe stacking context defeated z-index on map overlay)
+
 'use client'
 
 import { useState } from 'react'

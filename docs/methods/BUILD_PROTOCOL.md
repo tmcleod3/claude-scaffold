@@ -174,6 +174,10 @@ After building a new service, worker, or pipeline, verify it's connected to the 
 
 New infrastructure that isn't wired to consumers is dead code. This check runs at the end of every build mission, not deferred to review. (Field report #33: entire enrichment pipeline was dead code — orchestrator built but never connected to conversation engine.)
 
+**Multi-tenant sweep (conditional):** If this phase adds or modifies auth, ownership, or multi-tenant logic, run an org_id/ownership sweep: grep all `WHERE id = ?` (or ORM equivalent) queries across all routes/services and verify each includes an ownership check (`AND org_id = ?`, `AND userId = ?`, or equivalent). This catches IDOR vulnerabilities from queries that filter by primary key without scoping to the authenticated user's tenant.
+
+**Role enforcement sweep (conditional):** If this phase adds new API endpoints, verify each non-GET endpoint has role/permission enforcement. Grep for route registrations without auth middleware: any POST/PATCH/DELETE endpoint missing a `require_role`, `requireAuth`, or equivalent middleware is a security gap.
+
 **Phase 5 — Supporting Features.**
 1. Build in dependency order: schema -> API -> UI -> wire up -> verify
 2. One batch = one feature or tightly coupled feature group (max ~200 lines changed per batch)
