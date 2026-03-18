@@ -102,6 +102,7 @@ Kira reads the battlefield:
    - If vault exists + provisioning NOT done → flag: "Credentials collected but infrastructure not provisioned. Run `voidforge deploy` before continuing."
    - If vault exists + provisioning done → verify `.env` is populated from vault. If not, suggest re-running provisioner.
    - If no vault → proceed as today (manual credential management)
+8. **Deploy credential check (before any deploy):** Verify `SSH_HOST`, `SSH_USER`, and `SSH_KEY_PATH` are present in `.env` or discoverable in `~/.voidforge/projects.json`. Test SSH: `ssh -i $KEY -o ConnectTimeout=5 $USER@$HOST "echo ok"`. If missing, check `~/.voidforge/deploys/` for historical deploy outputs. If still missing → BLOCKED. Do not attempt deploy. (Field report #103: SSH_HOST lost from .env during long campaigns, caused deployment failure + data loss.)
 
 ### Campaign State Auto-Sync
 

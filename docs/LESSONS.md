@@ -37,3 +37,45 @@
 **Lesson:** Code review reads source files. But some bugs only manifest when the server processes an actual request — the asset proxy's `startsWith("uploads/")` check was invisible to static analysis because both the upload route and the proxy individually looked correct.
 **Action:** Added Step 2.5 (Smoke Tests) to /qa — after build, execute actual HTTP requests against localhost for each new feature. Upload a file then fetch the URL. Submit valid then invalid data. Verify cross-module paths at runtime.
 **Promoted to:** `/qa` (Step 2.5 — Smoke Tests)
+
+### Clamp values BEFORE constructing the object that consumes them
+**Agent:** Batman (DC) | **Category:** gotcha
+**Context:** VoidForge v7.1.0 Gauntlet — PTY cols/rows clamping placed after spawnOptions construction
+**Lesson:** JavaScript objects capture values by-value at construction time. Reassigning the local variable AFTER the object is created does NOT update the object's field. The PTY spawned with unclamped values because the clamping was placed between `spawnOptions = { cols, rows }` and `pty.spawn(shell, [], spawnOptions)`. Moving the clamp BEFORE the object construction fixed it.
+**Action:** When validating/sanitizing input, always do it BEFORE constructing any object or calling any function that uses the values. Never clamp between object construction and usage.
+**Promoted to:** Not yet
+
+### Synchronous lock acquisition before async work prevents TOCTOU in Node.js
+**Agent:** Loki (Marvel) | **Category:** pattern
+**Context:** VoidForge v7.1.0 Gauntlet — concurrent provisioning race condition
+**Lesson:** The provisioning endpoint checked `if (activeProvisionRun)` then did async work (JSON parsing, credential loading) before setting `activeProvisionRun = runId`. Two requests arriving in the same event loop tick could both pass the check. Fix: set the lock IMMEDIATELY (synchronously) after the check, before any `await`.
+**Action:** For single-process mutex patterns in Node.js, always check-and-set in the same synchronous block. Never put async work between the check and the set.
+**Promoted to:** `docs/methods/BACKEND_ENGINEER.md` (Node.js Single-Process Mutex gotcha)
+
+### CSS animation replay requires reflow between class removal and re-addition
+**Agent:** Constantine (DC) | **Category:** gotcha
+**Context:** VoidForge v7.1.0 Gauntlet — forge-lit pulse animation only fired once
+**Lesson:** Adding a CSS class that triggers an animation only works the first time. Re-adding the same class is a no-op if it's already present. To replay: remove the class, force a reflow (`void element.offsetWidth`), then re-add the class. Without the reflow, the browser batches the remove+add and skips the animation.
+**Action:** When CSS animations need to replay on repeated user actions, use the remove-reflow-add pattern.
+**Promoted to:** Not yet
+
+### Shell profiles can re-inject environment variables you filtered out
+**Agent:** Deathstroke (DC) | **Category:** gotcha
+**Context:** VoidForge v7.1.0 Gauntlet — ANTHROPIC_API_KEY removed from PTY env but shell profile could re-export it
+**Lesson:** Filtering environment variables from a PTY's initial env only controls what's explicitly passed. If the PTY spawns a login shell that sources `.zshrc`/`.bashrc`, any `export` statements in the profile will re-inject variables. This is an accepted design tradeoff — you can't control user shell configuration without breaking their environment.
+**Action:** Document this limitation. For true isolation, use containerized environments or non-login shells with `--noprofile --norc`.
+**Promoted to:** Not yet
+
+### Infrastructure credentials must survive .env edits
+**Agent:** Kusanagi (DevOps) + Kira (Campaign) | **Category:** antipattern
+**Context:** Dialog Travel Campaign 9 deploy failure (field report #103)
+**Lesson:** SSH_HOST was written to `.env` by the provisioner during initial setup but was lost during subsequent `.env` edits across 9 campaigns. No redundant storage existed for infrastructure credentials. The `rsync --delete` then destroyed 250 VPS-only avatar files, and the recovery attempt cleared 251 DB fields unnecessarily.
+**Action:** (1) Write deploy credentials to BOTH `.env` AND `~/.voidforge/projects.json`. (2) Validate SSH_HOST, SSH_KEY before any deploy. (3) NEVER `rsync --delete` without excluding VPS-only directories. (4) Before any destructive DB operation, check if the data can be restored from backup first.
+**Promoted to:** CAMPAIGN.md (Step 0 credential check), DEVOPS_ENGINEER.md (rsync exclusion + credential pre-flight), TROUBLESHOOTING.md (destructive DB recovery checklist)
+
+### Iframe stacking context defeats z-index
+**Agent:** Galadriel (UX) | **Category:** gotcha
+**Context:** Dialog Travel map overlay (field report #79)
+**Lesson:** Iframes with `allow-same-origin` create impenetrable stacking contexts. z-index has no effect across stacking context boundaries — a `z-index: 9999` overlay inside the main document cannot appear above an iframe's stacking context.
+**Action:** Use `createPortal(element, document.body)` for any overlay that coexists with iframes. See `docs/patterns/component.tsx` Portal Pattern.
+**Promoted to:** docs/patterns/component.tsx (Portal Pattern)

@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.4.0] - 2026-03-18
+
+### Added — The Autonomy (Full Autonomous Operation)
+- **`wizard/lib/route-optimizer.ts`** — Paris's ROI-weighted campaign sequencing: scores proposals on ROI (40%), urgency (35%), risk-inverted (25%). `pickBestCampaign()` for single-proposal selection.
+- **`wizard/lib/autonomy-controller.ts`** — Tier 2 supervised autonomy (24h delay queue, veto mechanism) + Tier 3 full autonomy (immediate execution). 6 circuit breakers: kill switch, strategic drift (>30%), consecutive Criticals (3+), spend increase streak (7 days), ROAS floor (<1.0x for 7 days), 30-day mandatory strategic sync. Deploy freeze windows. 10-campaign human checkpoint for Tier 3.
+- All 3 branches synced to v12.4 shared methodology
+
+### Fixed
+- DC-001: Added DEEP_CURRENT.md to CLAUDE.md docs reference table
+- DC-003: Added /api/danger-room/current endpoint for Deep Current tab data
+- DC-007: Improved SSRF protection (IPv6-mapped addresses, cloud metadata hostnames)
+
+## [12.2.0] - 2026-03-18
+
+### Added — The Bridge (Cross-Pipeline Correlation)
+- **`wizard/lib/correlation-engine.ts`** — Chakotay's correlation engine: product change → metric outcome tracking. Before/after comparison with configurable lag windows (1/7/28 days). Confidence levels (high >30%, medium >15%, low >5%). Prediction recording, evaluation, and accuracy averaging.
+
 ## [12.1.0] - 2026-03-18
 
 ### Added — The Analyst (Gap Analysis + Campaign Proposals)

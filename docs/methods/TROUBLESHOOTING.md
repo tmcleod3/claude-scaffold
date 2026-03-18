@@ -200,3 +200,14 @@ After resolving any significant failure:
 - [ ] If the failure can recur, add a guard (validation, test, monitoring)
 - [ ] Update `/docs/LESSONS.md` if the pattern is new
 - [ ] Update `/docs/qa-prompt.md` if it affects a critical flow
+
+### Before Any Destructive Database Operation
+
+Before clearing, deleting, or modifying database fields to "fix" missing files or broken state:
+1. **Can data be restored from backup?** Check `~/.voidforge/backups/`, `pg_dump` snapshots, platform export tools.
+2. **Can files be re-downloaded or re-generated without cost?** Check if the source is a free API or a paid service (DALL-E, CDN, etc.).
+3. **Is the DB change reversible?** Clearing a field is often irreversible — the original value is gone.
+4. **What is the regeneration cost?** Count: API calls × price per call. Time to regenerate.
+5. **NEVER clear a DB field to work around a missing file.** Restore the file first, or confirm the regeneration cost is acceptable BEFORE deleting the reference.
+
+(Field report #103: 251 avatarUrl fields cleared to "fix" missing files, triggering ~$10 in DALL-E regeneration + 50 minutes downtime. The files existed on the VPS — they were deleted by `rsync --delete`, not lost. Restoring from backup would have been free.)

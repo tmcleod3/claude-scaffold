@@ -125,6 +125,18 @@ Known issues when deploying Tailwind v4 to Vercel or similar build platforms:
 
 Never combine methodology syncs (`/void`) with unrelated debugging in the same session. If a sync introduces a problem, the debug commits interleave with sync commits, making it impossible to identify which change broke what. Rule: sync first, verify, THEN debug separately. If needed, hard-reset to the pre-sync state and reapply incrementally. (Field report #29: 6 retcon commits interleaved with 20 CSS-fix commits.)
 
+## Deploy Safety Rules
+
+**rsync exclusion mandate:** NEVER use `rsync --delete` without excluding VPS-only directories. User-uploaded files, generated avatars, and data files only exist on the VPS — `--delete` will destroy them. Mandatory exclusions:
+```
+--exclude node_modules --exclude .next --exclude .git
+--exclude .env --exclude .ssh
+--exclude public/avatars --exclude public/uploads --exclude data/
+```
+Add project-specific exclusions for any directory that receives runtime-generated content. (Field report #103: `rsync --delete` destroyed 250 VPS-only avatar files.)
+
+**Credential pre-flight:** Before any deploy, verify: (1) SSH_HOST is set, (2) SSH key file exists, (3) SSH test connection succeeds (`ssh -o ConnectTimeout=5`). If any check fails, abort — do not attempt deploy with missing credentials. Check `~/.voidforge/deploys/` and `~/.voidforge/projects.json` for historical credential data if `.env` is missing values.
+
 ## Deliverables
 
 1. /scripts/provision.sh, deploy.sh, rollback.sh, backup-db.sh
