@@ -1,0 +1,195 @@
+/**
+ * War Room API — Real-time data feeds for the mission control dashboard.
+ *
+ * REST endpoints read from existing state files (campaign-state.md, assemble-state.md, etc.).
+ * WebSocket pushes real-time events (agent activity, findings, phase updates).
+ */
+
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import type { Duplex } from 'node:stream';
+import { readFile, readdir } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { homedir } from 'node:os';
+import { WebSocketServer, WebSocket } from 'ws';
+import { addRoute } from '../router.js';
+import { getServerPort, getServerHost } from '../server.js';
+
+const PROJECT_ROOT = resolve(join(import.meta.dirname, '..'));
+const LOGS_DIR = join(PROJECT_ROOT, 'logs');
+const VOIDFORGE_DIR = join(homedir(), '.voidforge');
+
+// ── Helpers ─────────────────────────────────────
+
+function sendJson(res: ServerResponse, status: number, data: unknown): void {
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(data));
+}
+
+async function readFileOrNull(path: string): Promise<string | null> {
+  try { return await readFile(path, 'utf-8'); } catch { return null; }
+}
+
+// ── State file parsers ──────────────────────────
+
+interface Mission { name: string; status: string; number: number }
+interface CampaignData { missions: Mission[]; status: string; sections: Array<{ name: string; status: string }> }
+
+async function parseCampaignState(): Promise<CampaignData | null> {
+  const content = await readFileOrNull(join(LOGS_DIR, 'campaign-state.md'));
+  if (!content) return null;
+
+  const missions: Mission[] = [];
+  const re = /\|\s*(.+?)\s*\|\s*(COMPLETE|IN PROGRESS|NOT STARTED|BLOCKED|STRUCTURAL)\s*\|\s*Mission\s*(\d+)/g;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    missions.push({ name: m[1].trim(), status: m[2].trim(), number: parseInt(m[3]) });
+  }
+
+  if (missions.length === 0) return null;
+
+  const statusMatch = content.match(/CAMPAIGN STATUS:\s*(\w+)/);
+  const status = statusMatch ? statusMatch[1] : 'ACTIVE';
+  const sections = missions.map(mi => ({ name: mi.name, status: mi.status }));
+
+  return { missions, status, sections };
+}
+
+interface PhaseData { phases: Array<{ name: string; status: string }> }
+
+async function parseBuildState(): Promise<PhaseData | null> {
+  const content = await readFileOrNull(join(LOGS_DIR, 'assemble-state.md'));
+  if (!content) return null;
+
+  const phases: Array<{ name: string; status: string }> = [];
+  const re = /\|\s*(?:\d+\.\s*)?(.+?)\s*\|\s*(COMPLETE|IN PROGRESS|NOT STARTED|PENDING|SKIPPED)\s*\|/g;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    const name = m[1].trim();
+    if (name === 'Phase' || name === 'Status' || name.startsWith('-')) continue;
+    phases.push({ name, status: m[2].trim().toLowerCase() });
+  }
+
+  return phases.length > 0 ? { phases } : null;
+}
+
+function countSeverity(content: string, severity: string): number {
+  // Count in table cells: | SEVERITY |
+  const tableHits = (content.match(new RegExp(`\\|\\s*${severity}\\s*\\|`, 'g')) || []).length;
+  // Count in bold markers: **SEVERITY**
+  const boldHits = (content.match(new RegExp(`\\*\\*${severity}\\*\\*`, 'g')) || []).length;
+  return tableHits + boldHits;
+}
+
+interface FindingCounts { critical: number; high: number; medium: number; low: number }
+
+async function parseFindings(): Promise<FindingCounts> {
+  const counts: FindingCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+  try {
+    const files = await readdir(LOGS_DIR);
+    const logFiles = files.filter(f => f.startsWith('phase-') || f === 'gauntlet-state.md');
+    for (const file of logFiles) {
+      const content = await readFileOrNull(join(LOGS_DIR, file));
+      if (!content) continue;
+      counts.critical += countSeverity(content, 'CRITICAL');
+      counts.high += countSeverity(content, 'HIGH');
+      counts.medium += countSeverity(content, 'MEDIUM');
+      counts.low += countSeverity(content, 'LOW');
+    }
+  } catch { /* no logs directory */ }
+  return counts;
+}
+
+interface DeployData { url: string; healthy: boolean; target: string; timestamp: string }
+
+async function readDeployLog(): Promise<DeployData | null> {
+  const paths = [
+    join(LOGS_DIR, 'deploy-log.json'),
+    join(VOIDFORGE_DIR, 'deploys', 'latest.json'),
+  ];
+  for (const p of paths) {
+    const content = await readFileOrNull(p);
+    if (!content) continue;
+    try {
+      const data = JSON.parse(content) as Record<string, unknown>;
+      return {
+        url: String(data.url || ''),
+        healthy: Boolean(data.healthy),
+        target: String(data.target || ''),
+        timestamp: String(data.timestamp || ''),
+      };
+    } catch { continue; }
+  }
+  return null;
+}
+
+async function readVersion(): Promise<{ version: string; branch: string }> {
+  const content = await readFileOrNull(join(PROJECT_ROOT, 'VERSION.md'));
+  if (!content) return { version: 'unknown', branch: 'unknown' };
+  const match = content.match(/\*\*Current:\*\*\s*([\d.]+)/);
+  return { version: match ? match[1] : 'unknown', branch: 'main' };
+}
+
+// ── WebSocket ───────────────────────────────────
+
+const wss = new WebSocketServer({ noServer: true });
+const clients = new Set<WebSocket>();
+
+/** Broadcast a message to all connected War Room clients. */
+export function broadcastWarRoom(data: { type: string; [key: string]: unknown }): void {
+  const message = JSON.stringify(data);
+  for (const client of clients) {
+    if (client.readyState === WebSocket.OPEN) {
+      try { client.send(message); } catch { /* client gone */ }
+    }
+  }
+}
+
+/** Handle WebSocket upgrade for /ws/war-room. Session auth handled by server.ts. */
+export function handleWarRoomUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer): void {
+  // Origin validation — same pattern as terminal WebSocket
+  const origin = req.headers.origin || '';
+  const port = getServerPort();
+  const allowed = [`http://127.0.0.1:${port}`, `http://localhost:${port}`];
+  const remoteHost = getServerHost();
+  if (remoteHost) allowed.push(`https://${remoteHost}`);
+
+  if (!origin || !allowed.includes(origin)) {
+    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(req, socket, head, (ws) => {
+    clients.add(ws);
+    ws.on('close', () => clients.delete(ws));
+    ws.on('error', () => clients.delete(ws));
+  });
+}
+
+// ── REST endpoints ──────────────────────────────
+
+addRoute('GET', '/api/war-room/campaign', async (_req: IncomingMessage, res: ServerResponse) => {
+  sendJson(res, 200, await parseCampaignState());
+});
+
+addRoute('GET', '/api/war-room/build', async (_req: IncomingMessage, res: ServerResponse) => {
+  sendJson(res, 200, await parseBuildState());
+});
+
+addRoute('GET', '/api/war-room/findings', async (_req: IncomingMessage, res: ServerResponse) => {
+  sendJson(res, 200, await parseFindings());
+});
+
+addRoute('GET', '/api/war-room/version', async (_req: IncomingMessage, res: ServerResponse) => {
+  sendJson(res, 200, await readVersion());
+});
+
+addRoute('GET', '/api/war-room/deploy', async (_req: IncomingMessage, res: ServerResponse) => {
+  sendJson(res, 200, await readDeployLog());
+});
+
+addRoute('GET', '/api/war-room/context', async (_req: IncomingMessage, res: ServerResponse) => {
+  // Context usage is internal to Claude Code's runtime — not accessible from the server.
+  // The gauge renders "—%" when data is null.
+  sendJson(res, 200, null);
+});
