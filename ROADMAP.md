@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v10.2.0 (2026-03-17)
-**Next:** v11.0 — The Consciousness (Cosmere Growth Universe)
-**Status:** v10.x complete. v11.0 adds the 8th universe (Cosmere/Sanderson), growth/marketing pipeline, financial operations.
+**Current:** v11.3.0 (2026-03-18)
+**Next:** v12.0 — The Deep Current (Autonomous Campaign Intelligence)
+**Status:** v11.x complete. v12.0 adds the 9th concept layer (Voyager crew), autonomous campaign generation, cold start intake, cross-pipeline correlation, 3-tier autonomy.
 
 ---
 
@@ -1408,6 +1408,116 @@ Meta, Google Ads, TikTok, LinkedIn, Twitter/X, Reddit (paid). Product Hunt, Hack
 - Heartbeat tab in Danger Room
 - Desktop notifications (macOS/Linux)
 - Daemon session token auto-rotation (§9.19.15)
+
+---
+
+## v12.0 — The Deep Current (Autonomous Campaign Intelligence)
+
+*"Logic is the beginning of wisdom, not the end." — Tuvok*
+
+**The thesis:** VoidForge v1-v11 requires a human to decide what to build/grow next. v12 removes that requirement. The Deep Current reads the project, its history, its analytics, its competitive landscape, and autonomously designs the next campaign. The human monitors the dashboard and adjusts course — or walks away entirely.
+
+**The 9th universe expansion:** Voyager crew (Star Trek) — the ship that operated autonomously in the Delta Quadrant for 7 years without Starfleet Command. 5 new agent roles: Tuvok (strategic intelligence), Seven (optimization), Chakotay (cross-pipeline bridge), Paris (route planning), Torres (site scanning).
+
+**Inspired by:** The convergence of build pipeline (Sisko), growth pipeline (Kelsier), financial pipeline (Dockson), and learning pipeline (Bashir). Currently these are separate workflows requiring human orchestration. The Deep Current connects them into a single autonomous loop: SENSE → ANALYZE → PROPOSE → [GATE] → EXECUTE → LEARN.
+
+### Core Architecture
+
+**The Deep Current Loop:**
+1. **SENSE** — Torres scans the deployed site (Lighthouse, meta tags, health). Vin reads analytics. Marsh scans competitors. Dockson reads revenue. Wong reads lessons. Kira reads operational state.
+2. **ANALYZE** — Seven runs gap analysis across 5 dimensions: feature completeness, quality, performance, growth readiness, revenue potential. Scores each 0-100.
+3. **PROPOSE** — Tuvok generates a campaign proposal: missions, expected impact, risk assessment, alternatives considered, autonomy recommendation.
+4. **[GATE]** — Tier 1: human approves. Tier 2: auto-execute after 24h delay (human can veto). Tier 3: immediate execution.
+5. **EXECUTE** — Sisko runs the campaign. Fury assembles. Coulson commits. Thanos reviews.
+6. **LEARN** — Bashir debriefs. Tuvok scores predictions against actual outcomes. Chakotay updates the correlation model (which product changes drive which growth outcomes).
+
+**The Cold Start Problem (solved):**
+- User provides one paragraph: "What problem are you solving? For whom?"
+- Seven researches the competitive landscape (Marsh scans)
+- Tuvok generates a draft PRD (using /prd internally)
+- User reviews and approves
+- Paris computes the first campaign
+
+**Autonomy Tiers:**
+- **Tier 1 (Advisor):** System proposes campaigns. Human decides. Default.
+- **Tier 2 (Supervised):** System executes after 24h delay. Human can veto. Max 5 missions per campaign.
+- **Tier 3 (Full Autonomy):** System executes immediately. Circuit breakers for safety. 30-day mandatory human sync.
+
+**New command:** `/current` — Tuvok's Deep Current command (scan, analyze, propose, set tier, intake, history, stop, status).
+
+### Security Architecture (Worf + Tuvok)
+
+**Hard limits (non-negotiable):**
+- PRD modification requires human approval (hash checkpoint)
+- Campaign creation requires vault password (no programmatic bypass)
+- Methodology changes require human approval
+- Production deployment requires human promotion (autonomous → staging only)
+- Budget ceiling modifiable only with vault + TOTP
+- 30-day mandatory strategic sync (system pauses if overdue)
+
+**Strategic drift defense:**
+- Strategic intent document (read-only to system): "This product is X, NOT Y"
+- Drift score after every 5 autonomous actions (Troi compares current state to intent)
+- Drift > 30% → pause and escalate
+
+**Feedback loop circuit breakers:**
+- Lesson decay: 50% weight at 90 days, 25% at 180 days
+- 10-15% exploration budget (prevents collapsing into local optimum)
+- Minimum sample enforcement (500 impressions, 3 days, 95% confidence)
+- Circular dependency detection in Kelsier's recommendations
+
+**Aggregate spend controls:**
+- Single hard ceiling on total daily autonomous spend (set by human, immutable by system)
+- Monotonically increasing spend lockout (7 consecutive days → human review)
+- Minimum ROAS enforcement (< 1.0x for 7 days → freeze all autonomous campaigns)
+
+### Implementation Phases
+
+| Version | Codename | Focus | Effort |
+|---------|----------|-------|--------|
+| v12.0 | The Scanner | Cold start intake, site scan (Torres), situation model, `/current --scan`, `/current --intake` | 2-3 sessions |
+| v12.1 | The Analyst | Gap analysis (Seven), campaign proposal generation, `/current` full loop, Tier 1 advisory mode | 2-3 sessions |
+| v12.2 | The Bridge | Chakotay's correlation engine, cross-pipeline data flow, prediction tracking, LEARN step | 2-3 sessions |
+| v12.3 | The Navigator | Paris's route optimization, Tier 2 supervised autonomy, auto-execute with delay, Danger Room Deep Current tab | 2-3 sessions |
+| v12.4 | The Autonomy | Tier 3 full autonomy, circuit breakers, kill switch, deploy freeze windows, 30-day human checkpoint | 2-3 sessions |
+
+**Ordering principle:** Same as v11.0 — safety before agency. Tier 1 ships first (prove good recommendations). Tier 3 ships last (earn the right to act independently).
+
+### Danger Room Integration
+
+New tab: **Deep Current** — situation model (5-dimension radar), active proposal with launch/modify/reject, campaign history with prediction accuracy, signal feed, correlation map, autonomy status with emergency stop.
+
+### Deliverables per Phase
+
+**v12.0:**
+- `/current` command (scan, intake modes)
+- `docs/methods/DEEP_CURRENT.md` (Tuvok's method doc)
+- Torres's site scanner (Lighthouse-lite via HTTP checks)
+- Situation model (`/logs/deep-current/situation.json`)
+- 5 agent definitions in naming registry (Tuvok, Seven, Chakotay, Paris, Torres — Voyager pool)
+
+**v12.1:**
+- Seven's gap analysis engine (5-dimension scoring)
+- Campaign proposal generator
+- `/current` full loop (scan → analyze → propose)
+- Tier 1 advisory mode in Danger Room
+
+**v12.2:**
+- Chakotay's correlation engine (event log + before/after comparison)
+- Cross-pipeline data flow (Vin → Chakotay, Bashir → Chakotay)
+- Prediction tracking (proposed vs actual impact)
+
+**v12.3:**
+- Paris's route optimization (ROI-weighted campaign ordering)
+- Tier 2 supervised autonomy (24h delay, veto mechanism)
+- Danger Room Deep Current tab (6 panels)
+
+**v12.4:**
+- Tier 3 full autonomy
+- Circuit breakers (drift scoring, feedback loop detection, spend lockout)
+- Kill switch (`/current --stop`)
+- Deploy freeze windows
+- 30-day mandatory strategic sync enforcement
 
 ---
 
