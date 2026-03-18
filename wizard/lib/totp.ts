@@ -39,8 +39,7 @@ const TOTP_WINDOW = 1;        // accept ±1 time step (30s tolerance)
 interface TotpSession {
   verifiedAt: number;
   lastUsedAt: number;
-  lastUsedCode: string;
-  lastUsedStep: number;
+  usedCodes: Set<string>; // VG-003: Track all used (code+step) pairs within window
 }
 
 let session: TotpSession | null = null;
@@ -236,18 +235,25 @@ export async function totpVerify(code: string, fallbackPassword?: string): Promi
     const step = currentStep + offset;
     const expected = generateTotpCode(secret, step);
     if (code === expected) {
-      // Replay protection (§9.18): reject reuse within same time step
-      if (session && session.lastUsedCode === code && session.lastUsedStep === step) {
+      // VG-003: Replay protection — reject reuse of ANY code within the window period
+      const codeKey = code + ':' + step;
+      if (session && session.usedCodes.has(codeKey)) {
         return false; // Replay detected
       }
 
-      // Set session
-      session = {
-        verifiedAt: Date.now(),
-        lastUsedAt: Date.now(),
-        lastUsedCode: code,
-        lastUsedStep: step,
-      };
+      // Set or update session, tracking all used codes
+      if (!session) {
+        session = { verifiedAt: Date.now(), lastUsedAt: Date.now(), usedCodes: new Set() };
+      } else {
+        session.lastUsedAt = Date.now();
+      }
+      session.usedCodes.add(codeKey);
+      // Prune codes older than 3 TOTP periods (90 seconds)
+      // Codes are keyed by step, so prune steps more than 3 behind current
+      for (const key of session.usedCodes) {
+        const keyStep = parseInt(key.split(':')[1]);
+        if (currentStep - keyStep > 3) session.usedCodes.delete(key);
+      }
       return true;
     }
   }

@@ -222,6 +222,8 @@
   var cultivationInstalled = false;
 
   function switchTab(tabId) {
+    // VG-008: fall back to 'ops' for unknown tab IDs
+    if (!document.getElementById('tab-' + tabId)) tabId = 'ops';
     var tabs = document.querySelectorAll('[role="tab"]');
     var panels = document.querySelectorAll('.tab-panel');
     tabs.forEach(function (t) { t.setAttribute('aria-selected', 'false'); });
@@ -232,8 +234,6 @@
     if (panel) panel.classList.add('active');
     location.hash = tabId === 'ops' ? '' : tabId;
   }
-  // Expose for onclick
-  window.switchTab = switchTab;
 
   // Arrow key navigation within tab bar
   document.addEventListener('keydown', function (e) {
@@ -247,18 +247,27 @@
   });
 
   function initTabs() {
+    // VG-009: Wire up tab clicks via addEventListener (CSP-compliant, no inline onclick)
+    document.querySelectorAll('[data-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () { switchTab(btn.dataset.tab); });
+    });
+
+    // Wire up freeze buttons
+    var freezeBtn = document.getElementById('freeze-btn');
+    var freezeFab = document.getElementById('freeze-fab');
+    if (freezeBtn) freezeBtn.addEventListener('click', handleFreeze);
+    if (freezeFab) freezeFab.addEventListener('click', handleFreeze);
+
     // Check if Cultivation is installed by looking for heartbeat data
     fetchJSON('/api/danger-room/heartbeat').then(function (data) {
       if (data && data.cultivationInstalled) {
         cultivationInstalled = true;
         document.getElementById('tab-bar').classList.add('active');
-        document.getElementById('freeze-btn').classList.add('visible');
-        document.getElementById('freeze-fab').classList.add('visible');
-        // Apply hash-based tab routing
+        freezeBtn.classList.add('visible');
+        freezeFab.classList.add('visible');
+        // VG-011: Default to #growth when Cultivation is installed (PRD 9.20.2)
         var hash = location.hash.replace('#', '');
-        if (hash && document.getElementById('tab-' + hash)) {
-          switchTab(hash);
-        }
+        switchTab(hash || 'growth');
       }
       // Without Cultivation: no tab bar, no freeze button, flat layout preserved
     });
@@ -290,7 +299,7 @@
       })
       .catch(function () { alert('Freeze failed — try /treasury --freeze in the CLI.'); });
   }
-  window.handleFreeze = handleFreeze;
+  // handleFreeze wired via addEventListener in initTabs()
 
   // ── WebSocket with Reconnection Banner (§9.19.9) ──
 

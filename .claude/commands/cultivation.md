@@ -29,7 +29,7 @@ Cultivation is NOT a separate web application. The Danger Room is the single ope
 
 2. **Create financial vault** (if not exists):
    - Prompt for financial vault password (must differ from infra vault)
-   - Create `~/.voidforge/treasury/vault.enc` (AES-256-GCM, Argon2id key derivation)
+   - Create `~/.voidforge/treasury/vault.enc` (AES-256-GCM, scrypt key derivation — memory-hard, zero-dep)
    - Separate from infrastructure vault per §9.11
 
 3. **TOTP 2FA setup:**

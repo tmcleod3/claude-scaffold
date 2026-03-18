@@ -171,8 +171,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
         <button class="freeze-btn" id="freeze-btn" role="button"
-          aria-label="Emergency freeze: pause all automated spending" aria-pressed="false"
-          onclick="handleFreeze()">❄ Freeze Spend</button>
+          aria-label="Emergency freeze: pause all automated spending" aria-pressed="false">❄ Freeze Spend</button>
         <nav class="danger-room-nav" aria-label="Danger Room navigation">
           <a href="lobby.html">Lobby</a>
           <a href="danger-room.html" aria-current="page" style="background:var(--bg-card);color:var(--text);">Danger Room</a>
@@ -182,20 +181,20 @@
 
     <!-- Tab Bar (§9.20.2 — shown when Cultivation is installed) -->
     <div class="tab-bar" id="tab-bar" role="tablist" aria-label="Danger Room tabs">
-      <button role="tab" id="tab-ops" aria-selected="true" aria-controls="panel-ops" onclick="switchTab('ops')">Ops</button>
-      <button role="tab" id="tab-growth" aria-selected="false" aria-controls="panel-growth" onclick="switchTab('growth')">Growth</button>
+      <button role="tab" id="tab-ops" aria-selected="true" aria-controls="panel-ops" data-tab="ops">Ops</button>
+      <button role="tab" id="tab-growth" aria-selected="false" aria-controls="panel-growth" data-tab="growth">Growth</button>
     </div>
 
     <!-- Reconnection Banner (§9.19.9) -->
     <div class="reconnect-banner" id="reconnect-banner" role="status" aria-live="polite"></div>
 
     <!-- Mobile Freeze FAB (§9.20.8) -->
-    <button class="freeze-fab" id="freeze-fab" aria-label="Emergency freeze: pause all automated spending" onclick="handleFreeze()">❄</button>
+    <button class="freeze-fab" id="freeze-fab" aria-label="Emergency freeze: pause all automated spending">❄</button>
 
     <!-- Main Panels -->
     <main class="main-panels">
       <!-- ═══ OPS TAB ═══ -->
-      <div class="tab-panel active" id="panel-ops" role="tabpanel" aria-labelledby="tab-ops">
+      <div class="tab-panel active" id="panel-ops" role="tabpanel" aria-labelledby="tab-ops" tabindex="0">
       <!-- Campaign Timeline -->
       <div class="panel panel-full" role="region" aria-label="Campaign Timeline">
         <div class="panel-title" id="title-timeline">Campaign Timeline</div>
@@ -244,7 +243,7 @@
       </div><!-- /panel-ops -->
 
       <!-- ═══ GROWTH TAB (§9.10 — read-only, placeholder data) ═══ -->
-      <div class="tab-panel" id="panel-growth" role="tabpanel" aria-labelledby="tab-growth">
+      <div class="tab-panel" id="panel-growth" role="tabpanel" aria-labelledby="tab-growth" tabindex="0">
         <!-- System Status Summary (§9.20.2) -->
         <div class="system-status" id="growth-system-status" aria-live="polite" style="grid-column:1/-1;">
           Cultivation: not installed — run <code>/cultivation install</code> to begin
@@ -254,7 +253,7 @@
         <div class="empty-state" id="growth-empty-state">
           <div>No growth data yet.</div>
           <div style="margin-top:8px;">Run <code>/grow</code> to start your first growth campaign.</div>
-          <a href="#" class="empty-state-action" onclick="return false;">Learn about /grow →</a>
+          <a href="https://github.com/tmcleod3/voidforge#grow" class="empty-state-action">Learn about /grow →</a>
         </div>
 
         <!-- KPI Cards (hidden until data exists) -->

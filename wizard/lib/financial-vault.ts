@@ -142,8 +142,17 @@ async function writeVault(password: string, data: FinancialVaultData): Promise<v
 
 // ── Public API ────────────────────────────────────────
 
+const MIN_PASSWORD_LENGTH = 12;
+
+function validatePassword(password: string): void {
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    throw new Error(`Financial vault password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+  }
+}
+
 /** Store a financial credential */
 export function financialVaultSet(password: string, key: string, value: string): Promise<void> {
+  validatePassword(password);
   return serialized(async () => {
     const data = await readVault(password);
     data[key] = value;
@@ -203,6 +212,11 @@ export function financialVaultLock(): void {
     sessionCache.password = '\0'.repeat(sessionCache.password.length);
     sessionCache = null;
   }
+  // VG-004: Also invalidate TOTP session when vault is locked
+  try {
+    // Dynamic import to avoid circular dependency — totp.ts is a sibling module
+    import('./totp.js').then(m => m.totpSessionInvalidate()).catch(() => {});
+  } catch { /* totp module may not be loaded */ }
 }
 
 /** Return the vault file path */
