@@ -100,6 +100,16 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 **Kim (API Design):** REST conventions, consistent error shapes, pagination patterns, versioning strategy, GraphQL schema design. API surface architect.
 **Pike (Bold Planning):** In `/campaign` — challenges Dax's mission ordering. "Should we attempt a harder mission first while context is fresh?" Bold decisions about sequencing.
 
+## Data Mutation Parity Check
+
+When reviewing architecture, identify all endpoints/services that mutate the same data (same table, same store, same file). Verify they use identical safety mechanisms: locking strategy, transaction boundaries, version sync, validation rules. Drift between parallel mutation paths is the #1 source of data corruption in multi-endpoint applications. (Field report #102: inline-edit route was missing optimistic locking, default version sync, and atomic transactions that the chat service had — three rounds found three separate gaps in the same file.)
+
+**How to check:** For each mutable entity, grep all write paths (POST/PUT/PATCH/DELETE). List the safety mechanisms each path uses. If any path is missing a mechanism that another path has, flag it.
+
+## Security Tradeoff Register
+
+When architecture requires accepting a known security risk (e.g., iframe sandbox weakening for UX, storing tokens in memory for operational continuity), document it as an ADR with explicit risk acceptance. Include: the tradeoff made, what is gained, what attack surface is expanded, what mitigations are in place, and who accepted the risk. This prevents the same finding from appearing in every future audit and reduces Gauntlet noise. (Field report #102: preview iframe `allow-scripts + allow-same-origin` sandbox escape was a known tradeoff but was never documented — flagged in every security pass.)
+
 ## Deliverables
 
 1. ARCHITECTURE.md

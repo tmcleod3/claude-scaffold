@@ -226,6 +226,10 @@ Fix critical and high findings immediately. Medium findings get tracked. For eac
 4. **Critical path smoke test:** After applying security fixes, verify the primary user flow still works. Security hardening that breaks core functionality is a regression, not an improvement. Common traps: stripping environment variables that the main tool needs (e.g., API keys), tightening auth that blocks legitimate users, restricting paths that the app needs to access, **removing `unsafe-inline` from CSP when framework-generated inline scripts exist in build output** (Next.js, Nuxt, SvelteKit all inject `<script>` tags at build time — invisible in source, fatal if blocked). If the fix breaks the happy path, the fix is wrong — find a way to secure without breaking.
 5. Update the finding status
 
+### Remediation Caller Tracing Rule
+
+When fixing an auth, authorization, or validation check: trace ALL callers of the modified function AND find all code paths that implement the same check independently (inline duplicates). Don't fix only the helper — find the routes that duplicated the logic. When the fix changes a permission check in a shared function, grep for every endpoint that performs the same check with inline logic. (Field report #102: `checkMonthlyLimit()` was fixed to check BYOK tier, but the chat route had a separate inline BYOK resolution that wasn't updated.)
+
 ### Phase 4 — Re-Verify Remediations
 
 After remediations are applied:

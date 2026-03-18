@@ -41,7 +41,7 @@
 - Stark (Marvel) — code review scan
 - Galadriel (Tolkien) — UX surface map + Éowyn enchantment
 - Kenobi (Star Wars) — attack surface inventory
-- Kusanagi (Anime) — infrastructure discovery (deploy scripts, generated configs, CI/CD, open ports, default credentials)
+- Kusanagi (Anime) — infrastructure discovery (deploy scripts, generated configs, CI/CD, open ports, default credentials). **Mandate runtime diagnostics:** If the project is runnable, execute diagnostic commands (`ss -tlnp` or `lsof -i`, `df -h`, database config queries, cache status). Source-level config analysis misses runtime state — 3 Critical + 7 High infrastructure findings in field report #102 were invisible to source review. (Field report #102)
 
 **Round 2 — First Strike (full teams):**
 - Batman team: Oracle, Red Hood, Alfred, Deathstroke, Constantine, Nightwing, Lucius
@@ -102,7 +102,13 @@ Fix batches happen between rounds:
 - After Round 4: fix adversarial findings
 - After Round 5: final convergence fixes (max 2 iterations)
 
-**Grep for siblings:** After EVERY fix, grep the entire codebase for the same pattern. When fixing `aria-controls` in one component, grep all components. When adding SSRF protection to one endpoint, check all endpoints that accept URLs. Fix ALL instances — not just the one that was reported. This is the #1 source of rework across field reports.
+**Sibling Verification Protocol:** After EVERY fix, before commit, verify three dimensions:
+
+**Dimension 1 — Pattern grep:** Grep the entire codebase for the same pattern. When fixing `aria-controls` in one component, grep all components. When adding SSRF protection to one endpoint, check all endpoints that accept URLs. Fix ALL instances — not just the one that was reported. This is the #1 source of rework across field reports.
+
+**Dimension 2 — Caller tracing:** Trace all callers of the modified function. When fixing an auth check in a helper function, find every code path that implements the same check independently (inline duplicates). Don't fix only the helper — find the routes that duplicated the logic. (Field report #102: `checkMonthlyLimit()` was fixed to check BYOK, but the chat route had a separate BYOK resolution that didn't use the helper.)
+
+**Dimension 3 — Mutation parity:** Identify all routes/endpoints that mutate the same data. When fixing a safety mechanism (locking, transactions, version sync) in one mutation path, verify ALL other paths that write to the same table/store use identical mechanisms. (Field report #102: inline-edit route was missing optimistic locking, default version sync, and transactions that the chat service had — three rounds found three separate gaps in the same file.)
 
 **Concrete examples of sibling patterns to grep:**
 - Same ARIA attribute value in the same file (e.g., `role="option"` → grep for `"option"` in that file)
@@ -110,6 +116,7 @@ Fix batches happen between rounds:
 - Same SQL pattern in sibling store functions (e.g., added `AND org_id = ?` → check all `WHERE id = ?` queries)
 - Same CSS class or animation name across component files
 - Same error handling pattern across API routes (e.g., added try/catch → check all routes in the same router)
+- Same crypto pattern across utility files (e.g., fixed modulo bias in `generateToken()` → check `cryptoRandomSuffix()` in helpers.ts)
 
 **Execution order check:** For every fix, verify not just that the code exists, but that it executes in the correct order relative to the code that consumes its output. Specifically: if a fix sanitizes/validates a value, verify the sanitization happens BEFORE the value is captured by any object construction, function call, or closure. (Field report #20: PTY clamping placed after spawnOptions construction — caught in Round 3.)
 
