@@ -14,7 +14,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { addRoute } from '../router.js';
 import { getServerPort, getServerHost } from '../server.js';
 
-const PROJECT_ROOT = resolve(join(import.meta.dirname, '..'));
+const PROJECT_ROOT = resolve(join(import.meta.dirname, '..', '..'));
 const LOGS_DIR = join(PROJECT_ROOT, 'logs');
 const VOIDFORGE_DIR = join(homedir(), '.voidforge');
 
@@ -42,12 +42,15 @@ async function parseCampaignState(): Promise<CampaignData | null> {
   const re = /\|\s*(.+?)\s*\|\s*(COMPLETE|IN PROGRESS|NOT STARTED|BLOCKED|STRUCTURAL)\s*\|\s*Mission\s*(\d+)/g;
   let m;
   while ((m = re.exec(content)) !== null) {
-    missions.push({ name: m[1].trim(), status: m[2].trim(), number: parseInt(m[3]) });
+    // Normalize status: client expects COMPLETE, ACTIVE, BLOCKED, PENDING
+    const rawStatus = m[2].trim();
+    const status = rawStatus === 'IN PROGRESS' ? 'ACTIVE' : rawStatus === 'NOT STARTED' ? 'PENDING' : rawStatus;
+    missions.push({ name: m[1].trim(), status, number: parseInt(m[3]) });
   }
 
   if (missions.length === 0) return null;
 
-  const statusMatch = content.match(/CAMPAIGN STATUS:\s*(\w+)/);
+  const statusMatch = content.match(/CAMPAIGN STATUS:\s*(.+?)(?:\n|$)/);
   const status = statusMatch ? statusMatch[1] : 'ACTIVE';
   const sections = missions.map(mi => ({ name: mi.name, status: mi.status }));
 
@@ -66,17 +69,20 @@ async function parseBuildState(): Promise<PhaseData | null> {
   while ((m = re.exec(content)) !== null) {
     const name = m[1].trim();
     if (name === 'Phase' || name === 'Status' || name.startsWith('-')) continue;
-    phases.push({ name, status: m[2].trim().toLowerCase() });
+    // Normalize to single-word CSS-safe status: complete, active, pending, skipped
+    const raw = m[2].trim();
+    const normalized = raw === 'IN PROGRESS' ? 'active' : raw === 'NOT STARTED' ? 'pending' : raw.toLowerCase();
+    phases.push({ name, status: normalized });
   }
 
   return phases.length > 0 ? { phases } : null;
 }
 
 function countSeverity(content: string, severity: string): number {
-  // Count in table cells: | SEVERITY |
-  const tableHits = (content.match(new RegExp(`\\|\\s*${severity}\\s*\\|`, 'g')) || []).length;
+  // Count in table cells: | SEVERITY | (case-insensitive — logs use both CRITICAL and Critical)
+  const tableHits = (content.match(new RegExp(`\\|\\s*${severity}\\s*\\|`, 'gi')) || []).length;
   // Count in bold markers: **SEVERITY**
-  const boldHits = (content.match(new RegExp(`\\*\\*${severity}\\*\\*`, 'g')) || []).length;
+  const boldHits = (content.match(new RegExp(`\\*\\*${severity}\\*\\*`, 'gi')) || []).length;
   return tableHits + boldHits;
 }
 
@@ -133,6 +139,8 @@ async function readVersion(): Promise<{ version: string; branch: string }> {
 
 const wss = new WebSocketServer({ noServer: true });
 const clients = new Set<WebSocket>();
+const HEARTBEAT_INTERVAL_MS = 30000;
+const MAX_CLIENTS = 50;
 
 /** Broadcast a message to all connected War Room clients. */
 export function broadcastWarRoom(data: { type: string; [key: string]: unknown }): void {
@@ -142,6 +150,15 @@ export function broadcastWarRoom(data: { type: string; [key: string]: unknown })
       try { client.send(message); } catch { /* client gone */ }
     }
   }
+}
+
+/** Close all War Room WebSocket connections and shut down the server. */
+export function closeWarRoom(): void {
+  for (const client of clients) {
+    try { client.close(1001, 'Server shutting down'); } catch { /* ignore */ }
+  }
+  clients.clear();
+  wss.close();
 }
 
 /** Handle WebSocket upgrade for /ws/war-room. Session auth handled by server.ts. */
@@ -159,12 +176,36 @@ export function handleWarRoomUpgrade(req: IncomingMessage, socket: Duplex, head:
     return;
   }
 
+  // Connection limit — defense-in-depth
+  if (clients.size >= MAX_CLIENTS) {
+    socket.write('HTTP/1.1 503 Service Unavailable\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
   wss.handleUpgrade(req, socket, head, (ws) => {
     clients.add(ws);
+    (ws as unknown as Record<string, boolean>).isAlive = true;
+
+    ws.on('pong', () => { (ws as unknown as Record<string, boolean>).isAlive = true; });
     ws.on('close', () => clients.delete(ws));
     ws.on('error', () => clients.delete(ws));
   });
 }
+
+// Heartbeat — detect stale connections behind proxies/firewalls
+const heartbeat = setInterval(() => {
+  for (const client of clients) {
+    const ext = client as unknown as Record<string, boolean>;
+    if (!ext.isAlive) {
+      clients.delete(client);
+      client.terminate();
+      continue;
+    }
+    ext.isAlive = false;
+    try { client.ping(); } catch { clients.delete(client); }
+  }
+}, HEARTBEAT_INTERVAL_MS);
 
 // ── REST endpoints ──────────────────────────────
 

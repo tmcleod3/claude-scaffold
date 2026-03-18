@@ -74,6 +74,7 @@
   function renderGauge(usage) {
     const fill = document.getElementById('gauge-fill');
     const text = document.getElementById('gauge-text');
+    const gauge = document.getElementById('context-gauge');
     const pct = usage ? Math.round(usage.percent) : 0;
     // Circle circumference = 2 * PI * r = 2 * 3.14159 * 14 ≈ 88
     const offset = 88 - (88 * pct / 100);
@@ -83,6 +84,7 @@
     else if (pct < 70) fill.setAttribute('stroke', '#fbbf24');
     else fill.setAttribute('stroke', '#ef4444');
     text.textContent = pct + '%';
+    if (gauge) gauge.setAttribute('aria-valuenow', pct);
   }
 
   // ── Version & Branch ─────────────────────────────
@@ -189,28 +191,39 @@
 
   // ── WebSocket for real-time updates ──────────────
 
+  var wsRetryDelay = 1000;
+  var WS_MAX_RETRY_DELAY = 30000;
+
   function connectWebSocket() {
-    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(wsProtocol + '//' + location.host + '/ws/war-room');
+    var wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var ws = new WebSocket(wsProtocol + '//' + location.host + '/ws/war-room');
+
+    ws.onopen = function () {
+      wsRetryDelay = 1000; // Reset backoff on successful connection
+    };
 
     ws.onmessage = function (event) {
       try {
-        const msg = JSON.parse(event.data);
+        var msg = JSON.parse(event.data);
         if (msg.type === 'agent-activity') {
           addTickerMessage(msg.agent, msg.action);
         } else if (msg.type === 'finding') {
-          // Increment scoreboard
-          const el = document.getElementById('score-' + msg.severity);
+          var el = document.getElementById('score-' + msg.severity);
           if (el) el.textContent = parseInt(el.textContent) + 1;
         } else if (msg.type === 'phase-update') {
-          refresh(); // Full refresh on phase changes
+          refresh();
         }
       } catch { /* ignore malformed messages */ }
     };
 
+    ws.onerror = function () {
+      // Error fires before close — logged for debugging, close handles reconnect
+    };
+
     ws.onclose = function () {
-      // Reconnect after 5 seconds
-      setTimeout(connectWebSocket, 5000);
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 30s max
+      setTimeout(connectWebSocket, wsRetryDelay);
+      wsRetryDelay = Math.min(wsRetryDelay * 2, WS_MAX_RETRY_DELAY);
     };
   }
 

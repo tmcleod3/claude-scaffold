@@ -16,7 +16,7 @@ import './api/users.js';
 import './api/war-room.js';
 
 import { handleTerminalUpgrade } from './api/terminal.js';
-import { handleWarRoomUpgrade } from './api/war-room.js';
+import { handleWarRoomUpgrade, closeWarRoom } from './api/war-room.js';
 import { killAllSessions } from './lib/pty-manager.js';
 import { startHealthPoller, stopHealthPoller } from './lib/health-poller.js';
 import { isRemoteMode, setRemoteMode, validateSession, parseSessionCookie, isAuthExempt, getClientIp, type SessionInfo, type UserRole } from './lib/tower-auth.js';
@@ -349,6 +349,7 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
       shuttingDown = true;
       console.log('\n  Shutting down...');
       stopHealthPoller();
+      closeWarRoom();
       killAllSessions();
       server.close(() => process.exit(0));
       setTimeout(() => process.exit(0), 2000);
