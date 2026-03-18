@@ -56,7 +56,7 @@ function notifyLinux(opts: NotificationOptions): void {
 
 /** Strip characters that could be dangerous in shell/AppleScript contexts */
 function sanitize(input: string): string {
-  return input.replace(/[`$\\"\n\r]/g, '').slice(0, 200);
+  return input.replace(/[`$\\"\n\r\0]/g, '').slice(0, 200);
 }
 
 // ── Daemon Event Notifications ────────────────────────

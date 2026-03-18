@@ -68,10 +68,12 @@ async function handleRequest(
     return { status: 401, body: { ok: false, error: 'Session token required' } };
   }
 
-  // SEC-001: Verify vault password against actual vault (not just presence)
-  const vaultVerified = auth.vaultPassword && vaultKey
-    ? auth.vaultPassword === vaultKey  // Compare against daemon's held key
-    : false;
+  // SEC-001 + R4-MAUL-001: Verify vault password with constant-time comparison
+  let vaultVerified = false;
+  if (auth.vaultPassword && vaultKey && auth.vaultPassword.length === vaultKey.length) {
+    const { timingSafeEqual } = await import('node:crypto');
+    vaultVerified = timingSafeEqual(Buffer.from(auth.vaultPassword), Buffer.from(vaultKey));
+  }
 
   // SEC-001: Verify TOTP code (not just presence)
   let totpVerified = false;

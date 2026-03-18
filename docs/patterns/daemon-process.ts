@@ -109,11 +109,21 @@ function validateToken(provided: string, expected: string): boolean {
 
 function createSocketServer(
   sessionToken: string,
-  handleRequest: (method: string, path: string, body: unknown, auth: { hasToken: boolean; hasVault: boolean; hasTotp: boolean }) => Promise<{ status: number; body: unknown }>
+  handleRequest: (method: string, path: string, body: unknown, auth: { hasToken: boolean; vaultPassword: string; totpCode: string }) => Promise<{ status: number; body: unknown }>
 ): ReturnType<typeof createServer> {
+  const MAX_REQUEST_SIZE = 1024 * 1024; // 1MB — R2-NIGHTWING-003: enforce during streaming
+
   const server = createServer(async (conn) => {
     let data = '';
-    conn.on('data', (chunk) => { data += chunk.toString(); });
+    let rejected = false;
+    conn.on('data', (chunk) => {
+      data += chunk.toString();
+      if (data.length > MAX_REQUEST_SIZE && !rejected) {
+        rejected = true;
+        conn.write('HTTP/1.1 413 Payload Too Large\r\nContent-Type: application/json\r\n\r\n{"ok":false,"error":"Request too large"}');
+        conn.end();
+      }
+    });
     conn.on('end', async () => {
       try {
         // Parse HTTP-like request from the socket
@@ -134,13 +144,7 @@ function createSocketServer(
         // Parse body (after blank line)
         const bodyStart = data.indexOf('\r\n\r\n');
 
-        // SEC-012: Limit request body size to 1MB
-        const MAX_BODY_SIZE = 1024 * 1024;
-        if (data.length > MAX_BODY_SIZE) {
-          conn.write('HTTP/1.1 413 Payload Too Large\r\nContent-Type: application/json\r\n\r\n{"ok":false,"error":"Request too large"}');
-          conn.end();
-          return;
-        }
+        if (rejected) return; // Already rejected during streaming
 
         const body = bodyStart >= 0 ? JSON.parse(data.substring(bodyStart + 4) || '{}') : {};
 
