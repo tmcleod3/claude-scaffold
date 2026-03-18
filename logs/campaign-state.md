@@ -1,25 +1,26 @@
-# Campaign State — VoidForge Campaign 10 (v12.0 The Scanner)
+# Campaign State — VoidForge Campaign 11 (v12.1 The Analyst)
 
 ## Campaign Info
 
-**Version:** v12.0
-**Codename:** The Scanner
+**Version:** v12.1
+**Codename:** The Analyst
 **Mode:** `--blitz --continuous --major`
-**Started:** 2026-03-18 (continuing from Campaign 9)
-**ROADMAP:** v12.0 deliverables — `/current` command, DEEP_CURRENT.md, site scanner, situation model, 5 agents
+**Started:** 2026-03-18 (continuing from Campaign 10)
+**ROADMAP:** Seven's gap analysis engine, campaign proposal generator, /current full loop, Tier 1 advisory
 
 ## Mission Plan
 
 | # | Mission | Scope | Status | Debrief |
 |---|---------|-------|--------|---------|
-| 1 | Deep Current Methodology | Method doc, /current command, 5 agents | NOT STARTED | — |
-| 2 | Site Scanner | Torres's HTTP-based site analysis | NOT STARTED | — |
-| 3 | Situation Model + Intake | Project state classifier, cold start interview | NOT STARTED | — |
+| 1 | Seven's Gap Analysis | 5-dimension scoring engine | NOT STARTED | — |
+| 2 | Campaign Proposal Generator | Tuvok generates proposals from gaps | NOT STARTED | — |
+| 3 | Tier 1 Advisory Mode | /current full loop + Danger Room panel | NOT STARTED | — |
 
 Missions completed: 0. Next checkpoint at: 4.
 
 ## Previous Campaigns
 
+- Campaign 10 (v12.0): 3 missions, COMPLETE. Victory Gauntlet passed.
 - Campaign 9 (v11.3): 4 missions, COMPLETE. Victory Gauntlet 5/5.
 - Campaign 8 (v11.2): 4 missions, COMPLETE. Victory Gauntlet 5/5.
 - Campaign 7 (v11.1): 4 missions, COMPLETE. Victory Gauntlet 6/6.

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.1.0] - 2026-03-18
+
+### Added — The Analyst (Gap Analysis + Campaign Proposals)
+- **`wizard/lib/gap-analysis.ts`** — Seven's 5-dimension scoring: feature completeness (PRD vs codebase diff), quality (tests, gauntlet history, lessons), revenue potential (treasury, payments, pricing). Feeds situation model.
+- **`wizard/lib/campaign-proposer.ts`** — Tuvok's campaign proposal generator: per-dimension templates (feature sprint, quality hardening, performance optimization, growth foundation, revenue infrastructure). Quantified predictions, risk assessments, autonomy tier recommendations.
+- **Danger Room Deep Current tab** — 7th tab with 4 panels: situation model (5-dimension KPI cards), active proposal (Tuvok's recommendation with launch/dismiss), prediction history, autonomy status.
+
+---
+
 ## [12.0.0] - 2026-03-18
 
 ### Added — The Scanner (Deep Current: Autonomous Campaign Intelligence)
