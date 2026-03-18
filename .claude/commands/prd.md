@@ -50,7 +50,18 @@ Ask:
 **Draft:** PRD Section 2 (System Architecture) with route structure + ASCII diagram. Present for confirmation.
 
 ### Act 5 — "How does it ship?"
-Ask:
+
+**Natural Language Deploy (optional):** Before the structured questions, offer: *"Describe your ideal deployment in plain language — budget, features, scale. Or skip to configure manually."*
+
+If the user provides a prose description (e.g., "I want a $20/month server with SSL, daily backups, and a custom domain"), run it through the natural language deploy resolver (`wizard/lib/natural-language-deploy.ts`). Present the resolved config:
+- Deploy target and reasoning
+- Instance type and estimated cost
+- Resilience features (auto-detected from prose)
+- Hostname (if mentioned)
+
+The user confirms, adjusts, or overrides. The resolved config replaces the manual deploy target selection in Act 2's frontmatter.
+
+**Then ask:**
 - Any phased launch? (MVP first, then features?)
 - Success metrics? (users, revenue, performance targets)
 - Any non-functional requirements? (accessibility, performance, SEO)
