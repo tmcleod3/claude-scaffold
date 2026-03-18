@@ -166,6 +166,14 @@ After writing the report (Step 3), Wong checks if the findings should promote in
 
 **Why 3+ threshold:** A single lesson could be project-specific. Two could be coincidence. Three is a pattern worth encoding into the methodology. The user always has final say.
 
+### Experiment Analysis
+
+If `~/.voidforge/experiments.json` has completed experiments, Wong includes a summary in the debrief:
+1. List experiments completed since last debrief
+2. For each: variant names, winner, win reason, true-positive rates
+3. If an experiment shows a clear winner with >20% accuracy improvement, recommend adopting the winning variant as the new default
+4. Track per-agent accuracy across experiments — flag agents with consistently low true-positive rates for review
+
 ### Pattern Evolution Check
 
 If `docs/pattern-usage.json` exists (logged by BUILD_PROTOCOL Phase 12.5), Wong checks for recurring pattern variations:

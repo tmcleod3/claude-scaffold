@@ -235,3 +235,13 @@ addRoute('GET', '/api/war-room/context', async (_req: IncomingMessage, res: Serv
   // The gauge renders "—%" when data is null.
   sendJson(res, 200, null);
 });
+
+addRoute('GET', '/api/war-room/experiments', async (_req: IncomingMessage, res: ServerResponse) => {
+  try {
+    const { listExperiments } = await import('../lib/experiment.js');
+    const experiments = await listExperiments();
+    sendJson(res, 200, { experiments, total: experiments.length });
+  } catch {
+    sendJson(res, 200, { experiments: [], total: 0 });
+  }
+});

@@ -174,16 +174,34 @@
       `<span style="color:var(--text-dim)">${testData.skip || 0} skip</span>`;
   }
 
+  // ── Experiment Dashboard ──────────────────────────
+
+  function renderExperiments(data) {
+    const container = document.getElementById('experiment-dashboard');
+    if (!data || !data.experiments || data.experiments.length === 0) {
+      container.textContent = 'No experiments';
+      return;
+    }
+    var complete = data.experiments.filter(function(e) { return e.status === 'complete'; }).length;
+    var running = data.experiments.filter(function(e) { return e.status === 'running'; }).length;
+    var planned = data.experiments.filter(function(e) { return e.status === 'planned'; }).length;
+    container.innerHTML =
+      '<span style="color:#34d399">' + complete + ' complete</span> · ' +
+      '<span style="color:#fbbf24">' + running + ' running</span> · ' +
+      '<span style="color:var(--text-dim)">' + planned + ' planned</span>';
+  }
+
   // ── Main poll loop ───────────────────────────────
 
   async function refresh() {
-    const [campaign, build, findings, version, deploy, context] = await Promise.all([
+    const [campaign, build, findings, version, deploy, context, experiments] = await Promise.all([
       fetchJSON('/api/war-room/campaign'),
       fetchJSON('/api/war-room/build'),
       fetchJSON('/api/war-room/findings'),
       fetchJSON('/api/war-room/version'),
       fetchJSON('/api/war-room/deploy'),
       fetchJSON('/api/war-room/context'),
+      fetchJSON('/api/war-room/experiments'),
     ]);
 
     renderTimeline(campaign);
@@ -193,6 +211,7 @@
     renderDeploy(deploy);
     renderGauge(context);
     renderPrdCoverage(campaign);
+    renderExperiments(experiments);
   }
 
   // ── WebSocket for real-time updates ──────────────
