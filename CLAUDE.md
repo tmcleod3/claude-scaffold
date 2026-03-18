@@ -77,6 +77,11 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/campaign` | Sisko's War Room — read the PRD, pick the next mission, finish the fight, repeat until done |
 | `/imagine` | Celebrimbor's Forge — AI image generation from PRD visual descriptions |
 | `/debrief` | Bashir's Field Report — post-mortem analysis, upstream feedback via GitHub issues |
+| `/dangerroom` | The Danger Room (X-Men, Marvel) — installable operations dashboard for build/deploy/agent monitoring |
+| `/cultivation` | Cultivation (Cosmere Shard) — installable autonomous growth engine: marketing, ads, creative, A/B testing, spend optimization |
+| `/grow` | Kelsier's 6-phase growth protocol — initial setup within Cultivation, then autonomous loop |
+| `/treasury` | Dockson's financial operations — revenue ingest, budget allocation, spend execution, reconciliation |
+| `/portfolio` | Steris's cross-project financials — aggregated spend/revenue, portfolio optimization |
 
 ## Docs Reference
 
@@ -105,6 +110,9 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **The Campaign** | `/docs/methods/CAMPAIGN.md` | Sisko — when building the whole PRD mission by mission |
 | **Forge Artist** | `/docs/methods/FORGE_ARTIST.md` | Celebrimbor — when generating images from PRD descriptions |
 | **Field Medic** | `/docs/methods/FIELD_MEDIC.md` | Bashir — when running post-mortems and submitting upstream feedback |
+| **Growth Strategist** | `/docs/methods/GROWTH_STRATEGIST.md` | Kelsier — when running growth campaigns, SEO, content, ads |
+| **Treasury** | `/docs/methods/TREASURY.md` | Dockson — when managing revenue, budgets, spend, reconciliation |
+| **Heartbeat** | `/docs/methods/HEARTBEAT.md` | Daemon operations — token refresh, spend monitoring, scheduled jobs |
 | **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Sisko — when generating a PRD from scratch |
 | **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
 | **Patterns** | `/docs/patterns/` | When writing code (13 reference implementations) |
@@ -128,8 +136,10 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Campaign Command | **Sisko** (Star Trek) | Reads the PRD, picks the next mission, runs the war |
 | Forge Artist | **Celebrimbor** (Tolkien) | AI image generation from PRD visual descriptions |
 | Field Medic | **Bashir** (Star Trek) | Post-mortem analysis, upstream feedback via GitHub issues |
+| Growth Strategist | **Kelsier** (Cosmere) | Growth strategy, campaign orchestration, ad platforms, SEO |
+| Treasury | **Dockson** (Cosmere) | Revenue ingest, budget allocation, spend execution, reconciliation |
 
-170+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
+185+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
 
 ## Release Tiers
 

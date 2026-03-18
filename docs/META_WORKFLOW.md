@@ -98,7 +98,7 @@ git checkout main
 |------|------|---------|
 | `/campaign` (normal) | First time building a version. Want to review each mission. | Building a new product from PRD |
 | `/campaign --blitz` | Confident in the plan. Methodology-only changes. Want speed. | VoidForge roadmap execution |
-| `/campaign --autonomous` | Long campaign (10+ missions). Want checkpoints but not per-mission prompts. | v10.0 War Room (11 missions) |
+| `/campaign --autonomous` | Long campaign (10+ missions). Want checkpoints but not per-mission prompts. | v10.0 Danger Room (11 missions) |
 | `/campaign --fast` | Time-constrained. Accept reduced review quality. | Quick patch release |
 | `/campaign --blitz --fast` | Maximum speed, minimum interaction. Risk tolerance high. | Methodology-only blitz |
 

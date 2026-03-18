@@ -113,6 +113,14 @@ When processing user-uploaded content (PDFs, images, CSVs), process items indivi
 
 In multi-output AI pipelines, cache intermediate results on the entity model. Running the AI fresh for every output produces random drift (different design choices each time). Make "reuse cached output" the default with an explicit opt-out (e.g., "Regenerate" checkbox). One cache miss costs one API call; uncached outputs cost drift across every generation. (Field report #27: Design Agent ran fresh for every version, producing inconsistent designs.)
 
+### Pydantic v2 Constraint Gotcha
+
+`max_length` only works on `str`, `list`, `set`, `frozenset`. On `dict`, it is silently ignored — no warning, no error, no validation. Use `field_validator` for dict size validation: `@field_validator('config') @classmethod def validate_config_size(cls, v): if len(v) > 50: raise ValueError('config too large'); return v`. This applies to any constraint that is silently inapplicable to the field type. Always test that constraints actually reject invalid input. (Field report #99: `max_length=50` on a dict field allowed unbounded payloads.)
+
+### Auth Retrofit Pattern
+
+When adding authentication to existing endpoints, use optional parameters to preserve backward compatibility during migration. Pattern: `def get_widget(widget_id: str, user_id: str | None = None)` — the function works without `user_id` (existing call sites), and new auth-aware call sites pass it. This allows incremental migration without breaking existing consumers. After all call sites are updated, remove the default and make the parameter required. (Field report #99: auth retrofit broke 3 existing call sites that didn't pass the new required parameter.)
+
 ## Step 5 — Deliverables
 
 1. BACKEND_AUDIT.md

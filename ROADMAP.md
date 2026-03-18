@@ -1078,11 +1078,11 @@ deploy: "web"           # web (WebGL/HTML5) | steam | itch | mobile
 
 ---
 
-## v10.0 — The War Room + The Frontier
+## v10.0 — The Danger Room + The Frontier
 
-*The War Room is the surface. The Frontier features are what it displays.*
+*The Danger Room is the surface. The Frontier features are what it displays.*
 
-**Ship order:** Build the War Room dashboard FIRST (it's the platform). Then add Frontier features one at a time — each one gets a new panel on the dashboard.
+**Ship order:** Build the Danger Room dashboard FIRST (it's the platform). Then add Frontier features one at a time — each one gets a new panel on the dashboard.
 
 ### 1. Agent Confidence Scoring
 
@@ -1100,9 +1100,9 @@ Before building, an agent argues AGAINST the PRD. "This feature will be expensiv
 
 Instead of YAML frontmatter, describe deployment in prose: "I want this running on a $20/month server with a custom domain, automatic SSL, and daily backups." The system figures out the deploy target (VPS), instance type (t3.small), DNS provider (Cloudflare), backup schedule (pg_dump daily to S3), and generates the frontmatter. `/prd` already does this for features — extend it to infrastructure.
 
-### 5. The War Room Dashboard — THE CENTERPIECE
+### 5. The Danger Room Dashboard — THE CENTERPIECE
 
-**This is not just one of ten ideas. It is the surface that makes every other idea visible.** Agent debates, confidence scores, build archaeology, the living PRD, the prophecy graph — they all need somewhere to live. The War Room is the connective tissue. Promote to its own version (v9.5 or v10.0 foundation) and build it BEFORE the other v10.0 features so they have a surface to render on.
+**This is not just one of ten ideas. It is the surface that makes every other idea visible.** Agent debates, confidence scores, build archaeology, the living PRD, the prophecy graph — they all need somewhere to live. The Danger Room is the connective tissue. Promote to its own version (v9.5 or v10.0 foundation) and build it BEFORE the other v10.0 features so they have a surface to render on.
 
 **Architecture:** New tab in Avengers Tower Lobby (`/war-room.html`). Real-time updates via WebSocket (same `ws` infrastructure as Tower terminals). Data fed by Hill (phase tracking) and Jarvis (status summaries). Vanilla JS frontend — no framework, same as the rest of the wizard UI.
 
@@ -1137,7 +1137,7 @@ Instead of YAML frontmatter, describe deployment in prose: "I want this running 
 
 **Layout:** Responsive grid. Main area shows the active context (campaign timeline during campaign, phase pipeline during assemble, finding scoreboard during gauntlet). Sidebar shows persistent panels (context gauge, version, deploy status). Bottom ticker shows agent activity feed ("Maul probing /api/auth... Nightwing running test suite... Constantine found cursed code in utils.ts").
 
-**Data Layer:** All panels read from existing files (campaign-state.md, assemble-state.md, phase logs, VERSION.md, deploy-log.json) via REST endpoints + WebSocket push for real-time updates. No new data storage — the War Room is a VIEW layer over existing state.
+**Data Layer:** All panels read from existing files (campaign-state.md, assemble-state.md, phase logs, VERSION.md, deploy-log.json) via REST endpoints + WebSocket push for real-time updates. No new data storage — the Danger Room is a VIEW layer over existing state.
 
 ### 6. Build Archaeology
 
@@ -1161,76 +1161,76 @@ The PRD is currently static — read at Phase 0, checked at the end by Troi. Mak
 
 ### Campaign Missions
 
-**Mission 1 — War Room Foundation (wizard code + methodology)**
+**Mission 1 — Danger Room Foundation (wizard code + methodology)**
 - Create `wizard/ui/war-room.html` + `wizard/ui/war-room.js` + `wizard/ui/war-room.css`
 - Core layout: responsive grid, main area + sidebar + bottom ticker
 - 5 panels from existing data: Campaign Timeline, Phase Pipeline, Finding Scoreboard, Context Gauge, Version & Branch
 - WebSocket integration for real-time updates (reuse Tower ws infrastructure)
 - REST endpoints for reading campaign-state.md, assemble-state.md, phase logs
-- Add War Room tab to Lobby navigation
-- Update `docs/ARCHITECTURE.md`: add War Room to system diagram
+- Add Danger Room tab to Lobby navigation
+- Update `docs/ARCHITECTURE.md`: add Danger Room to system diagram
 
-**Mission 2 — War Room Extended Panels**
+**Mission 2 — Danger Room Extended Panels**
 - 5 more panels: Active Agents (universe-colored avatars), PRD Coverage, Test Suite status, Deploy Status, Cost Tracker
 - Agent activity ticker (bottom bar): parse agent tool invocations into "Maul probing /api/auth..." feed
-- Hill + Jarvis data feed: phase completion timestamps, status summaries piped to War Room
+- Hill + Jarvis data feed: phase completion timestamps, status summaries piped to Danger Room
 
 **Mission 3 — Agent Confidence Scoring (#1)**
 - Update all agent protocol sections: add confidence score (0-100) to finding format
 - Update `docs/methods/GAUNTLET.md`: low-confidence findings (<60) escalated to second agent
-- Create Confidence Heat Map panel for War Room
+- Create Confidence Heat Map panel for Danger Room
 - Update finding log format across all method docs
 
 **Mission 4 — Agent Debates (#2)**
 - Update `docs/methods/SUB_AGENTS.md`: add Debate Protocol (Agent A states → Agent B responds → Agent A rebuts → Arbiter decides, 3 exchanges max)
 - Update `docs/methods/ASSEMBLER.md`: when review agents disagree, trigger debate instead of listing both
-- Create Debate Arena panel for War Room (live transcripts, verdict badges)
+- Create Debate Arena panel for Danger Room (live transcripts, verdict badges)
 - Log debates as ADRs
 
 **Mission 5 — Adversarial PRD Review (#3)**
 - Create `.claude/commands/prd-challenge.md` or add `--challenge` flag to `/prd` command
 - Update `docs/methods/CAMPAIGN.md`: optional PRD challenge before first mission
-- Create PRD Challenge Log panel for War Room
+- Create PRD Challenge Log panel for Danger Room
 - Define the adversarial agent (Boromir-PRD? "One does not simply ship this feature")
 
 **Mission 6 — Natural Language Deploy (#4)**
 - Update `/prd` command Act 5: deploy section accepts prose description
 - Create infra-resolver logic: prose → frontmatter mapping (instance type, DNS, backup schedule)
-- Create Infra Config panel for War Room (generated config, cost estimate, approve button)
+- Create Infra Config panel for Danger Room (generated config, cost estimate, approve button)
 - Update `docs/methods/DEVOPS_ENGINEER.md`: natural language deploy section
 
 **Mission 7 — Build Archaeology (#6)**
 - Create `/archaeology` command or `--trace` flag on `/debrief`
 - Data model: link production bugs → git commits → build phases → agent findings
-- Create Bug Trace Timeline panel for War Room (animated path through pipeline)
+- Create Bug Trace Timeline panel for Danger Room (animated path through pipeline)
 - Update `docs/methods/FIELD_MEDIC.md`: archaeology mode in debrief
 
 **Mission 8 — Cross-Project Memory (#7)**
 - Create `~/.voidforge/lessons-global.json` schema
 - Update Wong's promotion analysis: after each debrief, write lesson summary to global store
 - Update Phase 0 Orient: Wong loads global lessons matching current framework/domain
-- Create Global Lessons panel for War Room (frequency badges, cross-project patterns)
+- Create Global Lessons panel for Danger Room (frequency badges, cross-project patterns)
 
 **Mission 9 — Methodology A/B Testing (#8)**
 - Create experiment framework: define experiment (agent count, protocol variant), run both, compare
 - Track true-positive rates per agent per project type
-- Create Experiment Dashboard panel for War Room (side-by-side accuracy charts)
+- Create Experiment Dashboard panel for Danger Room (side-by-side accuracy charts)
 - Update `docs/methods/FIELD_MEDIC.md`: experiment analysis in debrief
 
 **Mission 10 — Prophecy Visualizer (#9)**
 - Create interactive dependency graph renderer (vanilla JS + canvas or SVG)
 - Parse campaign-state.md into node/edge graph
-- Create Prophecy Graph panel for War Room (clickable nodes, color-coded status)
+- Create Prophecy Graph panel for Danger Room (clickable nodes, color-coded status)
 - Drill-down: click node → show missions, findings, agent reviews
 
 **Mission 11 — The Living PRD (#10)**
 - Update BUILD_PROTOCOL.md: Phase 4/6/8 gates include PRD update step when implementation deviates
 - Update Troi's compliance check: two-way sync (fix code OR update PRD)
-- Create PRD Drift View panel for War Room (side-by-side diff, drift score)
+- Create PRD Drift View panel for Danger Room (side-by-side diff, drift score)
 - Store Phase 0 PRD snapshot for diff comparison
 
 ### Estimated effort
-8-12 sessions. 11 missions. The War Room foundation (Missions 1-2) ships first; frontier features (Missions 3-11) add panels incrementally.
+8-12 sessions. 11 missions. The Danger Room foundation (Missions 1-2) ships first; frontier features (Missions 3-11) add panels incrementally.
 
 ---
 
@@ -1240,9 +1240,9 @@ The PRD is currently static — read at Phase 0, checked at the end by Troi. Mak
 
 *What was claimed as shipped but needs real implementation. Field report #76.*
 
-### v10.1 — War Room Data Feeds + Feature Enforcement
+### v10.1 — Danger Room Data Feeds + Feature Enforcement
 
-**Mission 1 — War Room WebSocket handler + data feeds**
+**Mission 1 — Danger Room WebSocket handler + data feeds**
 - Add `/ws/war-room` WebSocket upgrade handler in `wizard/server.ts` (alongside existing `/ws/terminal`)
 - Connect campaign-state.md parsing to `/api/war-room/campaign` endpoint (return mission list with statuses)
 - Connect assemble-state.md to `/api/war-room/build` (return phase pipeline with statuses)
@@ -1274,7 +1274,7 @@ The PRD is currently static — read at Phase 0, checked at the end by Troi. Mak
 - Design experiment schema: `~/.voidforge/experiments.json`
 - Track per-agent true-positive rates across projects
 - Build experiment runner that runs protocol variant A and B on same code, compares results
-- Add Experiment Dashboard panel to War Room
+- Add Experiment Dashboard panel to Danger Room
 
 **Mission 7 — Prophecy Visualizer**
 - Build dependency graph renderer (SVG or canvas) in `wizard/ui/war-room-prophecy.js`
@@ -1344,12 +1344,70 @@ Meta, Google Ads, TikTok, LinkedIn, Twitter/X, Reddit (paid). Product Hunt, Hack
 
 ### Implementation Phases
 
-| Version | Codename | Focus | Effort |
-|---------|----------|-------|--------|
-| v11.0 | The Consciousness | Cosmere universe (18 agents) + Kelsier (15th lead) + `/grow` (audit, SEO, content) + budget flags + method docs | 3-4 sessions |
-| v11.1 | The Distribution | Ad platforms (Meta, Google) + Wax/Wayne/Steris active + social (Lift) + outreach (Sarene) | 2-3 sessions |
-| v11.2 | The Treasury | Dockson + Stripe/Mercury revenue + spend tiers + `/treasury` command | 2-3 sessions |
-| v11.3 | The Heartbeat | Heartbeat mode + `/portfolio` + cross-project financials + daily optimization | 2-3 sessions |
+> **Full specification:** See `PRD-VOIDFORGE.md` Section 9 for complete user flows, schemas, integration specs, security model, and compliance framework.
+
+| Version | Codename | Focus | PRD Reference | Effort |
+|---------|----------|-------|---------------|--------|
+| v11.0 | The Consciousness | Cosmere universe (18 agents) + `/grow` Phases 1-3 + financial vault + TOTP + safety tier schema + Danger Room Growth tab (read-only) | §9.2, §9.3 (Ph 1-3), §9.11, §9.16 (ADR-2), §9.19 | 3-4 sessions |
+| v11.1 | The Treasury | `/treasury` + revenue ingest (read-only) + reconciliation + heartbeat daemon (monitoring only) + Treasury tab in Danger Room | §9.4, §9.7, §9.9, §9.16 (ADR-1/3/5), §9.19 | 2-3 sessions |
+| v11.2 | The Distribution | Ad platform adapters + spend execution (protected by v11.0/v11.1 safety) + `/grow` Phase 4 + Ad Campaigns tab in Danger Room | §9.3 (Ph 4), §9.5, §9.10, §9.17, §9.19 | 2-3 sessions |
+| v11.3 | The Heartbeat | `/portfolio` + anomaly detection + backup + cross-project financials + service install + Heartbeat tab in Danger Room | §9.7, §9.8, §9.16 (ADR-6), §9.17, §9.19 | 2-3 sessions |
+
+**Phase ordering principle (ADR-2):** Safety before agency. Observability before execution.
+
+### Required Deliverables per Phase
+
+**v11.0 deliverables:**
+- 18 agent definitions in `docs/NAMING_REGISTRY.md` ✓ (added)
+- Method doc: `docs/methods/GROWTH_STRATEGIST.md`
+- Command: `.claude/commands/grow.md`
+- Command: `.claude/commands/cultivation.md` (install command)
+- Pattern: `docs/patterns/ad-platform-adapter.ts` (split interface: AdPlatformSetup + AdPlatformAdapter per §9.19.10)
+- Pattern: `docs/patterns/financial-transaction.ts` (branded Cents type, hash-chained append log)
+- Financial vault (separate from infra vault, AES-256-GCM, Argon2id key derivation)
+- TOTP setup (secret in system keychain per ADR-4)
+- Safety tier schema + budget flags + campaign creation rate limits (§9.19.14)
+- Danger Room tab/view navigation system (prerequisite for growth tabs)
+- Danger Room Growth tab (read-only, placeholder data)
+- Financial CSS color tokens (§9.15.3)
+- Growth tab WebSocket event types
+- Danger Room WebSocket reconnection logic (§9.19.9)
+
+**v11.1 deliverables:**
+- Method doc: `docs/methods/TREASURY.md`
+- Method doc: `docs/methods/HEARTBEAT.md`
+- Command: `.claude/commands/treasury.md`
+- Pattern: `docs/patterns/daemon-process.ts` (PID, signals, sleep/wake, log rotation)
+- Pattern: `docs/patterns/revenue-source-adapter.ts`
+- Pattern: `docs/patterns/oauth-token-lifecycle.ts`
+- Stripe + Paddle revenue adapters (read-only, polling)
+- Heartbeat daemon with single-writer architecture (ADR-1, Unix domain socket)
+- Write-ahead log for pending operations (ADR-3)
+- Spend-log + revenue-log (append-only, hash-chained)
+- Reconciliation engine (two-pass: preliminary + final)
+- Treasury panel in Danger Room
+- Currency enforcement (USD-only per ADR-6)
+
+**v11.2 deliverables:**
+- Meta + Google adapters (full CRUD + reporting)
+- TikTok, LinkedIn, Twitter/X, Reddit adapters
+- Pattern: `docs/patterns/outbound-rate-limiter.ts`
+- Spend execution pipeline (budget lock, idempotency keys)
+- Campaign state machine (8 states, event-sourced transitions)
+- Ad Campaigns panel in Danger Room
+- Lift social content generation, Sarene outreach, Wayne A/B testing
+- Szeth compliance framework
+
+**v11.3 deliverables:**
+- Command: `.claude/commands/portfolio.md`
+- Mercury/Brex bank adapters
+- `/portfolio` command with cross-project financials
+- Anomaly detection (spend spikes, traffic drops, conversion changes)
+- Automatic daily backup (treasury + growth state → ~/.voidforge/backups/, encrypted per §9.19.13)
+- `launchd`/`systemd`/Task Scheduler install scripts (heartbeat + wizard server per §9.19.2)
+- Heartbeat tab in Danger Room
+- Desktop notifications (macOS/Linux)
+- Daemon session token auto-rotation (§9.19.15)
 
 ---
 

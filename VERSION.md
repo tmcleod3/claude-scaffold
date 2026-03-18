@@ -15,9 +15,9 @@ This project uses [Semantic Versioning](https://semver.org/):
 | Version | Date | Summary |
 |---------|------|---------|
 | 10.2.0 | 2026-03-17 | Unbuilt features: Natural Language Deploy, Methodology A/B Testing, Prophecy Visualizer |
-| 10.1.0 | 2026-03-17 | War Room data feeds + feature enforcement: live WebSocket, confidence scoring in commands, agent debates, Living PRD gates |
+| 10.1.0 | 2026-03-17 | Danger Room data feeds + feature enforcement: live WebSocket, confidence scoring in commands, agent debates, Living PRD gates |
 | 10.0.1 | 2026-03-17 | Frontier features: confidence scoring, agent debates, adversarial PRD, living PRD, cross-project memory, build archaeology |
-| 10.0.0 | 2026-03-17 | The War Room — mission control dashboard with 5 core panels, WebSocket real-time feed, agent activity ticker |
+| 10.0.0 | 2026-03-17 | The Danger Room — mission control dashboard with 5 core panels, WebSocket real-time feed, agent activity ticker |
 | 9.3.0 | 2026-03-17 | The Game Forge — game build protocol, 3 game patterns, game QA/UX checklists, 4 game agents. Distribution BLOCKED. |
 | 9.2.0 | 2026-03-17 | The Mobile Forge — iOS/Android methodology, mobile patterns, 3 conditional agents. Provisioner BLOCKED (needs real API integration). |
 | 9.1.0 | 2026-03-17 | The Multi-Language Forge (Python) — Django + FastAPI deep dives in all 8 patterns + build protocol Python path |
@@ -53,7 +53,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 | 4.1.0 | 2026-03-14 | The Observability Release — deploy logs, cost estimation, health monitoring, Sentry integration |
 | 4.0.0 | 2026-03-14 | The Reliability Release — pre-deploy build step, CI/CD generation, env validation, Railway API migration, credential scoping |
 | 3.9.1 | 2026-03-14 | Roadmap + VoidForge PRD + /campaign --plan mode for roadmap updates |
-| 3.9.0 | 2026-03-14 | Sisko's War Room — /campaign command, autonomous PRD-to-product mission sequencing, 11th lead agent |
+| 3.9.0 | 2026-03-14 | Sisko's Danger Room — /campaign command, autonomous PRD-to-product mission sequencing, 11th lead agent |
 | 3.8.0 | 2026-03-14 | Haku's Last Mile — end-to-end deploy automation for all 6 targets, GitHub integration, SSH deploy with rollback |
 | 3.7.0 | 2026-03-14 | Fury's Initiative — /assemble full pipeline, /thumper Telegram bridge, Dune universe, 10 leads, 12 commands |
 | 3.6.0 | 2026-03-14 | Chani's Worm Rider — /thumper Telegram bridge, Dune universe, Kongo.io methodology upgrades |

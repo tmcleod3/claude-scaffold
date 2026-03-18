@@ -87,6 +87,7 @@ describe('calculateProration', () => {
 3. Test the full request/response cycle for API routes.
 4. Validate response shape, status codes, and error formats.
 5. Test auth: authenticated, unauthenticated, wrong role, wrong owner.
+6. **Validation constraint smoke test:** For each model with validation constraints (Pydantic `Field`, Zod schema, Joi, class-validator decorators), write at least one test that sends invalid input and verifies rejection. Frameworks may silently ignore constraints on incompatible types (e.g., Pydantic v2 ignores `max_length` on dict). The test catches this. (Field report #99: `max_length=50` on a dict field was silently ignored — no size validation occurred.)
 
 ### Pattern
 

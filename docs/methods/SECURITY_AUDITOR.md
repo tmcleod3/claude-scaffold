@@ -58,7 +58,7 @@ OWASP Top 10 evaluation. Find misconfigurations, missing protections, insecure d
 
 These are independent, read-only scans. Run in parallel using the Agent tool:
 
-**Leia — Secrets:** No secrets in source code. No secrets in git history. .env in .gitignore. Different secrets dev/prod. Rotation plan documented.
+**Leia — Secrets:** No secrets in source code. No secrets in git history. .env in .gitignore. Different secrets dev/prod. Rotation plan documented. **Fail-closed verification:** When a new feature depends on a security primitive (encrypt, hash, sign, verify), check the primitive's failure mode. If it fails open (returns data instead of raising on misconfiguration), flag as Critical. Security functions must raise on misconfiguration, never silently degrade. (Field report #99: encrypt() silently returned plaintext when ENCRYPTION_KEY was unset — OAuth tokens stored unencrypted for an entire campaign.)
 
 ### Crypto Randomness
 

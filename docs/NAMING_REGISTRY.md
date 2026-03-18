@@ -7,7 +7,7 @@
 
 ## Rules
 
-1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury, Thanos, Sisko, Celebrimbor, Bashir. These never change.
+1. **Lead agents have fixed names** — Galadriel, Stark, Batman, Kenobi, Picard, Kusanagi, Coulson, Bombadil, Chani, Fury, Thanos, Sisko, Celebrimbor, Bashir, Kelsier. These never change.
 2. **Sub-agents pick from their universe's Available Pool** in order of relevance to their role.
 3. **No name may be used twice across ANY active session.** If Vegeta is taken, pick the next character.
 4. **When spinning up additional agents of the same type**, pick the next unused name from the pool.
@@ -36,6 +36,7 @@
 | **Star Trek** | Field Reports & Feedback | Bashir |
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
 | **Anime** (from Tom's list) | Deploy Wizard | Haku |
+| **Cosmere** (Brandon Sanderson) | Growth & Marketing | Kelsier |
 
 ---
 
@@ -376,6 +377,35 @@
 20. Sheeana — Worm riding, transport expertise
 
 **Reserved:** Chani (lead — worm rider)
+
+---
+
+## 📖 COSMERE (Brandon Sanderson) — Growth & Marketing
+
+**Lead:** Kelsier (The Survivor, Mistborn) — Growth Strategy & Campaign Orchestration
+
+*"There's always another secret."*
+
+**Available Pool (use in order, skip if taken):**
+1. Vin — Analytics, attribution, metrics, pattern detection (Mistborn Ascendant)
+2. Shallan — Content & creative, copy, brand, visual identity (Lightweaver, Stormlight)
+3. Hoid — Copywriting, the storyteller with the perfect words (Wit, Cosmere-wide)
+4. Kaladin — Organic growth, community, word-of-mouth, trust (Windrunner, Stormlight)
+5. Dalinar — Positioning, competitive analysis, market strategy (The Blackthorn, Stormlight)
+6. Navani — Technical SEO, schema, CWV, structured data (Scholar-Queen, Stormlight)
+7. Raoden — Conversion optimization, fixes broken funnels (Prince of Elantris)
+8. Sarene — Outreach, cold email, influencer, co-marketing (Princess of Teod, Elantris)
+9. Wax — Paid ads, targeting, campaigns, ROAS optimization (Allomantic Lawman, Mistborn Era 2)
+10. Wayne — A/B testing, tries every variation (Master of Disguise, Mistborn Era 2)
+11. Steris — Budget & forecasting, contingency plans (The Planner, Mistborn Era 2)
+12. Dockson — Treasury, bank connections, payments, spend execution (The Bookkeeper, Mistborn)
+13. Breeze — Platform relations, API credentials, platform ToS (The Soother, Mistborn)
+14. Lift — Social media, fast, irreverent, audience voice (Edgedancer, Stormlight)
+15. Szeth — Compliance, GDPR, CAN-SPAM, ad policies (Truthless, Stormlight)
+16. Adolin — Brand ambassador, launches, PR, charm (Highprince, Stormlight)
+17. Marsh — Competitive intel, deep monitoring of competitors (The Inquisitor, Mistborn)
+
+**Reserved:** Kelsier (lead — growth strategy)
 
 ---
 

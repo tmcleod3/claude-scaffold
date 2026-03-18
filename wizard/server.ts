@@ -13,10 +13,10 @@ import './api/terminal.js';
 import './api/projects.js';
 import './api/auth.js';
 import './api/users.js';
-import './api/war-room.js';
+import './api/danger-room.js';
 
 import { handleTerminalUpgrade } from './api/terminal.js';
-import { handleWarRoomUpgrade, closeWarRoom } from './api/war-room.js';
+import { handleDangerRoomUpgrade, closeDangerRoom } from './api/danger-room.js';
 import { killAllSessions } from './lib/pty-manager.js';
 import { startHealthPoller, stopHealthPoller } from './lib/health-poller.js';
 import { isRemoteMode, setRemoteMode, validateSession, parseSessionCookie, isAuthExempt, getClientIp, type SessionInfo, type UserRole } from './lib/tower-auth.js';
@@ -50,7 +50,7 @@ const ROUTE_ROLES: Array<{ prefix: string; minRole: UserRole }> = [
   { prefix: '/api/deploys', minRole: 'deployer' },
   { prefix: '/api/project/validate', minRole: 'deployer' },
   { prefix: '/api/project/defaults', minRole: 'deployer' },
-  // Viewer: read-only endpoints (GET /api/projects, GET /api/auth/session, /api/war-room/*) — no entry needed
+  // Viewer: read-only endpoints (GET /api/projects, GET /api/auth/session, /api/danger-room/*) — no entry needed
 ];
 
 function getMinRole(pathname: string): UserRole | null {
@@ -286,7 +286,7 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
       reject(err);
     });
 
-    // WebSocket upgrade handler for terminal and War Room connections
+    // WebSocket upgrade handler for terminal and Danger Room connections
     server.on('upgrade', (req, socket, head) => {
       console.error('[UPGRADE]', req.url, 'from', req.socket.remoteAddress);
       const url = new URL(req.url || '', `http://localhost:${port}`);
@@ -311,8 +311,8 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
           wsSession = session;
         }
         handleTerminalUpgrade(req, socket, head, wsSession);
-      } else if (url.pathname === '/ws/war-room') {
-        // War Room: any authenticated user in remote mode (read-only dashboard)
+      } else if (url.pathname === '/ws/danger-room') {
+        // Danger Room: any authenticated user in remote mode (read-only dashboard)
         if (isRemoteMode()) {
           const token = parseSessionCookie(req.headers.cookie);
           const ip = getClientIp(req);
@@ -323,7 +323,7 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
             return;
           }
         }
-        handleWarRoomUpgrade(req, socket, head);
+        handleDangerRoomUpgrade(req, socket, head);
       } else {
         socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
         socket.destroy();
@@ -349,7 +349,7 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
       shuttingDown = true;
       console.log('\n  Shutting down...');
       stopHealthPoller();
-      closeWarRoom();
+      closeDangerRoom();
       killAllSessions();
       server.close(() => process.exit(0));
       setTimeout(() => process.exit(0), 2000);

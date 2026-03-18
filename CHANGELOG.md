@@ -10,8 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 - **Natural Language Deploy** — `wizard/lib/natural-language-deploy.ts`. Prose description → YAML deploy frontmatter. Budget parsing, platform detection, resilience config inference. Integrated into `/prd` Act 5 as optional input.
-- **Methodology A/B Testing** — `wizard/lib/experiment.ts`. Experiment CRUD + evaluation framework at `~/.voidforge/experiments.json`. True-positive rate + context efficiency comparison. Per-agent accuracy tracking. War Room Experiment Dashboard panel.
-- **Prophecy Visualizer** — `wizard/ui/war-room-prophecy.js`. Interactive SVG dependency graph. Color-coded mission nodes (green/yellow/red/gray/purple). Clickable with keyboard support. Legend and detail panel. War Room integration.
+- **Methodology A/B Testing** — `wizard/lib/experiment.ts`. Experiment CRUD + evaluation framework at `~/.voidforge/experiments.json`. True-positive rate + context efficiency comparison. Per-agent accuracy tracking. Danger Room Experiment Dashboard panel.
+- **Prophecy Visualizer** — `wizard/ui/war-room-prophecy.js`. Interactive SVG dependency graph. Color-coded mission nodes (green/yellow/red/gray/purple). Clickable with keyboard support. Legend and detail panel. Danger Room integration.
 
 ### Fixed
 - SVG focus indicators for keyboard navigation (Gauntlet G-UX-001)
@@ -25,13 +25,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [10.1.0] - 2026-03-17
 
 ### Added
-- **War Room data feeds** — `wizard/api/war-room.ts` with 6 REST endpoints parsing campaign-state.md, assemble-state.md, phase logs, deploy logs, VERSION.md. WebSocket handler at `/ws/war-room` with heartbeat, connection limits, and graceful shutdown.
+- **Danger Room data feeds** — `wizard/api/war-room.ts` with 6 REST endpoints parsing campaign-state.md, assemble-state.md, phase logs, deploy logs, VERSION.md. WebSocket handler at `/ws/war-room` with heartbeat, connection limits, and graceful shutdown.
 - **Confidence scoring enforcement** — mandatory `[CONFIDENCE: XX]` in finding tables across `/gauntlet`, `/qa`, `/security`, `/ux`, `/review` commands. Low-confidence (<60) escalation to different-universe agent. Cross-referenced in QA_ENGINEER.md, SECURITY_AUDITOR.md, PRODUCT_DESIGN_FRONTEND.md.
 - **Agent debates enforcement** — conflict detection in `/assemble` (Crossfire + Council) and `/review` (new Step 1.5). Structured 3-exchange debates logged as ADRs.
 - **Living PRD enforcement** — Phase 0 PRD snapshot (`PRD-snapshot-phase0.md`), PRD alignment gates at Phases 4, 6, 8 in `/build`. Two-way sync: fix code or update PRD.
 
 ### Fixed
-- War Room a11y: ARIA landmarks, keyboard focus, responsive breakpoint, reduced motion, gauge progressbar role, agent ticker aria-live
+- Danger Room a11y: ARIA landmarks, keyboard focus, responsive breakpoint, reduced motion, gauge progressbar role, agent ticker aria-live
 - WebSocket: exponential backoff reconnect, onerror handler, heartbeat keepalive, stale connection cleanup
 - Context gauge shows em-dash instead of misleading 0% when data unavailable
 
@@ -52,9 +52,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [10.0.0] - 2026-03-17
 
 ### Added
-- **War Room dashboard** — `war-room.html` + `war-room.js`. 5 core panels (Campaign Timeline, Phase Pipeline, Finding Scoreboard, Context Gauge, PRD Coverage), sidebar (Version, Deploy, Tests, Cost), Agent Activity Ticker. WebSocket real-time feed with auto-reconnect.
+- **Danger Room dashboard** — `war-room.html` + `war-room.js`. 5 core panels (Campaign Timeline, Phase Pipeline, Finding Scoreboard, Context Gauge, PRD Coverage), sidebar (Version, Deploy, Tests, Cost), Agent Activity Ticker. WebSocket real-time feed with auto-reconnect.
 - **`/api/war-room/*` REST endpoints** in server.ts.
-- **War Room button** in Lobby navigation.
+- **Danger Room button** in Lobby navigation.
 
 ---
 
@@ -710,7 +710,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [3.9.0] - 2026-03-14
 
 ### Added
-- **/campaign command** — Sisko's War Room: read the PRD, pick the next mission, finish the fight, repeat until done. Autonomous campaign execution with mission scoping, dependency ordering, and The Prophecy Board for tracking progress across sessions.
+- **/campaign command** — Sisko's Danger Room: read the PRD, pick the next mission, finish the fight, repeat until done. Autonomous campaign execution with mission scoping, dependency ordering, and The Prophecy Board for tracking progress across sessions.
 - **Sisko** (Benjamin Sisko, DS9) promoted to 11th lead agent. Star Trek now has two leads: Picard (architecture) and Sisko (campaign). Sub-agents: Kira (ops), Dax (strategy), Odo (prerequisites).
 - `docs/methods/CAMPAIGN.md` — full operating rules, 6-step sequence, session management, victory condition.
 - Flags: `--resume` (continue mid-campaign), `--fast` (skip Crossfire+Council in each mission), `--mission "Name"` (jump to specific PRD section).

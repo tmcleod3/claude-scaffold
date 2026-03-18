@@ -55,7 +55,7 @@ voidforge/
 │       ├── void.md              ← /void — Bombadil's forge sync
 │       ├── thumper.md           ← /thumper — Chani's worm rider
 │       ├── assemble.md          ← /assemble — Fury's Initiative
-│       ├── campaign.md          ← /campaign — Sisko's War Room
+│       ├── campaign.md          ← /campaign — Sisko's Danger Room
 │       ├── imagine.md           ← /imagine — Celebrimbor's Forge
 │       └── debrief.md           ← /debrief — Bashir's Field Report
 │
@@ -162,7 +162,7 @@ voidforge/
 | `/void` | Bombadil | Sync VoidForge methodology from upstream |
 | `/thumper` | Chani | Worm rider — Dune-themed Telegram bridge with Gom Jabbar auth |
 | `/assemble` | Fury | The Initiative — full pipeline with crossfire + council |
-| `/campaign` | Sisko | War Room — autonomous PRD-to-product mission sequencing |
+| `/campaign` | Sisko | Danger Room — autonomous PRD-to-product mission sequencing |
 | `/imagine` | Celebrimbor | Forge — AI image generation from PRD visual descriptions |
 | `/debrief` | Bashir | Field Report — post-mortem analysis, upstream feedback |
 

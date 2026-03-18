@@ -50,7 +50,7 @@
 **Context:** VoidForge v7.1.0 Gauntlet — concurrent provisioning race condition
 **Lesson:** The provisioning endpoint checked `if (activeProvisionRun)` then did async work (JSON parsing, credential loading) before setting `activeProvisionRun = runId`. Two requests arriving in the same event loop tick could both pass the check. Fix: set the lock IMMEDIATELY (synchronously) after the check, before any `await`.
 **Action:** For single-process mutex patterns in Node.js, always check-and-set in the same synchronous block. Never put async work between the check and the set.
-**Promoted to:** Not yet
+**Promoted to:** `docs/methods/BACKEND_ENGINEER.md` (Node.js Single-Process Mutex gotcha)
 
 ### CSS animation replay requires reflow between class removal and re-addition
 **Agent:** Constantine (DC) | **Category:** gotcha

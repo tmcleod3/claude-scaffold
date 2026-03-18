@@ -171,6 +171,9 @@ After building a new service, worker, or pipeline, verify it's connected to the 
 2. Check existing call sites that should consume the new service — are they updated?
 3. Verify new workers/jobs are registered in the main entry point (e.g., `workers/index.ts`)
 4. Check that new API routes are imported in the router
+5. **Parameter threading check:** For any feature that passes context (user_id, org_id, tenant_id) through multiple layers, trace the parameter from the HTTP boundary to the final DB query. Verify each intermediate function accepts and forwards the parameter. A grep for the parameter name in each file on the call chain is the minimum check. (Field report #99: entire per-user fetch pipeline was a no-op — user_id computed then silently discarded at the function boundary.)
+6. **Frontend route registration:** For every new page component or tab, verify a corresponding route exists in the router configuration (App.tsx, router.ts, or equivalent). For every new API endpoint consumed by frontend, verify the fetch call exists. Grep `Route.*path=` or framework equivalent in the router file after adding new pages. (Field report #99: ConnectionsTab built but unreachable — no route in App.tsx.)
+7. **Consumer verification:** For new configuration/preference stores, verify at least one consumer reads the stored values and changes behavior accordingly. A preference that is stored but never read is dead code. (Field report #99: widget preferences API built but no pipeline consumer checked preferences before processing.)
 
 New infrastructure that isn't wired to consumers is dead code. This check runs at the end of every build mission, not deferred to review. (Field report #33: entire enrichment pipeline was dead code — orchestrator built but never connected to conversation engine.)
 
@@ -184,7 +187,8 @@ New infrastructure that isn't wired to consumers is dead code. This check runs a
 3. After each batch: build passes, previous flows work, new flow works, all tests pass
 4. If a batch breaks a previous flow: revert the batch, isolate the conflict, fix, re-verify (see Rollback below)
 5. **Enum/tier consumer sweep:** When adding new enum values (tiers, roles, statuses, categories), grep ALL consumers of that enum. Verify each handles the new value. Prefer centralized config lookups (e.g., `getTierConfig(tier)`) over hardcoded comparisons (`tier === 'PRO' || tier === 'ENTERPRISE'`). This is the #1 source of tier enforcement drift.
-6. Log each batch to `/logs/phase-05-features.md`
+6. **Split router file warning:** If the project has multiple router files (e.g., `router.ts` + `api-router.ts`, or framework-split `routes/` directories), verify sibling fixes hit ALL router files. When adding auth middleware, rate limiting, or error handling to one router, grep for sibling route registrations in other router files. (Field report #99: dual router files caused sibling fixes to miss half the routes.)
+7. Log each batch to `/logs/phase-05-features.md`
 
 **Phase 6 — Integrations.**
 1. Each integration: client wrapper, env vars, test mode, error handling, retry logic

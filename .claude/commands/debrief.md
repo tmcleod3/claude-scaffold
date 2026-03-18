@@ -89,6 +89,8 @@ Present the full report. The user can:
 - `[edit]` → user modifies before submitting
 - `[skip]` → discard
 
+**When `--submit` is specified:** Present the full report, then proceed directly to Step 5 without re-asking "shall I submit?" The flag already signals intent — showing the report fulfills the review obligation, and the user can interrupt with `[edit]` if they spot an issue. Do NOT skip the report presentation step — the user must always see the full report before it goes out. The `--submit` flag enables auto-proceed, not auto-skip.
+
 ## Step 5 — Submit to Starfleet (GitHub Issue)
 
 If user approves submission:

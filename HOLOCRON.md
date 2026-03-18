@@ -471,7 +471,7 @@ Fix batches between rounds. Grep-for-siblings after every fix. Build-output veri
 
 Flags: `--quick` (3 rounds — skip Crossfire + Council), `--security-only`, `--ux-only`, `--qa-only`, `--resume`.
 
-#### `/campaign` — Sisko's War Room
+#### `/campaign` — Sisko's Danger Room
 **When:** You have a PRD and want VoidForge to build the whole thing, mission by mission, autonomously.
 
 *"It's easy to be a saint in paradise."*

@@ -1,4 +1,4 @@
-# THE CAMPAIGN — Sisko's War Room
+# THE CAMPAIGN — Sisko's Danger Room
 ## Lead Agent: **Sisko** (Benjamin Sisko, DS9) · Sub-agents: Star Trek Universe
 
 > *"It's easy to be a saint in paradise. But the Badlands are where the real work gets done."*
@@ -331,8 +331,9 @@ Specifically, you MUST NOT:
    - Future feature → append to `ROADMAP.md` under the appropriate version
    - User-provided asset (illustrations, OG images) → add to `## Blocked Items` in campaign-state.md
    - PRD requirement beyond code → mark BLOCKED in the Prophecy Board with reason
-5. **Troi pre-scan before "all complete" declaration:** Before declaring all requirements COMPLETE or BLOCKED, run a lightweight Troi check: read the PRD's testable sections (features, marketing, dashboard, tiers, emails) and verify semantic completeness — not just route existence. This catches "FAQ section missing" and "social proof not rendered" type gaps that structural diffs miss. Cheaper than deferring to the Victory Gauntlet. (Field report #38: 11 gaps found by Gauntlet that a prior session's "all complete" declaration missed.)
-6. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
+5. **Consumer verification:** Before marking a mission complete, verify that stored data is consumed. For every new store/preference/setting built in this mission, identify at least one backend consumer that reads it and acts on it. A preference that is stored but never read is dead code and must be flagged. (Field report #99: widget preferences API built with full CRUD + migration, but no pipeline consumer checked preferences before processing — entire feature was a dead end.)
+6. **Troi pre-scan before "all complete" declaration:** Before declaring all requirements COMPLETE or BLOCKED, run a lightweight Troi check: read the PRD's testable sections (features, marketing, dashboard, tiers, emails) and verify semantic completeness — not just route existence. This catches "FAQ section missing" and "social proof not rendered" type gaps that structural diffs miss. Cheaper than deferring to the Victory Gauntlet. (Field report #38: 11 gaps found by Gauntlet that a prior session's "all complete" declaration missed.)
+7. Check: are all PRD requirements COMPLETE or explicitly BLOCKED?
    - **No** → loop back to Step 1 (next mission)
    - **Yes** → Step 6 (victory)
 
