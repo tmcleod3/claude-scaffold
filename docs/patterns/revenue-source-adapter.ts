@@ -175,7 +175,10 @@ class StripeAdapter implements RevenueSourceAdapter {
       .update(`${timestamp}.${payload.toString()}`)
       .digest('hex');
 
-    return signed === expected;
+    // VG-006: Use timing-safe comparison to prevent timing attacks on signature
+    const { timingSafeEqual } = require('node:crypto');
+    if (signed.length !== expected.length) return false;
+    return timingSafeEqual(Buffer.from(signed), Buffer.from(expected));
   }
 
   private async apiCall(method: string, path: string, params?: Record<string, string>): Promise<Record<string, unknown>> {

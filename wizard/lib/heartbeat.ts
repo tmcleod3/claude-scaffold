@@ -108,6 +108,12 @@ async function handleRequest(
       return await handleCampaignPause(id);
     }
 
+    // Campaign creative update — session token only for non-URL changes (§9.20.11)
+    if (path.match(/^\/campaigns\/[^/]+\/creative$/)) {
+      const id = path.split('/')[2];
+      return { status: 501, body: { ok: false, error: `Creative updates require ad platform adapters (v11.2). Campaign: ${id}` } };
+    }
+
     // Campaign resume — requires vault password
     if (path.match(/^\/campaigns\/[^/]+\/resume$/)) {
       if (!auth.hasVault) {

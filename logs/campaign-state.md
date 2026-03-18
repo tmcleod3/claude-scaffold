@@ -17,9 +17,11 @@
 | 3 | Revenue + Reconciliation | §9.4, §9.9, §9.17, ADR-1/3/5/6 | COMPLETE | — |
 | 4 | Treasury Tab | §9.10, §9.15, §9.20.2 | COMPLETE | — |
 
-Missions completed: 4. All built. **Victory Gauntlet next** — run in fresh session.
+Missions completed: 4. Victory Gauntlet: 6/6 SIGN OFF (0C, 0H, 1M, 6L). v11.1.0 released.
 
-Resume: `/campaign --resume --blitz --continuous --major` → Victory Gauntlet → version bump → continue to v11.2
+## Victory
+
+v11.1.0 released. Campaign 7 complete. The Treasury is open for business.
 
 ## Previous Campaigns
 

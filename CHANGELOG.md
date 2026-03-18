@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [11.1.0] - 2026-03-18
+
+### Added — The Treasury (Dockson's Financial Operations)
+- **`docs/methods/TREASURY.md`** — Dockson's financial operations protocol: revenue ingest, budget allocation, reconciliation, safety controls, immutable spend log
+- **`docs/methods/HEARTBEAT.md`** — Daemon architecture: startup sequence, signal handling, sleep/wake recovery, socket API contract, vault session, service management, daemon states
+- **`/treasury` command** — first-run setup flow, financial summary, budget management, freeze/unfreeze, reconciliation trigger, data export
+- **`docs/patterns/daemon-process.ts`** — PID management with stale detection, Unix domain socket server with JSON-over-HTTP, session token auth with rotation, job scheduler with sleep/wake detection, signal handling with 10s deadline, structured JSON logger
+- **`docs/patterns/revenue-source-adapter.ts`** — Read-only revenue interface with Stripe Events API + Paddle implementations, overlapping poll windows, externalId dedup, timing-safe webhook signature verification
+- **`docs/patterns/oauth-token-lifecycle.ts`** — Per-platform TTL configs (Meta 60d, Google 1h, TikTok 24h, LinkedIn 60d, Reddit 1h), refresh at 80% TTL, 3-failure escalation to requires_reauth, session token 24h rotation with 30s grace period
+- **`wizard/lib/heartbeat.ts`** — Heartbeat daemon: single-writer for all financial state (ADR-1), Unix domain socket API with auth tiers, 10 scheduled jobs, WAL reconciliation on startup (ADR-3), vault key in memory with SIGTERM zeroing
+- **`wizard/lib/reconciliation.ts`** — Two-pass reconciliation engine: preliminary at midnight UTC, authoritative at 06:00 UTC, tiered discrepancy thresholds ($5 noise / 5% relative / $50 absolute), ADR-6 currency enforcement
+- **Danger Room Treasury tab** — KPI cards (revenue/spend/net/ROAS), budget utilization progress bar with ARIA, platform connections status, reconciliation status, empty states with CTAs
+- **5 methodology improvements from inbox triage** — GAUNTLET.md (3-dimension Sibling Verification Protocol + R1 runtime diagnostics), SECURITY_AUDITOR.md (Remediation Caller Tracing), SYSTEMS_ARCHITECT.md (Data Mutation Parity + Security Tradeoff Register)
+
+### Fixed
+- VG-001: Added creative endpoint stub (501) to heartbeat daemon socket API
+- VG-006: Stripe webhook signature now uses timing-safe comparison
+
+---
+
 ## [11.0.0] - 2026-03-18
 
 ### Added — The Consciousness (Cosmere Growth Universe)
