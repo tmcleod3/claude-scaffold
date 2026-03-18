@@ -55,6 +55,8 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `game-state.ts` — Hierarchical state machine with history, save/load
 - `game-entity.ts` — Entity Component System with component stores and systems
 - `sse-endpoint.ts` — Server-Sent Events: lifecycle, keepalive, timeout, React hook (+ FastAPI, Django)
+- `ad-platform-adapter.ts` — Split interface: AdPlatformSetup (interactive) + AdPlatformAdapter (runtime) + ReadOnlyAdapter (daemon)
+- `financial-transaction.ts` — Branded Cents type, hash-chained append log, atomic writes, number formatting
 
 ## Slash Commands
 
