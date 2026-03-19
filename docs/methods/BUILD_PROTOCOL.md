@@ -162,7 +162,8 @@ This catches architecture mistakes that currently escape until Phase 9-11 review
 1. Single most important user journey, end-to-end vertical slice
 2. Follow patterns: `/docs/patterns/api-route.ts`, `/docs/patterns/service.ts`, `/docs/patterns/component.tsx`
 3. Write unit tests for core service logic + integration tests for API routes
-4. Log to `/logs/phase-04-core.md`
+4. **Visual intent confirmation:** For visual/layout changes, confirm placement intent (replace vs augment) before coding. "Add logo to hero" and "logo IS the hero" produce very different implementations. Ask: "Should this replace the existing content, or be added alongside it?" (Field report #111)
+5. Log to `/logs/phase-04-core.md`
 
 ### Integration Wiring Check
 

@@ -137,6 +137,10 @@ Add project-specific exclusions for any directory that receives runtime-generate
 
 **Credential pre-flight:** Before any deploy, verify: (1) SSH_HOST is set, (2) SSH key file exists, (3) SSH test connection succeeds (`ssh -o ConnectTimeout=5`). If any check fails, abort — do not attempt deploy with missing credentials. Check `~/.voidforge/deploys/` and `~/.voidforge/projects.json` for historical credential data if `.env` is missing values.
 
+**Deploy target verification:** Before deploying to any platform (Vercel, Cloudflare, Netlify, etc.), verify the deploy target matches the intended production environment. If the project has multiple environments (preview, staging, production) or non-default production branches, use explicit flags (`--branch=main`, `--prod`). Never rely on default branch inference — it can silently deploy to the wrong environment. (Field report #114: 3 deploys to the wrong Vercel environment because the default branch was "main" but production was mapped to a different branch.)
+
+**Post-deploy asset verification:** After deploying, verify specifically the files that *changed* in this deploy — not pre-existing assets. Check: (a) correct content-type header (text/html on a static asset means the file is missing from the deployment), (b) correct content-length (not the index.html fallback size), (c) deployment list shows the correct environment. Do NOT verify only pre-existing assets — they prove the host is up, not that the deploy succeeded. (Field report #114)
+
 ## Deliverables
 
 1. /scripts/provision.sh, deploy.sh, rollback.sh, backup-db.sh

@@ -326,6 +326,7 @@ Specifically, you MUST NOT:
 ### Step 5 — Debrief and Commit
 
 1. **Security gate (before commit):** Check if this mission added new TypeScript/JavaScript files that handle network I/O (HTTP endpoints, WebSocket handlers), user input (form parsing, body parsing), or credential storage (vault writes, env file generation). If yes, flag: **"This mission added network-facing code. Run `/security` before committing."** Even in `--fast` mode, security is non-negotiable for new attack surface. This prevents shipping Critical vulnerabilities that only get caught in a post-hoc hardening pass.
+1a. **Data source verification (when debugging data flow):** When a mission involves tracing a data pipeline (CSS inheritance, design system propagation, content rendering), verify the *source data* is current — not just the format. Saved snapshots (designSystem, companyBrief) may be stale if the underlying JSX/HTML was modified by chat edits. Always prefer extracting from the current source of truth over reading cached state. (Field report #111: chat edits changed CSS vars but designSystem snapshot was stale.)
 2. Coulson commits the mission (`/git`)
 3. Update `/logs/campaign-state.md` — mark mission complete, log any deviations from PRD. Include the debrief issue number: "Debrief: #XX" or "Debrief: SKIPPED (not blitz)" or "Debrief: N/A (normal mode)".
 4. **Route BLOCKED items to the right place:**

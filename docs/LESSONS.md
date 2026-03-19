@@ -66,6 +66,20 @@
 **Action:** Document this limitation. For true isolation, use containerized environments or non-login shells with `--noprofile --norc`.
 **Promoted to:** Not yet
 
+### NextAuth v5 authorize() throws are wrapped — use side-channel for error reasons
+**Agent:** Batman (DC) | **Category:** gotcha
+**Context:** Kongo.io v3.12 — email verification gate (field report #115)
+**Lesson:** NextAuth v5 beta wraps all errors thrown from `authorize()` into a generic CredentialsSignin error. Custom error messages are lost. Auto-login after signup with verification required triggers duplicate emails. Verification redirects to authenticated routes can create apparent privilege escalation with existing sessions.
+**Action:** Never throw custom errors from authorize() expecting them to reach the client. Use a separate API endpoint for specific error reasons. Never auto-login when email verification is required. Never redirect verification links to authenticated routes.
+**Promoted to:** QA_ENGINEER.md (Nightwing auth flow end-to-end)
+
+### Chat edits are invisible to saved state — JSX is the source of truth
+**Agent:** Stark (Marvel) | **Category:** antipattern
+**Context:** Kongo.io v3.11 — designSystem stale after chat CSS edit (field report #111)
+**Lesson:** When any system stores a "snapshot" of generated output (designSystem, companyBrief), chat edits that modify the underlying JSX/HTML create a divergence. The saved snapshot is stale. Always extract from the current JSX (source of truth) rather than reading saved snapshots.
+**Action:** After chat edits that modify CSS vars or design tokens, extract and re-save the designSystem from the current DOM/JSX. Saved state is a cache, not the authority.
+**Promoted to:** CAMPAIGN.md (data source verification)
+
 ### CLAUDE.md is a contract — every claim must have a backing file
 **Agent:** Troi (Star Trek) + Coulson (Marvel) | **Category:** antipattern
 **Context:** VoidForge v10.0-v12.4.0 — /dangerroom listed in CLAUDE.md but no command file existed (field report #108)

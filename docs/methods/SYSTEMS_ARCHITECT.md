@@ -100,6 +100,12 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 **Kim (API Design):** REST conventions, consistent error shapes, pagination patterns, versioning strategy, GraphQL schema design. API surface architect.
 **Pike (Bold Planning):** In `/campaign` — challenges Dax's mission ordering. "Should we attempt a harder mission first while context is fresh?" Bold decisions about sequencing.
 
+## Architect-to-Campaign Handoff
+
+When `/architect` produces a plan that will be executed via `/campaign`, offer to generate a PRD skeleton from the architecture deliverables. The architect's output (ADRs, component inventory, design decisions) maps directly to PRD sections: ADRs → Tech Stack + System Architecture, component inventory → Core Features, design decisions → Implementation phases. If the user says "build this" after an `/architect` session, route to `/campaign --plan` with the architect's output as input — don't restart the analysis from scratch. (Field report #116)
+
+**Detecting campaign intent:** If the user invokes `/architect --plan` but their request describes a new product/feature (not a review of existing architecture), suggest `/campaign --plan` instead. Signs: "create a new page," "build a feature," "add a subdomain."
+
 ## Data Mutation Parity Check
 
 When reviewing architecture, identify all endpoints/services that mutate the same data (same table, same store, same file). Verify they use identical safety mechanisms: locking strategy, transaction boundaries, version sync, validation rules. Drift between parallel mutation paths is the #1 source of data corruption in multi-endpoint applications. (Field report #102: inline-edit route was missing optimistic locking, default version sync, and atomic transactions that the chat service had — three rounds found three separate gaps in the same file.)
