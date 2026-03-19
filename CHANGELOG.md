@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.4.1] - 2026-03-18
+
+### Added
+- **`/dangerroom` command** — starts wizard server and opens the Danger Room dashboard. Documents all 6 tabs, global elements, prerequisites. Was listed in CLAUDE.md but the command file never existed.
+- **`WORKSHOP.md`** — 45-minute beginner workshop for building web apps with Claude Code + VoidForge scaffold
+- **GitHub community health files** — LICENSE (MIT), CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, 3 issue templates, PR template, CODEOWNERS, FUNDING.yml
+
+### Fixed
+- GAUNTLET.md: env var audit after smoke test (NEXT_PUBLIC blindness — field report #104)
+- RELEASE_MANAGER.md: post-push deploy check (build-not-deployed gap — field report #104)
+- BUILD_PROTOCOL.md: build-time env var verification in Phase 13 (field report #104)
+- CAMPAIGN.md: deploy credential check in Step 0 (field report #103)
+- DEVOPS_ENGINEER.md: rsync exclusion mandate + credential pre-flight (field report #103)
+- TROUBLESHOOTING.md: destructive DB operation recovery checklist (field report #103)
+
+---
+
 ## [12.4.0] - 2026-03-18
 
 ### Added — The Autonomy (Full Autonomous Operation)

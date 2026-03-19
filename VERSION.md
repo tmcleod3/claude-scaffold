@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 12.4.0
+**Current:** 12.4.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 12.4.1 | 2026-03-18 | Missing /dangerroom command, community health files, WORKSHOP.md, inbox triage (#104), branch sync |
 | 12.4.0 | 2026-03-18 | The Autonomy — route optimizer, Tier 2/3 autonomy, circuit breakers, kill switch, deploy freeze |
 | 12.3.0 | 2026-03-18 | The Navigator — Paris's route optimization (included in v12.4 release) |
 | 12.2.0 | 2026-03-18 | The Bridge — Chakotay's correlation engine, prediction tracking, cross-pipeline data flow |
