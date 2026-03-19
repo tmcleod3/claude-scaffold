@@ -248,7 +248,7 @@ After build completes and before launch, Wong logs which patterns were used in t
 4. This data feeds Wong's promotion analysis in `/debrief` — recurring variations across 10+ projects become candidate patterns
 
 **Phase 13 — Launch Checklist.**
-All flows in production. SSL. Email. Payments. Analytics. Monitoring. Backups. Security headers. Legal. Performance. Mobile. Accessibility. Tests passing. Log final status to `/logs/phase-13-launch.md`.
+All flows in production. SSL. Email. Payments. Analytics. Monitoring. Backups. Security headers. Legal. Performance. Mobile. Accessibility. Tests passing. **Build-time env var verification:** For every new `NEXT_PUBLIC_*` / `VITE_*` / `REACT_APP_*` reference introduced during this build, verify the variable exists in `.env` or the deploy environment. Missing build-time vars cause features to silently disappear without errors. (Field report #104) Log final status to `/logs/phase-13-launch.md`.
 
 ---
 

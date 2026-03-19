@@ -59,6 +59,8 @@ If the project has a runnable server, start it and verify the full lifecycle:
 
 This catches what static analysis misses: IPv6 binding, native module ABI compatibility, WebSocket frame timing, browser caching, in-memory state lifecycle. (Field report #30: 11 runtime bugs invisible to 5 rounds of code review.)
 
+**Env var audit (after smoke test):** If the project uses build-time environment variables (Next.js `NEXT_PUBLIC_*`, Vite `VITE_*`, CRA `REACT_APP_*`), grep the built JS bundle for references and verify each has a non-empty value in the deployment environment. Build succeeding does NOT mean env vars are set — missing build-time vars cause features to silently disappear without errors. (Field report #104: OAuth buttons rendered conditionally on `NEXT_PUBLIC_GOOGLE_CLIENT_ID` which was never created — build passed, buttons vanished.)
+
 **Round 3 — Second Strike (targeted re-verification):**
 - Batman: Nightwing + Red Hood + Deathstroke (re-probe)
 - Galadriel: Samwise + Radagast + Bilbo (re-verify)

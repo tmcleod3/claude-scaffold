@@ -118,3 +118,11 @@ After every commit, Barton verifies:
 - [ ] `CHANGELOG.md` has `[X.Y.Z]` section with correct date
 - [ ] `git status` shows clean working tree
 - [ ] No untracked files that should have been included
+
+## Post-Push Deploy Check
+
+After pushing to remote, if the project runs on a persistent server (PM2, systemd, Docker):
+1. **Check:** Is the deployed version current? Compare `git log -1 --format="%h"` on the server with what was just pushed.
+2. **If stale:** Prompt: "Server is running an older version. Rebuild and restart? [Y/n]"
+3. **In blitz mode:** Auto-rebuild if a deploy script or PM2 ecosystem config exists.
+4. Pushing code to GitHub is NOT deploying it. The server must be rebuilt and restarted for changes to take effect. (Field report #104: 22 commits pushed but PM2 was still running v3.8.1 while code was v3.10.0.)
