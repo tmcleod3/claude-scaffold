@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.4.2] - 2026-03-19
+
+### Changed
+- Full-tier commands auto-pull `wizard/` from upstream when missing — scaffold/core users get "Pull it? [Y/n]" instead of a dead end
+- CLAUDE.md slash command table has Tier column (All/Full) for all 23 commands
+- Gauntlet Troi verifies CLAUDE.md claims (commands, agents, docs exist at stated paths)
+- Gauntlet Kenobi checks pattern auth completeness (flags presence-only `!!header` checks)
+- Campaign Victory Gauntlet has cross-campaign integration gate
+- Release Manager has CLAUDE.md command table integrity check
+
+### Fixed
+- Field reports #108, #109, #110 triaged — 12 methodology improvements applied
+
+---
+
 ## [12.4.1] - 2026-03-18
 
 ### Added
