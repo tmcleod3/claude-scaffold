@@ -5,7 +5,10 @@
 Read `/docs/methods/DEEP_CURRENT.md` for operating rules.
 
 ## Prerequisites
-This command requires VoidForge Full (main branch) for site scanning and daemon integration. If `wizard/` does not exist, stop: "Deep Current's full capabilities require the wizard server (main branch). You're on scaffold/core. The `/current --intake` cold start interview works on all tiers, but `--scan` and daemon integration require main. To get the full version: `npx voidforge init` or `git checkout main`."
+If `wizard/` does not exist and the mode requires it (`--scan`, `--propose`, default):
+1. Offer: "Deep Current's site scanner and daemon integration require the wizard server. Pull it from upstream? [Y/n]" (Note: `--intake` works without wizard/ — it's a Claude Code interview, not a server feature.)
+2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`
+3. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
 
 ## Context Setup
 1. Read `/logs/deep-current/situation.json` — if exists, we have a situation model

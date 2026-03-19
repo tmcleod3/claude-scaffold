@@ -6,7 +6,10 @@ Read `/docs/methods/GROWTH_STRATEGIST.md` for operating rules.
 Read PRD-VOIDFORGE.md §9.19 for the Cultivation architecture.
 
 ## Prerequisites
-This command requires VoidForge Full (main branch). If `wizard/` does not exist, stop: "Cultivation requires the wizard server (main branch). You're on scaffold/core. To get the full version: `npx voidforge init` or `git checkout main`."
+If `wizard/` does not exist (scaffold/core users):
+1. Offer: "Cultivation requires the wizard server. Pull it from upstream? [Y/n]"
+2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`
+3. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
 
 ## What Cultivation IS
 

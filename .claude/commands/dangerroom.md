@@ -58,9 +58,14 @@ Stop the wizard server if running.
 
 ## Prerequisites
 
-- The `wizard/` directory must exist (main branch only — not available on scaffold or core)
 - Node.js installed
 - Port 3141 available (or set `VOIDFORGE_PORT` env var)
+- The `wizard/` directory must exist. If it does not (scaffold/core users):
+  1. Offer: "The Danger Room requires the wizard server. Pull it from upstream? [Y/n]"
+  2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/`
+  3. Run `cd wizard && npm install` to install wizard dependencies
+  4. Proceed with `/dangerroom start`
+  5. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
 
 ## Arguments
 $ARGUMENTS
