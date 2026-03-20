@@ -10,6 +10,11 @@
 ## Pre-Analysis — Conflict Scan
 Before any deep analysis, scan the PRD frontmatter for structural contradictions (see SYSTEMS_ARCHITECT.md Conflict Checklist). Check: auth+database, payments+auth, websockets+deploy, workers+deploy, database+deploy, cache+deploy, admin+auth, email+credentials. Flag any contradictions immediately — these cost hours if caught late.
 
+## Agent Deployment Manifest
+
+**Lead:** Picard (Star Trek)
+**Full bridge crew:** Spock (schema), Uhura (integrations), Worf (security implications), Tuvok (security architecture), Scotty (service architecture + scaling), Kim (API design), Janeway (novel architectures), Torres (performance), La Forge (failure analysis), Data (tech debt), Crusher (system diagnostics), Archer (greenfield), Pike (bold ordering — challenges Dax in /campaign), Riker (ADR review — challenges trade-offs), Troi (PRD compliance)
+
 ## Step 0 — System Discovery (**Crusher** + **Archer**)
 **Crusher** assesses system health first — test coverage, build time, dependency age, code complexity. Baseline before changes.
 **Archer** (for greenfield projects) proposes initial directory structure, module boundaries, naming conventions.

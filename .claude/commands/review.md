@@ -15,6 +15,31 @@ Determine what to review:
 
 List all files in scope and their types (API route, service, component, middleware, config).
 
+## Agent Deployment Manifest
+
+**Lead:** Picard (Star Trek) — architecture lens, final arbiter
+**Core team (always deployed):**
+- **Spock** — pattern compliance + integration tracing
+- **Seven** — code quality, dead code, complexity
+- **Data** — maintainability, error paths, state flow
+
+**Stark's Marvel team (deployed on backend-heavy reviews):**
+- **Rogers** — API design: HTTP semantics, consistent response shapes, REST conventions
+- **Banner** — database: query patterns, N+1, missing indexes, schema concerns
+- **Strange** — service architecture: separation of concerns, business logic placement
+- **Barton** — error handling: try/catch completeness, error propagation, user-facing messages
+- **Romanoff** — security implications in reviewed code (lightweight — flags for Kenobi, doesn't audit)
+- **Thor** — performance: unnecessary re-renders, expensive computations, missing memoization
+- **Wanda** — state management: store design, prop drilling, context boundaries
+- **T'Challa** — API integration: external service calls, retry logic, fallback behavior
+
+**Cross-domain agents (deployed based on content):**
+- **Nightwing** (DC) — auth flow end-to-end: when auth code is in scope, trace signup→verify→login→protected→logout
+- **Bilbo** (Tolkien) — copy audit: error messages, UI text, API response descriptions — are they clear and human?
+- **Troi** (Star Trek) — PRD compliance: does the code match what the PRD describes?
+- **Constantine** (DC) — cursed code: logic that works by accident, tautological checks, shadowed vars
+- **Samwise** (Tolkien) — a11y spot-check: when components are in scope, check keyboard nav and ARIA
+
 ## Step 1 — Parallel Analysis
 Use the Agent tool to run these in parallel — all are read-only analysis:
 
@@ -48,6 +73,19 @@ For each file, check against its matching pattern in `/docs/patterns/`:
 - Missing error handling at system boundaries
 - Hardcoded values that should be config
 - Missing or misleading comments on non-obvious logic
+
+**Agent 4 (Rogers + Banner + Strange — Backend Review, if backend code in scope):**
+- Rogers: API endpoints follow REST conventions, consistent response shapes, proper HTTP status codes
+- Banner: database queries are efficient (no N+1), indexes exist for query patterns, schema is normalized
+- Strange: business logic is in services not routes, separation of concerns is clean, no god functions
+
+**Agent 5 (Nightwing + Constantine — Cross-Domain, if auth or complex logic in scope):**
+- Nightwing: if auth code changed, trace the full signup→verify→login→protected→logout flow
+- Constantine: scan fixed/refactored areas for logic that only works by coincidence
+
+**Agent 6 (Bilbo + Troi — Copy + PRD, if UI or user-facing code in scope):**
+- Bilbo: error messages are clear and human, not generic "Something went wrong"
+- Troi: implementation matches PRD descriptions (not just "route exists" but "renders what PRD says")
 
 **ROUTE COLLISION CHECK (mandatory for web apps):** When a new router/route file is added, list ALL registered routes (method + path) across ALL routers. Check for duplicate method+path combinations. Frameworks like FastAPI silently shadow duplicate routes — the first registered wins.
 

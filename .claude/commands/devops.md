@@ -5,6 +5,30 @@
 2. Read `/docs/PRD.md` frontmatter — check `deploy` value to determine target
 3. Read `/docs/methods/DEVOPS_ENGINEER.md`
 
+## Agent Deployment Manifest
+
+**Lead:** Kusanagi (Anime — Ghost in the Shell)
+
+**Core team (always deployed):**
+- **Senku** (Dr. Stone) — provisioning: server setup, dependencies, runtime, idempotent scripts
+- **Levi** (Attack on Titan) — deployment: process management, zero-downtime, rollback scripts
+- **Spike** (Cowboy Bebop) — networking: reverse proxy, DNS, TLS, firewall, CORS headers
+- **L** (Death Note) — monitoring: health checks, uptime, alerting, log aggregation
+- **Bulma** (Dragon Ball) — backup: database dumps, file backup, retention, restore testing
+- **Holo** (Spice & Wolf) — cost: resource sizing, instance selection, cost estimation, optimization
+
+**Extended team (deployed on full infra reviews):**
+- **Valkyrie** (Marvel/Anime crossover) — disaster recovery: failover, data center redundancy, RTO/RPO
+- **Vegeta** (Dragon Ball) — scaling: horizontal scaling, load balancing, auto-scaling policies
+- **Trunks** (Dragon Ball) — migration: database migration strategy, zero-downtime schema changes
+- **Mikasa** (Attack on Titan) — security hardening: SSH config, fail2ban, unattended upgrades
+- **Erwin** (Attack on Titan) — strategy: multi-environment management, staging/production parity
+- **Mustang** (FMA) — orchestration: Docker Compose, container networking, service discovery
+- **Olivier** (FMA) — cold region: CDN configuration, edge caching, geographic distribution
+- **Hughes** (FMA) — documentation: runbook writing, infrastructure diagrams, onboarding docs
+- **Calcifer** (Ghibli) — energy: resource efficiency, idle scaling, sleep/wake optimization
+- **Duo** (Gundam) — CI/CD: GitHub Actions, pipeline design, automated testing in deploy
+
 ## Deploy Target Branching
 
 The infrastructure sequence adapts based on `deploy` in PRD frontmatter:
