@@ -7,6 +7,24 @@ Avengers, assemble. Full pipeline from architecture to launch — one command to
 
 **Hill** tracks phase completion — logs each gate pass to `assemble-state.md`. **Jarvis** provides status summaries between phases.
 
+## Agent Deployment Manifest — The Full Initiative
+
+When `/assemble` invokes each sub-command, it deploys the FULL roster for that command — not just the lead. The leads below are coordinators; they bring their complete teams.
+
+| Phase | Lead | Full Team Deployed |
+|-------|------|--------------------|
+| Architecture | **Picard** | Spock, Uhura, Worf, Tuvok, Scotty, Kim, Janeway, Torres, La Forge, Data, Crusher, Archer, Pike, Riker, Troi |
+| Build | **Stark + Galadriel + Kusanagi** | Full /build roster (~35 agents across 4 universes) |
+| Smoke Test | **Hawkeye** | Solo — runtime verification |
+| Code Review (×3) | **Picard** | Spock, Seven, Data + **Rogers, Banner, Strange, Barton, Thor, Romanoff, Wanda, T'Challa** + **Nightwing, Bilbo, Troi, Constantine, Samwise** (cross-domain) |
+| UX | **Galadriel** | Elrond, Arwen, Samwise, Bilbo, Legolas, Gimli, Radagast, Éowyn, Celeborn, Aragorn, Faramir, Pippin, Boromir, Haldir, Frodo, Merry |
+| Security (×2) | **Kenobi** | Leia, Chewie, Rex, Maul, Yoda, Windu, Ahsoka, Padmé, Han, Cassian, Sabine, Qui-Gon, Bo-Katan, Anakin, Din Djarin |
+| DevOps | **Kusanagi** | Senku, Levi, Spike, L, Bulma, Holo, Valkyrie, Vegeta, Trunks, Mikasa, Erwin, Mustang, Olivier, Hughes, Calcifer, Duo |
+| QA | **Batman** | Oracle, Red Hood, Alfred, Deathstroke, Constantine, Nightwing, Lucius, Cyborg, Raven, Wonder Woman, Flash, Green Lantern, Batgirl, Aquaman |
+| Test | **Batman** | Oracle, Red Hood, Alfred, Nightwing (testing subset) |
+| Crossfire | **Maul, Deathstroke, Loki, Constantine, Éowyn** | Adversarial — each attacks another domain's work |
+| Council | **Spock, Ahsoka, Nightwing, Samwise, Padmé, Troi** | Final convergence — one voice per domain |
+
 ## Phase 1 — Architecture (Picard has the conn)
 **Fury:** "Picard, you're up. Review the architecture before we build anything."
 

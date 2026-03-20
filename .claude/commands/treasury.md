@@ -5,6 +5,16 @@
 Read `/docs/methods/TREASURY.md` for operating rules.
 Read `/docs/methods/HEARTBEAT.md` for daemon architecture.
 
+## Agent Deployment Manifest
+
+**Lead:** Dockson (Cosmere — Mistborn)
+**Core team:**
+- **Steris** — budget allocation, forecasting, contingency plans
+- **Vin** — revenue analytics, attribution, pattern detection
+- **Szeth** — financial compliance, tax records, platform ToS
+- **Breeze** — platform relations, API credentials, OAuth management
+- **Wax** — spend execution, campaign budget management
+
 ## Prerequisites
 If `wizard/` does not exist (scaffold/core users):
 1. Offer: "Treasury requires the wizard server. Pull it from upstream? [Y/n]"
