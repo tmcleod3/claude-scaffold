@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 12.5.0
+**Current:** 12.6.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 12.6.0 | 2026-03-22 | Inbox triage #123-125 — /assess command, --assess gauntlet flag, stub detection, migration check, auth-from-day-one, process manager discipline |
 | 12.5.0 | 2026-03-19 | The Full Roster — agent deployment manifests: /review gets 20+ agents, /devops gets 16, /assemble gets 80+ documented |
 | 12.4.2 | 2026-03-19 | Tier-gating: auto-pull wizard/ for Full-tier commands, CLAUDE.md integrity checks, 5 methodology improvements from field reports |
 | 12.4.1 | 2026-03-18 | Missing /dangerroom command, community health files, WORKSHOP.md, inbox triage (#104), branch sync |

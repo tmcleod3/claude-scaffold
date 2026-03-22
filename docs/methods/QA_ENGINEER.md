@@ -141,6 +141,18 @@ Every bug in the v7.3 Avengers Tower crisis was a first-run scenario. Steady-sta
 Grep for `strftime`, `format(`, `toISOString`, `new Date().to` calls and verify they use the project's canonical timestamp format (typically `%Y-%m-%dT%H:%M:%SZ` or ISO 8601). Flag any non-canonical format strings. Non-canonical timestamps cause: cache TTL bugs (string comparison fails), sorting issues, and cross-system timestamp mismatches.
 (Field report #21: cache used `%Y-%m-%d %H:%M:%S` while all other code used `%Y-%m-%dT%H:%M:%SZ` — cache effectively never expired.)
 
+### Stub Detection (Oracle, Round 2)
+
+Oracle scans for methods that return success without side effects — the most dangerous form of incomplete code. A method that raises `NotImplementedError` fails loudly and safely. A method that returns `True` without acting is a time bomb.
+
+**Pattern to detect:** Methods where the final statement is `return True`, `return success`, `return {"status": "ok"}`, or equivalent, AND the method body contains no preceding network calls (`self.exchange`, `requests.`, `fetch(`, `await`), no state writes (`self.state.set`, `.save()`, `.update(`, `.create(`), and no external mutations (`subprocess`, `os.`, `shutil.`). These are stubs that pass code review because they have correct signatures and reasonable log messages — they just don't DO anything.
+
+**Grep patterns:**
+- Python: methods ending in `return True` with no `self.exchange`, `requests.`, `aiohttp`, or `await` in the body
+- TypeScript: functions ending in `return true` or `return { success: true }` with no `fetch(`, `prisma.`, `.save()`, or `await` in the body
+
+Flag as **High severity**. In financial systems (trading, payments, billing), flag as **Critical**. (Field report #125: `ProtectionService._place_stop_loss()` returned `True` after logging but never called the exchange. `OrderService.cancel_order()` returned `True` without cancelling.)
+
 ## Step 2 — Baseline Repro Harness
 
 Get the project running. Create repeatable manual validation: app starts, primary flow works, auth works, data persists, error states display, mobile works. Document exact commands.

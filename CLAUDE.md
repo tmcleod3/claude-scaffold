@@ -73,6 +73,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/ux` | Galadriel's adversarial UX/UI review with a11y audit and verification pass | All |
 | `/review` | Picard's code review — pattern compliance, quality, maintainability | All |
 | `/devops` | Kusanagi's infrastructure — adapts based on deploy target | All |
+| `/assess` | Picard's pre-build assessment — architecture + assessment gauntlet + PRD gap analysis for existing codebases | All |
 | `/architect` | Picard's architecture review with parallel analysis and conflict resolution | All |
 | `/git` | Coulson's version bump, changelog, commit — full release management | All |
 | `/void` | Bombadil's forge sync — update VoidForge methodology from upstream | All |
@@ -106,6 +107,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **Testing** | `/docs/methods/TESTING.md` | When writing tests (framework mapping inside) |
 | **Security** | `/docs/methods/SECURITY_AUDITOR.md` | Kenobi — when doing security review |
 | **Architecture** | `/docs/methods/SYSTEMS_ARCHITECT.md` | Picard — when making arch decisions |
+| **Assessment** | `.claude/commands/assess.md` | Picard — when evaluating existing codebases before build |
 | **DevOps** | `/docs/methods/DEVOPS_ENGINEER.md` | Kusanagi — when doing infrastructure |
 | **Orchestrator** | `/docs/methods/SUB_AGENTS.md` | When coordinating multiple agents |
 | **Troubleshooting** | `/docs/methods/TROUBLESHOOTING.md` | When something fails |

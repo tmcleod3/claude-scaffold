@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.6.0] - 2026-03-22
+
+### Added
+- **`/assess` command** — Pre-build codebase assessment: chains `/architect` → `/gauntlet --assess` → PRD gap analysis into a unified "State of the Codebase" report. For evaluating existing codebases before a rebuild or VoidForge onboarding.
+- **`--assess` flag for `/gauntlet`** — Assessment-only mode: Rounds 1-2 (Discovery + First Strike), no fix batches. Produces report grouped by root cause. Designed for pre-build evaluation where full 10 rounds would be redundant.
+- **Stub Detection** in QA_ENGINEER.md — Oracle scans for methods that return True/success without side effects (no network calls, no state writes). The most dangerous form of incomplete code. High severity; Critical for financial systems.
+- **Migration Completeness Check** in BUILD_PROTOCOL.md Phase 1 — Before scaffolding, scan for duplicate implementations across directories. Abandoned migrations are flagged as blockers.
+- **Auth-from-Day-One** in BUILD_PROTOCOL.md Phase 1 — HTTP endpoints require API key middleware returning 401 from birth. Full auth stays Phase 3, but the door is locked from day one.
+- **Process Manager Discipline** in DEVOPS_ENGINEER.md — Never kill ports owned by PM2/systemd/Docker directly; always reload through the process manager.
+- **Frontmatter Validation** in CAMPAIGN.md Step 1 — Before Dax analyzes the PRD, validate YAML frontmatter exists. If missing, Sisko runs a 5-question interview to add it.
+- **VM execution test** in GAUNTLET.md build-output verification — Compiled JSX/HTML must be tested in the target runtime, not just built successfully.
+
+### Fixed
+- Field reports #123, #124, #125 triaged — 8 methodology improvements applied, all 3 issues closed
+
+---
+
 ## [12.4.2] - 2026-03-19
 
 ### Changed
