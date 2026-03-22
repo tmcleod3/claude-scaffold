@@ -140,11 +140,13 @@ If any contradictions found: present them to the user with specific resolution o
 This catches architecture mistakes that currently escape until Phase 9-11 reviews — where fixing them costs hours instead of minutes.
 
 **Phase 1 — Stark + Kusanagi Scaffold.**
-1. Initialize framework, configs, schema, directory structure, types, utils, root layout
-2. Set up test runner per `/docs/methods/TESTING.md`
-3. Every placeholder references its PRD section
-4. **Tailwind v4 projects:** If framework is Next.js and styling is Tailwind, create `postcss.config.mjs` (`export default { plugins: { "@tailwindcss/postcss": {} } }`) and ensure `globals.css` starts with `@import "tailwindcss" source("../.."). Tailwind v4's implicit scanning breaks in deployed environments when non-source files (methodology docs, build logs) are scanned.
-5. Log to `/logs/phase-01-scaffold.md`
+1. **Migration Completeness Check (existing codebases only):** Before scaffolding, scan for duplicate implementations — same class name, same function name, or same route pattern in multiple directories (e.g., `src/` and `core/`, `v1/` and `v2/`). If found: flag as blocker. An abandoned migration is worse than no migration — two architectures create confusion, duplicate maintenance, and allow each to reference the other. Resolve before proceeding: complete the migration, revert it, or document the boundary. (Field report #125: stubs in `core/services/` returned True without acting while working code in `src/` was never connected.)
+2. **Auth-from-Day-One:** When scaffolding includes HTTP endpoints, require at minimum an API key middleware stub that returns 401 by default. Full auth (JWT, OAuth, 2FA) stays in Phase 3, but every endpoint is locked from birth. The cost of a simple API key check is minutes; the cost of public exposure during Phases 1-2 is catastrophic for financial or data-sensitive systems. (Field report #125: all endpoints shipped with `allow_origins=["*"]`, zero authentication, bound to `0.0.0.0` — existed unprotected for 2+ build phases.)
+3. Initialize framework, configs, schema, directory structure, types, utils, root layout
+4. Set up test runner per `/docs/methods/TESTING.md`
+5. Every placeholder references its PRD section
+6. **Tailwind v4 projects:** If framework is Next.js and styling is Tailwind, create `postcss.config.mjs` (`export default { plugins: { "@tailwindcss/postcss": {} } }`) and ensure `globals.css` starts with `@import "tailwindcss" source("../.."). Tailwind v4's implicit scanning breaks in deployed environments when non-source files (methodology docs, build logs) are scanned.
+7. Log to `/logs/phase-01-scaffold.md`
 
 **Phase 2 — Kusanagi Infrastructure.**
 1. Database (Banner assists) -> Redis -> Environment

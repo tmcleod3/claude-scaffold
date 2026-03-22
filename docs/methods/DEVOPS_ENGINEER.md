@@ -125,6 +125,12 @@ Known issues when deploying Tailwind v4 to Vercel or similar build platforms:
 
 Never combine methodology syncs (`/void`) with unrelated debugging in the same session. If a sync introduces a problem, the debug commits interleave with sync commits, making it impossible to identify which change broke what. Rule: sync first, verify, THEN debug separately. If needed, hard-reset to the pre-sync state and reapply incrementally. (Field report #29: 6 retcon commits interleaved with 20 CSS-fix commits.)
 
+### Process Manager Discipline
+
+If a process manager (PM2, systemd, Docker, supervisord) owns the application port, NEVER kill the port directly (`fuser -k`, `kill`, `lsof -ti | xargs kill`). Always reload through the process manager: `pm2 reload`, `systemctl restart`, `docker compose restart`. Killing the port causes the process manager to auto-restart the old build, creating a race condition with any manual start attempt — the user sees stale code while the fix is already built. (Field report #123: 30+ minutes of stale code serving in production because `fuser -k 5005/tcp` raced with PM2's auto-restart.)
+
+**Detection rule:** When writing CLAUDE.md "How to Run" sections or session restart commands, check if the project uses a process manager (`ecosystem.config.js`, `docker-compose.yml`, `*.service` files). If yes, the restart command MUST go through the PM — not through port killing.
+
 ## Deploy Safety Rules
 
 **rsync exclusion mandate:** NEVER use `rsync --delete` without excluding VPS-only directories. User-uploaded files, generated avatars, and data files only exist on the VPS — `--delete` will destroy them. Mandatory exclusions:

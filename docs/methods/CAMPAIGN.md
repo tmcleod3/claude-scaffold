@@ -129,17 +129,18 @@ This step runs AFTER Step 0 (vault status known) and BEFORE Step 1 (so Dax's ful
 Dax reads the Prophets' plan:
 
 1. Read the PRD — check `/PRD-VOIDFORGE.md` first (root-level, VoidForge's own), fall back to `/docs/PRD.md`
-2. Scan the codebase — what routes, schema, components, tests exist?
-3. Read Section 16 (Launch Sequence) for phased priorities
-4. Read the YAML frontmatter for skip flags (`auth: no`, `payments: none`, etc.)
-5. **Classify every PRD requirement by type:**
+2. **Frontmatter validation (before analysis):** Check the PRD for a YAML frontmatter block (opening `---` within the first 5 lines). If missing, Sisko offers to add it via a focused 5-question interview: (a) project type? (b) auth needed? (c) payments? (d) deploy target? (e) key integrations? Write the frontmatter block and continue. A PRD without frontmatter cannot be parsed by `/campaign` — skip flags, conditional phases, and project sizing all depend on it. The PRD generator (`/prd`) produces proper frontmatter, but user-written PRDs bypass it. (Field report #125: 1,957-line PRD with no frontmatter, no acceptance criteria, no mission decomposition.)
+3. Scan the codebase — what routes, schema, components, tests exist?
+4. Read Section 16 (Launch Sequence) for phased priorities
+5. Read the YAML frontmatter for skip flags (`auth: no`, `payments: none`, etc.)
+6. **Classify every PRD requirement by type:**
    - **Code** — routes, components, data models, logic, API endpoints (buildable by `/build`)
    - **Asset** — images, illustrations, SVGs, OG images, custom icons (require external generation)
    - **Copy** — marketing text, metadata descriptions, numeric claims (buildable but need accuracy verification)
    - **Infrastructure** — DNS, env vars, deployments, third-party dashboard setup (require CLI/dashboard access)
    - **Vault-Available** — infrastructure items where credentials exist in `~/.voidforge/vault.enc` but haven't been injected into `.env`. When scanning `.env.example` against `.env`, check if missing vars are in the vault before marking BLOCKED. Vault-backed credentials can be auto-resolved by running `voidforge deploy`. (Field report #40: 5 items classified as BLOCKED for an entire 10-mission campaign when the vault had the credentials.)
-6. Diff: PRD requirements vs. implemented features (structural AND semantic — not just "does the route exist?" but "does the component render what the PRD describes?")
-7. Produce: **The Prophecy Board** — ordered list of missions with scope, plus a separate list of BLOCKED items (assets, credentials, user decisions)
+7. Diff: PRD requirements vs. implemented features (structural AND semantic — not just "does the route exist?" but "does the component render what the PRD describes?")
+8. Produce: **The Prophecy Board** — ordered list of missions with scope, plus a separate list of BLOCKED items (assets, credentials, user decisions)
 
 ### Deep Codebase Scan for PRD Diff
 
