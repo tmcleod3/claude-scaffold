@@ -8,6 +8,8 @@ import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 import { WebSocketServer, WebSocket } from 'ws';
 import { getServerPort, getServerHost } from '../server.js';
+import { isLanMode } from './tower-auth.js';
+import { isPrivateOrigin } from './network.js';
 
 const HEARTBEAT_INTERVAL_MS = 30000;
 const MAX_CLIENTS = 50;
@@ -61,7 +63,11 @@ export function createDashboardWs(name: string): DashboardWs {
       const remoteHost = getServerHost();
       if (remoteHost) allowed.push(`https://${remoteHost}`);
 
-      if (!origin || !allowed.includes(origin)) {
+      // In LAN mode, accept connections from any private IP origin
+      const originAllowed = allowed.includes(origin)
+        || (isLanMode() && isPrivateOrigin(origin));
+
+      if (!origin || !originAllowed) {
         socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
         socket.destroy();
         return;

@@ -79,6 +79,7 @@ const CLEANUP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const sessions = new Map<string, Session>();
 const rateLimits = new Map<string, RateLimitEntry>();
 let remoteMode = false;
+let lanMode = false;
 let cleanupTimer: ReturnType<typeof setInterval> | null = null;
 
 // ── Write serialization (prevents setup race condition) ──
@@ -107,6 +108,16 @@ export function setRemoteMode(enabled: boolean): void {
 
 export function isRemoteMode(): boolean {
   return remoteMode;
+}
+
+// ── LAN mode (private network — ZeroTier/Tailscale/WireGuard) ──
+
+export function setLanMode(enabled: boolean): void {
+  lanMode = enabled;
+}
+
+export function isLanMode(): boolean {
+  return lanMode;
 }
 
 /** Evict expired sessions and stale rate-limit entries (memory leak prevention). */

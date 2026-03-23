@@ -4,6 +4,7 @@
  * Usage: npx voidforge init                    — Launch Gandalf (setup wizard)
  *        npx voidforge init --template saas    — Start from a project template
  *        npx voidforge init --remote           — Launch in remote mode (0.0.0.0 + auth)
+ *        npx voidforge init --lan              — Launch in LAN mode (0.0.0.0, optional password, no TOTP)
  *        npx voidforge deploy                  — Launch Haku (deploy wizard)
  *        npx voidforge deploy --headless       — Deploy from CLI (no browser)
  *        npx voidforge deploy --env-only       — Write vault credentials to .env (no provisioning)
@@ -37,6 +38,7 @@ if (command === 'templates') {
 
 const isHeadless = args.includes('--headless');
 const isRemote = args.includes('--remote');
+const isLan = args.includes('--lan');
 const isSelfDeploy = args.includes('--self');
 const isEnvOnly = args.includes('--env-only');
 const projectDirFlag = args.find((a, i) => args[i - 1] === '--dir');
@@ -91,15 +93,24 @@ if (command === 'deploy' && isEnvOnly) {
     const protocol = isRemote ? 'https' : 'http';
     const host = isRemote ? (hostFlag ?? 'localhost') : 'localhost';
     const url = `${protocol}://${host}:${port}${wizard.path}`;
+    const modeLabel = isRemote ? ' (Remote Mode)' : isLan ? ' (LAN Mode)' : '';
     console.log('');
-    console.log(`  VoidForge — ${wizard.name}${isRemote ? ' (Remote Mode)' : ''}`);
+    console.log(`  VoidForge — ${wizard.name}${modeLabel}`);
     console.log(`  Server running at ${url}`);
+    if (isLan) {
+      console.log('  LAN Mode: Listening on all interfaces (0.0.0.0)');
+      console.log('  Access from private network: http://<your-ip>:' + port + wizard.path);
+      console.log('  Auth: optional password (no TOTP, no Caddy)');
+    }
     if (isRemote) console.log('  Authentication: REQUIRED (5-layer security active)');
     console.log('  Press Ctrl+C to stop');
     console.log('');
 
-    await startServer(port, isRemote ? { remote: true, host: hostFlag } : undefined);
-    if (!isRemote) await openBrowser(url);
+    const serverOptions = isRemote ? { remote: true, host: hostFlag }
+      : isLan ? { lan: true }
+      : undefined;
+    await startServer(port, serverOptions);
+    if (!isRemote && !isLan) await openBrowser(url);
   }
 
   main().catch((err: unknown) => {

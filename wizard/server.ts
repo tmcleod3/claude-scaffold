@@ -30,7 +30,7 @@ import { handleWarRoomUpgrade, closeWarRoom } from './api/war-room.js';
 let killAllSessions: (() => void) | null = null;
 try { killAllSessions = (await import('./lib/pty-manager.js')).killAllSessions; } catch { /* node-pty not available */ }
 import { startHealthPoller, stopHealthPoller } from './lib/health-poller.js';
-import { isRemoteMode, setRemoteMode, validateSession, parseSessionCookie, isAuthExempt, getClientIp, type SessionInfo, type UserRole } from './lib/tower-auth.js';
+import { isRemoteMode, setRemoteMode, isLanMode, setLanMode, validateSession, parseSessionCookie, isAuthExempt, getClientIp, type SessionInfo, type UserRole } from './lib/tower-auth.js';
 import { initAuditLog, audit } from './lib/audit-log.js';
 import { hasRole } from './lib/user-manager.js';
 
@@ -272,11 +272,14 @@ export async function checkNativeModulesChanged(): Promise<boolean> {
   return false;
 }
 
-export function startServer(port: number, options?: { remote?: boolean; host?: string }): Promise<void> {
+export function startServer(port: number, options?: { remote?: boolean; lan?: boolean; host?: string }): Promise<void> {
   serverPort = port;
   if (options?.remote) {
     setRemoteMode(true);
     serverHost = options.host ?? '';
+  }
+  if (options?.lan) {
+    setLanMode(true);
   }
   return new Promise((resolve, reject) => {
     const server = createServer((req, res) => {
@@ -356,8 +359,8 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
 
     // Bind to '::' (dual-stack) in local mode — macOS resolves 'localhost' to ::1 (IPv6),
     // so binding only to 127.0.0.1 breaks WebSocket connections from browsers.
-    // CORS + CSRF headers restrict access to the wizard's own origin regardless.
-    const bindAddress = isRemoteMode() ? '0.0.0.0' : '::';
+    // LAN mode binds 0.0.0.0 for private network access (ZeroTier/Tailscale/WireGuard).
+    const bindAddress = (isRemoteMode() || isLanMode()) ? '0.0.0.0' : '::';
 
     server.listen(port, bindAddress, async () => {
       await initAuditLog();
