@@ -11,7 +11,7 @@ import { readFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { atomicWrite, SPEND_LOG, REVENUE_LOG, TREASURY_DIR } from '../../docs/patterns/financial-transaction.js';
+import { atomicWrite, SPEND_LOG, REVENUE_LOG, TREASURY_DIR } from './financial-core.js';
 
 type Cents = number & { readonly __brand: 'Cents' };
 type Ratio = number & { readonly __brand: 'Ratio' };

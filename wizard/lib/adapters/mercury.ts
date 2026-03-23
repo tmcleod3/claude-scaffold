@@ -8,7 +8,7 @@
  * PRD Reference: §9.4 (Revenue Ingest — Mercury)
  */
 
-import type { RevenueSourceAdapter, RevenueCredentials, ConnectionResult, TransactionPage, BalanceResult, DateRange } from '../../../docs/patterns/revenue-source-adapter.js';
+import type { RevenueSourceAdapter, RevenueCredentials, ConnectionResult, TransactionPage, BalanceResult, DateRange } from '../revenue-types.js';
 
 export class MercuryAdapter implements RevenueSourceAdapter {
   private accessToken: string = '';

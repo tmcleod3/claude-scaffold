@@ -11,9 +11,9 @@ export type {
   SpendReport, PerformanceMetrics, InsightData,
   OAuthTokens, ConnectionStatus, PlatformError,
   Cents, Percentage, Ratio, AdPlatform,
-} from '../../../docs/patterns/ad-platform-adapter.js';
+} from '../ad-platform-core.js';
 
-export { toCents, toDollars } from '../../../docs/patterns/ad-platform-adapter.js';
+export { toCents, toDollars } from '../ad-platform-core.js';
 // Note: TokenBucketLimiter in ad-platform-adapter.ts is the simple reference version.
 // Production adapters use OutboundRateLimiter (below) which has safety margins, daily quotas, and retry logic.
-export { OutboundRateLimiter, getLimiter } from '../../../docs/patterns/outbound-rate-limiter.js';
+export { OutboundRateLimiter, getLimiter } from '../rate-limiter-core.js';

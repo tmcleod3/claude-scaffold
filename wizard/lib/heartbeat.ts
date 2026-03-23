@@ -20,9 +20,9 @@ import {
   writeState, setupSignalHandlers,
   JobScheduler, createLogger,
   STATE_FILE, SOCKET_PATH,
-} from '../../docs/patterns/daemon-process.js';
+} from './daemon-core.js';
 
-import type { HeartbeatState, DaemonState } from '../../docs/patterns/daemon-process.js';
+import type { HeartbeatState, DaemonState } from './daemon-core.js';
 
 import { financialVaultGet, financialVaultLock, financialVaultUnlock } from './financial-vault.js';
 import { totpVerify, totpSessionValid, totpSessionInvalidate } from './totp.js';
@@ -33,11 +33,11 @@ import {
   needsRefresh, handleRefreshFailure, getTokenHealth,
   tokenVaultKey, deserializeTokens,
   shouldRotateSessionToken, rotateSessionToken, validateSessionToken,
-} from '../../docs/patterns/oauth-token-lifecycle.js';
+} from './oauth-core.js';
 
-import type { SessionTokenState } from '../../docs/patterns/oauth-token-lifecycle.js';
+import type { SessionTokenState } from './oauth-core.js';
 
-import { appendToLog, atomicWrite, SPEND_LOG, REVENUE_LOG, TREASURY_DIR } from '../../docs/patterns/financial-transaction.js';
+import { appendToLog, atomicWrite, SPEND_LOG, REVENUE_LOG, TREASURY_DIR } from './financial-core.js';
 
 const PENDING_OPS = join(TREASURY_DIR, 'pending-ops.jsonl');
 const VOIDFORGE_DIR = join(homedir(), '.voidforge');
