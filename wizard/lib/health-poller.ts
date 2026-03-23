@@ -5,6 +5,7 @@
  */
 
 import { readRegistry, updateHealthStatus, type HealthStatus } from './project-registry.js';
+import { isPrivateIp } from './network.js';
 
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const FETCH_TIMEOUT_MS = 5_000; // 5 seconds per project
@@ -22,21 +23,12 @@ function isValidHealthUrl(url: string): boolean {
     const host = parsed.hostname.toLowerCase();
 
     // Localhost variants
-    if (host === 'localhost' || host === '127.0.0.1' || host === '::1') return false;
+    // Use shared private IP check (Gauntlet v13.1 consolidation)
+    if (host === 'localhost' || isPrivateIp(host)) return false;
     if (host === '0.0.0.0' || host === '127.1') return false;
 
     // AWS/cloud metadata
     if (host === '169.254.169.254') return false;
-
-    // Private IPv4 ranges
-    if (host.startsWith('10.') || host.startsWith('192.168.')) return false;
-    if (host.startsWith('172.')) {
-      const second = parseInt(host.split('.')[1], 10);
-      if (second >= 16 && second <= 31) return false;
-    }
-
-    // IPv6 mapped addresses and link-local
-    if (host.includes('::ffff:') || host.includes('ffff:')) return false;
     if (host.startsWith('fe80') || host.startsWith('fc00') || host.startsWith('fd')) return false;
 
     // Block bracket-wrapped IPv6

@@ -76,18 +76,11 @@ function getMinRole(pathname: string): UserRole | null {
 const UI_DIR = join(import.meta.dirname, 'ui');
 
 /** Set by startServer so handleRequest can scope CORS to the actual origin. */
+// Server config shared via wizard/lib/server-config.ts (breaks circular import — Gauntlet DR-02)
+import { getServerPort, getServerHost, setServerPort, setServerHost } from './lib/server-config.js';
+export { getServerPort, getServerHost }; // re-export for backwards compat
 let serverPort = 0;
-let serverHost = ''; // Set for remote mode (e.g., 'forge.yourdomain.com')
-
-/** Expose the server port for WebSocket origin validation. */
-export function getServerPort(): number {
-  return serverPort;
-}
-
-/** Expose the server host for remote-mode WebSocket origin validation. */
-export function getServerHost(): string {
-  return serverHost;
-}
+let serverHost = '';
 
 const MIME_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -125,7 +118,9 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   if (isRemoteMode() && serverHost) {
     allowedOrigins.push(`https://${serverHost}`);
   }
-  if (allowedOrigins.includes(origin)) {
+  // LAN mode: accept any private IP origin (Gauntlet Picard DR-04)
+  const { isPrivateOrigin } = await import('./lib/network.js');
+  if (allowedOrigins.includes(origin) || (isLanMode() && isPrivateOrigin(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -138,8 +133,11 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   if (isRemoteMode()) {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
+  // LAN mode: allow WebSocket from any private IP (Gauntlet Kenobi DR-10)
   const connectSrc = isRemoteMode() && serverHost
     ? `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort} wss://${serverHost}`
+    : isLanMode()
+    ? `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort} ws://*:${serverPort}`
     : `'self' ws://localhost:${serverPort} ws://127.0.0.1:${serverPort}`;
   res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src ${connectSrc} https://cdn.jsdelivr.net; frame-ancestors 'none'`);
 
@@ -289,9 +287,11 @@ export async function checkNativeModulesChanged(): Promise<boolean> {
 
 export function startServer(port: number, options?: { remote?: boolean; lan?: boolean; host?: string }): Promise<void> {
   serverPort = port;
+  setServerPort(port);
   if (options?.remote) {
     setRemoteMode(true);
     serverHost = options.host ?? '';
+    setServerHost(serverHost);
   }
   if (options?.lan) {
     setLanMode(true);

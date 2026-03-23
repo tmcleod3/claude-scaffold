@@ -7,7 +7,7 @@
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 import { WebSocketServer, WebSocket } from 'ws';
-import { getServerPort, getServerHost } from '../server.js';
+import { getServerPort, getServerHost } from './server-config.js';
 import { isLanMode } from './tower-auth.js';
 import { isPrivateOrigin } from './network.js';
 

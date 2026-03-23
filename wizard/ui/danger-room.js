@@ -78,9 +78,11 @@
     const gauge = document.getElementById('context-gauge');
     const emptyHint = document.getElementById('context-empty');
     const modelDisplay = document.getElementById('context-model');
+    const headerCtx = document.getElementById('header-context');
     if (!usage) {
       text.textContent = '\u2014%';
       fill.style.strokeDashoffset = 88;
+      if (headerCtx) headerCtx.textContent = '\u2014%';
       if (gauge) gauge.removeAttribute('aria-valuenow');
       if (emptyHint) emptyHint.style.display = '';
       if (modelDisplay) modelDisplay.textContent = '';
@@ -95,6 +97,12 @@
     else fill.setAttribute('stroke', '#ef4444');
     text.textContent = pct + '%';
     if (gauge) gauge.setAttribute('aria-valuenow', pct);
+    // Compact header indicator (always visible — Gauntlet UX-005)
+    if (headerCtx) {
+      headerCtx.textContent = pct + '%';
+      headerCtx.style.color = pct < 50 ? '#34d399' : pct < 70 ? '#fbbf24' : '#ef4444';
+      headerCtx.style.borderColor = headerCtx.style.color;
+    }
     if (modelDisplay && usage.model) modelDisplay.textContent = usage.model;
     // Update cost display from same data source
     var costEl = document.getElementById('cost-display');
