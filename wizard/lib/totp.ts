@@ -252,11 +252,14 @@ export async function totpVerify(code: string, fallbackPassword?: string): Promi
       }
       session.usedCodes.add(codeKey);
       // Prune codes older than 3 TOTP periods (90 seconds)
-      // Codes are keyed by step, so prune steps more than 3 behind current
+      // LOKI-005: If clock jumped (step difference > 10), clear all used codes to prevent lockout
+      const toDelete: string[] = [];
       for (const key of session.usedCodes) {
         const keyStep = parseInt(key.split(':')[1]);
-        if (currentStep - keyStep > 3) session.usedCodes.delete(key);
+        const drift = currentStep - keyStep;
+        if (drift > 3 || drift < -3) toDelete.push(key);
       }
+      for (const key of toDelete) session.usedCodes.delete(key);
       return true;
     }
   }
