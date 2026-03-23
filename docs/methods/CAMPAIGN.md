@@ -103,6 +103,13 @@ Kira reads the battlefield:
    - If vault exists + provisioning done → verify `.env` is populated from vault. If not, suggest re-running provisioner.
    - If no vault → proceed as today (manual credential management)
 8. **Deploy credential check (before any deploy):** Verify `SSH_HOST`, `SSH_USER`, and `SSH_KEY_PATH` are present in `.env` or discoverable in `~/.voidforge/projects.json`. Test SSH: `ssh -i $KEY -o ConnectTimeout=5 $USER@$HOST "echo ok"`. If missing, check `~/.voidforge/deploys/` for historical deploy outputs. If still missing → BLOCKED. Do not attempt deploy. (Field report #103: SSH_HOST lost from .env during long campaigns, caused deployment failure + data loss.)
+9. **Campaign state git-tracking check:** If `logs/campaign-state.md` exists (or will be created), verify it is tracked by git. Run `git check-ignore logs/campaign-state.md`. If gitignored, warn immediately: "⚠ campaign-state.md is gitignored. Campaign planning work will be lost on `/clear` or session end. Either: (a) `git add -f logs/campaign-state.md` to force-track it, or (b) remove `logs/` from `.gitignore`." Do NOT proceed silently — losing campaign state is the highest-impact data loss in VoidForge. (Field report #129: `git add` failed silently due to gitignore, planning work nearly lost.)
+10. **Blitz pre-flight checklist (all modes, not just `--blitz`):**
+    - [ ] `VERSION.md` exists (required by `/git`)
+    - [ ] `package.json` or `pyproject.toml` exists (required for version tracking)
+    - [ ] Campaign state is git-tracked (check #9 above)
+    - [ ] Working tree is clean or changes are committed
+    If any item fails, warn before proceeding. In `--blitz` mode, auto-fix where possible (create VERSION.md from package.json version, force-add campaign-state). (Field report #129)
 
 ### Campaign State Auto-Sync
 
@@ -141,6 +148,7 @@ Dax reads the Prophets' plan:
    - **Vault-Available** — infrastructure items where credentials exist in `~/.voidforge/vault.enc` but haven't been injected into `.env`. When scanning `.env.example` against `.env`, check if missing vars are in the vault before marking BLOCKED. Vault-backed credentials can be auto-resolved by running `voidforge deploy`. (Field report #40: 5 items classified as BLOCKED for an entire 10-mission campaign when the vault had the credentials.)
 7. Diff: PRD requirements vs. implemented features (structural AND semantic — not just "does the route exist?" but "does the component render what the PRD describes?")
 8. Produce: **The Prophecy Board** — ordered list of missions with scope, plus a separate list of BLOCKED items (assets, credentials, user decisions)
+9. **Acceptance criteria gate:** Every mission on the Prophecy Board MUST have at least one acceptance criterion before Dax finalizes the board. Acceptance criteria are concrete, verifiable conditions — "endpoint returns 200 with correct schema," "UI renders empty/loading/error/success states," "test covers the happy path." Missions without acceptance criteria are stubs that escape quality gates later. If a mission's scope is too vague to produce criteria, it's too vague to build — split or clarify first. This applies to `--plan` mode too, not just build mode. (Field report #129: Phases 3-6 written as stubs without criteria, caught late by blitz compliance check.)
 
 ### Deep Codebase Scan for PRD Diff
 
