@@ -125,6 +125,17 @@ After every release, verify that every entry in the CLAUDE.md Slash Commands tab
 
 Check: scan the table for command names, verify each has a command file. Any mismatch is a documentation-reality gap that undermines trust. (Field report #108: `/dangerroom` listed since v10.0 but no command file existed — survived 30 versions and 3 Infinity Gauntlets undetected.)
 
+## `/git --deploy` Flag
+
+When the user passes `--deploy` to `/git`, run `/deploy` automatically after the commit + push succeeds:
+
+1. Coulson completes the normal `/git` workflow (stage → commit → verify → push)
+2. After push succeeds, hand off to Kusanagi: run `/deploy` with auto-detected target
+3. If deploy fails, the commit and push are still valid — only the deploy needs retry
+4. Log the deploy result in the commit's campaign-state entry
+
+This enables one-command commit-and-deploy for ad-hoc changes outside of campaigns.
+
 ## Post-Push Deploy Check
 
 After pushing to remote, if the project runs on a persistent server (PM2, systemd, Docker):

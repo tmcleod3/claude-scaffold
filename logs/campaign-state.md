@@ -11,11 +11,11 @@
 
 | # | Mission | Scope | Status | Debrief |
 |---|---------|-------|--------|---------|
-| 1 | Deploy Engine | /deploy command, target detection, strategy execution, health check, rollback, deploy-state.md | NOT STARTED | — |
+| 1 | Deploy Engine | /deploy command, target detection, strategy execution, health check, rollback, deploy-state.md | **DONE** | #144 |
 | 2 | Campaign Integration | Auto-deploy at campaign end, /git --deploy flag, CAMPAIGN.md deploy step | NOT STARTED | — |
 | 3 | Danger Room Integration | Wire deploy panel to deploy-state.md, drift detector | NOT STARTED | — |
 
-Missions completed: 0. Next checkpoint at: 4.
+Missions completed: 1. Next checkpoint at: 4.
 
 ## Previous Campaigns
 

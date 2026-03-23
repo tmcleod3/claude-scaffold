@@ -402,6 +402,19 @@ This is lighter than a Victory Gauntlet (~13 agents vs 30+) and focused on "can 
 
 > *"The Prophets' plan is fulfilled. The campaign is complete."*
 
+### Step 7 — Deploy (Kusanagi — optional)
+
+After Victory Gauntlet passes and debrief is filed:
+
+1. Check PRD frontmatter for `deploy:` target. If no deploy target → skip.
+2. In normal mode: "Deploy to [target]? [Y/n]"
+3. In `--blitz` mode: auto-deploy (no confirmation needed — the Gauntlet already verified the code)
+4. Run `/deploy` — Kusanagi handles target detection, execution, health check, rollback
+5. If deploy succeeds: update deploy-state.md, Danger Room deploy panel shows live status
+6. If deploy fails: Valkyrie rolls back, logs failure. Campaign still counts as VICTORY (the code is correct; the deploy issue is infrastructure, not code quality).
+
+Deploy is OPTIONAL — Victory means "code is correct and Gauntlet-verified." Deploy means "code is also in production." A campaign can achieve Victory without deploying.
+
 **Victory does NOT mean "everything was built." It means "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 
 **The Victory Gauntlet is NEVER skipped.** Not for methodology-only campaigns. Not for "no code changes." Not for single-mission campaigns. The Gauntlet checks methodology consistency (cross-references, command↔doc sync, agent assignments, version drift) in ADDITION to code quality. Five consecutive campaigns (v8.1-v9.2) shipped without Gauntlets because the first skip was self-justified as "methodology-only" and the pattern stuck. This is a protocol violation on the same level as the Quality Reduction Anti-Pattern.
