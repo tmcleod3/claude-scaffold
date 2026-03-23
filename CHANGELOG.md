@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [13.1.0] - 2026-03-22
+
+### Changed
+- **Circular import broken** — `getServerPort`/`getServerHost` extracted to `wizard/lib/server-config.ts`, eliminating the `server.ts ↔ dashboard-ws.ts` cycle
+- **CORS/CSP for LAN mode** — private IP origins accepted via `isPrivateOrigin()` in CORS; `ws://*:PORT` added to CSP `connect-src` for WebSocket
+- **Context gauge always visible** — compact percentage indicator in header bar, color-coded, stays visible when scrolling past Tier 1
+- **Private IP consolidation** — `health-poller.ts` now imports `isPrivateIp` from shared `network.ts` instead of inline checks
+
+---
+
 ## [13.0.0] - 2026-03-22
 
 ### Added
