@@ -16,9 +16,9 @@
 | 3 | LAN Mode | --lan flag, private IP validation, optional password auth | **DONE** | #134 |
 | 4 | Status Line Bridge | Atomic writes, per-session files, context gauge + cost display | **DONE** | #135 |
 | 5 | Agent Ticker | Methodology-driven JSONL logging, hybrid watch+poll, rotation | **DONE** | #136 |
-| 6 | New Panels + Config | Tests, health, infra, git, deploy drift via panel registry | NOT STARTED | — |
+| 6 | New Panels + Config | Tests, health, infra, git, deploy drift via panel registry | **DONE** | #137 |
 
-Missions completed: 5. Next checkpoint at: 8.
+Missions completed: 6. All missions complete — proceeding to Victory Gauntlet.
 
 ## Previous Campaigns
 

@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [13.0.0] - 2026-03-22
+
+### Added
+- **LAN mode (`--lan`)** — Private network access for ZeroTier, Tailscale, WireGuard. Binds `0.0.0.0` with optional password, no TOTP/Caddy. Private IP validation covers RFC 1918, CGNAT (Tailscale), IPv6 ULA (ZeroTier).
+- **Status Line bridge** — `scripts/danger-room-feed.sh` connects Claude Code's Status Line API to the Danger Room. Per-session files with atomic writes, 60-second staleness threshold. Powers context gauge + cost display.
+- **Agent activity ticker** — Methodology-driven JSONL logging (not hooks). Hybrid `fs.watch` + 3-second poll fallback. Live agent dispatch events broadcast via WebSocket.
+- **Tests panel** — Structured `test-results.json` data contract with defined schema. New `/api/danger-room/tests` endpoint.
+- **Git status panel** — Branch, uncommitted count, ahead/behind, last commit via `execFile` with 5-second timeout. New `/api/danger-room/git-status` endpoint.
+- **Dashboard config** — `danger-room.config.json` for project-specific panel settings (health endpoint, PM2 process, enabled panels).
+- **Shared `wizard/lib/network.ts`** — `isPrivateIp()` + `isPrivateOrigin()` with numeric octet parsing. Consolidates duplicate implementations.
+
+### Changed
+- **3-tier information architecture** — Ops tab restructured: Live Feed (context gauge + agent ticker) → Campaign State (timeline + findings + pipeline) → System Status (version + deploy + tests). Visual hierarchy with tier labels and distinct styling.
+- **Tiered polling** — Fast 5s (context), campaign 10s (timeline/findings), slow 60s (version/deploy). Replaces uniform 10-second poll. ~60% reduction in unnecessary network requests.
+- **Dashboard consolidation** — 800+ lines of duplicated code extracted into 3 shared modules (`http-helpers.ts`, `dashboard-data.ts`, `dashboard-ws.ts`). danger-room.ts: 306→113 lines. war-room.ts: 248→67 lines.
+- **War Room wired** — Routes now actually register (was dead code — never imported by server.ts).
+- **Empty states** — Every panel shows actionable guidance when data is missing.
+
+### Fixed
+- **Campaign regex** — `parseCampaignState()` rewritten for actual 5-column format. Handles bold markdown status (`**DONE**`). Normalizes vocabulary. Extracts `blockedBy` + `debrief` fields.
+- **Build state artifacts** — `parseBuildState()` explicit trim removes leading `| ` capture artifacts.
+- **Findings counter** — `parseFindings()` reads `build-state.md` "Known Issues" first (curated, open issues only). Falls back to regex scan with defensive logging.
+
+---
+
 ## [12.6.4] - 2026-03-22
 
 ### Added

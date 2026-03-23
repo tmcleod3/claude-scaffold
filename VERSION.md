@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 12.6.4
+**Current:** 13.0.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 13.0.0 | 2026-03-22 | The Living Dashboard — consolidation, 3-tier UX, LAN mode, Status Line bridge, agent ticker, new panels |
 | 12.6.4 | 2026-03-22 | Inbox triage #130-131 — encryption egress audit, GROUP BY compatibility, v14.0 Day-0 Engine roadmap |
 | 12.6.3 | 2026-03-22 | Inbox triage #129 — acceptance criteria enforcement, gitignore warning, blitz pre-flight, --adr-only mode |
 | 12.6.2 | 2026-03-22 | v13.0 roadmap — LAN mode, Danger Room bug fixes + feature proposals from field reports #127-128 |
