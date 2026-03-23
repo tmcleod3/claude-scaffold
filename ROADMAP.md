@@ -3,8 +3,8 @@
 > The plan for the plan-maker.
 
 **Current:** v12.6.4 (2026-03-22)
-**Next:** v13.0 — The Living Dashboard
-**Status:** v12.x complete. v13.0 transforms the Danger Room from static file parsing into a live operations center — consolidation, information architecture, LAN mode, Status Line bridge, agent ticker, new panels, full UX review.
+**Next:** v13.1 — Dashboard Polish → v14.0 — The Day-0 Engine
+**Status:** v13.0 shipped. v13.1 cleans up Gauntlet tech debt (8 items, 1 session). v14.0 redesigns Cultivation onboarding as a 7-step guided growth setup — treasury, revenue, ads, budget, creatives, tracking, launch.
 
 ---
 
@@ -1820,33 +1820,164 @@ Full `/gauntlet` across the combined v13.0 changes. Non-negotiable.
 
 ---
 
+## v13.1 — Dashboard Polish (Tech Debt from v13.0 Gauntlet)
+
+*Gauntlet-identified items documented but not blocking v13.0 ship. Clean up before v14.0.*
+
+| # | Item | Severity | Fix |
+|---|------|----------|-----|
+| 1 | Circular import: `dashboard-ws.ts` → `server.ts` → `danger-room.ts` → `dashboard-ws.ts` | MEDIUM | Extract `getServerPort`/`getServerHost` into `wizard/lib/server-config.ts` |
+| 2 | CORS/CSP headers don't include LAN origins — WebSocket from LAN peers blocked by CSP | MEDIUM | In LAN mode, add requesting origin to CORS if `isPrivateOrigin()`, add `ws://*:PORT` to CSP `connect-src` |
+| 3 | Context gauge scrolls out of view when user scrolls past Tier 1 | MEDIUM | Add compact context indicator in header bar (always visible) |
+| 4 | Deep Current "Launch Campaign" and "Dismiss" buttons unwired | MEDIUM | Wire to API calls or display as disabled with CLI instruction tooltip |
+| 5 | Health + Infrastructure panels deferred from v13.0 M6 | MEDIUM | Add `GET /api/danger-room/health` (poll configured endpoint), `GET /api/danger-room/infra` (execFile: df, free, pm2) |
+| 6 | Deploy Drift Detector deferred from v13.0 M6 | MEDIUM | Add `GET /api/danger-room/drift` (compare build hash vs git HEAD) |
+| 7 | `health-poller.ts` and `site-scanner.ts` still have old private IP implementations | LOW | Replace with import from shared `wizard/lib/network.ts` |
+| 8 | Open issue #97: `/deploy` command (Kusanagi's deploy agent) | LOW | Evaluate scope — may be v14.0 or v15.0 |
+
+### Estimated effort
+1 session. ~200 lines. PATCH version bump (v13.1.0).
+
+---
+
 ## v14.0 — The Day-0 Engine (Cultivation Onboarding Redesign)
 
 *"Growth infrastructure from the first commit, not the first customer."*
 
 **The problem:** Cultivation's install assumes a post-launch state — deployed project, existing revenue, ad accounts already configured. The highest-leverage growth work happens BEFORE launch. The current flow installs vault + daemon + empty dashboard tabs, then says "run /grow" — but /grow needs ad accounts you don't have yet.
 
-**The fix:** Redesign `/cultivation` install as a 7-step guided onboarding wizard that establishes growth infrastructure from scratch:
+**The vision:** Redesign `/cultivation` install as a 7-step guided onboarding wizard that establishes growth infrastructure from scratch. The user walks through treasury setup, revenue tracking, ad platform credentials, budget allocation, creative generation, tracking pixels, and launch — all in one guided session. The Danger Room's Growth tabs light up with real data from minute one.
 
-1. **Financial Foundation** — Connect treasury (Mercury/Brex/manual budget), set spending limits and circuit breakers
-2. **Revenue Tracking** — Auto-detect Stripe, connect to Treasury for day-0 revenue tracking
-3. **Ad Platform Setup** — Guided credential setup for Google Ads, Meta, LinkedIn, Twitter, Reddit with per-platform guidance
-4. **Initial Budget Allocation** — Product-type-aware split suggestions, daily spend limits, ROAS circuit breakers
-5. **Creative Foundation** — Pull existing brand assets, generate initial ad variants via /imagine, set up A/B test matrix
-6. **Tracking & Attribution** — Inject tracking pixels, connect analytics, define conversion events, configure attribution model
-7. **Launch** — Summary review, activate campaigns, Danger Room tabs light up with real data
+**Source:** Field report #131, v13.0 architectural review.
 
-**Why it matters:** Attribution from first user, budget discipline from first dollar, AI optimization from first spend, treasury reconciliation from day 1.
+### Campaign Missions
 
-| File | Change | Priority |
-|------|--------|----------|
-| `.claude/commands/cultivation.md` | Redesign install flow with 7-step guided onboarding | High |
-| `docs/methods/GROWTH_STRATEGIST.md` | Add "Day-0 Setup" section | High |
-| `wizard/lib/adapters/` | Verify adapters handle onboarding credential flow | Medium |
-| `docs/methods/TREASURY.md` | Add "Pre-Revenue Setup" section | Medium |
+Build in this order. Dependencies are strict.
+
+---
+
+#### Mission 1: Financial Foundation + Revenue Tracking (Steps 1-2)
+
+**Objective:** Connect treasury and revenue sources before anything else. Money in, money out — the foundation.
+
+**Deliverables:**
+1. Redesign `/cultivation` install command to start with a guided financial setup interview
+2. Add "Day-0 Setup" section to GROWTH_STRATEGIST.md with the full onboarding sequence
+3. Add "Pre-Revenue Setup" section to TREASURY.md — connecting treasury before first dollar
+4. Verify Mercury adapter handles onboarding credential flow (guided API key setup)
+5. Auto-detect Stripe: scan project for `stripe` dependency or `STRIPE_SECRET_KEY` in env/vault. If found, offer to connect. If not, offer Stripe setup or manual tracking.
+6. Create financial vault entry for connected accounts with circuit breakers from the start
+
+**Acceptance criteria:**
+- [ ] `/cultivation install` starts with treasury connection interview
+- [ ] Mercury/Brex API key setup is guided with test-connection verification
+- [ ] Stripe auto-detection works for Next.js, Express, Django, FastAPI projects
+- [ ] Manual budget entry works when no payment processor exists
+- [ ] Circuit breakers configured: pause if ROAS < 1.0x for 7 days
+- [ ] GROWTH_STRATEGIST.md has Day-0 Setup section
+- [ ] TREASURY.md has Pre-Revenue Setup section
+
+---
+
+#### Mission 2: Ad Platform Onboarding (Step 3)
+
+**Objective:** Guide users through ad platform credential setup with per-platform instructions.
+
+**Deliverables:**
+1. Interactive platform selection: present Google Ads, Meta, LinkedIn, Twitter, Reddit with guidance on best fit by product type (B2B → LinkedIn, visual → Meta, intent → Google, etc.)
+2. Per-platform credential walkthrough: create account → get API credentials → store in vault → test connection
+3. Verify existing adapters (`wizard/lib/adapters/`) handle the credential-collection flow, not just the API-call flow
+4. Recommend starting with 1-2 platforms: "You can add more later."
+5. Update `.claude/commands/cultivation.md` with the ad platform onboarding flow
+
+**Acceptance criteria:**
+- [ ] Each supported platform has a guided credential setup flow
+- [ ] Test-connection verification before proceeding to next step
+- [ ] Credentials stored in financial vault (not .env)
+- [ ] Adapter interfaces support both "collect credentials" and "run campaign" modes
+- [ ] User can skip platforms and add them later
+
+---
+
+#### Mission 3: Budget + Creatives + Tracking (Steps 4-6)
+
+**Objective:** Allocate budget, generate initial creatives, set up attribution.
+
+**Deliverables:**
+1. Budget allocation: product-type-aware split suggestions (e.g., B2B SaaS → 60% Google, 30% LinkedIn, 10% testing). Daily spend limits per platform. Circuit breakers.
+2. Creative foundation: pull brand assets from project (company name, tagline, OG images, brand colors from CSS vars). Generate initial ad variants via `/imagine` or Shallan's creative templates. Set up A/B test matrix (3 headlines × 2 images = 6 variants).
+3. Tracking setup: inject tracking pixels (Google Ads conversion, Meta Pixel) into published site. Connect to PostHog/analytics for funnel tracking. Define conversion events (signup, first action, subscription). Attribution model: last-click default, cross-platform dedup.
+4. Update Kelsier's GROWTH_STRATEGIST.md Phase 1 to reference the Day-0 setup outputs
+
+**Acceptance criteria:**
+- [ ] Budget suggestions are product-type-aware (not generic)
+- [ ] Creative generation pulls from existing brand assets
+- [ ] At least 6 ad variants generated (3 headlines × 2 images)
+- [ ] Tracking pixel injection works for Next.js and static sites
+- [ ] Conversion events are defined with measurable criteria
+- [ ] Attribution model documented and configurable
+
+---
+
+#### Mission 4: Launch + Danger Room Integration (Step 7)
+
+**Objective:** Activate everything and verify the Danger Room shows live data.
+
+**Deliverables:**
+1. Launch summary: present the full growth engine configuration for user review before activation
+2. Activate campaigns via adapters. Heartbeat daemon starts monitoring spend, refreshing tokens, evaluating A/B tests.
+3. Danger Room Growth tab: verify KPI cards show real revenue/spend/net data from connected sources
+4. Danger Room Campaigns tab: verify campaign table shows active campaigns with real platform data
+5. Verify the Growth tab empty state transitions to the real data view when Cultivation is installed and data flows
+6. End-to-end test: install → configure → launch → verify Danger Room reflects live data
+
+**Acceptance criteria:**
+- [ ] Launch summary shows all configured platforms, budgets, creatives, tracking
+- [ ] User must confirm before campaigns go live
+- [ ] Growth tab KPI cards show real revenue from Stripe adapter
+- [ ] Campaigns tab shows platform name, campaign name, spend, status
+- [ ] Heartbeat daemon runs and reports to `/api/danger-room/heartbeat`
+- [ ] Growth tab empty state → real data transition is smooth
+
+---
+
+#### Mission 5: Victory Gauntlet
+
+Full `/gauntlet` across the combined v14.0 changes. Non-negotiable.
+
+Focus areas beyond standard checks:
+- **Financial safety:** Can the system accidentally overspend? Are circuit breakers tested?
+- **Credential security:** Are ad platform API keys stored securely? Never in .env, always in vault?
+- **Pixel injection safety:** Do injected tracking scripts introduce XSS vectors?
+- **Adapter failure modes:** What happens when Google Ads API returns 429? When Meta token expires?
+
+---
+
+### Architecture Decisions
+
+**ADR: Guided interview over config file** — The onboarding is an interactive interview, not a `cultivation.config.json` to fill in manually. Users don't know what API scopes Google Ads requires or what Mercury endpoint to use. The wizard asks questions and fills in the config.
+
+**ADR: Vault-first credentials** — All ad platform and treasury credentials go to the financial vault with TOTP protection, never to `.env`. The adapters read from vault at runtime.
+
+**ADR: Conservative budget defaults** — First-time budgets default to $10/day per platform with aggressive circuit breakers (pause at <1.0x ROAS after 7 days). Users can increase after seeing results. Prevent "$500 burned on day 1" scenarios.
+
+### Dependencies
+
+- v13.0 Living Dashboard (SHIPPED) — Danger Room Growth/Campaigns tabs exist, need real data
+- v13.1 Dashboard Polish (PLANNED) — not a hard dependency but nice-to-have before v14.0
+- Cultivation wizard code (`wizard/lib/adapters/`, `wizard/lib/financial-vault.ts`) — already exists, needs onboarding flow additions
+- `/imagine` for creative generation — already exists, needs to be callable from onboarding
+
+### Open Issues to Address
+
+| Issue | Status | Action |
+|-------|--------|--------|
+| #97 | Feature: /deploy command | Evaluate in v14.0 — may integrate with launch step |
+| #98 | Kongo.io M27 CSRF fix | Project-specific, not VoidForge methodology |
+| #94, #91, #89, #87, #86 | Kongo.io campaign field reports | Project-specific debriefs, not VoidForge methodology issues — close as external |
 
 ### Estimated effort
-2-3 sessions. Wizard + methodology + adapter changes. MAJOR version bump (new growth paradigm). (Field report #131)
+3-4 sessions (4 missions + Victory Gauntlet). Wizard + methodology + adapter + Danger Room integration. MAJOR version bump — new growth paradigm. (Field report #131)
 
 ---
 
