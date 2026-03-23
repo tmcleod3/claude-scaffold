@@ -95,6 +95,25 @@ Cross-cutting changes (shared types, DB schema, utils) require orchestrator appr
 
 ---
 
+## Agent Activity Logging (Danger Room Ticker)
+
+When dispatching an agent via the Agent tool, append a JSONL entry to `logs/agent-activity.jsonl` **before** the tool call:
+
+```json
+{"agent":"Picard","task":"scanning architecture","timestamp":"2026-03-22T12:00:00Z"}
+```
+
+This powers the Danger Room's live agent ticker. The wizard server watches this file and broadcasts events via WebSocket. Without these entries, the ticker shows "Sisko standing by..." permanently.
+
+**Rules:**
+- One line per agent dispatch (JSON, no pretty-printing)
+- `agent` field uses the character name (Picard, Batman, Galadriel — not "Agent 1")
+- `task` field is a 3-5 word summary of the agent's assignment
+- Truncate the file at the start of each `/campaign` or `/gauntlet` run (historical entries from previous sessions are not meaningful for the live ticker)
+- If the file exceeds 1MB, truncate to the most recent 100 entries
+
+This is **methodology-driven logging**, not hook-driven. Hooks cannot extract agent identity from tool input — the orchestrator must write the log entry explicitly. (Field report #128, architectural review)
+
 ## Delegation Template
 
 ```

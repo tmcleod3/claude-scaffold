@@ -28,6 +28,7 @@ logs/
   decisions.md                ← Running log of all non-obvious decisions
   handoffs.md                 ← Every agent-to-agent handoff with context
   errors.md                   ← Every significant error encountered and resolution
+  agent-activity.jsonl        ← Live agent dispatch log (JSONL — powers Danger Room ticker)
 ```
 
 ## Log Entry Format

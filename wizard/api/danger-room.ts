@@ -8,9 +8,10 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Duplex } from 'node:stream';
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { watch } from 'node:fs';
 import { addRoute } from '../router.js';
 import { sendJson, readFileOrNull } from '../lib/http-helpers.js';
 import {
@@ -37,6 +38,51 @@ export const closeDangerRoom = ws.close;
 /** Handle WebSocket upgrade for /ws/danger-room. */
 export const handleDangerRoomUpgrade = (req: IncomingMessage, socket: Duplex, head: Buffer) =>
   ws.handleUpgrade(req, socket, head);
+
+// ── Agent Activity Watcher (methodology-driven JSONL) ──
+
+const ACTIVITY_FILE = join(PROJECT_ROOT, 'logs', 'agent-activity.jsonl');
+let lastActivitySize = 0;
+let activityDebounce: ReturnType<typeof setTimeout> | null = null;
+
+/** Read new lines from agent-activity.jsonl and broadcast via WebSocket. */
+async function checkAgentActivity(): Promise<void> {
+  try {
+    const st = await stat(ACTIVITY_FILE);
+    if (st.size <= lastActivitySize) return;
+
+    const content = await readFile(ACTIVITY_FILE, 'utf-8');
+    const lines = content.trim().split('\n');
+    // Only process lines after our last known position
+    const newLines = lastActivitySize === 0 ? lines.slice(-5) : lines.slice(-Math.max(1, lines.length - Math.floor(lastActivitySize / 80)));
+    lastActivitySize = st.size;
+
+    for (const line of newLines) {
+      try {
+        const entry = JSON.parse(line) as { agent?: string; task?: string; status?: string };
+        if (entry.agent) {
+          ws.broadcast({
+            type: 'agent-activity',
+            agent: entry.agent,
+            action: entry.task || entry.status || 'dispatched',
+          });
+        }
+      } catch { /* skip malformed lines */ }
+    }
+  } catch { /* file doesn't exist yet — normal before first agent dispatch */ }
+}
+
+// Hybrid approach: fs.watch for immediate + poll fallback (fs.watch is unreliable on some OSes)
+try {
+  const watcher = watch(ACTIVITY_FILE, { persistent: false }, () => {
+    if (activityDebounce) clearTimeout(activityDebounce);
+    activityDebounce = setTimeout(checkAgentActivity, 200); // debounce rapid writes
+  });
+  watcher.on('error', () => {}); // file may not exist yet
+} catch { /* watch setup fails if file doesn't exist — poll handles it */ }
+
+// Poll fallback — catches events fs.watch misses (every 3 seconds)
+setInterval(checkAgentActivity, 3000);
 
 // ── Shared REST endpoints ────────────────────────
 
