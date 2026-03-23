@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [14.0.0] - 2026-03-22
+
+### Added
+- **Day-0 Cultivation onboarding** — 7-step guided install: treasury → revenue → ad platforms → budget → creatives → tracking → launch. No longer requires a deployed product.
+- **`/grow --setup`** — standalone ad platform onboarding: guided credential collection for Google Ads, Meta, LinkedIn, Twitter, Reddit with per-platform best-fit guidance
+- **Phase 4.5 Launch Preparation** — budget allocation (product-type-aware splits), creative foundation (6 variants via /imagine), tracking & attribution (pixel snippets + conversion events)
+- **Launch activation flow** — summary presentation, user confirmation, platform submission, Danger Room Growth tab wiring
+- **Pre-Revenue Setup** in TREASURY.md — budget tracking before first dollar, auto-detection of payment processors, absolute spend limits for pre-revenue projects
+
+### Changed
+- **Cultivation install no longer requires deployment** — "product should be deployed" prerequisite removed. Day-0 setup works pre-launch, launch day, and post-launch.
+- **Growth Strategist operating rule 1** updated — product deployment required for Phase 1+ (reconnaissance), not for installation
+
+---
+
 ## [13.1.0] - 2026-03-22
 
 ### Changed
