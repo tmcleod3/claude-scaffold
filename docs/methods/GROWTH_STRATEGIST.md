@@ -235,6 +235,41 @@ This phase bridges campaign creation (Phase 4) and compliance review (Phase 5). 
 
 **Output:** Measurement baseline + autonomous rule configuration.
 
+### Launch Activation (between Phase 6 and autonomous handoff)
+
+*"The heist is ready. Kelsier gives the signal."*
+
+Before the heartbeat daemon takes over, present the full growth engine configuration for user confirmation:
+
+```
+═══════════════════════════════════════════════════════════
+  GROWTH ENGINE — Launch Summary
+═══════════════════════════════════════════════════════════
+  Treasury:    $X/month from [Mercury | Brex | Manual]
+  Revenue:     [Stripe connected | Paddle | Not yet]
+  Platforms:   [Google Ads ($Y/day), Meta ($Z/day), ...]
+  Creatives:   [N] headline × [M] image = [N×M] ad sets
+  Tracking:    [N] conversion events, [M] platform pixels
+  Circuit breakers: Pause at <1.0x ROAS / $X daily cap
+  Daemon:      Heartbeat running (PID XXXXX)
+═══════════════════════════════════════════════════════════
+  Activate campaigns? [Y/n]
+═══════════════════════════════════════════════════════════
+```
+
+On activation:
+1. Submit campaign structures to each connected platform via adapters
+2. Verify campaign status: each platform returns campaign ID + "active" status
+3. Heartbeat daemon begins monitoring spend, refreshing tokens, evaluating A/B tests
+4. **Danger Room integration:**
+   - Growth tab: KPI cards show real revenue/spend/net from connected treasury + revenue
+   - Campaigns tab: campaign table shows platform name, campaign name, spend, status
+   - Treasury tab: vault status, circuit breakers, reconciliation schedule
+   - Heartbeat tab: daemon status, last job run, next scheduled job
+5. Log activation to `/logs/growth-launch.md`
+
+**Danger Room empty state → live data transition:** When Cultivation is installed AND launch has been activated, the Growth tab's empty state ("No growth data yet") should be replaced by real KPI cards. The `cultivationInstalled` flag in the heartbeat endpoint already controls tab visibility. The Growth tab should check for non-zero revenue or spend data to switch from empty state to KPI view.
+
 **After Phase 6, the CLI-to-autonomous handoff occurs.** See §9.19.8. The heartbeat daemon runs Tier 1 deterministic rules 24/7. The user manages strategy through `/grow` commands and monitors via Danger Room growth tabs.
 
 ## Autonomous Execution Model (§9.19.4)
