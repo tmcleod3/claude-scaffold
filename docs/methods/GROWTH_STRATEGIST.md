@@ -48,7 +48,7 @@ Transform a deployed product into a growing business. The 6-phase growth protoco
 
 ## Operating Rules
 
-1. **Product must be deployed.** Cultivation reads the live site. Can't grow what doesn't exist.
+1. **Product does not need to be deployed for installation.** Cultivation's Day-0 setup (vault, treasury, revenue tracking) works pre-launch. The 6-phase growth protocol (below) requires a deployed product for Phases 1+ (reconnaissance reads the live site). Install early, grow when ready.
 2. **Phase order matters.** Reconnaissance before content. Content before distribution. Compliance before launch. Measurement after everything.
 3. **No money without Treasury.** Distribution (Phase 4) can create campaign structures but cannot launch them without `/treasury` set up and heartbeat daemon running.
 4. **Three channels minimum.** Never put all growth eggs in one basket. Organic + Paid + Outreach.
@@ -56,6 +56,32 @@ Transform a deployed product into a growing business. The 6-phase growth protoco
 6. **Compliance is a gate, not a suggestion.** Szeth blocks launch on Critical compliance issues. Period.
 7. **Autonomous = deterministic rules.** The heartbeat daemon runs Tier 1 rules (pause underperformers, evaluate A/B tests, rebalance budgets). AI-assisted strategy (Tier 2/3) requires human invocation. See §9.19.4.
 8. **Code changes go to a branch.** Cultivation code modifications (landing pages, CTAs) go to `cultivation/` branch. Human merges. Never auto-deploy. See §9.19.6.
+
+## Day-0 Setup (Pre-Launch Growth Infrastructure)
+
+*"The heist begins before anyone knows we're in the building."*
+
+Growth infrastructure should be established at the same time as the product — not after launch. `/cultivation install` now runs a Day-0 onboarding flow that connects treasury, revenue tracking, and circuit breakers before the first user arrives. (Field report #131)
+
+**When to use Day-0 Setup:** Any time. The old prerequisite "project should be deployed" is removed. Cultivation's install flow now works for:
+- **Pre-launch:** Connect treasury + revenue tracking. Ad platforms can wait for `/grow --setup`.
+- **Launch day:** Full 7-step setup including ad platforms, creatives, and tracking pixels.
+- **Post-launch:** Same flow, but auto-detects existing integrations (Stripe, analytics).
+
+**What Day-0 establishes:**
+1. Financial vault with TOTP 2FA
+2. Treasury connection (Mercury/Brex/manual budget)
+3. Revenue source (Stripe auto-detect, Paddle, or manual)
+4. Spending circuit breakers (ROAS threshold, daily caps)
+5. Heartbeat daemon running from day 0
+
+**What Day-0 defers to `/grow --setup`:**
+- Ad platform credential setup (Google Ads, Meta, LinkedIn, etc.)
+- Creative generation
+- Tracking pixel injection
+- Budget allocation across platforms
+
+This separation means the user can install Cultivation in 5 minutes (vault + treasury + revenue + daemon) and configure ad platforms later when they're ready to spend.
 
 ## The 6-Phase Protocol
 
