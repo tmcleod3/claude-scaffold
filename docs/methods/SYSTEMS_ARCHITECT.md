@@ -91,6 +91,17 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 - **Picard writes ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives.
 - **Riker reviews:** "Number One, does this hold up?" Riker challenges each ADR's trade-offs — are the alternatives truly worse? Are the consequences acceptable? Did we consider the second-order effects? Riker's review prevents architectural decisions made in a vacuum.
 
+### `--adr-only` Lightweight Mode
+
+When architecture work is deferred (e.g., designing auth that won't be built for months), skip the full parallel analysis (Steps 1-4) and go straight to Step 5:
+
+1. Picard reads the relevant PRD sections
+2. Picard writes ADRs capturing decisions, constraints, and alternatives
+3. Riker reviews the ADRs
+4. Deliverable: `/docs/adrs/` only — no ARCHITECTURE.md, no SCALING.md, no FAILURE_MODES.md
+
+This saves ~100K tokens on work that's far from execution. The full bridge crew (Spock, Uhura, Worf, Tuvok, La Forge, Data) deploys when the architecture is about to be built, not when it's first discussed. ADRs capture the "why" cheaply; the detailed analysis can wait. (Field report #129: full 4-agent bridge crew deployed for auth architecture that was then deferred to Phase 4.)
+
 ### Extended Star Trek Roster (activate as needed)
 
 **Janeway (Novel Architectures):** When the standard monolith doesn't fit — event-sourcing, CQRS, serverless, edge computing. Janeway navigates uncharted territory and proposes architectures the team hasn't tried before.

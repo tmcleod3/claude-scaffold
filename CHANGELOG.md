@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.6.3] - 2026-03-22
+
+### Changed
+- Campaign planning now **requires acceptance criteria** on every mission before the Prophecy Board is finalized — applies to `--plan` mode too, not just build
+- Kira's Step 0 checks if `campaign-state.md` is **gitignored** and warns immediately — prevents silent data loss on `/clear`
+- Kira's Step 0 includes a **pre-flight checklist**: VERSION.md, package manifest, campaign-state tracking, clean working tree
+
+### Added
+- `/architect --adr-only` lightweight mode — write ADRs without full bridge crew deployment, for deferred architecture decisions
+
+### Fixed
+- Field report #129 triaged — 4 fixes applied, 1 wontfix (--plan --draft solved by git diff)
+
+---
+
+## [12.6.2] - 2026-03-22
+
+### Added
+- **v13.0 roadmap** — The Private Network: `--lan` mode for ZeroTier/Tailscale/WireGuard access, context gauge wiring via Status Line bridge, 3 Danger Room bug fixes, 3 unwired feature plans, 4 new dashboard panel proposals from real-world usage (field reports #127, #128)
+
+---
+
 ## [12.6.1] - 2026-03-22
 
 ### Changed
