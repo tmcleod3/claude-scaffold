@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { addRoute } from '../router.js';
-import { vaultSet, vaultGet, vaultExists, vaultUnlock, vaultKeys, vaultPath } from '../lib/vault.js';
+import { vaultSet, vaultGet, vaultExists, vaultUnlock, vaultKeys, vaultPath, vaultLock } from '../lib/vault.js';
 import { parseJsonBody } from '../lib/body-parser.js';
 import { clearModelCache } from '../lib/anthropic.js';
 
@@ -14,8 +14,81 @@ function sendJson(res: ServerResponse, status: number, data: unknown): void {
 let sessionPassword: string | null = null;
 
 export function getSessionPassword(): string | null {
+  if (sessionPassword) touchVaultAccess(); // SEC-R2-004: Reset auto-lock on every access
   return sessionPassword;
 }
+
+// ── Vault unlock rate limiting (SEC-R2-003) ──────────
+// Separate from login rate limits to prevent cross-endpoint exhaustion (Deathstroke R4)
+const VAULT_RATE_LIMIT_MAX = 5;
+const VAULT_RATE_WINDOW_MS = 60_000;
+const VAULT_LOCKOUT_THRESHOLD = 10;
+const VAULT_LOCKOUT_DURATION_MS = 30 * 60_000;
+
+interface VaultRateEntry {
+  attempts: number;
+  firstAttempt: number;
+  consecutiveFailures: number;
+  lockedUntil: number;
+}
+const vaultRateLimits = new Map<string, VaultRateEntry>();
+
+function checkVaultRateLimit(ip: string): { allowed: boolean; retryAfterMs: number } {
+  const now = Date.now();
+  const entry = vaultRateLimits.get(ip);
+  if (!entry) {
+    vaultRateLimits.set(ip, { attempts: 1, firstAttempt: now, consecutiveFailures: 0, lockedUntil: 0 });
+    return { allowed: true, retryAfterMs: 0 };
+  }
+  if (entry.lockedUntil > now) {
+    return { allowed: false, retryAfterMs: entry.lockedUntil - now };
+  }
+  if (now - entry.firstAttempt > VAULT_RATE_WINDOW_MS) {
+    entry.attempts = 1;
+    entry.firstAttempt = now;
+    return { allowed: true, retryAfterMs: 0 };
+  }
+  entry.attempts++;
+  if (entry.attempts > VAULT_RATE_LIMIT_MAX) {
+    return { allowed: false, retryAfterMs: VAULT_RATE_WINDOW_MS - (now - entry.firstAttempt) };
+  }
+  return { allowed: true, retryAfterMs: 0 };
+}
+
+function recordVaultFailure(ip: string): void {
+  const entry = vaultRateLimits.get(ip);
+  if (!entry) return;
+  entry.consecutiveFailures++;
+  if (entry.consecutiveFailures >= VAULT_LOCKOUT_THRESHOLD) {
+    entry.lockedUntil = Date.now() + VAULT_LOCKOUT_DURATION_MS;
+    entry.consecutiveFailures = 0;
+  }
+}
+
+function clearVaultFailures(ip: string): void {
+  const entry = vaultRateLimits.get(ip);
+  if (entry) entry.consecutiveFailures = 0;
+}
+
+// ── Vault auto-lock (SEC-R2-004) ─────────────────────
+const VAULT_AUTO_LOCK_MS = 15 * 60_000; // 15 minutes idle
+let lastVaultAccess = 0;
+let autoLockTimer: ReturnType<typeof setInterval> | null = null;
+
+function touchVaultAccess(): void {
+  lastVaultAccess = Date.now();
+  if (!autoLockTimer) {
+    autoLockTimer = setInterval(() => {
+      if (sessionPassword && Date.now() - lastVaultAccess > VAULT_AUTO_LOCK_MS) {
+        sessionPassword = null;
+        vaultLock();
+        if (autoLockTimer) { clearInterval(autoLockTimer); autoLockTimer = null; }
+      }
+    }, 60_000); // Check every minute
+    autoLockTimer.unref(); // Don't prevent graceful shutdown
+  }
+}
+
 
 /** Validate an Anthropic API key by making a lightweight test call */
 function validateAnthropicKey(apiKey: string): Promise<{ valid: boolean; error?: string }> {
@@ -98,6 +171,14 @@ addRoute('GET', '/api/credentials/status', async (_req: IncomingMessage, res: Se
 
 // POST /api/credentials/unlock — unlock vault with password (or create new vault)
 addRoute('POST', '/api/credentials/unlock', async (req: IncomingMessage, res: ServerResponse) => {
+  // SEC-R2-003: Rate limit vault unlock to prevent brute-force
+  const ip = req.socket.remoteAddress ?? 'unknown';
+  const rateCheck = checkVaultRateLimit(ip);
+  if (!rateCheck.allowed) {
+    sendJson(res, 429, { error: 'Too many unlock attempts. Try again later.', retryAfterMs: rateCheck.retryAfterMs });
+    return;
+  }
+
   const body = await parseJsonBody(req) as { password?: string };
 
   if (!body.password || typeof body.password !== 'string') {
@@ -123,11 +204,14 @@ addRoute('POST', '/api/credentials/unlock', async (req: IncomingMessage, res: Se
   const valid = await vaultUnlock(body.password);
 
   if (!valid) {
+    recordVaultFailure(ip);
     sendJson(res, 401, { error: 'Wrong password' });
     return;
   }
 
+  clearVaultFailures(ip);
   sessionPassword = body.password;
+  touchVaultAccess(); // SEC-R2-004: Start auto-lock timer
 
   // Check what's already stored
   let hasAnthropic = false;
