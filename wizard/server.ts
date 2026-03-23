@@ -20,11 +20,13 @@ import './api/projects.js';
 import './api/auth.js';
 import './api/users.js';
 import './api/danger-room.js';
+import './api/war-room.js';
 
 // Lazy import — may not exist if node-pty is not installed
 let handleTerminalUpgrade: ((req: IncomingMessage, socket: import('node:stream').Duplex, head: Buffer, session?: unknown) => void) | null = null;
 try { handleTerminalUpgrade = (await import('./api/terminal.js')).handleTerminalUpgrade; } catch { /* node-pty not available */ }
 import { handleDangerRoomUpgrade, closeDangerRoom } from './api/danger-room.js';
+import { handleWarRoomUpgrade, closeWarRoom } from './api/war-room.js';
 let killAllSessions: (() => void) | null = null;
 try { killAllSessions = (await import('./lib/pty-manager.js')).killAllSessions; } catch { /* node-pty not available */ }
 import { startHealthPoller, stopHealthPoller } from './lib/health-poller.js';
@@ -333,6 +335,19 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
           }
         }
         handleDangerRoomUpgrade(req, socket, head);
+      } else if (url.pathname === '/ws/war-room') {
+        // War Room: same auth rules as Danger Room
+        if (isRemoteMode()) {
+          const token = parseSessionCookie(req.headers.cookie);
+          const ip = getClientIp(req);
+          const session = token ? validateSession(token, ip) : null;
+          if (!session) {
+            socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+            socket.destroy();
+            return;
+          }
+        }
+        handleWarRoomUpgrade(req, socket, head);
       } else {
         socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
         socket.destroy();
@@ -359,6 +374,7 @@ export function startServer(port: number, options?: { remote?: boolean; host?: s
       console.log('\n  Shutting down...');
       stopHealthPoller();
       closeDangerRoom();
+      closeWarRoom();
       killAllSessions();
       server.close(() => process.exit(0));
       setTimeout(() => process.exit(0), 2000);
