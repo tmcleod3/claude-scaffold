@@ -141,7 +141,7 @@ export async function parseFindings(): Promise<FindingCounts> {
   // Preferred: read Known Issues from build-state.md
   const buildState = await readFileOrNull(join(LOGS_DIR, 'build-state.md'));
   if (buildState) {
-    const knownIssuesMatch = buildState.match(/## Known Issues[\s\S]*?(?=\n## |\n---|\Z)/);
+    const knownIssuesMatch = buildState.match(/## Known Issues[\s\S]*?(?=\n## |\n---|$)/);
     if (knownIssuesMatch) {
       const section = knownIssuesMatch[0];
       counts.critical = countSeverity(section, 'CRITICAL');

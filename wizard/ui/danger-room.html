@@ -72,7 +72,7 @@
 
     /* ── Data Tier Sections (v13.0 Information Architecture) ── */
     .tier-section { grid-column: 1 / -1; margin-top: 4px; }
-    .tier-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); opacity: 0.6; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .tier-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); opacity: 0.85; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .tier-label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
     .tier-live .tier-label::before { background: #34d399; animation: pulse 2s infinite; }
     .tier-campaign .tier-label::before { background: #fbbf24; }
@@ -163,6 +163,9 @@
       .sidebar { border-left: none; border-top: 1px solid var(--border); }
       .main-panels { grid-template-columns: 1fr; }
       .tab-panel.active { grid-template-columns: 1fr; }
+      .tier-live .tier-content { grid-template-columns: 1fr; }
+      .tier-campaign .tier-content { grid-template-columns: 1fr; }
+      .tier-system .tier-content { grid-template-columns: 1fr 1fr; }
       .kpi-row { flex-direction: column; }
       .tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
       /* Mobile freeze FAB (§9.20.8) */

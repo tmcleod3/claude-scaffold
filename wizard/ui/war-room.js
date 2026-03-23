@@ -1,7 +1,8 @@
 (function () {
   'use strict';
 
-  const REFRESH_INTERVAL_MS = 10000; // 10 second poll
+  const FAST_POLL_MS = 5000;   // 5s — live feed (context)
+  const SLOW_POLL_MS = 60000;  // 60s — system status (version, deploy, experiments)
 
   // ── Data fetchers ────────────────────────────────
 
@@ -191,30 +192,43 @@
       '<span style="color:var(--text-dim)">' + planned + ' planned</span>';
   }
 
-  // ── Main poll loop ───────────────────────────────
+  // ── Tiered poll loops (v13.0 — fast for live data, slow for system status) ──
 
-  async function refresh() {
-    const [campaign, build, findings, version, deploy, context, experiments] = await Promise.all([
+  async function refreshFast() {
+    const [context] = await Promise.all([
+      fetchJSON('/api/war-room/context'),
+    ]);
+    renderGauge(context);
+  }
+
+  async function refreshCampaign() {
+    const [campaign, build, findings] = await Promise.all([
       fetchJSON('/api/war-room/campaign'),
       fetchJSON('/api/war-room/build'),
       fetchJSON('/api/war-room/findings'),
-      fetchJSON('/api/war-room/version'),
-      fetchJSON('/api/war-room/deploy'),
-      fetchJSON('/api/war-room/context'),
-      fetchJSON('/api/war-room/experiments'),
     ]);
-
     renderTimeline(campaign);
     renderPipeline(build);
     renderScoreboard(findings);
-    renderVersion(version);
-    renderDeploy(deploy);
-    renderGauge(context);
     renderPrdCoverage(campaign);
-    renderExperiments(experiments);
     if (typeof window.renderProphecyGraph === 'function') {
       window.renderProphecyGraph(document.getElementById('prophecy-graph'), campaign);
     }
+  }
+
+  async function refreshSlow() {
+    const [version, deploy, experiments] = await Promise.all([
+      fetchJSON('/api/war-room/version'),
+      fetchJSON('/api/war-room/deploy'),
+      fetchJSON('/api/war-room/experiments'),
+    ]);
+    renderVersion(version);
+    renderDeploy(deploy);
+    renderExperiments(experiments);
+  }
+
+  async function refresh() {
+    await Promise.all([refreshFast(), refreshCampaign(), refreshSlow()]);
   }
 
   // ── WebSocket for real-time updates ──────────────
@@ -259,7 +273,9 @@
 
   async function init() {
     await refresh();
-    setInterval(refresh, REFRESH_INTERVAL_MS);
+    setInterval(refreshFast, FAST_POLL_MS);
+    setInterval(refreshCampaign, 10000);
+    setInterval(refreshSlow, SLOW_POLL_MS);
     connectWebSocket();
   }
 

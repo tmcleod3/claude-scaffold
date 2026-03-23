@@ -18,12 +18,15 @@
 export function isPrivateIp(ip: string): boolean {
   // IPv6 checks
   if (ip.includes(':')) {
-    const normalized = ip.replace(/^\[/, '').replace(/\]$/, '');
+    const normalized = ip.replace(/^\[/, '').replace(/\]$/, '').toLowerCase();
     if (normalized === '::1') return true;
+    // IPv4-mapped IPv6 (::ffff:10.0.0.1) — extract and check the IPv4 part
+    const v4Mapped = normalized.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+    if (v4Mapped) return isPrivateIp(v4Mapped[1]);
     // fd00::/8 — unique local addresses (ZeroTier, WireGuard)
-    if (normalized.toLowerCase().startsWith('fd')) return true;
+    if (normalized.startsWith('fd')) return true;
     // fe80::/10 — link-local
-    if (normalized.toLowerCase().startsWith('fe80')) return true;
+    if (normalized.startsWith('fe80')) return true;
     return false;
   }
 

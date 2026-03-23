@@ -46,9 +46,16 @@ export const handleDangerRoomUpgrade = (req: IncomingMessage, socket: Duplex, he
 const ACTIVITY_FILE = join(PROJECT_ROOT, 'logs', 'agent-activity.jsonl');
 let lastActivitySize = 0;
 let activityDebounce: ReturnType<typeof setTimeout> | null = null;
+let activityCheckInProgress = false;
 
 /** Read new lines from agent-activity.jsonl and broadcast via WebSocket. */
 async function checkAgentActivity(): Promise<void> {
+  if (activityCheckInProgress) return; // prevent concurrent reads (Gauntlet DR-08)
+  activityCheckInProgress = true;
+  try { await _checkAgentActivity(); } finally { activityCheckInProgress = false; }
+}
+
+async function _checkAgentActivity(): Promise<void> {
   try {
     const st = await stat(ACTIVITY_FILE);
     if (st.size <= lastActivitySize) return;
