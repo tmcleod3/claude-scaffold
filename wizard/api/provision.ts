@@ -10,13 +10,8 @@ import { addRoute } from '../router.js';
 import { getSessionPassword } from './credentials.js';
 import { vaultGet, vaultKeys } from '../lib/vault.js';
 import { parseJsonBody } from '../lib/body-parser.js';
-import type { ProvisionContext, ProvisionEvent, Provisioner, CreatedResource } from '../lib/provisioners/types.js';
-import { dockerProvisioner } from '../lib/provisioners/docker.js';
-import { awsVpsProvisioner } from '../lib/provisioners/aws-vps.js';
-import { vercelProvisioner } from '../lib/provisioners/vercel.js';
-import { railwayProvisioner } from '../lib/provisioners/railway.js';
-import { cloudflareProvisioner } from '../lib/provisioners/cloudflare.js';
-import { staticS3Provisioner } from '../lib/provisioners/static-s3.js';
+import type { ProvisionContext, ProvisionEvent, CreatedResource } from '../lib/provisioners/types.js';
+import { provisioners, provisionKeys, GITHUB_LINKED_TARGETS, GITHUB_OPTIONAL_TARGETS } from '../lib/provisioner-registry.js';
 import {
   createManifest, updateManifestStatus, readManifest, deleteManifest,
   listIncompleteRuns, manifestToCreatedResources,
@@ -34,20 +29,6 @@ import { setupHealthMonitoring } from '../lib/health-monitor.js';
 import { generateSentryInit } from '../lib/sentry-generator.js';
 import { sendJson } from '../lib/http-helpers.js';
 
-/** Deploy targets that benefit from GitHub repo linking (ADR-015). */
-const GITHUB_LINKED_TARGETS = ['vercel', 'cloudflare', 'railway'];
-/** Deploy targets where GitHub push is optional (deploy via SSH/SDK instead). */
-const GITHUB_OPTIONAL_TARGETS = ['vps', 'static'];
-
-const provisioners: Record<string, Provisioner> = {
-  docker: dockerProvisioner,
-  vps: awsVpsProvisioner,
-  vercel: vercelProvisioner,
-  railway: railwayProvisioner,
-  cloudflare: cloudflareProvisioner,
-  static: staticS3Provisioner,
-};
-
 /** Tracks resources per provisioning run by ID, keyed by runId. */
 interface ProvisionRun {
   resources: CreatedResource[];
@@ -58,16 +39,6 @@ const provisionRuns = new Map<string, ProvisionRun>();
 
 /** Concurrency lock — only one provisioning run at a time (F-02). */
 let activeProvisionRun: string | null = null;
-
-/** Credential scoping — each provisioner only receives vault keys it needs (ADR-020). */
-const provisionKeys: Record<string, string[]> = {
-  vps: ['aws-access-key-id', 'aws-secret-access-key', 'aws-region'],
-  static: ['aws-access-key-id', 'aws-secret-access-key', 'aws-region'],
-  vercel: ['vercel-token'],
-  railway: ['railway-token'],
-  cloudflare: ['cloudflare-api-token', 'cloudflare-account-id'],
-  docker: [],
-};
 
 /** Scope credentials to only the keys a provisioner needs. Internal _-prefixed keys pass through. */
 function scopeCredentials(allCreds: Record<string, string>, target: string): Record<string, string> {

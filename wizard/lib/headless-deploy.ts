@@ -23,35 +23,8 @@ import { s3Deploy } from './s3-deploy.js';
 import { prepareGithub } from './github.js';
 import { provisionDns } from './dns/cloudflare-dns.js';
 import { generateSentryInit } from './sentry-generator.js';
-import type { ProvisionContext, ProvisionEvent, Provisioner, ProvisionResult } from './provisioners/types.js';
-import { dockerProvisioner } from './provisioners/docker.js';
-import { awsVpsProvisioner } from './provisioners/aws-vps.js';
-import { vercelProvisioner } from './provisioners/vercel.js';
-import { railwayProvisioner } from './provisioners/railway.js';
-import { cloudflareProvisioner } from './provisioners/cloudflare.js';
-import { staticS3Provisioner } from './provisioners/static-s3.js';
-
-const provisioners: Record<string, Provisioner> = {
-  docker: dockerProvisioner,
-  vps: awsVpsProvisioner,
-  vercel: vercelProvisioner,
-  railway: railwayProvisioner,
-  cloudflare: cloudflareProvisioner,
-  static: staticS3Provisioner,
-};
-
-/** Credential scoping — same as provision.ts (ADR-020). */
-const provisionKeys: Record<string, string[]> = {
-  vps: ['aws-access-key-id', 'aws-secret-access-key', 'aws-region'],
-  static: ['aws-access-key-id', 'aws-secret-access-key', 'aws-region'],
-  vercel: ['vercel-token'],
-  railway: ['railway-token'],
-  cloudflare: ['cloudflare-api-token', 'cloudflare-account-id'],
-  docker: [],
-};
-
-const GITHUB_LINKED_TARGETS = ['vercel', 'cloudflare', 'railway'];
-const GITHUB_OPTIONAL_TARGETS = ['vps', 'static'];
+import type { ProvisionContext, ProvisionEvent, ProvisionResult } from './provisioners/types.js';
+import { provisioners, provisionKeys, GITHUB_LINKED_TARGETS, GITHUB_OPTIONAL_TARGETS } from './provisioner-registry.js';
 
 function log(icon: string, message: string): void {
   console.log(`  ${icon} ${message}`);
