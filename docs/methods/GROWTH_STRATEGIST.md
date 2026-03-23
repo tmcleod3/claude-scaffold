@@ -48,7 +48,7 @@ Transform a deployed product into a growing business. The 6-phase growth protoco
 
 ## Operating Rules
 
-1. **Product must be deployed.** Cultivation reads the live site. Can't grow what doesn't exist.
+1. **Product does not need to be deployed for installation.** Cultivation's Day-0 setup (vault, treasury, revenue tracking) works pre-launch. The 6-phase growth protocol (below) requires a deployed product for Phases 1+ (reconnaissance reads the live site). Install early, grow when ready.
 2. **Phase order matters.** Reconnaissance before content. Content before distribution. Compliance before launch. Measurement after everything.
 3. **No money without Treasury.** Distribution (Phase 4) can create campaign structures but cannot launch them without `/treasury` set up and heartbeat daemon running.
 4. **Three channels minimum.** Never put all growth eggs in one basket. Organic + Paid + Outreach.
@@ -56,6 +56,76 @@ Transform a deployed product into a growing business. The 6-phase growth protoco
 6. **Compliance is a gate, not a suggestion.** Szeth blocks launch on Critical compliance issues. Period.
 7. **Autonomous = deterministic rules.** The heartbeat daemon runs Tier 1 rules (pause underperformers, evaluate A/B tests, rebalance budgets). AI-assisted strategy (Tier 2/3) requires human invocation. See §9.19.4.
 8. **Code changes go to a branch.** Cultivation code modifications (landing pages, CTAs) go to `cultivation/` branch. Human merges. Never auto-deploy. See §9.19.6.
+
+## Day-0 Setup (Pre-Launch Growth Infrastructure)
+
+*"The heist begins before anyone knows we're in the building."*
+
+Growth infrastructure should be established at the same time as the product — not after launch. `/cultivation install` now runs a Day-0 onboarding flow that connects treasury, revenue tracking, and circuit breakers before the first user arrives. (Field report #131)
+
+**When to use Day-0 Setup:** Any time. The old prerequisite "project should be deployed" is removed. Cultivation's install flow now works for:
+- **Pre-launch:** Connect treasury + revenue tracking. Ad platforms can wait for `/grow --setup`.
+- **Launch day:** Full 7-step setup including ad platforms, creatives, and tracking pixels.
+- **Post-launch:** Same flow, but auto-detects existing integrations (Stripe, analytics).
+
+**What Day-0 establishes:**
+1. Financial vault with TOTP 2FA
+2. Treasury connection (Mercury/Brex/manual budget)
+3. Revenue source (Stripe auto-detect, Paddle, or manual)
+4. Spending circuit breakers (ROAS threshold, daily caps)
+5. Heartbeat daemon running from day 0
+
+**What Day-0 defers to `/grow --setup`:**
+- Ad platform credential setup (Google Ads, Meta, LinkedIn, etc.)
+- Creative generation
+- Tracking pixel injection
+- Budget allocation across platforms
+
+This separation means the user can install Cultivation in 5 minutes (vault + treasury + revenue + daemon) and configure ad platforms later when they're ready to spend.
+
+## Ad Platform Setup (`/grow --setup`)
+
+*"Every dollar is a bullet. Load the gun before the heist." — Wax*
+
+Run `/grow --setup` after `/cultivation install` to configure ad platforms. This is the interactive credential-collection flow — separate from the Day-0 install so users can install Cultivation quickly and add platforms when ready.
+
+### Platform Selection
+
+Present each platform with guidance on best fit:
+
+| Platform | Best For | Setup Complexity |
+|----------|----------|-----------------|
+| **Google Ads** | Intent-based search ("best pitch deck tool") | Medium — API key + OAuth |
+| **Meta (Facebook/Instagram)** | Visual/social discovery, broad targeting | Medium — Business Manager + API token |
+| **LinkedIn** | B2B, enterprise, founders/VCs | Medium — Campaign Manager + API |
+| **Twitter/X** | Tech community, startup audience | Low — API key |
+| **Reddit** | Niche communities, technical audiences | Low — API key |
+
+"Start with 1-2 platforms. You can add more later."
+
+### Per-Platform Credential Flow (Breeze leads)
+
+For each selected platform:
+
+1. **Account check:** "Do you have a [Platform] Ads account?" If no → guide through account creation URL
+2. **Credential collection:** Walk through API key/OAuth setup with platform-specific instructions
+3. **Test connection:** Call the platform API with a read-only request (list campaigns or account info). Verify 200 response.
+4. **Store credentials:** Write to financial vault (NEVER to .env — vault-first per v14.0 ADR)
+5. **Confirm:** "✓ [Platform] connected — [Account Name]"
+
+If test connection fails: show the error, suggest common fixes (wrong API scope, account not approved for API access), offer to retry or skip.
+
+### Adapter Verification
+
+Verify existing adapters (`wizard/lib/adapters/`) support both modes:
+- **Credential collection mode:** Interactive setup, test connection, store in vault
+- **Runtime mode:** Read campaigns, submit spend, evaluate performance
+
+If an adapter only handles runtime mode, flag it for code changes before the platform can be onboarded.
+
+### Output
+
+Updated financial vault with platform credentials. Campaign-state.md records which platforms are connected. The Danger Room Campaigns tab will show connected platforms once `/grow` creates campaigns.
 
 ## The 6-Phase Protocol
 
@@ -100,7 +170,48 @@ Transform a deployed product into a growing business. The 6-phase growth protoco
 **Track C — Outreach** (Sarene): Cold email sequences, co-marketing pitches.
 
 **Output:** `/logs/growth-distribution.md` + `/logs/growth-campaigns.json` (campaign structures, not launched).
-**Gate:** User confirmation before Phase 5. Campaign launch requires `/treasury` setup.
+**Gate:** User confirmation before Phase 4.5.
+
+### Phase 4.5 — Launch Preparation (Steris + Shallan + Vin) — Day-0
+
+*"47 contingency plans. One launch."*
+
+This phase bridges campaign creation (Phase 4) and compliance review (Phase 5). It handles the three things needed before campaigns go live: budget, creatives, and tracking.
+
+**1. Budget Allocation (Steris):**
+- Read connected treasury balance and monthly budget from vault
+- Product-type-aware split suggestions:
+  - B2B SaaS → 60% Google Ads, 30% LinkedIn, 10% testing
+  - Consumer app → 50% Meta, 30% Google, 20% testing
+  - Dev tool → 40% Google, 30% Reddit, 20% Twitter, 10% testing
+  - E-commerce → 50% Google Shopping, 30% Meta, 20% testing
+- Set daily spend limits per platform (default: $10/day per platform for new campaigns)
+- Configure circuit breakers: pause at <1.0x ROAS after 7 days (or absolute cap for pre-revenue)
+- Present allocation for user approval: "Here's the proposed split. Adjust? [enter to accept]"
+
+**2. Creative Foundation (Shallan + /imagine):**
+- Pull brand assets from project: company name, tagline, `<meta>` descriptions, OG images, CSS custom properties (brand colors)
+- Generate initial ad variants via `/imagine` or Shallan's templates:
+  - 3 headline variants (value prop, social proof, urgency)
+  - 2 image variants (product screenshot + lifestyle/abstract)
+  - = 6 ad set combinations for A/B testing
+- For each platform: format creatives to platform specs (Meta: 1200x628, Google: responsive, LinkedIn: 1200x627)
+- Store creative assets in `/content/ads/` directory
+
+**3. Tracking & Attribution (Vin):**
+- **Conversion events:** Define 3 measurable events:
+  1. Signup / account creation
+  2. First meaningful action (create project, make purchase, etc. — from PRD core features)
+  3. Paid conversion (subscription, purchase — if applicable)
+- **Tracking pixels:** For web apps, generate pixel snippets for each connected platform:
+  - Google Ads: `gtag('config', 'AW-XXXXXXX')` + conversion action
+  - Meta: `fbq('init', 'XXXXXXX')` + standard events
+  - LinkedIn: Insight Tag
+- **Attribution model:** Last-click default with cross-platform deduplication (same user converting on multiple platforms counts once)
+- Output pixel snippets to `/content/tracking/` — user injects into their app manually (VoidForge does NOT auto-inject into source code)
+
+**Output:** `/logs/growth-launch-prep.md` + `/content/ads/` + `/content/tracking/`
+**Auto-continues to Phase 5.**
 
 ### Phase 5 — Compliance (Szeth)
 
@@ -123,6 +234,41 @@ Transform a deployed product into a growing business. The 6-phase growth protoco
 3. Transition to autonomous mode — daemon takes over monitoring.
 
 **Output:** Measurement baseline + autonomous rule configuration.
+
+### Launch Activation (between Phase 6 and autonomous handoff)
+
+*"The heist is ready. Kelsier gives the signal."*
+
+Before the heartbeat daemon takes over, present the full growth engine configuration for user confirmation:
+
+```
+═══════════════════════════════════════════════════════════
+  GROWTH ENGINE — Launch Summary
+═══════════════════════════════════════════════════════════
+  Treasury:    $X/month from [Mercury | Brex | Manual]
+  Revenue:     [Stripe connected | Paddle | Not yet]
+  Platforms:   [Google Ads ($Y/day), Meta ($Z/day), ...]
+  Creatives:   [N] headline × [M] image = [N×M] ad sets
+  Tracking:    [N] conversion events, [M] platform pixels
+  Circuit breakers: Pause at <1.0x ROAS / $X daily cap
+  Daemon:      Heartbeat running (PID XXXXX)
+═══════════════════════════════════════════════════════════
+  Activate campaigns? [Y/n]
+═══════════════════════════════════════════════════════════
+```
+
+On activation:
+1. Submit campaign structures to each connected platform via adapters
+2. Verify campaign status: each platform returns campaign ID + "active" status
+3. Heartbeat daemon begins monitoring spend, refreshing tokens, evaluating A/B tests
+4. **Danger Room integration:**
+   - Growth tab: KPI cards show real revenue/spend/net from connected treasury + revenue
+   - Campaigns tab: campaign table shows platform name, campaign name, spend, status
+   - Treasury tab: vault status, circuit breakers, reconciliation schedule
+   - Heartbeat tab: daemon status, last job run, next scheduled job
+5. Log activation to `/logs/growth-launch.md`
+
+**Danger Room empty state → live data transition:** When Cultivation is installed AND launch has been activated, the Growth tab's empty state ("No growth data yet") should be replaced by real KPI cards. The `cultivationInstalled` flag in the heartbeat endpoint already controls tab visibility. The Growth tab should check for non-zero revenue or spend data to switch from empty state to KPI view.
 
 **After Phase 6, the CLI-to-autonomous handoff occurs.** See §9.19.8. The heartbeat daemon runs Tier 1 deterministic rules 24/7. The user manages strategy through `/grow` commands and monitors via Danger Room growth tabs.
 

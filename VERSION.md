@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 13.0.0
+**Current:** 14.0.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,8 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 14.0.0 | 2026-03-22 | The Day-0 Engine — Cultivation onboarding redesign: treasury, revenue, ad platforms, budget, creatives, tracking, launch |
+| 13.1.0 | 2026-03-22 | Dashboard Polish — break circular import, CORS/CSP LAN, header context gauge, consolidate private IP |
 | 13.0.0 | 2026-03-22 | The Living Dashboard — consolidation, 3-tier UX, LAN mode, Status Line bridge, agent ticker, new panels |
 | 12.6.4 | 2026-03-22 | Inbox triage #130-131 — encryption egress audit, GROUP BY compatibility, v14.0 Day-0 Engine roadmap |
 | 12.6.3 | 2026-03-22 | Inbox triage #129 — acceptance criteria enforcement, gitignore warning, blitz pre-flight, --adr-only mode |

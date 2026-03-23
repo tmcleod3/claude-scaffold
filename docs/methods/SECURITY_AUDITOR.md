@@ -116,6 +116,18 @@ Random-IV encryption (AES-CBC, AES-GCM) produces unique ciphertexts for identica
 
 **Rule:** When encrypting a column, check if it's used in aggregation queries (`GROUP BY`, `DISTINCT`, `HAVING`, `JOIN`). If so, add a deterministic hash column (HMAC-SHA256 with a stable key) alongside the encrypted column. Use the hash for grouping, the encrypted column for storage. The hash reveals equality (same email = same hash) but not the plaintext. (Field report #130: encrypted viewerEmail broke analytics GROUP BY — every ciphertext was unique due to random IVs.)
 
+### Key Hierarchy Change Audit
+
+When a credential hierarchy changes (e.g., ADR establishes a new agent-specific key instead of the master key, or a service account replaces a personal API key), grep ALL configuration files, deployment manifests, environment templates, and infrastructure-as-code for references to the OLD key/credential:
+
+- Docker Compose / Kubernetes manifests (`docker-compose.yml`, `*.yaml`)
+- Environment files (`.env`, `.env.example`, `.env.production`)
+- CI/CD configs (`.github/workflows/*.yml`, `Jenkinsfile`)
+- Provisioner scripts (`deploy.sh`, Terraform, Ansible)
+- Documentation that references the key name or variable
+
+**Rule:** After any key hierarchy change documented in an ADR, run `grep -r "OLD_KEY_NAME"` across the entire project. Every match must be updated to the new key or explicitly documented as an exception. A docker-compose.yml that passes the master key when the ADR says to use the agent key is a credential scope violation — the container gets more access than intended. (Field report #139: ADR-021 specified agent key but docker-compose still passed ATLAS_PRIVATE_KEY, exposing full-control key to all containers.)
+
 ### External API Transport
 
 Grep for all `fetch(`, `axios(`, `http.get(`, `https.get(`, and `new URL(` calls. Flag any that construct URLs with `http://` (not `https://`). External API calls over plain HTTP leak credentials, API keys, and user data to network observers. Common culprits: GeoIP services, analytics endpoints, webhook callbacks, development-mode URLs hardcoded for localhost that accidentally reach production.

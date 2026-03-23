@@ -8,11 +8,26 @@ If `wizard/` does not exist (scaffold/core users):
 2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`
 3. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
 
+## Arguments
+- No arguments → run/resume the 6-phase growth protocol
+- `--setup` → Ad platform onboarding only (interactive credential setup for Google/Meta/LinkedIn/Twitter/Reddit). See GROWTH_STRATEGIST.md "Ad Platform Setup" section. Does NOT require a deployed product.
+- `--audit-only` → Run Phase 1 (Reconnaissance) only — quick audit without building
+- `--resume` → Resume from last completed phase in growth-state.md
+
+## `/grow --setup` (Ad Platform Onboarding)
+
+If `--setup` is specified, skip the 6-phase protocol and run the ad platform onboarding flow:
+1. Check: is Cultivation installed? (`~/.voidforge/treasury/vault.enc` exists). If not: "Run `/cultivation install` first."
+2. Read GROWTH_STRATEGIST.md "Ad Platform Setup" section
+3. Present platform options with best-fit guidance per product type
+4. For each selected platform: account check → credential collection → test connection → store in vault
+5. Summary: which platforms are connected, suggest next steps (`/grow` to start campaigns)
+
 ## Context Setup
 1. Read `/logs/growth-state.md` — if it exists, resume from current phase
 2. Read `/logs/growth-brief.md` — if it exists, reconnaissance is complete
 3. Read the PRD — extract product vision, target audience, deployed URL
-4. Verify the product is deployed: check for a live URL in deploy logs or PRD. If not deployed: "Can't grow what doesn't exist. Run `/campaign` first."
+4. Verify the product is deployed: check for a live URL in deploy logs or PRD. If not deployed and not `--setup`: "Can't grow what doesn't exist. Run `/campaign` first."
 
 ## First-Run Experience
 

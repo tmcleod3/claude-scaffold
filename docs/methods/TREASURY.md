@@ -29,6 +29,21 @@
 7. **Platform caps.** Set platform-level daily budget 10% below VoidForge hard stop.
 8. **Reconcile daily.** Two-pass: preliminary at midnight UTC, authoritative at 06:00 UTC.
 
+## Pre-Revenue Setup
+
+For projects that don't yet have revenue (pre-launch, MVP, side projects), Treasury still provides value:
+
+1. **Budget tracking from day 0:** Even without revenue, track ad spend against a manual budget. Know exactly how much you've invested before the first dollar returns.
+2. **Revenue source auto-detection:** During `/cultivation install`, scan the project for payment processor integrations:
+   - `stripe` in package.json/requirements.txt → offer to connect Stripe read-only key
+   - `STRIPE_SECRET_KEY` in .env or vault → Stripe is already configured
+   - `paddle` dependency → offer Paddle connection
+   - No payment processor found → "Revenue tracking will activate when you add a payment processor. Treasury tracks spend in the meantime."
+3. **Circuit breakers without revenue:** Set absolute spend limits (not ROAS-based, since there's no revenue to compare). Example: "Pause all campaigns if total spend exceeds $500 this month." ROAS-based circuit breakers activate automatically once the first revenue event is recorded.
+4. **Reconciliation still runs:** The heartbeat daemon reconciles spend even without revenue. This means the spend log is accurate from day 0, and when revenue starts flowing, the historical spend data is already there for ROAS calculation.
+
+**The principle:** Treasury should never block on "no revenue yet." The spend side works independently. The revenue side activates when data appears. (Field report #131)
+
 ## Revenue Ingest
 
 | Source | Auth | Data | Frequency |

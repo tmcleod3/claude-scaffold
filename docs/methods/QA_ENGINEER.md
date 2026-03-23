@@ -69,7 +69,7 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Lucius (Config):** .env completeness, secrets not hardcoded, no secrets in git history, prod vs dev mismatches.
 **Deathstroke (Adversarial):** Penetration-style probing — exploit business logic, bypass validations, chain unexpected interactions, test authorization boundaries. **Query-param state trust:** For every URL query parameter that changes client-side state (`?verified=true`, `?role=admin`, `?step=complete`), test: can you achieve the state change by manually constructing the URL without going through the intended flow? If the UI trusts the param without server validation, it's a bypass — the component must confirm against the server before rendering the privileged state. (Field report #44: dashboard hid verification banner on `?verified=true` without checking DB — any user could dismiss security prompts via URL.)
 **Constantine (Cursed Code):** Unreachable branches, dead state, impossible conditions, logic that only works by accident, tautological checks, shadowed variables. **const/let audit:** For JavaScript/TypeScript, grep for `const` declarations of arrays and objects, then check if any are later reassigned (`= ` after declaration). `const arr = []; arr = arr.filter(...)` is a TypeError in strict mode. Use `splice`, `push`, or declare with `let`. (Field report #50: `const tabs = []` reassigned in cleanup handler — crashed at runtime.)
-**Nightwing (Regression):** Smoke validation, high-value manual flows, "break it on purpose" probes, exact commands.
+**Nightwing (Regression):** Smoke validation, high-value manual flows, "break it on purpose" probes, exact commands. **Auth flow end-to-end:** When auth changes are made (login, signup, email verification, password reset, OAuth), test the FULL flow: signup → verify email → login → access protected route → logout → attempt protected route. Do not just unit-test individual functions. Auth bugs compound across the flow — auto-login after signup can trigger duplicate verification emails, redirect after verification can hit wrong session state. (Field report #115: 3 Critical auth bugs from verifying individual steps but not the composed flow.)
 **Cyborg (Integration):** System integration testing — when 3+ API files or modules connect, Cyborg traces the full data path across boundaries. "I see into the machine." Catches: missing imports between modules, inconsistent response shapes across endpoints, broken cross-module data flows.
 **Raven (Deep Analysis):** Bugs hidden beneath 3 layers of abstraction — follows data through transforms, closures, and callbacks. The bugs that exist because the logic is technically correct in each function but the composition is wrong.
 **Wonder Woman (Truth):** Finds where code says one thing and does another — misleading variable names, wrong comments, stale documentation, function names that don't match their behavior. "I compel the truth."
@@ -152,6 +152,16 @@ Oracle scans for methods that return success without side effects — the most d
 - TypeScript: functions ending in `return true` or `return { success: true }` with no `fetch(`, `prisma.`, `.save()`, or `await` in the body
 
 Flag as **High severity**. In financial systems (trading, payments, billing), flag as **Critical**. (Field report #125: `ProtectionService._place_stop_loss()` returned `True` after logging but never called the exchange. `OrderService.cancel_order()` returned `True` without cancelling.)
+
+### Safety-Critical Return Value Verification
+
+For systems with safety-critical operations (stop-loss placement, circuit breakers, rollback triggers, payment captures, credential revocations): verify the return value of the safety operation BEFORE transitioning state. The pattern: `call safety operation → check return → only then transition`.
+
+**Anti-pattern:** `place_stop_loss(params); self.state = IN_POSITION` — the stop-loss might fail silently (API timeout, insufficient margin, wrong symbol), and the system enters IN_POSITION without protection.
+
+**Correct pattern:** `result = place_stop_loss(params); if not result.success: abort_entry(); return; self.state = IN_POSITION`
+
+**Where to check:** Any state machine transition that follows a safety-critical call. Grep for state assignments (`self.state =`, `setState(`, `status =`) and trace backwards — is the preceding safety call's return value checked? (Field report #139: funding_capture strategy opened positions without verifying stop-loss succeeded. Could hold $2K unprotected.)
 
 ## Step 2 — Baseline Repro Harness
 
