@@ -70,6 +70,24 @@
     .ticker-item { display: inline; margin-right: 24px; }
     .ticker-agent { color: var(--accent); font-weight: 600; }
 
+    /* ── Data Tier Sections (v13.0 Information Architecture) ── */
+    .tier-section { grid-column: 1 / -1; margin-top: 4px; }
+    .tier-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); opacity: 0.6; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .tier-label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .tier-live .tier-label::before { background: #34d399; animation: pulse 2s infinite; }
+    .tier-campaign .tier-label::before { background: #fbbf24; }
+    .tier-system .tier-label::before { background: var(--text-dim); opacity: 0.5; }
+    .tier-live .tier-content { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
+    .tier-campaign .tier-content { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .tier-system .tier-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+    .tier-system .panel { padding: 10px; }
+    .tier-system .panel-title { font-size: 9px; margin-bottom: 4px; }
+    .tier-system .score-count { font-size: 12px; }
+
+    /* Empty state with guidance */
+    .empty-guidance { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+    .empty-guidance code { background: var(--bg); padding: 2px 5px; border-radius: 3px; font-size: 10px; }
+
     /* Deploy Status */
     .deploy-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
     .deploy-dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -199,51 +217,101 @@
     <main class="main-panels">
       <!-- ═══ OPS TAB ═══ -->
       <div class="tab-panel active" id="panel-ops" role="tabpanel" aria-labelledby="tab-ops" tabindex="0">
-      <!-- Campaign Timeline -->
-      <div class="panel panel-full" role="region" aria-label="Campaign Timeline">
-        <div class="panel-title" id="title-timeline">Campaign Timeline</div>
-        <div class="timeline" id="campaign-timeline" aria-labelledby="title-timeline">
-          <div class="timeline-item timeline-pending">—</div>
+
+      <!-- ═══ TIER 1: LIVE FEED (real-time, changes per-second) ═══ -->
+      <div class="tier-section tier-live" role="region" aria-label="Live Feed">
+        <div class="tier-label">Live Feed</div>
+        <div class="tier-content">
+          <!-- Context Gauge (inline — moved from sidebar for prominence) -->
+          <div class="panel" role="region" aria-label="Context Usage">
+            <div class="gauge" id="context-gauge" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Context window usage">
+              <svg viewBox="0 0 36 36"><circle class="gauge-track" cx="18" cy="18" r="14" /><circle class="gauge-fill" id="gauge-fill" cx="18" cy="18" r="14" stroke-dasharray="88" stroke-dashoffset="88" stroke="#34d399" /></svg>
+              <div class="gauge-text" id="gauge-text">&mdash;%</div>
+            </div>
+            <div style="text-align:center;margin-top:4px;font-size:10px;color:var(--text-dim);" id="context-model"></div>
+            <div class="empty-guidance" id="context-empty" style="text-align:center;">Set up Status Line for live data</div>
+          </div>
+          <!-- Agent Activity (live ticker — was at bottom, now prominent) -->
+          <div class="panel" role="region" aria-label="Agent Activity" aria-live="polite">
+            <div class="panel-title">Agent Activity</div>
+            <div id="agent-ticker-panel" style="font-size:12px;min-height:60px;">
+              <span class="ticker-item"><span class="ticker-agent">Sisko</span> standing by...</span>
+              <div class="empty-guidance">Run <code>/assemble</code> or <code>/campaign</code> to see live agent activity</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Phase Pipeline -->
-      <div class="panel" role="region" aria-label="Phase Pipeline">
-        <div class="panel-title" id="title-pipeline">Phase Pipeline</div>
-        <div class="pipeline" id="phase-pipeline">
-          <div class="pipeline-phase"><span class="pipeline-dot pending"></span><span class="pipeline-label">No active build</span></div>
+      <!-- ═══ TIER 2: CAMPAIGN STATE (changes per-mission, ~30min cycles) ═══ -->
+      <div class="tier-section tier-campaign" role="region" aria-label="Campaign State">
+        <div class="tier-label">Campaign State</div>
+        <div class="tier-content">
+          <!-- Campaign Timeline -->
+          <div class="panel panel-full" role="region" aria-label="Campaign Timeline">
+            <div class="panel-title" id="title-timeline">Campaign Timeline</div>
+            <div class="timeline" id="campaign-timeline" aria-labelledby="title-timeline">
+              <div class="timeline-item timeline-pending">—</div>
+            </div>
+          </div>
+
+          <!-- Phase Pipeline -->
+          <div class="panel" role="region" aria-label="Phase Pipeline">
+            <div class="panel-title" id="title-pipeline">Phase Pipeline</div>
+            <div class="pipeline" id="phase-pipeline">
+              <div class="pipeline-phase"><span class="pipeline-dot pending"></span><span class="pipeline-label">No active build</span></div>
+            </div>
+          </div>
+
+          <!-- Finding Scoreboard -->
+          <div class="panel" role="region" aria-label="Finding Scoreboard">
+            <div class="panel-title" id="title-findings">Open Findings</div>
+            <div class="scoreboard" id="finding-scoreboard" aria-labelledby="title-findings" role="group">
+              <div class="score-item score-critical"><div class="score-count" id="score-critical">0</div><div class="score-label">Critical</div></div>
+              <div class="score-item score-high"><div class="score-count" id="score-high">0</div><div class="score-label">High</div></div>
+              <div class="score-item score-medium"><div class="score-count" id="score-medium">0</div><div class="score-label">Medium</div></div>
+              <div class="score-item score-low"><div class="score-count" id="score-low">0</div><div class="score-label">Low</div></div>
+            </div>
+          </div>
+
+          <!-- PRD Coverage -->
+          <div class="panel panel-full" role="region" aria-label="PRD Coverage">
+            <div class="panel-title" id="title-prd">PRD Coverage</div>
+            <div id="prd-coverage" style="font-size:13px;color:var(--text-dim);">No campaign active</div>
+          </div>
+
+          <!-- Prophecy Graph -->
+          <div class="panel panel-full" role="region" aria-label="Prophecy Graph">
+            <div class="panel-title" id="title-prophecy">Prophecy Graph</div>
+            <div id="prophecy-graph" style="min-height:100px;"></div>
+            <div id="prophecy-detail" style="font-size:12px;margin-top:6px;min-height:40px;color:var(--text-dim);"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Finding Scoreboard -->
-      <div class="panel" role="region" aria-label="Finding Scoreboard">
-        <div class="panel-title" id="title-findings">Findings</div>
-        <div class="scoreboard" id="finding-scoreboard" aria-labelledby="title-findings" role="group">
-          <div class="score-item score-critical"><div class="score-count" id="score-critical">0</div><div class="score-label">Critical</div></div>
-          <div class="score-item score-high"><div class="score-count" id="score-high">0</div><div class="score-label">High</div></div>
-          <div class="score-item score-medium"><div class="score-count" id="score-medium">0</div><div class="score-label">Medium</div></div>
-          <div class="score-item score-low"><div class="score-count" id="score-low">0</div><div class="score-label">Low</div></div>
+      <!-- ═══ TIER 3: SYSTEM STATUS (changes rarely, background monitoring) ═══ -->
+      <div class="tier-section tier-system" role="region" aria-label="System Status">
+        <div class="tier-label">System Status</div>
+        <div class="tier-content">
+          <div class="panel" role="region" aria-label="Version">
+            <div class="panel-title">Version</div>
+            <div class="version-badge" id="version-badge">—</div>
+            <div class="branch-status" id="branch-status">—</div>
+          </div>
+          <div class="panel" role="region" aria-label="Deploy">
+            <div class="panel-title">Deploy</div>
+            <div class="deploy-badge" id="deploy-status"><span class="deploy-dot unknown"></span><span>No deploy data</span></div>
+          </div>
+          <div class="panel" role="region" aria-label="Tests">
+            <div class="panel-title">Tests</div>
+            <div id="test-status" style="font-size:12px;color:var(--text-dim);">No test data</div>
+          </div>
+          <div class="panel" role="region" aria-label="Experiments">
+            <div class="panel-title" id="title-experiments">Experiments</div>
+            <div id="experiment-dashboard" aria-labelledby="title-experiments" style="font-size:12px;color:var(--text-dim);">No experiments</div>
+          </div>
         </div>
       </div>
 
-      <!-- Experiment Dashboard -->
-      <div class="panel" role="region" aria-label="Experiments">
-        <div class="panel-title" id="title-experiments">Experiments</div>
-        <div id="experiment-dashboard" aria-labelledby="title-experiments" style="font-size:13px;color:var(--text-dim);">No experiments</div>
-      </div>
-
-      <!-- PRD Coverage -->
-      <div class="panel panel-full" role="region" aria-label="PRD Coverage">
-        <div class="panel-title" id="title-prd">PRD Coverage</div>
-        <div id="prd-coverage" style="font-size:13px;color:var(--text-dim);">No campaign active</div>
-      </div>
-
-      <!-- Prophecy Graph -->
-      <div class="panel panel-full" role="region" aria-label="Prophecy Graph">
-        <div class="panel-title" id="title-prophecy">Prophecy Graph</div>
-        <div id="prophecy-graph" style="min-height:100px;"></div>
-        <div id="prophecy-detail" style="font-size:12px;margin-top:6px;min-height:40px;color:var(--text-dim);"></div>
-      </div>
       </div><!-- /panel-ops -->
 
       <!-- ═══ GROWTH TAB (§9.10 — read-only, placeholder data) ═══ -->
@@ -501,50 +569,25 @@
 
     <!-- Sidebar -->
     <aside class="sidebar">
-      <!-- Context Gauge -->
+      <!-- Session Cost (compact — data from Status Line bridge) -->
       <div class="panel">
-        <div class="panel-title">Context Usage</div>
-        <div class="gauge" id="context-gauge" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Context usage">
-          <svg viewBox="0 0 36 36" role="img" aria-hidden="true">
-            <circle class="gauge-track" cx="18" cy="18" r="14" />
-            <circle class="gauge-fill" cx="18" cy="18" r="14"
-              stroke-dasharray="88" stroke-dashoffset="88"
-              id="gauge-fill" stroke="#34d399" />
-          </svg>
-          <div class="gauge-text" id="gauge-text" aria-live="polite">—%</div>
+        <div class="panel-title">Session Cost</div>
+        <div id="cost-display" style="font-size:18px;font-weight:700;color:var(--text);">—</div>
+        <div class="empty-guidance">Wired via Status Line bridge</div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="panel">
+        <div class="panel-title">Quick Actions</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.8;">
+          <code>/campaign --blitz</code> — Build everything<br>
+          <code>/gauntlet</code> — Full review<br>
+          <code>/debrief --inbox</code> — Triage reports
         </div>
-      </div>
-
-      <!-- Version & Branch -->
-      <div class="panel">
-        <div class="panel-title">Version</div>
-        <div class="version-badge" id="version-badge">—</div>
-        <div class="branch-status" id="branch-status">—</div>
-      </div>
-
-      <!-- Deploy Status -->
-      <div class="panel">
-        <div class="panel-title">Deploy</div>
-        <div class="deploy-badge" id="deploy-status">
-          <span class="deploy-dot unknown"></span>
-          <span>No deploy data</span>
-        </div>
-      </div>
-
-      <!-- Test Suite -->
-      <div class="panel">
-        <div class="panel-title">Tests</div>
-        <div id="test-status" style="font-size:13px;color:var(--text-dim);">No test data</div>
-      </div>
-
-      <!-- Cost -->
-      <div class="panel">
-        <div class="panel-title">Cost</div>
-        <div id="cost-display" style="font-size:13px;color:var(--text-dim);">No cost data</div>
       </div>
     </aside>
 
-    <!-- Agent Activity Ticker -->
+    <!-- Agent Activity Ticker (scrolling footer — mirrors Tier 1 panel) -->
     <footer class="ticker" id="agent-ticker" aria-live="polite" aria-label="Agent activity feed">
       <span class="ticker-item"><span class="ticker-agent">Sisko</span> standing by...</span>
     </footer>

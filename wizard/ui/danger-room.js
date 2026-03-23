@@ -1,7 +1,8 @@
 (function () {
   'use strict';
 
-  const REFRESH_INTERVAL_MS = 10000; // 10 second poll
+  const FAST_POLL_MS = 5000;   // 5s — live feed (context, cost)
+  const SLOW_POLL_MS = 60000;  // 60s — system status (version, deploy, experiments)
 
   // ── Data fetchers ────────────────────────────────
 
@@ -75,22 +76,32 @@
     const fill = document.getElementById('gauge-fill');
     const text = document.getElementById('gauge-text');
     const gauge = document.getElementById('context-gauge');
+    const emptyHint = document.getElementById('context-empty');
+    const modelDisplay = document.getElementById('context-model');
     if (!usage) {
       text.textContent = '\u2014%';
       fill.style.strokeDashoffset = 88;
       if (gauge) gauge.removeAttribute('aria-valuenow');
+      if (emptyHint) emptyHint.style.display = '';
+      if (modelDisplay) modelDisplay.textContent = '';
       return;
     }
+    if (emptyHint) emptyHint.style.display = 'none';
     const pct = Math.round(usage.percent);
-    // Circle circumference = 2 * PI * r = 2 * 3.14159 * 14 ≈ 88
     const offset = 88 - (88 * pct / 100);
     fill.style.strokeDashoffset = offset;
-    // Color: green <50, yellow 50-70, red >70
     if (pct < 50) fill.setAttribute('stroke', '#34d399');
     else if (pct < 70) fill.setAttribute('stroke', '#fbbf24');
     else fill.setAttribute('stroke', '#ef4444');
     text.textContent = pct + '%';
     if (gauge) gauge.setAttribute('aria-valuenow', pct);
+    if (modelDisplay && usage.model) modelDisplay.textContent = usage.model;
+    // Update cost display from same data source
+    var costEl = document.getElementById('cost-display');
+    if (costEl && usage.cost != null) {
+      costEl.textContent = '$' + usage.cost.toFixed(4);
+      costEl.nextElementSibling.style.display = 'none';
+    }
   }
 
   // ── Version & Branch ─────────────────────────────
@@ -131,13 +142,19 @@
   }
 
   function renderTicker() {
-    const container = document.getElementById('agent-ticker');
+    // Update both: footer ticker (scrolling) and Tier 1 panel (detailed)
+    const footer = document.getElementById('agent-ticker');
+    const panel = document.getElementById('agent-ticker-panel');
     if (tickerMessages.length === 0) {
-      container.innerHTML = '<span class="ticker-item"><span class="ticker-agent">Sisko</span> standing by...</span>';
+      if (footer) footer.innerHTML = '<span class="ticker-item"><span class="ticker-agent">Sisko</span> standing by...</span>';
       return;
     }
-    container.innerHTML = tickerMessages.map(m =>
+    var html = tickerMessages.map(m =>
       `<span class="ticker-item"><span class="ticker-agent">${escapeHtml(m.agent)}</span> ${escapeHtml(m.action)}</span>`
+    ).join('');
+    if (footer) footer.innerHTML = html;
+    if (panel) panel.innerHTML = tickerMessages.map(m =>
+      `<div style="margin-bottom:4px;"><span class="ticker-agent">${escapeHtml(m.agent)}</span> <span style="color:var(--text-dim)">${escapeHtml(m.action)}</span></div>`
     ).join('');
   }
 
@@ -191,30 +208,47 @@
       '<span style="color:var(--text-dim)">' + planned + ' planned</span>';
   }
 
-  // ── Main poll loop ───────────────────────────────
+  // ── Tiered poll loops (v13.0 — fast for live data, slow for system status) ──
 
-  async function refresh() {
-    const [campaign, build, findings, version, deploy, context, experiments] = await Promise.all([
+  /** Fast poll (5s): live feed data that changes per-message */
+  async function refreshFast() {
+    const [context] = await Promise.all([
+      fetchJSON('/api/danger-room/context'),
+    ]);
+    renderGauge(context);
+  }
+
+  /** Campaign poll (10s): campaign state that changes per-mission */
+  async function refreshCampaign() {
+    const [campaign, build, findings] = await Promise.all([
       fetchJSON('/api/danger-room/campaign'),
       fetchJSON('/api/danger-room/build'),
       fetchJSON('/api/danger-room/findings'),
-      fetchJSON('/api/danger-room/version'),
-      fetchJSON('/api/danger-room/deploy'),
-      fetchJSON('/api/danger-room/context'),
-      fetchJSON('/api/danger-room/experiments'),
     ]);
-
     renderTimeline(campaign);
     renderPipeline(build);
     renderScoreboard(findings);
-    renderVersion(version);
-    renderDeploy(deploy);
-    renderGauge(context);
     renderPrdCoverage(campaign);
-    renderExperiments(experiments);
     if (typeof window.renderProphecyGraph === 'function') {
       window.renderProphecyGraph(document.getElementById('prophecy-graph'), campaign);
     }
+  }
+
+  /** Slow poll (60s): system status that changes rarely */
+  async function refreshSlow() {
+    const [version, deploy, experiments] = await Promise.all([
+      fetchJSON('/api/danger-room/version'),
+      fetchJSON('/api/danger-room/deploy'),
+      fetchJSON('/api/danger-room/experiments'),
+    ]);
+    renderVersion(version);
+    renderDeploy(deploy);
+    renderExperiments(experiments);
+  }
+
+  /** Full refresh — all tiers at once (used on init and reconnect) */
+  async function refresh() {
+    await Promise.all([refreshFast(), refreshCampaign(), refreshSlow()]);
   }
 
   // ── Tab Navigation (§9.20.2) ─────────────────────
@@ -371,7 +405,9 @@
 
   async function init() {
     await refresh();
-    setInterval(refresh, REFRESH_INTERVAL_MS);
+    setInterval(refreshFast, FAST_POLL_MS);
+    setInterval(refreshCampaign, 10000); // 10s for campaign data
+    setInterval(refreshSlow, SLOW_POLL_MS);
     connectWebSocket();
     initTabs();
   }
