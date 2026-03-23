@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [12.6.4] - 2026-03-22
+
+### Added
+- **Encryption Egress Audit** in security auditor — grep all usages of plaintext variable after encrypting, not just the storage path (DB, Redis, SSE, logs, API responses)
+- **GROUP BY Compatibility Check** in security auditor — random-IV encryption breaks aggregation; add deterministic HMAC hash column
+- **v14.0 roadmap** — The Day-0 Engine: Cultivation onboarding redesign with 7-step guided growth setup
+
+### Fixed
+- Field reports #130, #131 triaged — 2 security methodology fixes applied, 1 feature request roadmapped
+
+---
+
 ## [12.6.3] - 2026-03-22
 
 ### Changed

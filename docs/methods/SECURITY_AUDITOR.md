@@ -98,6 +98,24 @@ Pattern: `/api/photos/[...name]` that joins path segments into a Google API URL 
 
 **Security principle:** For security boundaries (tool access, URL allowlists, IP ranges, credential scopes), **always prefer whitelist (default-deny) over blocklist (default-allow)**. New entries should be blocked by default until explicitly allowed. Blocklists inevitably miss entries.
 
+### Encryption Egress Audit
+
+When a field is encrypted (at rest or in transit), grep ALL usages of the original plaintext variable in the same function and across the codebase. Encryption applied to one egress point (e.g., database write) does not protect other egress points that use the same variable:
+
+- **Database writes** — the primary target, usually encrypted correctly
+- **Redis pub/sub** — often publishes the original variable, not the ciphertext
+- **SSE/WebSocket broadcasts** — real-time events may include plaintext
+- **Log statements** — structured logging may capture the pre-encryption value
+- **API responses** — endpoints that return the decrypted value for display may also return it in contexts where it shouldn't appear (e.g., admin lists, export endpoints)
+
+**Rule:** After adding `encrypt()` to a field, run `grep -n "variableName"` across the entire file and all consumers. Every usage must either use the encrypted value or explicitly decrypt with authorization. A plaintext leak 4 lines below the encryption call is invisible to single-path review. (Field report #130: viewerEmail encrypted for DB storage but the original plaintext was published to Redis pub/sub in the same function.)
+
+### GROUP BY Compatibility Check
+
+Random-IV encryption (AES-CBC, AES-GCM) produces unique ciphertexts for identical plaintext — `encrypt("alice")` returns a different value every time. This means GROUP BY, DISTINCT, COUNT(DISTINCT), and JOIN on encrypted columns return one row per record, silently breaking analytics.
+
+**Rule:** When encrypting a column, check if it's used in aggregation queries (`GROUP BY`, `DISTINCT`, `HAVING`, `JOIN`). If so, add a deterministic hash column (HMAC-SHA256 with a stable key) alongside the encrypted column. Use the hash for grouping, the encrypted column for storage. The hash reveals equality (same email = same hash) but not the plaintext. (Field report #130: encrypted viewerEmail broke analytics GROUP BY — every ciphertext was unique due to random IVs.)
+
 ### External API Transport
 
 Grep for all `fetch(`, `axios(`, `http.get(`, `https.get(`, and `new URL(` calls. Flag any that construct URLs with `http://` (not `https://`). External API calls over plain HTTP leak credentials, API keys, and user data to network observers. Common culprits: GeoIP services, analytics endpoints, webhook callbacks, development-mode URLs hardcoded for localhost that accidentally reach production.
