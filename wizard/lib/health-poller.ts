@@ -4,7 +4,7 @@
  * Non-blocking: uses fetch with 5-second timeout per project.
  */
 
-import { readRegistry, updateHealthStatus, type HealthStatus } from './project-registry.js';
+import { readRegistry, batchUpdateHealthStatus, type HealthStatus } from './project-registry.js';
 import { isPrivateIp } from './network.js';
 
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -76,19 +76,25 @@ async function pollAll(): Promise<void> {
 
     if (withUrls.length === 0) return;
 
-    // Check all health endpoints in parallel (bounded by fetch timeout)
-    const results = await Promise.allSettled(
-      withUrls.map(async (project) => {
-        const status = await checkHealth(project.healthCheckUrl);
-        await updateHealthStatus(project.id, status);
-      }),
+    // LOKI-004: Check all endpoints in parallel, batch-write results in a single registry update
+    const checkResults = await Promise.allSettled(
+      withUrls.map(async (project) => ({
+        id: project.id,
+        status: await checkHealth(project.healthCheckUrl),
+      })),
     );
 
-    // Log any individual failures (non-fatal)
-    for (const result of results) {
-      if (result.status === 'rejected') {
+    const updates: Array<{ id: string; status: HealthStatus }> = [];
+    for (const result of checkResults) {
+      if (result.status === 'fulfilled') {
+        updates.push(result.value);
+      } else {
         console.error('Health check failed:', result.reason instanceof Error ? result.reason.message : 'Unknown');
       }
+    }
+
+    if (updates.length > 0) {
+      await batchUpdateHealthStatus(updates);
     }
   } catch (err) {
     // Registry read failures are non-fatal — log and continue

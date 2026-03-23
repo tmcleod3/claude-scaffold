@@ -256,6 +256,22 @@ export function updateHealthStatus(
   });
 }
 
+/** LOKI-004: Batch update health status — single read-write cycle for N projects. */
+export function batchUpdateHealthStatus(
+  updates: Array<{ id: string; status: HealthStatus }>,
+): Promise<void> {
+  return serialized(async () => {
+    const projects = await readRegistry();
+    const now = new Date().toISOString();
+    for (const { id, status } of updates) {
+      const idx = projects.findIndex((p) => p.id === id);
+      if (idx === -1) continue;
+      projects[idx] = { ...projects[idx], healthStatus: status, healthCheckedAt: now };
+    }
+    await writeRegistry(projects);
+  });
+}
+
 // ── Per-project access control ──────────────────────
 
 /**
