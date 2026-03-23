@@ -6,6 +6,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [15.2.1] - 2026-03-23
+
+### Changed
+- **GAUNTLET.md** — Added Dimension 4 (output verification) to Sibling Verification Protocol: verify fixes against real output data to catch false positives in keyword filters (#148)
+- **CAMPAIGN.md** — Victory condition now includes deploy entrypoint verification: confirm Docker CMD / PM2 ecosystem runs the built architecture, not a legacy file (#147)
+- **BUILD_PROTOCOL.md** — Phase 12 Docker smoke test: mandatory check that container entrypoint runs new code before go-live (#147)
+- **DEVOPS_ENGINEER.md** — First deployment checklist: process manager, env vars, log directory, health endpoint, entrypoint verification (#147)
+
+### Added
+- **LESSONS.md** — 3 new lessons: read-before-export (verify source exports before re-exporting), read-before-test (read implementation before writing expectations), numeric context checks (cite actual % from /context)
+
+## [15.2.0] - 2026-03-23
+
+### Changed
+- **tower-auth.ts** split into 3 modules: tower-auth (424 lines — auth core), tower-session (149 lines — sessions/cookies), tower-rate-limit (87 lines — rate limiting). All exports re-exported for backward compatibility.
+- **aws-vps.ts** — SSH security group restricted to deployer's IP post-provisioning (detects IP via checkip.amazonaws.com, revokes 0.0.0.0/0 rule)
+- **ProvisionEvent.status** type now includes `'warning'` for non-fatal alerts
+
+## [15.1.0] - 2026-03-23
+
+### Added
+- **vitest** test framework with `--pool forks` isolation — 91 tests across 8 files (vault, body-parser, tower-auth, network, frontmatter, instance-sizing, safety-tiers, http-helpers)
+- **Vault unlock rate limiting** — 5 attempts/min, lockout after 10 consecutive failures (separate from login rate limits)
+- **Vault auto-lock** — 15-minute idle timeout clears session password
+- **6 proxy modules** — financial-core, daemon-core, oauth-core, revenue-types, ad-platform-core, rate-limiter-core (breaks direct wizard/ → docs/patterns/ imports)
+- **provisioner-registry.ts** — single source of truth for provisioners, credential scoping, GitHub-linked targets
+
+### Changed
+- **Terminal HMAC** — per-boot random 32-byte key replaces vault password as HMAC keying material
+- **sendJson** consolidated from 10 duplicate definitions to 1 shared module in http-helpers.ts (with noCache support)
+- **Health poller** — batch writes (N individual → 1 registry update per poll cycle)
+- **TOTP clock skew** — prunes usedCodes when drift exceeds ±3 steps (prevents lockout after clock jump)
+
+### Fixed
+- **47 Infinity Gauntlet fixes** — provision lock deadlock, vault cache mutation, body-parser non-object bypass, terminal resize NaN crash, Docker healthcheck exec form, CI SSH key leak, RDS hardcoded 'admin', symlink security no-op, autonomy-controller crash safety, secret stripping keyword gaps, and 36 more across 21 files
+- **Accessibility** — skip-nav + noscript on all 7 pages, aria-labelledby on deploy step 1
+
+### Security
+- Secret stripping expanded with allowlist (SAFE_OUTPUT_KEYS) — comprehensive keyword coverage without false positives
+- Error message token regex lowered from 40+ to 16+ characters
+
+---
+
 ## [15.0.0] - 2026-03-22
 
 ### Added

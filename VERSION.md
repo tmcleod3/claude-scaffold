@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 15.2.0
+**Current:** 15.2.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 15.2.1 | 2026-03-23 | Inbox triage #147-#148: 4 methodology fixes + 3 lessons from field reports |
 | 15.2.0 | 2026-03-23 | The Cleanup — tower-auth split (636→3 modules), SSH SG restriction post-provisioning |
 | 15.1.0 | 2026-03-23 | The Hardening — Infinity Gauntlet (47 fixes), vault rate-limit + auto-lock, HMAC key rotation, sendJson consolidation, pattern proxy modules, batch health poller, TOTP clock skew recovery, vitest (91 tests), UX enchantments |
 | 15.0.0 | 2026-03-22 | The Last Mile — /deploy command, campaign auto-deploy, /git --deploy, drift detector |

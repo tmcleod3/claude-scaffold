@@ -1,6 +1,6 @@
 {
   "name": "voidforge",
-  "version": "15.2.0",
+  "version": "15.2.1",
   "description": "From nothing, everything. A methodology framework for building with Claude Code.",
   "type": "module",
   "engines": {
