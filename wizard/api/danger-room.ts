@@ -60,21 +60,23 @@ async function _checkAgentActivity(): Promise<void> {
     const st = await stat(ACTIVITY_FILE);
     if (st.size <= lastActivitySize) return;
 
-    const content = await readFile(ACTIVITY_FILE, 'utf-8');
-    const lines = content.trim().split('\n');
-    // Only process lines after our last known position
-    const newLines = lastActivitySize === 0 ? lines.slice(-5) : lines.slice(-Math.max(1, lines.length - Math.floor(lastActivitySize / 80)));
+    // Read only the new bytes appended since last check (Gauntlet DR-05: no line estimation)
+    const fd = await import('node:fs/promises').then(m => m.open(ACTIVITY_FILE, 'r'));
+    const buf = Buffer.alloc(st.size - lastActivitySize);
+    await fd.read(buf, 0, buf.length, lastActivitySize);
+    await fd.close();
+    const newContent = buf.toString('utf-8');
+    const newLines = newContent.trim().split('\n').filter(Boolean);
     lastActivitySize = st.size;
 
     for (const line of newLines) {
       try {
         const entry = JSON.parse(line) as { agent?: string; task?: string; status?: string };
         if (entry.agent) {
-          ws.broadcast({
-            type: 'agent-activity',
-            agent: entry.agent,
-            action: entry.task || entry.status || 'dispatched',
-          });
+          // Server-side sanitization: cap field lengths (Gauntlet Kenobi DR-05)
+          const agent = String(entry.agent).slice(0, 50);
+          const action = String(entry.task || entry.status || 'dispatched').slice(0, 200);
+          ws.broadcast({ type: 'agent-activity', agent, action });
         }
       } catch { /* skip malformed lines */ }
     }
@@ -82,16 +84,26 @@ async function _checkAgentActivity(): Promise<void> {
 }
 
 // Hybrid approach: fs.watch for immediate + poll fallback (fs.watch is unreliable on some OSes)
-try {
-  const watcher = watch(ACTIVITY_FILE, { persistent: false }, () => {
-    if (activityDebounce) clearTimeout(activityDebounce);
-    activityDebounce = setTimeout(checkAgentActivity, 200); // debounce rapid writes
-  });
-  watcher.on('error', () => {}); // file may not exist yet
-} catch { /* watch setup fails if file doesn't exist — poll handles it */ }
+let activityWatcher: ReturnType<typeof watch> | null = null;
 
-// Poll fallback — catches events fs.watch misses (every 3 seconds)
-setInterval(checkAgentActivity, 3000);
+function setupActivityWatch(): void {
+  if (activityWatcher) return;
+  try {
+    activityWatcher = watch(ACTIVITY_FILE, { persistent: false }, () => {
+      if (activityDebounce) clearTimeout(activityDebounce);
+      activityDebounce = setTimeout(checkAgentActivity, 200);
+    });
+    activityWatcher.on('error', () => { activityWatcher = null; }); // re-establish on next poll
+  } catch { /* file doesn't exist yet — poll will re-try */ }
+}
+
+setupActivityWatch();
+
+// Poll fallback — catches events fs.watch misses AND re-establishes watch if file appeared (DR-06)
+setInterval(() => {
+  if (!activityWatcher) setupActivityWatch();
+  checkAgentActivity();
+}, 3000);
 
 // ── Shared REST endpoints ────────────────────────
 

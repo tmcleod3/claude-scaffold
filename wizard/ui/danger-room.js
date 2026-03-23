@@ -98,9 +98,10 @@
     if (modelDisplay && usage.model) modelDisplay.textContent = usage.model;
     // Update cost display from same data source
     var costEl = document.getElementById('cost-display');
+    var costEmpty = document.getElementById('cost-empty');
     if (costEl && usage.cost != null) {
       costEl.textContent = '$' + usage.cost.toFixed(4);
-      costEl.nextElementSibling.style.display = 'none';
+      if (costEmpty) costEmpty.style.display = 'none';
     }
   }
 

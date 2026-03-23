@@ -228,15 +228,23 @@ export async function readContextStats(): Promise<ContextStats | null> {
     let mostRecent: ContextStats | null = null;
     let latestTime = 0;
     const now = Date.now() / 1000; // jq's `now` outputs Unix seconds
+    const CLEANUP_AGE_S = 300; // 5 minutes — delete orphaned session files
 
     for (const file of statsFiles) {
-      const content = await readFileOrNull(join(VOIDFORGE_DIR, file));
+      const filePath = join(VOIDFORGE_DIR, file);
+      const content = await readFileOrNull(filePath);
       if (!content) continue;
       try {
         const data = JSON.parse(content) as ContextStats;
-        if (data.updated_at && data.updated_at > latestTime) {
-          // Check staleness — skip files older than 60 seconds
-          if (now - data.updated_at > STALENESS_THRESHOLD_MS / 1000) continue;
+        if (!data.updated_at) continue;
+        // Clean up files older than 5 minutes (orphaned sessions — Gauntlet Picard DR-13)
+        if (now - data.updated_at > CLEANUP_AGE_S) {
+          try { const { unlink } = await import('node:fs/promises'); await unlink(filePath); } catch { /* ignore */ }
+          continue;
+        }
+        // Check staleness — skip files older than 60 seconds (still show —% gauge)
+        if (now - data.updated_at > STALENESS_THRESHOLD_MS / 1000) continue;
+        if (data.updated_at > latestTime) {
           latestTime = data.updated_at;
           mostRecent = data;
         }

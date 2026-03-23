@@ -99,10 +99,8 @@ const MIME_TYPES: Record<string, string> = {
   '.ico': 'image/x-icon',
 };
 
-function sendJson(res: ServerResponse, status: number, data: unknown): void {
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify(data));
-}
+// Use shared sendJson from http-helpers.ts — do NOT redefine here (Gauntlet DR-07)
+import { sendJson } from './lib/http-helpers.js';
 
 async function serveStatic(res: ServerResponse, filePath: string): Promise<void> {
   try {

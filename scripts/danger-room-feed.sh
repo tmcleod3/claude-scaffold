@@ -21,7 +21,10 @@ VOIDFORGE_DIR="${HOME}/.voidforge"
 mkdir -p "${VOIDFORGE_DIR}"
 
 # Extract session ID for per-session file naming (prevents concurrent write corruption)
-SESSION_ID=$(echo "$input" | jq -r '.session_id // "default"' 2>/dev/null || echo "default")
+# Sanitize: alphanumeric + hyphens only (prevents path traversal — Gauntlet Kenobi DR-06)
+RAW_ID=$(echo "$input" | jq -r '.session_id // "default"' 2>/dev/null || echo "default")
+SESSION_ID=$(echo "$RAW_ID" | tr -cd 'a-zA-Z0-9-' | head -c 64)
+SESSION_ID="${SESSION_ID:-default}"
 STATS_FILE="${VOIDFORGE_DIR}/context-stats-${SESSION_ID}.json"
 TMP_FILE="${STATS_FILE}.tmp"
 
