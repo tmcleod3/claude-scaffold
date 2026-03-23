@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a href="#wizard-body" class="skip-nav">Skip to main content</a>
+  <noscript><div class="noscript-msg">VoidForge requires JavaScript to run.</div></noscript>
   <div class="wizard" id="wizard">
     <header class="wizard-header">
       <div class="logo">Haku — VoidForge Deploy</div>
@@ -20,8 +22,8 @@
     <main class="wizard-body" id="wizard-body">
 
       <!-- Step 1: Unlock + Select Project -->
-      <section class="step" id="step-1" data-step="1">
-        <h1>Select Project</h1>
+      <section class="step" id="step-1" data-step="1" aria-labelledby="step-1-heading">
+        <h1 id="step-1-heading">Select Project</h1>
         <p class="subtitle">Point Haku at a built VoidForge project to provision and deploy.</p>
 
         <div class="card" id="vault-card">
