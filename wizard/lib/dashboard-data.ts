@@ -168,13 +168,14 @@ export async function parseFindings(): Promise<FindingCounts> {
   return counts;
 }
 
-/** Read deploy log from logs or .voidforge directory. */
+/** Read deploy log from logs or .voidforge directory. Also reads deploy-state.md (v15.0). */
 export async function readDeployLog(): Promise<DeployData | null> {
-  const paths = [
+  // Try JSON sources first
+  const jsonPaths = [
     join(LOGS_DIR, 'deploy-log.json'),
     join(VOIDFORGE_DIR, 'deploys', 'latest.json'),
   ];
-  for (const p of paths) {
+  for (const p of jsonPaths) {
     const content = await readFileOrNull(p);
     if (!content) continue;
     try {
@@ -187,7 +188,58 @@ export async function readDeployLog(): Promise<DeployData | null> {
       };
     } catch { continue; }
   }
+
+  // Try deploy-state.md (v15.0 /deploy command format)
+  const deployState = await readFileOrNull(join(LOGS_DIR, 'deploy-state.md'));
+  if (deployState) {
+    const urlMatch = deployState.match(/(?:URL|Target):\s*(.+?)(?:\n|$)/i);
+    const statusMatch = deployState.match(/Status:\s*(.+?)(?:\n|$)/i);
+    const timestampMatch = deployState.match(/(?:Last deployed|Timestamp):\s*(.+?)(?:\n|$)/i);
+    const commitMatch = deployState.match(/Commit:\s*(.+?)(?:\n|$)/i);
+    if (urlMatch || statusMatch) {
+      return {
+        url: urlMatch ? urlMatch[1].trim() : '',
+        healthy: statusMatch ? statusMatch[1].trim().toLowerCase() === 'healthy' : false,
+        target: '',
+        timestamp: timestampMatch ? timestampMatch[1].trim() : '',
+        commit: commitMatch ? commitMatch[1].trim() : undefined,
+      } as DeployData & { commit?: string };
+    }
+  }
+
   return null;
+}
+
+/** Detect deployment drift — compare deployed commit against current HEAD. */
+export async function detectDeployDrift(): Promise<{
+  deployed_commit: string | null;
+  head_commit: string | null;
+  drifted: boolean;
+} | null> {
+  // Read deployed commit from deploy-state.md
+  const deployState = await readFileOrNull(join(LOGS_DIR, 'deploy-state.md'));
+  let deployedCommit: string | null = null;
+  if (deployState) {
+    const match = deployState.match(/Commit:\s*(\w+)/);
+    if (match) deployedCommit = match[1];
+  }
+  if (!deployedCommit) return null;
+
+  // Get current HEAD
+  try {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const exec = promisify(execFile);
+    const result = await exec('git', ['rev-parse', '--short', 'HEAD'], { cwd: PROJECT_ROOT, timeout: 5000 });
+    const headCommit = result.stdout.trim();
+    return {
+      deployed_commit: deployedCommit,
+      head_commit: headCommit,
+      drifted: deployedCommit !== headCommit,
+    };
+  } catch {
+    return { deployed_commit: deployedCommit, head_commit: null, drifted: true };
+  }
 }
 
 /** Read current version from VERSION.md. */

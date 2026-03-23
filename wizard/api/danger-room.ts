@@ -23,6 +23,7 @@ import {
   readContextStats,
   readTestResults,
   readGitStatus,
+  detectDeployDrift,
   PROJECT_ROOT,
 } from '../lib/dashboard-data.js';
 import { createDashboardWs } from '../lib/dashboard-ws.js';
@@ -148,6 +149,10 @@ addRoute('GET', '/api/danger-room/tests', async (_req: IncomingMessage, res: Ser
 
 addRoute('GET', '/api/danger-room/git-status', async (_req: IncomingMessage, res: ServerResponse) => {
   sendJson(res, 200, await readGitStatus());
+});
+
+addRoute('GET', '/api/danger-room/drift', async (_req: IncomingMessage, res: ServerResponse) => {
+  sendJson(res, 200, await detectDeployDrift());
 });
 
 // ── Danger Room-specific endpoints ───────────────
