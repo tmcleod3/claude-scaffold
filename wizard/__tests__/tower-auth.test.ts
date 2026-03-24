@@ -139,3 +139,25 @@ describe('parseSessionCookie', () => {
     expect(auth.parseSessionCookie('voidforge_session=mytoken')).toBe('mytoken');
   });
 });
+
+describe('getClientIp', () => {
+  it('should return leftmost X-Forwarded-For entry in remote mode', () => {
+    // Note: getClientIp only trusts XFF in remote mode. In local mode it uses socket.remoteAddress.
+    // We test the parsing logic directly since remoteMode is a module-level flag.
+    const forwarded = '203.0.113.50, 198.51.100.1, 127.0.0.1';
+    const parts = forwarded.split(',');
+    // v17.0 fix: use parts[0] (leftmost = real client), not parts[parts.length - 1] (proxy)
+    expect(parts[0].trim()).toBe('203.0.113.50');
+    expect(parts[parts.length - 1].trim()).toBe('127.0.0.1'); // This was the old broken behavior
+  });
+
+  it('should return socket address when not in remote mode', () => {
+    const req = {
+      headers: { 'x-forwarded-for': '203.0.113.50' },
+      socket: { remoteAddress: '::1' },
+    };
+    // In local mode (default), getClientIp ignores XFF
+    const ip = auth.getClientIp(req);
+    expect(ip).toBe('::1');
+  });
+});

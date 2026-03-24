@@ -71,17 +71,4 @@ export function cleanupStaleEntries(): void {
   }
 }
 
-/** Get client IP — trusts X-Forwarded-For only in remote mode (behind Caddy). */
-export function getClientIp(
-  req: { headers: Record<string, string | string[] | undefined>; socket: { remoteAddress?: string } },
-  trustProxy: boolean,
-): string {
-  if (trustProxy) {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string') {
-      const parts = forwarded.split(',');
-      return parts[parts.length - 1].trim();
-    }
-  }
-  return req.socket.remoteAddress ?? 'unknown';
-}
+// getClientIp removed — single source of truth is tower-auth.ts (v17.0 No Stubs cleanup)

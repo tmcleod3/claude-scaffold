@@ -372,15 +372,33 @@ export function startServer(port: number, options?: { remote?: boolean; lan?: bo
       }
     });
 
-    // Bind to '::' (dual-stack) in local mode — macOS resolves 'localhost' to ::1 (IPv6),
-    // so binding only to 127.0.0.1 breaks WebSocket connections from browsers.
-    // LAN mode binds 0.0.0.0 for private network access (ZeroTier/Tailscale/WireGuard).
-    const bindAddress = (isRemoteMode() || isLanMode()) ? '0.0.0.0' : '::';
+    // Local mode: bind to loopback only (PRD §9.20.1) to prevent LAN exposure of vault data.
+    // Listen on both 127.0.0.1 (IPv4) and ::1 (IPv6) — macOS resolves 'localhost' to ::1.
+    // Remote/LAN mode: bind 0.0.0.0 for external access.
+    const bindAddress = (isRemoteMode() || isLanMode()) ? '0.0.0.0' : '127.0.0.1';
 
     server.listen(port, bindAddress, async () => {
       await initAuditLog();
       startHealthPoller();
       await snapshotNativeModules();
+
+      // In local mode, also listen on IPv6 loopback so macOS 'localhost' (::1) works.
+      // TCP proxy from ::1 → 127.0.0.1 so both IPv4 and IPv6 loopback are served.
+      if (!isRemoteMode() && !isLanMode()) {
+        try {
+          const net = await import('node:net');
+          const ipv6Proxy = net.createServer((socket) => {
+            const upstream = net.connect({ port, host: '127.0.0.1' });
+            socket.pipe(upstream);
+            upstream.pipe(socket);
+            socket.on('error', () => upstream.destroy());
+            upstream.on('error', () => socket.destroy());
+          });
+          ipv6Proxy.listen(port, '::1', () => {});
+          ipv6Proxy.on('error', () => {}); // Best-effort: IPv6 may not be available
+        } catch { /* IPv6 loopback best-effort */ }
+      }
+
       resolve();
     });
 

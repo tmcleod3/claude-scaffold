@@ -5,6 +5,7 @@ import { vaultSet, vaultGet, vaultExists, vaultUnlock, vaultKeys, vaultPath, vau
 import { parseJsonBody } from '../lib/body-parser.js';
 import { clearModelCache } from '../lib/anthropic.js';
 import { sendJson } from '../lib/http-helpers.js';
+import { getClientIp } from '../lib/tower-auth.js';
 
 /** Session password — held in memory only, never written to disk */
 let sessionPassword: string | null = null;
@@ -167,8 +168,9 @@ addRoute('GET', '/api/credentials/status', async (_req: IncomingMessage, res: Se
 
 // POST /api/credentials/unlock — unlock vault with password (or create new vault)
 addRoute('POST', '/api/credentials/unlock', async (req: IncomingMessage, res: ServerResponse) => {
-  // SEC-R2-003: Rate limit vault unlock to prevent brute-force
-  const ip = req.socket.remoteAddress ?? 'unknown';
+  // SEC-R2-003: Rate limit vault unlock to prevent brute-force.
+  // Use getClientIp() for consistent IP extraction behind proxy (v17.0 fix).
+  const ip = getClientIp(req);
   const rateCheck = checkVaultRateLimit(ip);
   if (!rateCheck.allowed) {
     sendJson(res, 429, { error: 'Too many unlock attempts. Try again later.', retryAfterMs: rateCheck.retryAfterMs });

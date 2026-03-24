@@ -110,12 +110,15 @@ export function isLanMode(): boolean {
 
 /** Get client IP — delegates to rate-limit module but passes remoteMode state. */
 export function getClientIp(req: { headers: Record<string, string | string[] | undefined>; socket: { remoteAddress?: string } }): string {
-  // Inline to avoid circular: trusts X-Forwarded-For only in remote mode
+  // Inline to avoid circular: trusts X-Forwarded-For only in remote mode.
+  // Use leftmost entry (parts[0]) — the real client IP before any proxies.
+  // Previously used rightmost (parts[parts.length - 1]) which returned 127.0.0.1
+  // behind Caddy, making rate limiting and session IP binding ineffective.
   if (remoteMode) {
     const forwarded = req.headers['x-forwarded-for'];
     if (typeof forwarded === 'string') {
       const parts = forwarded.split(',');
-      return parts[parts.length - 1].trim();
+      return parts[0].trim();
     }
   }
   return req.socket.remoteAddress ?? 'unknown';
