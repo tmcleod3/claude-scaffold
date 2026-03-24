@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [17.1.0] - 2026-03-24
+
+### Added
+- **3 new test files** — stripe-adapter (9 tests: mocked HTTPS, error handling), heartbeat-data (10 tests: file-based campaign/treasury reads), audit-log (7 tests: rotation cascade, no-throw). Total: 167 → 193.
+- **3 ADRs** — ADR-032 (No Stubs Doctrine), ADR-033 (Sandbox Demo Pipeline), ADR-034 (Raw HTTPS for External APIs)
+- **TypeScript CI** — `npm run typecheck` added to validate-branches.yml before tests
+
+### Fixed
+- **Timing-safe vault comparison** — HMAC both inputs to fixed-size digests before `timingSafeEqual` (no more password length leak via timing)
+- **Negative spend clamping** — `Math.max(0, ...)` on spend log entries prevents negative amountCents from producing nonsensical ROAS
+- **Inverted date range handling** — sandbox adapters return empty results instead of silently treating end-before-start as 1 day
+- **IPv6 proxy shutdown** — stored at module level and closed in shutdown handler (was a dangling listener)
+- **28 TypeScript errors** in pattern files — type-safe API response casts, removed unused @ts-expect-error, fixed session type in server.ts. `tsc --noEmit` now produces **0 errors**
+
+### Changed
+- **Sandbox campaigns Map** moved from module level to instance scope — prevents state leaks between tests and adapter instances
+- `readCampaigns()` and `readTreasurySummary()` exported from heartbeat.ts for direct unit testing
+
 ## [17.0.0] - 2026-03-24
 
 ### Added
