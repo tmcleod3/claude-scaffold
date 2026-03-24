@@ -73,6 +73,10 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `prompt-template.ts` — Versioned prompts with variable injection, testing
 - `ai-eval.ts` — Golden datasets, scoring, regression detection
 - `ai-tool-schema.ts` — Type-safe tool definitions with provider adapters
+- `database-migration.ts` — Safe migrations: backward-compatible adds, batched ops, rollback, zero-downtime validation
+- `data-pipeline.ts` — ETL pipeline: typed stages, checkpoint/resume, quality checks, idempotent processing
+- `backtest-engine.ts` — Walk-forward backtesting: no-lookahead, slippage, Sharpe/drawdown/profit factor
+- `execution-safety.ts` — Trading execution: order validation, position limits, exchange precision, paper/live toggle
 
 ## Slash Commands
 
@@ -142,7 +146,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Sisko — when generating a PRD from scratch |
 | **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
 | **AI Intelligence** | `/docs/methods/AI_INTELLIGENCE.md` | When project uses LLM/AI features |
-| **Patterns** | `/docs/patterns/` | When writing code (26 reference implementations) |
+| **Patterns** | `/docs/patterns/` | When writing code (30 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team

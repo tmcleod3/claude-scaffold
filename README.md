@@ -2,7 +2,7 @@
 
 From nothing, everything.
 
-A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 260+ AI agents across 9 fictional universes. 26 slash commands. 26 code patterns. 91 automated tests.
+A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 260+ AI agents across 9 fictional universes. 26 slash commands. 30 code patterns. 91 automated tests.
 
 **New here?** Read the **[Holocron](HOLOCRON.md)** -- the complete guide. **Curious about what's next?** Read the **[Prophecy](PROPHECY.md)** -- the roadmap.
 
@@ -136,7 +136,11 @@ voidforge/
 │       ├── ai-router.ts        ← Intent-based routing with fallback chains
 │       ├── prompt-template.ts   ← Versioned prompts with variable injection
 │       ├── ai-eval.ts          ← Golden datasets, scoring, regression
-│       └── ai-tool-schema.ts   ← Type-safe tool definitions
+│       ├── ai-tool-schema.ts   ← Type-safe tool definitions
+│       ├── database-migration.ts ← Safe migrations, rollback
+│       ├── data-pipeline.ts    ← ETL with checkpoint/resume
+│       ├── backtest-engine.ts  ← Walk-forward backtesting
+│       └── execution-safety.ts ← Order validation, position limits
 │
 ├── logs/                         ← Build journal (per-project)
 │   └── build-state.md            ← Master state file

@@ -5,7 +5,7 @@
 **Current:** v16.0.0 (2026-03-24)
 **Next:** v16.1 — The Hardened Methodology (gaps + data pipelines)
 **Status:** v16.0 shipped. Next: methodology gaps identified during v16.0 session.
-**91 tests**, 9 universes, 260+ agents, 26 slash commands, 26 code patterns.
+**91 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
 
 ---
 

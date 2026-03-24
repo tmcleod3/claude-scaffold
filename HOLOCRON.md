@@ -81,7 +81,7 @@ Every tier includes:
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **260+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
-- **26 code patterns** — Reference implementations with framework adaptations
+- **30 code patterns** — Reference implementations with framework adaptations
 - **Meta-Workflow** — How VoidForge uses itself to develop itself (`docs/META_WORKFLOW.md`)
 - **This Holocron** — The guide you're reading now
 
@@ -573,7 +573,7 @@ Flags: `--prompts` (prompt audit only), `--safety` (safety review only), `--eval
 
 ### Code Patterns
 
-Twenty-six reference implementations live in `docs/patterns/`. Every pattern includes framework adaptations for Next.js, Express, Django, FastAPI, and Rails. Mobile and game patterns added in v9.2-v9.3. Financial, daemon, SSE, ad platform, and OAuth patterns added in v11-v15.
+Thirty reference implementations live in `docs/patterns/`. Every pattern includes framework adaptations for Next.js, Express, Django, FastAPI, and Rails. Mobile and game patterns added in v9.2-v9.3. Financial, daemon, SSE, ad platform, and OAuth patterns added in v11-v15.
 
 | Pattern | File | What It Teaches |
 |---------|------|----------------|
@@ -603,6 +603,10 @@ Twenty-six reference implementations live in `docs/patterns/`. Every pattern inc
 | **Prompt Template** | `prompt-template.ts` | Versioned prompts with variable injection, testing |
 | **AI Eval** | `ai-eval.ts` | Golden datasets, scoring, regression detection |
 | **AI Tool Schema** | `ai-tool-schema.ts` | Type-safe tool definitions with provider adapters |
+| **Database Migration** | `database-migration.ts` | Safe migrations: backward-compat, batched ops, rollback, zero-downtime validation |
+| **Data Pipeline** | `data-pipeline.ts` | ETL pipeline: typed stages, checkpoint/resume, quality checks, idempotent processing |
+| **Backtest Engine** | `backtest-engine.ts` | Walk-forward backtesting: no-lookahead, slippage, Sharpe/drawdown/profit factor |
+| **Execution Safety** | `execution-safety.ts` | Trading execution: order validation, position limits, exchange precision, paper/live toggle |
 
 ### Coding Standards
 
