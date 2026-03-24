@@ -37,6 +37,7 @@
 | **Anime** (from Tom's list) | DevOps & Infrastructure | Kusanagi |
 | **Anime** (from Tom's list) | Deploy Wizard | Haku |
 | **Cosmere** (Brandon Sanderson) | Growth & Marketing | Kelsier |
+| **Foundation** (Isaac Asimov) | AI Intelligence | Hari Seldon |
 
 ---
 
@@ -410,12 +411,36 @@
 
 ---
 
+## 🔮 FOUNDATION (Isaac Asimov) — AI Intelligence
+
+**Lead:** Hari Seldon (Psychohistorian, Foundation) — AI Intelligence Architect
+
+*"The fall is inevitable. The recovery can be guided."*
+
+**Available Pool (use in order, skip if taken):**
+1. Salvor Hardin — Model selection, capability matching, cost-performance trade-offs ("Violence is the last refuge of the incompetent")
+2. Gaal Dornick — Prompt architecture, system prompt design, few-shot strategy, guardrails
+3. Hober Mallow — Tool-use / function-calling schema design, parameter typing, description quality
+4. Bel Riose — Orchestration patterns (chains, agents, workflows), reliability engineering
+5. The Mule — Adversarial AI testing: hallucination, refusal, context overflow, prompt injection
+6. Ducem Barr — Token economics, cost tracking, caching strategy, batching optimization
+7. Bayta Darell — Evaluation frameworks, golden datasets, A/B testing, regression detection
+8. Bliss — AI safety, alignment, content filtering, PII protection (Gaia — the collective consciousness)
+9. R. Daneel Olivaw — Model migration, prompt versioning, behavior regression, pinning strategy (Robots/Foundation bridge)
+10. Dors Venabili — Observability, trace logging, decision audit trails, quality dashboards
+11. Janov Pelorat — Context engineering, RAG pipelines, embeddings, retrieval, chunking
+12. Wanda Seldon — Structured output validation, schema enforcement, parse-failure retry
+
+**Reserved:** Hari Seldon (lead — AI Intelligence Architect)
+
+---
+
 ## Cross-Universe Conflict Resolution
 
 | Name | Universe 1 | Universe 2 | Resolution |
 |------|-----------|-----------|-----------|
 | Stark | Marvel (lead) | Frieren character | Marvel owns it. Frieren's Stark → use "Fern" instead. |
-| Oracle | DC Comics | — | DC owns it. |
+| Oracle | DC Comics | — | DC owns it. Foundation uses "Hari Seldon" as lead, not "The Oracle". |
 
 **Rule:** If a name appears in multiple universes, the universe where it's a LEAD agent owns it. Otherwise, first assignment wins.
 
