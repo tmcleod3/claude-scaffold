@@ -3,8 +3,124 @@
 > The plan for the plan-maker.
 
 **Current:** v16.0.0 (2026-03-24)
-**Status:** All planned versions through v16.0 shipped. v4.0–v16.0 below are historical.
+**Next:** v16.1 — The Hardened Methodology (gaps + data pipelines)
+**Status:** v16.0 shipped. Next: methodology gaps identified during v16.0 session.
 **91 tests**, 9 universes, 260+ agents, 26 slash commands, 26 code patterns.
+
+---
+
+## v16.1 — The Hardened Methodology
+
+*Gaps identified during the v15.0→v16.0 mega-session. Real problems, not speculative features.*
+
+### Database Migration Safety
+
+**The gap:** No agent reviews migration file safety. A migration that adds `NOT NULL` without a default, drops a column a running server reads, or full-table-scans 10M rows during peak traffic — nobody catches it.
+
+**The fix:**
+- Migration safety checklist in BUILD_PROTOCOL.md Phase 2 (Schema): backward compatibility, rollback plan, data volume awareness, zero-downtime compatibility
+- Picard's `/architect` Step 1 (Spock schema review) adds migration review
+- New pattern file: `database-migration.ts` — safe migration patterns with rollback, online DDL for large tables, data backfill with batching
+
+### Dependency Health Check
+
+**The gap:** VoidForge builds projects and walks away. When the user returns months later, dependencies are stale, SDKs have deprecation warnings, Node.js version might be EOL.
+
+**The fix:**
+- Add dependency health check to `/assess` (Picard's pre-build assessment): `npm outdated`, major version flags, Node.js EOL check, deprecation pattern scan
+- Add to `/campaign` Step 0 (Kira's recon): "If project untouched >30 days, run dependency health check first"
+
+### Load Testing Guidance
+
+**The gap:** Torres reviews performance architecture theoretically. Nobody proves it with real traffic.
+
+**The fix:**
+- Load testing section in DEVOPS_ENGINEER.md: when to load test, tools (k6, Artillery), what to measure (p95, error rate, pool saturation)
+- `/deploy` pre-launch checklist: "If production launch with >100 req/s expected, load test first"
+
+### Data Pipeline / Quantitative Patterns
+
+**The gap:** VoidForge has no patterns for data pipelines, backtesting, or quantitative application development. Users building trading bots, data products, or ML-adjacent applications have no reference implementations for ETL, feature engineering, walk-forward validation, or execution safety.
+
+**The fix — 3 new pattern files:**
+
+**`data-pipeline.ts`** — ETL pattern with:
+- Source → Transform → Load with validation at each stage
+- Checkpoint/resume for long-running pipelines
+- Idempotent processing (safe to re-run)
+- Data quality checks (null rates, range validation, freshness)
+- Schema evolution handling
+- Batch vs streaming modes
+- Adaptations: Node.js streams, Python pandas/polars, SQL-based
+
+**`backtest-engine.ts`** — Walk-forward backtesting with:
+- No-lookahead enforcement (data only available at decision time)
+- Slippage and commission modeling
+- Walk-forward validation (train on window A, test on window B, slide)
+- Survivorship bias prevention
+- Metric collection (Sharpe, max drawdown, win rate, profit factor)
+- Equity curve generation
+- Out-of-sample vs in-sample separation
+- Adaptations: Python (backtrader/vectorbt patterns), TypeScript
+
+**`execution-safety.ts`** — Trading/financial execution with:
+- Order validation (size limits, price bounds, rate limits per exchange/API)
+- Position management (max exposure, stop-loss enforcement, portfolio limits)
+- Exchange/API precision handling (tick size, lot size, min notional — fetch from API, never hardcode)
+- Paper trading → live trading toggle (same code path, different execution layer)
+- Reconciliation (order fill verification against exchange/API response)
+- Circuit breaker on repeated failures
+- Audit trail for every order/action
+- Adaptations: Crypto exchanges (CCXT), stock brokers, any financial API
+
+**PRD frontmatter additions:**
+```yaml
+type: "quantitative"     # New type alongside full-stack, api-only, static-site, prototype, game
+data_source: "exchange"  # exchange | database | api | file
+backtest: yes           # Activates backtest review in build protocol
+live_execution: yes     # Activates execution safety review
+```
+
+**Build protocol addition:** When `type: "quantitative"` detected, Phase 4 (Core Features) includes:
+- "Verify backtest has no lookahead bias"
+- "Verify execution layer has safety limits"
+- "Verify data pipeline handles gaps and duplicates"
+- "Verify exchange precision fetched from API, not hardcoded"
+
+**Seldon integration:** Bayta Darell (evaluation) naturally extends to backtest validation — "Is your backtest methodology sound?" maps to "Is your AI eval methodology sound?" Same agent, different domain data.
+
+### E2E Testing (Playwright)
+
+**The gap:** 91 unit tests. Zero end-to-end tests. 7 HTML pages with JavaScript that can break silently. The Gauntlet catches UI issues via manual review but not on every commit.
+
+**The fix:**
+- Add Playwright as dev dependency
+- 3-5 E2E tests: setup flow, login flow, project import, terminal launch, deploy scan
+- `npm run test:e2e` script
+- Gauntlet Round 2.5 smoke test calls E2E automatically
+
+### Scaffold/Core Branch CI
+
+**The gap:** Two of three distribution tiers have never been independently validated. "The files exist" ≠ "the experience works."
+
+**The fix:**
+- `.github/workflows/validate-branches.yml`: checkout each branch, verify CLAUDE.md references resolve, verify command files exist, verify doc paths exist
+- Runs on push to any branch
+- VoidForge generates CI for others but has none for itself (the meta-irony)
+
+### Campaign Structure (estimated 7 missions)
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Database migration safety (BUILD_PROTOCOL + pattern) | Methodology + pattern | 1 |
+| 2 | Dependency health check (/assess + /campaign) | Methodology | 0.5 |
+| 3 | Load testing guidance (DEVOPS_ENGINEER) | Methodology | 0.5 |
+| 4 | Data pipeline pattern (`data-pipeline.ts`) | Pattern | 1 |
+| 5 | Backtest + execution safety patterns | Pattern | 1.5 |
+| 6 | E2E testing (Playwright setup + tests) | Code | 2 |
+| 7 | Branch CI validation | Process | 1 |
+
+**Version bump:** MINOR (v16.1.0) — new patterns, new methodology sections, new tests. No breaking changes.
 
 ---
 

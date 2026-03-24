@@ -13,7 +13,7 @@ Fill this out first. The Build Protocol reads these values to determine which ph
 ```yaml
 # Project identity
 name: "[PROJECT_NAME]"
-type: "full-stack"  # full-stack | api-only | static-site | prototype | game
+type: "full-stack"  # full-stack | api-only | static-site | prototype | game | quantitative
 
 # Stack
 framework: ""       # next.js | django | rails | express | etc.
@@ -43,6 +43,17 @@ deploy: "web"         # web (WebGL/HTML5) | steam | itch | mobile
 mobile_framework: ""  # react-native | flutter | swiftui | kotlin
 app_store_id: ""      # Apple Team ID for code signing (iOS)
 bundle_id: ""         # com.yourcompany.appname
+
+# AI Intelligence (only if the app uses LLM/AI features)
+ai: no                  # yes | no — activates Seldon's /ai review
+ai_provider: ""         # anthropic | openai | local | multi
+ai_models: []           # ["claude-sonnet-4-6"] — models used at runtime
+ai_features: []         # ["classification", "generation", "tool-use", "routing", "orchestration"]
+
+# Quantitative / Data Pipeline (only if type: quantitative)
+data_source: ""         # exchange | database | api | file
+backtest: no            # yes | no — activates backtest review (no lookahead, walk-forward)
+live_execution: no      # yes | no — activates execution safety review (position limits, precision)
 ```
 
 ---
