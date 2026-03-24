@@ -3,9 +3,98 @@
 > The plan for the plan-maker.
 
 **Current:** v17.2.0 (2026-03-24)
-**Next:** v18.0 — TBD (reassessment gate passed)
-**Status:** v17.2 shipped. All 7 P0 security modules tested. 0 TypeScript errors. Foundation verified.
+**Next:** v18.0 — The Proving Ground (E2E testing with Playwright)
+**Status:** v17.2 shipped. Foundation verified. Ready for E2E.
 **294 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+
+---
+
+## v18.0 — The Proving Ground
+
+*"The Gauntlet tests the code. The Proving Ground tests the product."*
+
+**Breaking change:** First external testing dependency (Playwright). CI pipeline expanded from typecheck + unit tests to include browser-based E2E. This changes the development workflow — broken UI is now a CI failure, not a Gauntlet surprise.
+
+**Origin:** Deferred since v16.1 (3 versions). 7 HTML pages with JavaScript that can break silently. 294 unit tests cover the backend; zero automated tests touch the UI. Every Gauntlet finds UI issues via manual review — E2E catches them on every commit.
+
+### What Gets Tested
+
+| Page | File | Key Flows |
+|------|------|-----------|
+| **Lobby** | `lobby.html` + `lobby.js` | Project list renders, import modal opens/closes, project cards show health status, delete confirmation |
+| **Setup Wizard** | `index.html` + `app.js` | 3-act flow: identity → PRD → operations. Vault password creation. Credential entry. |
+| **Deploy Wizard** | `deploy.html` + `deploy.js` | Target selection, provision progress (SSE), deploy status |
+| **Tower** | `tower.html` + `tower.js` | Terminal session creation, PTY data flow (WebSocket), Claude Code launch |
+| **Danger Room** | `danger-room.html` + `danger-room.js` | Tab navigation (including 4 growth tabs), campaign timeline, findings panel, WebSocket activity feed |
+| **War Room** | `war-room.html` + `war-room.js` | Alternative dashboard view, experiment panel |
+| **Login** | `login.html` + `login.js` | Username/password form, TOTP input, error states, redirect after login |
+
+### Mission Plan (5 missions)
+
+#### Mission 1 — Playwright Setup + Test Infrastructure
+
+1. Add `@playwright/test` as dev dependency (justified: testing infrastructure)
+2. Create `playwright.config.ts` — configure for the wizard server (localhost:3141)
+3. Create test helper: start wizard server before tests, stop after
+4. Add `npm run test:e2e` script to package.json
+5. Add E2E step to `.github/workflows/validate-branches.yml` (main branch only)
+6. Write 1 smoke test: server starts, lobby page loads, title is correct
+
+#### Mission 2 — Lobby + Login E2E Tests
+
+1. **Lobby:** Page loads, project list renders (empty state), import modal keyboard navigation (Escape closes, Tab cycles), link modal
+2. **Login:** Form renders, validation errors on empty submit, TOTP field appears after password, redirect on success (mock auth)
+3. Test error states: server down, invalid credentials
+
+#### Mission 3 — Setup Wizard E2E Tests
+
+1. **Act 1 (Identity):** Project name input, domain selection
+2. **Act 2 (PRD):** PRD text area, upload, generation (mock Anthropic)
+3. **Act 3 (Operations):** Operations menu renders, vault password creation, credential entry flow
+4. Focus trap verification: modals trap focus, Escape closes
+
+#### Mission 4 — Danger Room + Growth Tabs E2E Tests
+
+1. **Tab navigation:** All tabs clickable, content switches correctly
+2. **Growth tab:** KPI cards render (with sandbox data), empty state without Cultivation
+3. **Campaigns tab:** Table renders, empty state guidance
+4. **Treasury tab:** Budget bar renders, vault status
+5. **Heartbeat tab:** Daemon status, token health display
+6. **WebSocket activity feed:** Mock WebSocket, verify ticker updates
+
+#### Mission 5 — Deploy + Tower + Version Bump
+
+1. **Deploy wizard:** Target selection renders, provision progress UI
+2. **Tower:** Terminal session UI loads (PTY mocked — node-pty not in E2E)
+3. **War Room:** Basic page load + tab verification
+4. Version bump to v18.0.0, changelog, push all branches
+
+### Campaign Structure
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Playwright setup + smoke test | Infra + test | 1.5 |
+| 2 | Lobby + Login E2E | Tests | 1.5 |
+| 3 | Setup Wizard E2E | Tests | 2 |
+| 4 | Danger Room + Growth Tabs E2E | Tests | 2 |
+| 5 | Deploy + Tower + Version Bump | Tests + release | 1.5 |
+
+**Version bump:** MAJOR (v18.0.0) — new testing dependency (Playwright), CI pipeline change, development workflow change.
+
+### Technical Notes
+
+- Playwright runs against the real wizard server (not mocked). The server starts in local mode on a test port.
+- Tests that need auth (remote mode pages) use a test helper that creates a user and logs in via the API.
+- Tests that need Cultivation data write sandbox campaign/treasury files to a temp `~/.voidforge/` directory.
+- Terminal tests mock node-pty (native module) — verify UI only, not PTY data flow.
+- Anthropic API calls (PRD generation) are intercepted and mocked.
+
+### After v18.0
+
+| Version | Direction |
+|---------|-----------|
+| **v19.0** | CLI Distribution — `npx voidforge init` global installer |
+| **v17.3+** | Platform Adapters — as developer accounts become available |
 
 ---
 
