@@ -201,6 +201,12 @@ See `docs/patterns/database-migration.ts` for reference implementations.
 
 **AI Gate (conditional — if `ai: yes` in frontmatter):** After the vertical slice is built, Hari Seldon reviews the first AI integration point. Validates: model selection, prompt structure, basic error handling, eval strategy exists. If no AI features in this phase, skip.
 
+### Integration Verification Gate (after each service)
+After building a service, verify at least one consumer calls it at the point of decision (not just imports it). Grep for actual call sites: `serviceName.methodName(`. If a service is imported but never called from business logic, flag as CRITICAL — it's decorative, not functional. Building a RiskGuard and wiring it into an observation loop is NOT the same as having strategies call `riskGuard.checkLimits()` before executing. (Field report #151: CapitalAllocator built and "wired" but strategies used hardcoded limits — $25K orders on $5K account.)
+
+### Data Flow Verification Checkpoint (after Phase 3 wiring)
+Before building features that consume data, verify the pipeline works end-to-end: source -> storage -> consumer. Log one real data point at each stage. If any stage returns zeros, empty arrays, or placeholder data — stop and fix the pipeline before proceeding. Features built on broken data pipelines pass all tests but fail in production. (Field report #152: WebSocket manager had placeholder _update_candles(); all downstream features saw zeros.)
+
 ### Integration Wiring Check
 
 After building a new service, worker, or pipeline, verify it's connected to the system:

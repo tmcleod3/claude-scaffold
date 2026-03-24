@@ -147,6 +147,9 @@ Before hiding, relocating, or collapsing a UI container (dropdown, panel, menu, 
 **Elrond:** IA, navigation, task flows, friction.
 **Arwen:** Spacing, typography, icons, button hierarchy, visual hierarchy.
 **Samwise:** Keyboard nav, focus rings, ARIA, contrast, reduced motion. **WCAG contrast verification:** For the project's primary text/background combinations, verify WCAG AA contrast ratio (4.5:1 for normal text, 3:1 for large text). Check: primary text on primary bg, muted text on primary bg, accent text on primary bg. Opacity modifiers (e.g., `text-emerald-200/50`) halve the effective contrast — always compute the final rendered color, not the base color. A systematic check during the initial color system design prevents dozens of instances across the codebase. (Field report #38: 46 failing-contrast instances across 13 files, systemic from day 1.)
+### Async Polling State Machine
+Any UI that polls for backend status changes must implement 4 states: **idle -> syncing -> success -> failure**. Never show "success" before the async confirmation resolves. Never show the old value alongside a "updated" banner. The polling result replaces the displayed value atomically — both change together or neither does. (Field report #149)
+
 **Samwise — Async Button A11y:** For buttons that trigger async operations (save, submit, deploy), verify: button shows loading state (`aria-busy="true"`), disabled during operation, success/error announced via `aria-live="polite"` region or `role="status"`. Sighted users see a spinner; screen reader users need the equivalent announcement. (Field report #57)
 **Bilbo:** Microcopy, labels, CTAs, error messages, empty states, tone.
 **Legolas:** Component architecture, CSS, semantic HTML, state management.
