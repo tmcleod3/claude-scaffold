@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v16.1.0 (2026-03-24)
-**Next:** v17.0 — The Complete Implementation (no stubs, Cultivation activation, security remediation)
-**Status:** v16.1 shipped. Next: assessment-driven remediation + methodology enforcement.
-**91 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+**Current:** v17.0.0 (2026-03-24)
+**Next:** v17.1 — Platform Adapters (as developer accounts become available)
+**Status:** v17.0 shipped. No Stubs Doctrine enforced. Cultivation functional.
+**167 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
 
 ---
 

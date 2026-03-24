@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 16.1.0
+**Current:** 17.0.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 17.0.0 | 2026-03-24 | The Complete Implementation — No Stubs Doctrine, P0/P1 security fixes, Cultivation activation (sandbox + Stripe adapters, heartbeat wiring, growth tabs), 74 new tests (167 total), 8 stub files deleted |
 | 16.1.0 | 2026-03-24 | The Hardened Methodology — migration safety, data pipelines, backtest/execution patterns, dependency health, load testing, branch CI |
 | 16.0.0 | 2026-03-24 | The Psychohistorians — AI Intelligence Layer: Foundation universe, Hari Seldon, /ai command, 6 AI patterns, AI_INTELLIGENCE.md, integrated into 8 commands |
 | 15.3.0 | 2026-03-23 | The Chronicle — 9 public docs updated to v15.2.1 (76 staleness issues fixed) |
