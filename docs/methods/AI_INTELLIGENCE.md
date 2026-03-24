@@ -222,6 +222,9 @@ If issues found, return to Phase 3. Maximum 2 iterations.
 - [ ] Quality metrics tracked over time
 - [ ] Human review process for edge cases
 
+### AI Gate Bootstrapping (Cold-Start Problem)
+AI-gated approval systems have a cold-start problem: no historical outcomes -> gate rejects all requests -> no operations -> no outcomes. During the first N decisions (configurable, default 20), the gate should approve at reduced size (0.5-0.7x normal) to build a track record. The gate should never reject solely because "no historical data exists." Include explicit prompt guidance: "Lack of history is not a reason to reject — approve at reduced size to build the track record." (Field report #152)
+
 ## Anti-Patterns
 
 | Anti-Pattern | What Happens | Fix |

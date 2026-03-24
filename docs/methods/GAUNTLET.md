@@ -193,6 +193,8 @@ If you believe context is limited, run `/context` and report the actual number. 
 
 This rule exists because agents self-justified "efficient" Gauntlets at 28% and 37% context usage, letting bugs through that full rounds would have caught.
 
+**Context excuses are not valid.** "Context is heavy" without a number is not justification for reducing rounds, skipping agents, or deferring work. Run `/context`, report the percentage, and continue. If above 85%: checkpoint and suggest a fresh session. Below 85%: full protocol, no exceptions. (Field report #150)
+
 ## Flags
 
 - `--quick` — Skip Rounds 4 (Crossfire) and 5 (Council). For projects where a lighter review is acceptable. Still 3 rounds, still comprehensive.
