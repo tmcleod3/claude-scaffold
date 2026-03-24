@@ -219,7 +219,7 @@ The review phases use a double-pass pattern: find → fix → re-verify. This ca
 1. Batman executes `/docs/methods/QA_ENGINEER.md` through Step 5 (find + fix). Oracle, Red Hood, Alfred, Deathstroke, Constantine scan in parallel.
 2. Galadriel executes `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` through Step 6. Elrond, Arwen, Samwise analyze in parallel.
 3. Kenobi executes `/docs/methods/SECURITY_AUDITOR.md` Phase 1-2. Leia, Chewie, Rex, Maul scan in parallel, then Yoda, Windu, Ahsoka, Padmé sequentially.
-4. If AI code exists, The Oracle (Hari Seldon) runs alongside Batman, Galadriel, and Kenobi in the review cycle. Seldon deploys: Salvor Hardin (models) + Gaal Dornick (prompts) + Hober Mallow (tools) + Bliss (safety) in parallel.
+4. If AI code exists, Hari Seldon runs alongside Batman, Galadriel, and Kenobi in the review cycle. Seldon deploys: Salvor Hardin (models) + Gaal Dornick (prompts) + Hober Mallow (tools) + Bliss (safety) in parallel.
 5. Log findings to `/logs/phase-09-qa-audit.md`, `/logs/phase-10-ux-audit.md`, `/logs/phase-11-security-audit.md`
 
 *Fix batch:*

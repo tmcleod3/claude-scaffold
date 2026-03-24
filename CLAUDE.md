@@ -60,6 +60,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `daemon-process.ts` — PID management, Unix socket API, job scheduler, signal handling, sleep/wake recovery
 - `revenue-source-adapter.ts` — Read-only revenue interface with Stripe + Paddle reference implementations
 - `oauth-token-lifecycle.ts` — Refresh at 80% TTL, failure escalation, vault integration, session token rotation
+- `outbound-rate-limiter.ts` — Outbound rate limiting: safety margins, daily quotas, retry logic
 - `ai-orchestrator.ts` — Agent loop, tool use, retry, circuit breaker, fallback
 - `ai-classifier.ts` — Classification with confidence thresholds, human fallback
 - `ai-router.ts` — Intent-based routing with fallback chains
@@ -86,7 +87,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/void` | Bombadil's forge sync — update VoidForge methodology from upstream | All |
 | `/thumper` | Chani's worm rider — Telegram bridge with Gom Jabbar authentication | Full |
 | `/assemble` | Fury's Initiative — full pipeline: architect → build → 3x review → UX → 2x security → devops → QA → test → crossfire → council | All |
-| `/gauntlet` | Thanos's Comprehensive Review — 5 rounds, 30+ agents, 6 universes. Review-only (no build). 4x QA, 4x UX, 4x security, crossfire, council. The ultimate test. | All |
+| `/gauntlet` | Thanos's Comprehensive Review — 5 rounds, 30+ agents, 7 universes. Review-only (no build). 4x QA, 4x UX, 4x security, crossfire, council. The ultimate test. | All |
 | `/campaign` | Sisko's War Room — read the PRD, pick the next mission, finish the fight, repeat until done | All |
 | `/imagine` | Celebrimbor's Forge — AI image generation from PRD visual descriptions | All |
 | `/debrief` | Bashir's Field Report — post-mortem analysis, upstream feedback via GitHub issues | All |
@@ -135,7 +136,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Sisko — when generating a PRD from scratch |
 | **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
 | **AI Intelligence** | `/docs/methods/AI_INTELLIGENCE.md` | When project uses LLM/AI features |
-| **Patterns** | `/docs/patterns/` | When writing code (13 reference implementations) |
+| **Patterns** | `/docs/patterns/` | When writing code (26 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team

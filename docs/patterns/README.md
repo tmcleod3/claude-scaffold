@@ -24,6 +24,12 @@ Reference implementations for common code structures. These show the **shape and
 | Revenue Source Adapter | `revenue-source-adapter.ts` | Read-only revenue interface | Stripe/Paddle |
 | OAuth Token Lifecycle | `oauth-token-lifecycle.ts` | Refresh at 80% TTL, vault integration | Any OAuth provider |
 | Outbound Rate Limiter | `outbound-rate-limiter.ts` | Safety margins, daily quotas, retry logic | Any API client |
+| AI Orchestrator | `ai-orchestrator.ts` | Agent loops, tool use, retry, circuit breaker | Anthropic SDK (OpenAI notes) |
+| AI Classifier | `ai-classifier.ts` | Classification with confidence thresholds, fallback chains | Anthropic SDK (OpenAI notes) |
+| AI Router | `ai-router.ts` | Intent-based routing with fallback chains | Anthropic SDK (OpenAI notes) |
+| Prompt Template | `prompt-template.ts` | Versioned prompts, variable injection, guardrails | Any (provider-agnostic) |
+| AI Eval | `ai-eval.ts` | Golden datasets, scoring functions, regression detection | Any (provider-agnostic) |
+| AI Tool Schema | `ai-tool-schema.ts` | Typed tool definitions, provider adapters | Anthropic + OpenAI |
 
 ## How to Use
 
