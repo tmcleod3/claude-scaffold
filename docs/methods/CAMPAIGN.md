@@ -40,7 +40,7 @@ Autonomous campaign execution: read the PRD, figure out what's next, build it, v
 3. **Scope small.** Each mission is 1-3 PRD sections — a buildable unit, not the whole product.
 4. **Dependency order.** Auth before anything gated. Schema before API. Core before supporting.
 5. **Checkpoint everything.** Update `campaign-state.md` after every mission.
-6. **Respect context limits.** Watch for symptoms (re-reading files, forgetting decisions). Ask user to run `/context` — only checkpoint if usage exceeds 70%.
+6. **Context is not a concern at 1M.** The window supports 10+ missions, 40+ agent launches, and full Infinity Gauntlets in a single session. Only suggest a fresh session if `/context` shows >85%. Never reduce quality for context reasons.
 7. **One mission at a time.** Don't plan three missions ahead. Plan one, execute one, reassess.
 8. **Mission scoping follows PRD Section 16** (Launch Sequence) when available.
 9. **After each mission, commit.** Coulson handles versioning.
@@ -81,7 +81,7 @@ Blitz is fully autonomous campaign execution. Sisko does not pause between missi
 - `/git` commits after every mission
 - BLOCKED items are still tracked
 
-**Phase completion is NOT a pause point.** When the campaign crosses a phase boundary (Phase 1 → Phase 2, etc.), do NOT stop, summarize, or suggest continuing in a fresh session. Phase boundaries are organizational labels — they are not gates, checkpoints, or rest stops. In blitz mode, the only pause triggers are: (1) context usage exceeds 70%, (2) a BLOCKED item requires user input. Everything else is continuous execution. (Field report #139: agent stopped at phase boundaries twice in a 39-mission blitz despite explicit "don't stop" instructions.)
+**Phase completion is NOT a pause point.** When the campaign crosses a phase boundary (Phase 1 → Phase 2, etc.), do NOT stop, summarize, or suggest continuing in a fresh session. Phase boundaries are organizational labels — they are not gates, checkpoints, or rest stops. In blitz mode, the only pause triggers are: (1) context usage exceeds 85%, (2) a BLOCKED item requires user input. Everything else is continuous execution. (Field report #139: agent stopped at phase boundaries twice in a 39-mission blitz despite explicit "don't stop" instructions.)
 
 **Combine with `--fast` explicitly** if you want reduced reviews: `--blitz --fast`
 
@@ -219,7 +219,7 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 
 1. Construct the `/assemble` prompt with the mission scope
 2. Fury runs the full pipeline (or `--fast` if user prefers). **Note:** `--fast` skips Crossfire + Council but NEVER skips `/security` if the mission adds new endpoints, WebSocket handlers, or credential-handling code.
-3. Monitor for context pressure symptoms — if noticed, ask user to run `/context` before checkpointing
+3. Only checkpoint if `/context` shows actual usage above 85%. Do not preemptively suggest checkpoints.
 4. On completion → Step 5
 
 ### Campaign-Mode Pipeline
@@ -302,9 +302,9 @@ After every 4th completed mission (missions 4, 8, 12, etc.), Thanos runs a Gaunt
 
 ### Lightweight Blitz Debrief (Alternative)
 
-**Only valid when `/context` shows actual usage above 70% (~700k tokens).** You MUST report the actual context percentage to justify using the lightweight alternative. "Context is heavy" without a number is not valid justification.
+**Only valid when `/context` shows actual usage above 85% (~850k tokens).** You MUST report the actual context percentage to justify using the lightweight alternative. "Context is heavy" without a number is not valid justification.
 
-If actual usage exceeds 70%, capture a **3-line mission summary** appended to `/logs/campaign-debriefs.md` instead:
+If actual usage exceeds 85%, capture a **3-line mission summary** appended to `/logs/campaign-debriefs.md` instead:
 
 ```
 ### Mission N — [Name] (vX.Y.Z)
@@ -314,39 +314,30 @@ If actual usage exceeds 70%, capture a **3-line mission summary** appended to `/
 
 Full debrief runs once at campaign end (after Victory Gauntlet), covering all missions together. This reduces per-mission debrief cost from ~5-10% context to ~0.5%. The BLITZ GATE in the command file still applies — this is a lighter alternative that satisfies the gate without invoking the full skill. (Field report #26)
 
-### Context Pressure Limit
+### Context at 1M
 
-**Do NOT checkpoint based on mission count.** Check actual context usage via `/context`. The 1M context window supports 10+ missions easily. Only checkpoint when actual usage exceeds 70% (~700k tokens).
+The 1M context window eliminates context as a practical concern for single sessions. Evidence: a full Infinity Gauntlet (10 rounds, 40 agent launches) + 4 campaigns (28 missions) + 42 commits used only 600k (60%) of a 1M window.
 
-Symptoms of real context pressure (NOT speculative):
-- Claude re-reads files it already read this session
-- Claude forgets decisions made earlier in the conversation
-- Review quality visibly degrades (skipped rounds, generic findings)
+**The rule is simple:** Do not mention context. Do not suggest checkpoints. Do not reduce quality. If `/context` shows >85%, suggest a fresh session. Below 85%, context is never a reason to change behavior.
 
-If these symptoms appear, run `/context` to check actual usage. If >70%, checkpoint. If <70%, the symptoms have a different cause — investigate instead of checkpointing.
+**Quality Reduction Anti-Pattern (unchanged — this is a hard rule):**
 
-**Never suggest stopping a blitz based on mission count alone.** The field report #33 quality degradation was at ~800k tokens after 6 heavy missions with full /assemble pipelines, not at 3 lightweight missions. (Field report #45: blitz incorrectly paused at 172k/1000k — 17% usage — after 1 mission.)
+You MUST NOT reduce the quality or thoroughness of any review, Gauntlet, checkpoint, or debrief based on self-assessed "context pressure." This is a hard rule, not a guideline.
 
-### Quality Reduction Anti-Pattern (MANDATORY — applies to all agents)
-
-**You MUST NOT reduce the quality or thoroughness of any review, Gauntlet, checkpoint, or debrief based on self-assessed "context pressure."** This is a hard rule, not a guideline.
-
-Specifically, you MUST NOT:
-- Run the Gauntlet "efficiently" or "focused on the changeset" instead of the full protocol
-- Use a "lightweight checkpoint" instead of the full Gauntlet checkpoint
+You MUST NOT:
+- Run a "lightweight" Gauntlet because the session has been long
+- Skip agents or rounds because "context is getting heavy"
 - Skip debrief because "context is heavy"
-- Reduce review rounds because "we've been building continuously"
+- Reduce review depth because of mission count
 - Use phrases like "given context pressure," "to save context," or "running efficiently" to justify cutting any quality gate
 
-**If you believe context pressure justifies reducing quality:**
-1. Run `/context` (or ask the user to)
-2. Report the ACTUAL number: "Context is at X/1000k (Y%)"
-3. If below 70%: **you are wrong — continue at full quality**
-4. If above 70%: checkpoint state and suggest a fresh session — do NOT reduce quality in the current session
+If you believe context justifies reducing quality:
+1. Run `/context`
+2. Report the actual percentage
+3. If below 85%: **you are wrong — continue at full quality**
+4. If above 85%: suggest a fresh session — do NOT reduce quality in the current session
 
-**Why this rule exists:** In 3 separate sessions (field reports #45, #50, and prior campaigns), agents self-justified quality reductions at 17%, 28%, and 37% context usage. The Gauntlet was "run efficiently" at 284k. A checkpoint was made "lightweight" at 375k. Both decisions let bugs through that the full protocol would have caught. Self-assessed "context pressure" is the #1 cause of quality degradation in VoidForge campaigns — not actual context limits.
-
-**The Gauntlet is never reduced. Checkpoints are never lightweight. Debriefs are never skipped. Run `/context` or run the full protocol.**
+The Gauntlet is never reduced. Checkpoints are never lightweight. Debriefs are never skipped. Run `/context` or run the full protocol.
 
 ### Step 5 — Debrief and Commit
 

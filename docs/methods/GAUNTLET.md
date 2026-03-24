@@ -187,7 +187,7 @@ You MUST NOT:
 - Skip agents within a round because "context is heavy"
 - Combine rounds to "save context"
 
-If you believe context is limited, run `/context` and report the actual number. Below 70%: continue full protocol. Above 70%: checkpoint and suggest a fresh session. Never reduce Gauntlet quality in the current session.
+If you believe context is limited, run `/context` and report the actual number. Below 85%: continue full protocol. Above 85%: checkpoint and suggest a fresh session. Never reduce Gauntlet quality in the current session.
 
 This rule exists because agents self-justified "efficient" Gauntlets at 28% and 37% context usage, letting bugs through that full rounds would have caught.
 
@@ -261,7 +261,7 @@ Round 5 — Council (6+ agents, each as own sub-process):
 
 **When to use:** After completing a major version (v8.x, v9.x). Before v1.0 of a real product. When shipping to production for the first time. When the cost of a missed bug exceeds the cost of the review.
 
-**ENFORCEMENT:** Every agent named above MUST be launched as its own Agent tool invocation. Do NOT combine agents. Do NOT shortcut to inline analysis. If context reaches 70%, checkpoint and resume in a fresh session — do NOT reduce the agent count. The Infinity Gauntlet is the one protocol where "too thorough" is impossible.
+**ENFORCEMENT:** Every agent named above MUST be launched as its own Agent tool invocation. Do NOT combine agents. Do NOT shortcut to inline analysis. If context reaches 85%, checkpoint and resume in a fresh session — do NOT reduce the agent count. The Infinity Gauntlet is the one protocol where "too thorough" is impossible.
 
 ## Agent Confidence Scoring
 

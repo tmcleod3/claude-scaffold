@@ -27,14 +27,14 @@ Every phase, decision, handoff, and failure gets logged to `/logs/`. See `/docs/
 
 - **Start of session:** Read `/logs/build-state.md` to recover state
 - **During work:** Log decisions, test results, and findings to the active phase log
-- **End of session or context getting heavy:** Update `/logs/build-state.md` with current state
+- **End of session:** Update `/logs/build-state.md` with current state
 
 ## Context Management
 
 Pre-load active domain methodology. Load application code on demand. See `/docs/methods/CONTEXT_MANAGEMENT.md`.
 
 - Pre-load method docs for the active agent's domain at session start (1M context budget allows this)
-- Watch for context pressure symptoms (re-reading files, forgetting decisions). When noticed, ask user to run `/context`. Only checkpoint when actual usage exceeds 70%.
+- The 1M context window supports full multi-campaign sessions. Do not preemptively checkpoint or reduce quality for context reasons. Only suggest a fresh session if `/context` shows actual usage above 85%.
 - Per-directory `CLAUDE.md` files for directory-specific conventions (keep under 50 lines each)
 
 ## Code Patterns

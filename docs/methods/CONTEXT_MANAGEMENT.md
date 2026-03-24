@@ -11,7 +11,7 @@ Claude Code has a finite context window. Long sessions accumulate tool results, 
 1. **Pre-load active domain** — load the active agent's method docs at session start (~4% of 1M context)
 2. **Application code on demand** — read source files when you need them, not all upfront
 3. **Write to disk, not memory** — decisions, state, and findings go in `/logs/` immediately
-4. **Checkpoint before context fills** — write build-state.md and hand off
+4. **Checkpoint only above 85%** — the 1M window supports full campaigns. Write build-state.md only when `/context` shows >85%.
 5. **New sessions read from disk** — build journal is the bridge between sessions
 
 ## Pre-Loading Budget (1M Context)
@@ -59,7 +59,7 @@ At 1M tokens, methodology docs consume ~4% of context. Pre-load strategically:
 - Building 5+ features → one session per 2-3 features
 - Full build (Phase 0-13) → split at natural boundaries (see below)
 - Large QA pass with 30+ findings → split: find bugs in session 1, fix in session 2
-- **Context pressure symptoms appear** → ask user to run `/context`, checkpoint if above 70%
+- **Context pressure symptoms appear** → ask user to run `/context`, checkpoint if above 85%
 
 ### Natural session boundaries (1M context)
 
@@ -104,27 +104,24 @@ Small-to-medium projects (≤5 features, ≤20 source files) may complete phases
 
 When context is genuinely running low, checkpoint to disk so the next session can resume.
 
-### How to detect context pressure (symptom-based, not count-based):
+### Context at 1M
 
-**Watch for these symptoms:**
-- You're re-reading files you already read earlier (compression dropped them)
-- You can't recall decisions made earlier in the session
-- Responses are getting slower or less coherent
+The 1M context window eliminates context pressure as a practical concern. A full Infinity Gauntlet (10 rounds, 40 agent launches) + 4 campaigns (28 missions) + 42 commits used only 600k (60%) in a single session.
 
-**When symptoms appear:**
-1. If the Danger Room is running with the Status Line bridge configured, check the context gauge — it shows live usage percentage. No need to ask the user to run `/context`.
-2. If no Danger Room is available, ask the user to run `/context` to check actual usage.
-3. If usage is **below 70%** — symptoms may be from other causes. Continue working.
-4. If usage is **above 70%** — checkpoint and suggest a new session.
+**Do not mention context. Do not suggest checkpoints. Do not reduce quality.**
+
+The only valid action: if `/context` shows >85%, suggest a fresh session.
 
 **What is NOT a sign of context pressure:**
-- High file read count or tool call count alone — these are normal for ambitious sessions
-- Long conversations — 1M context supports extended work sessions
-- Multiple /assemble runs — these are expected in /campaign mode
+- A long session
+- Many files read
+- Many tool calls made
+- Many agent launches
+- "Feeling" like it's been a while
 
 **Never preemptively suggest checkpoints based on file counts or tool calls.** The model cannot check its own context usage — only the user can via `/context`. Don't guess.
 
-**CRITICAL: Never use self-assessed "context pressure" to reduce quality.** You MUST NOT run Gauntlets "efficiently," use "lightweight checkpoints," skip debriefs, or reduce review rounds based on a feeling that context is heavy. Run `/context` and report the actual number, or run the full protocol. See CAMPAIGN.md "Quality Reduction Anti-Pattern" for the complete rule. This is the #1 source of shipped bugs in VoidForge campaigns.
+**CRITICAL: Never use self-assessed "context pressure" to reduce quality.** See CAMPAIGN.md "Quality Reduction Anti-Pattern" for the complete rule.
 
 ### Checkpoint procedure:
 1. Update `/logs/build-state.md` with current state
