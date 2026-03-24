@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { readFile, stat, readdir } from 'node:fs/promises';
 import { join, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { route } from './router.js';
+import { route, addRoute } from './router.js';
 
 // Node 20 LTS compatibility — import.meta.dirname requires Node 21.2+ (field report #122)
 // @ts-ignore — polyfill for environments where import.meta.dirname is undefined
@@ -21,6 +21,13 @@ import './api/auth.js';
 import './api/users.js';
 import './api/danger-room.js';
 import './api/war-room.js';
+
+// v17.0: Register server status via addRoute for auth middleware coverage in remote mode.
+// Previously this was a hardcoded path handler that bypassed auth.
+addRoute('GET', '/api/server/status', async (_req: IncomingMessage, res: ServerResponse) => {
+  const needsRestart = await checkNativeModulesChanged();
+  sendJson(res, 200, { needsRestart });
+});
 
 // Lazy import — may not exist if node-pty is not installed
 let handleTerminalUpgrade: ((req: IncomingMessage, socket: import('node:stream').Duplex, head: Buffer, session?: unknown) => void) | null = null;
@@ -214,13 +221,9 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     return;
   }
 
-  // Server status endpoint — native module mtime check for restart detection
+  // v17.0: /api/server/status moved to addRoute() registration below for auth middleware coverage.
   const reqUrl = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-  if (reqUrl.pathname === '/api/server/status' && req.method === 'GET') {
-    const needsRestart = await checkNativeModulesChanged();
-    sendJson(res, 200, { needsRestart });
-    return;
-  }
+
 
   // Static file serving
   const url = reqUrl;

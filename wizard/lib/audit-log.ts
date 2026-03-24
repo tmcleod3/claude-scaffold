@@ -58,12 +58,20 @@ export async function initAuditLog(): Promise<void> {
   initialized = true;
 }
 
+const MAX_ROTATIONS = 7; // Keep 7 rotated files (.1 through .7) for financial audit trail
+
 /** Check if log needs rotation and rotate if so. */
 async function rotateIfNeeded(): Promise<void> {
   try {
     const stats = await stat(LOG_PATH);
     if (stats.size >= MAX_SIZE_BYTES) {
-      // Rotate: current → .1 (overwrite previous rotation)
+      // v17.0: 7-rotation scheme instead of single .1 (preserves financial audit trail).
+      // Shift .6 → .7, .5 → .6, ... .1 → .2, then current → .1
+      for (let i = MAX_ROTATIONS - 1; i >= 1; i--) {
+        try {
+          await rename(LOG_PATH + '.' + i, LOG_PATH + '.' + (i + 1));
+        } catch { /* file doesn't exist at this slot — skip */ }
+      }
       await rename(LOG_PATH, LOG_PATH + '.1');
     }
   } catch {

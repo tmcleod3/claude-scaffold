@@ -94,6 +94,12 @@ async function collectFiles(dir: string, baseDir: string, result: Array<{ relati
     if (entry.isDirectory()) {
       await collectFiles(fullPath, baseDir, result);
     } else if (entry.isFile()) {
+      // v17.0: Size limit to prevent unbounded memory allocation
+      const fileStat = await import('node:fs/promises').then(m => m.stat(fullPath));
+      if (fileStat.size > 100 * 1024 * 1024) {
+        console.warn(`Treasury backup: skipping ${entry.name} (${fileStat.size} bytes > 100MB limit)`);
+        continue;
+      }
       const relativePath = fullPath.replace(baseDir + '/', '');
       const content = await readFile(fullPath);
       result.push({ relativePath, content });

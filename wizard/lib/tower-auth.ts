@@ -9,7 +9,7 @@
  */
 
 import { randomBytes, createHmac, pbkdf2 as pbkdf2Cb, timingSafeEqual } from 'node:crypto';
-import { readFile, rename, mkdir, open } from 'node:fs/promises';
+import { readFile, rename, mkdir, open, copyFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
@@ -248,6 +248,13 @@ async function readAuthStore(): Promise<AuthStore> {
 
 async function writeAuthStore(store: AuthStore): Promise<void> {
   await mkdir(VOIDFORGE_DIR, { recursive: true });
+
+  // v17.0: Backup before write — prevents lockout on corruption.
+  // Matches project-registry.ts pattern.
+  try {
+    await copyFile(AUTH_PATH, AUTH_PATH + '.bak');
+  } catch { /* No existing file to backup — first write */ }
+
   const data = JSON.stringify(store, null, 2);
   const tmpPath = AUTH_PATH + '.tmp';
   const fh = await open(tmpPath, 'w', 0o600);
