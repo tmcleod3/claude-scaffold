@@ -36,6 +36,8 @@ Run sequentially — each builds on the previous:
 - **Ducem Barr (Token Economics):** Token usage tracked per request? Caching strategies? Context window efficient? System prompts deduplicated? Streaming where appropriate?
 - **Bayta Darell (Evaluation):** How do you know outputs are correct? Golden datasets? Automated scoring? Regression suite for prompt changes? Quality degradation detection?
 - **Dors Venabili (Observability):** Can you see what the AI decided and why? Trace logging? Inputs/outputs logged (PII-scrubbed)? Latency tracked? Quality scores over time?
+- **Janov Pelorat (Context Engineering):** RAG retrieval returning relevant docs? Embeddings right dimensionality? Chunking appropriate?
+- **R. Daneel Olivaw (Versioning):** When models update, does behavior change? Prompts pinned? Migration strategy?
 
 ## Phase 3 — Remediate
 
@@ -47,7 +49,7 @@ Fix all Critical and High findings. Use the standard finding format with confide
 
 ## Arguments
 - No arguments → full 5-phase audit of all AI components
-- `--prompts` → Focus on prompt engineering only (Gaal Dornick + Neo deep dive)
+- `--prompts` → Focus on prompt engineering only (Gaal Dornick deep dive)
 - `--tools` → Focus on tool-use schemas only (Hober Mallow solo)
 - `--safety` → Focus on AI safety and prompt injection (Bliss + The Mule)
 - `--eval` → Focus on evaluation strategy and test coverage (Bayta Darell solo)
