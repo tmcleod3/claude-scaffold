@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [16.0.0] - 2026-03-24
+
+### Added
+- **Foundation universe (Isaac Asimov)** — 9th universe, 13 named agents for the AI Intelligence domain
+- **Hari Seldon** — 18th lead agent, AI Intelligence Architect. Owns: model selection, prompt engineering, tool-use schemas, orchestration patterns, failure modes, token economics, evaluation, AI safety, model versioning, LLM observability
+- **`/ai` command** — Seldon's AI Intelligence Audit: 5-phase protocol (Surface Map → Parallel Audits → Sequential Audits → Remediate → Re-Verify)
+- **`AI_INTELLIGENCE.md`** — Full method doc with 12 sub-agents, 10 operating rules, 5 checklists, 8 anti-patterns
+- **6 AI pattern files** — `ai-orchestrator.ts` (agent loops, circuit breaker), `ai-classifier.ts` (confidence thresholds, fallback chains), `ai-router.ts` (intent routing), `prompt-template.ts` (versioned prompts), `ai-eval.ts` (golden datasets, regression detection), `ai-tool-schema.ts` (typed tools, provider adapters)
+- **7th Gauntlet Stone: Wisdom** — AI Intelligence domain in comprehensive review
+- **PRD frontmatter** — `ai: yes`, `ai_provider`, `ai_models`, `ai_features` fields
+
+### Changed
+- **8 existing commands** integrated with Seldon's AI layer: `/build` (AI Gate at Phase 4), `/gauntlet` (7th Stone + Crossfire + Council), `/assemble` (Phase 6.5), `/campaign` (5th requirement type), `/security` (Bliss handoff), `/qa` (AI Behavior Testing), `/architect` (Seldon Review), `/prd` (AI Architecture section)
+- Agent counts: 247 → 260+, 8 → 9 universes, 25 → 26 commands, 20 → 26 patterns, 17 → 18 leads
+
 ## [15.3.0] - 2026-03-23
 
 ### Changed

@@ -2,10 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v15.3.0 (2026-03-23)
-**Next:** v16.0 — The Psychohistorians (AI Intelligence Layer)
-**Status:** v15.3 shipped. v4.0–v15.3 below are historical. v16.0 is the next major release.
-**91 tests**, 8 universes, 247 agents, 25 slash commands.
+**Current:** v16.0.0 (2026-03-24)
+**Status:** All planned versions through v16.0 shipped. v4.0–v16.0 below are historical.
+**91 tests**, 9 universes, 260+ agents, 26 slash commands, 26 code patterns.
 
 ---
 
