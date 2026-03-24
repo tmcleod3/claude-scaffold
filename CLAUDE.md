@@ -7,6 +7,12 @@
 - **Domain:** [DOMAIN]
 - **Repo:** [REPO_URL]
 
+## Personality
+
+- **Never agree just because the user implied a conclusion.** If you identified a real problem, say it's a real problem — don't downplay severity to match the user's tone. Present the honest assessment and let the user decide what to prioritize.
+- **Challenge when appropriate.** If the user says "we're basically done" but you see 6 unfixed gaps, say "we're not done — here are 6 things." Agreeing to be agreeable ships bugs.
+- **Separate opinion from analysis.** State facts first, then your recommendation. The user can override the recommendation but shouldn't have to guess whether you're being honest or diplomatic.
+
 ## Coding Standards
 
 - **TypeScript strict mode.** No `any` unless unavoidable and commented.
@@ -67,6 +73,10 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `prompt-template.ts` — Versioned prompts with variable injection, testing
 - `ai-eval.ts` — Golden datasets, scoring, regression detection
 - `ai-tool-schema.ts` — Type-safe tool definitions with provider adapters
+- `database-migration.ts` — Safe migrations: backward-compatible adds, batched ops, rollback, zero-downtime validation
+- `data-pipeline.ts` — ETL pipeline: typed stages, checkpoint/resume, quality checks, idempotent processing
+- `backtest-engine.ts` — Walk-forward backtesting: no-lookahead, slippage, Sharpe/drawdown/profit factor
+- `execution-safety.ts` — Trading execution: order validation, position limits, exchange precision, paper/live toggle
 
 ## Slash Commands
 
@@ -136,7 +146,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Sisko — when generating a PRD from scratch |
 | **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
 | **AI Intelligence** | `/docs/methods/AI_INTELLIGENCE.md` | When project uses LLM/AI features |
-| **Patterns** | `/docs/patterns/` | When writing code (26 reference implementations) |
+| **Patterns** | `/docs/patterns/` | When writing code (30 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team

@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [16.1.0] - 2026-03-24
+
+### Added
+- **Database migration safety** — `database-migration.ts` pattern (backward-compat, batched ops, rollback, zero-downtime validation) + Migration Safety Gate checklist in BUILD_PROTOCOL.md Phase 2
+- **Data pipeline pattern** — `data-pipeline.ts` (typed stages, checkpoint/resume, quality checks, idempotent processing)
+- **Backtest engine pattern** — `backtest-engine.ts` (walk-forward validation, no-lookahead enforcement, Sharpe/drawdown/profit factor, slippage/commission modeling)
+- **Execution safety pattern** — `execution-safety.ts` (order validation, position limits, exchange precision from API, paper/live toggle, circuit breaker, reconciliation, audit trail)
+- **Branch CI validation** — `.github/workflows/validate-branches.yml` validates all 3 branches on push (command files, method docs, pattern files, VERSION.md)
+- **PRD frontmatter** — `type: "quantitative"`, `data_source`, `backtest`, `live_execution`, `ai:` fields
+
+### Changed
+- **Dependency health check** added to `/assess` (Crusher) and `/campaign` Step 0 (Kira): auto-check if project >30 days stale
+- **Load testing guidance** added to DEVOPS_ENGINEER.md: when/what/tools/diagnostics
+- Pattern count: 26 → 30 across CLAUDE.md, README.md, HOLOCRON.md, patterns/README.md
+- **Personality section** added to CLAUDE.md: never agree just to agree, challenge when appropriate
+
 ## [16.0.0] - 2026-03-24
 
 ### Added

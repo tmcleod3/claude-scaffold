@@ -124,6 +124,7 @@ At the start of every campaign session, cross-reference `git log` against `campa
 - **BLOCKED ITEMS** — campaign-state has unresolved BLOCKED items from previous missions → present them: "These items are still blocked: [list]. Resolve now, skip, or continue?"
 - **VAULT AVAILABLE** — vault exists but `.env` is sparse → offer: "The vault has credentials but infrastructure isn't provisioned. Run `voidforge deploy` now? [Y/n]" In `--blitz` mode: auto-run provisioner. In normal mode: ask user.
 - **CLEAR** — no in-progress work → proceed to Step 1
+- If project has a `package.json` and hasn't been modified in >30 days → run dependency health check: `npm outdated`, flag major bumps, check Node.js EOL status. In blitz mode, auto-run and log results to campaign-state.md.
 
 ### Step 0.5 — Vault Auto-Inject
 

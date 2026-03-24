@@ -109,6 +109,14 @@ This saves ~100K tokens on work that's far from execution. The full bridge crew 
 **Janeway (Novel Architectures):** When the standard monolith doesn't fit — event-sourcing, CQRS, serverless, edge computing. Janeway navigates uncharted territory and proposes architectures the team hasn't tried before.
 **Tuvok (Security Architecture):** Auth flow design, token storage strategy, session architecture, encryption at rest vs in transit decisions. Different from Worf (who flags security *implications*); Tuvok designs the security *architecture* from scratch.
 **Crusher (System Diagnostics):** "What's the health of this codebase before we start?" Tech health assessment — test coverage, build time, dependency age, code complexity metrics. Baseline before changes.
+
+**Dependency health (Crusher, conditional — if project has package.json/requirements.txt/Gemfile):**
+- Run `npm outdated` (or equivalent) — flag packages with major version bumps
+- Check Node.js/Python/Ruby version against EOL schedule
+- Scan for known deprecation patterns in dependencies
+- Flag any dependency not updated in >12 months
+- If project hasn't been touched in >30 days, this check is mandatory before any build work
+
 **Archer (Greenfield):** For new projects — proposes the initial directory structure, module boundaries, naming conventions, and bootstrap sequence. "Where no one has gone before."
 **Kim (API Design):** REST conventions, consistent error shapes, pagination patterns, versioning strategy, GraphQL schema design. API surface architect.
 **Pike (Bold Planning):** In `/campaign` — challenges Dax's mission ordering. "Should we attempt a harder mission first while context is fresh?" Bold decisions about sequencing.

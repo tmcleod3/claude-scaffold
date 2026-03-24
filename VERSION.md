@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 16.0.0
+**Current:** 16.1.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 16.1.0 | 2026-03-24 | The Hardened Methodology — migration safety, data pipelines, backtest/execution patterns, dependency health, load testing, branch CI |
 | 16.0.0 | 2026-03-24 | The Psychohistorians — AI Intelligence Layer: Foundation universe, Hari Seldon, /ai command, 6 AI patterns, AI_INTELLIGENCE.md, integrated into 8 commands |
 | 15.3.0 | 2026-03-23 | The Chronicle — 9 public docs updated to v15.2.1 (76 staleness issues fixed) |
 | 15.2.1 | 2026-03-23 | Inbox triage #147-#148: 4 methodology fixes + 3 lessons from field reports |

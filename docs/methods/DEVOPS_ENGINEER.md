@@ -176,6 +176,32 @@ If health check fails after deploy:
 
 (Field report #97: 3 campaigns of Dialog Travel code never reached production because no deploy step existed.)
 
+## Load Testing (Pre-Launch)
+
+**When to load test:**
+- Before first production launch with expected traffic >100 req/s
+- After significant architecture changes (new database, new caching layer, new API gateway)
+- Before scaling events (marketing launch, Product Hunt, press coverage)
+
+**What to test:**
+- Target: the slowest API endpoint at 2x expected peak traffic
+- Measure: p50, p95, p99 latency; error rate; connection pool saturation; memory usage
+- Duration: sustained load for 5+ minutes (not just burst)
+
+**Tools (pick one):**
+- **k6** (Grafana) — scriptable, CI-friendly, TypeScript support
+- **Artillery** — YAML config, good for API testing
+- **ab** (Apache Bench) — quick and dirty, already installed on most systems
+- **wrk** — high-performance HTTP benchmarking
+
+**What to look for:**
+- p95 latency >500ms under load → database query optimization needed
+- Error rate >1% → connection pool exhaustion or resource limits
+- Memory climbing without leveling → memory leak
+- CPU at 100% on a single core → event loop blocking (Node.js)
+
+**Load testing is NOT a VoidForge automation.** VoidForge tells you to do it and what to look for. The actual test requires infrastructure and traffic generation tools that are project-specific.
+
 ## Deploy Safety Rules
 
 **rsync exclusion mandate:** NEVER use `rsync --delete` without excluding VPS-only directories. User-uploaded files, generated avatars, and data files only exist on the VPS — `--delete` will destroy them. Mandatory exclusions:

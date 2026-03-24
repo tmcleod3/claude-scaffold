@@ -30,6 +30,10 @@ Reference implementations for common code structures. These show the **shape and
 | Prompt Template | `prompt-template.ts` | Versioned prompts, variable injection, guardrails | Any (provider-agnostic) |
 | AI Eval | `ai-eval.ts` | Golden datasets, scoring functions, regression detection | Any (provider-agnostic) |
 | AI Tool Schema | `ai-tool-schema.ts` | Typed tool definitions, provider adapters | Anthropic + OpenAI |
+| Database Migration | `database-migration.ts` | Safe migrations: backward-compat, batched ops, rollback, zero-downtime | Prisma, Alembic, ActiveRecord, Django |
+| Data Pipeline | `data-pipeline.ts` | ETL with checkpoint/resume, quality checks, idempotent processing | Node.js streams, Python polars, SQL/dbt |
+| Backtest Engine | `backtest-engine.ts` | Walk-forward validation, no-lookahead, Sharpe/drawdown metrics | Python vectorbt/backtrader |
+| Execution Safety | `execution-safety.ts` | Order validation, position limits, exchange precision, paper/live toggle | CCXT, Alpaca, IBKR |
 
 ## How to Use
 

@@ -1,0 +1,72 @@
+name: Validate Branch Integrity
+
+on:
+  push:
+    branches: [main, scaffold, core]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch: [main, scaffold, core]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Verify CLAUDE.md exists
+        run: test -f CLAUDE.md
+
+      - name: Verify all slash commands have command files
+        run: |
+          # Extract command names from CLAUDE.md table
+          grep '| `/[a-z]' CLAUDE.md | sed 's/.*`\/\([a-z]*\)`.*/\1/' | while read cmd; do
+            if [ ! -f ".claude/commands/${cmd}.md" ]; then
+              echo "MISSING: .claude/commands/${cmd}.md (listed in CLAUDE.md)"
+              exit 1
+            fi
+          done
+          echo "All slash commands have matching command files."
+
+      - name: Verify docs reference table paths exist
+        run: |
+          # Check that key method docs exist
+          for doc in BUILD_PROTOCOL BUILD_JOURNAL CONTEXT_MANAGEMENT PRODUCT_DESIGN_FRONTEND \
+                     BACKEND_ENGINEER QA_ENGINEER TESTING SECURITY_AUDITOR SYSTEMS_ARCHITECT \
+                     DEVOPS_ENGINEER RELEASE_MANAGER SUB_AGENTS TROUBLESHOOTING MCP_INTEGRATION \
+                     PRD_GENERATOR FORGE_KEEPER THUMPER ASSEMBLER FIELD_MEDIC FORGE_ARTIST \
+                     CAMPAIGN GAUNTLET GROWTH_STRATEGIST DEEP_CURRENT TREASURY HEARTBEAT \
+                     AI_INTELLIGENCE; do
+            if [ ! -f "docs/methods/${doc}.md" ]; then
+              echo "MISSING: docs/methods/${doc}.md"
+              exit 1
+            fi
+          done
+          echo "All method docs exist."
+
+      - name: Verify pattern files exist
+        run: |
+          ls docs/patterns/*.ts docs/patterns/*.tsx 2>/dev/null | wc -l | xargs -I{} echo "Pattern files found: {}"
+          test -f docs/patterns/README.md || (echo "MISSING: docs/patterns/README.md" && exit 1)
+
+      - name: Verify VERSION.md consistency
+        run: |
+          grep -q "Current:" VERSION.md || (echo "VERSION.md missing Current field" && exit 1)
+          echo "VERSION.md OK"
+
+      - name: Verify naming registry exists
+        run: test -f docs/NAMING_REGISTRY.md
+
+      - name: Run tests (main branch only)
+        if: matrix.branch == 'main'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and test (main branch only)
+        if: matrix.branch == 'main'
+        run: |
+          npm ci
+          npm test
