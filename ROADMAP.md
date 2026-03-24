@@ -2,10 +2,293 @@
 
 > The plan for the plan-maker.
 
-**Current:** v16.0.0 (2026-03-24)
-**Next:** v16.1 — The Hardened Methodology (gaps + data pipelines)
-**Status:** v16.0 shipped. Next: methodology gaps identified during v16.0 session.
-**91 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+**Current:** v17.2.0 (2026-03-24)
+**Next:** v18.0 — The Proving Ground (E2E testing with Playwright)
+**Status:** v17.2 shipped. Foundation verified. Ready for E2E.
+**294 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+
+---
+
+## v18.0 — The Proving Ground
+
+*"The Gauntlet tests the code. The Proving Ground tests the product."*
+
+**Breaking change:** First external testing dependency (Playwright). CI pipeline expanded from typecheck + unit tests to include browser-based E2E. This changes the development workflow — broken UI is now a CI failure, not a Gauntlet surprise.
+
+**Origin:** Deferred since v16.1 (3 versions). 7 HTML pages with JavaScript that can break silently. 294 unit tests cover the backend; zero automated tests touch the UI. Every Gauntlet finds UI issues via manual review — E2E catches them on every commit.
+
+### What Gets Tested
+
+| Page | File | Key Flows |
+|------|------|-----------|
+| **Lobby** | `lobby.html` + `lobby.js` | Project list renders, import modal opens/closes, project cards show health status, delete confirmation |
+| **Setup Wizard** | `index.html` + `app.js` | 3-act flow: identity → PRD → operations. Vault password creation. Credential entry. |
+| **Deploy Wizard** | `deploy.html` + `deploy.js` | Target selection, provision progress (SSE), deploy status |
+| **Tower** | `tower.html` + `tower.js` | Terminal session creation, PTY data flow (WebSocket), Claude Code launch |
+| **Danger Room** | `danger-room.html` + `danger-room.js` | Tab navigation (including 4 growth tabs), campaign timeline, findings panel, WebSocket activity feed |
+| **War Room** | `war-room.html` + `war-room.js` | Alternative dashboard view, experiment panel |
+| **Login** | `login.html` + `login.js` | Username/password form, TOTP input, error states, redirect after login |
+
+### Mission Plan (5 missions)
+
+#### Mission 1 — Playwright Setup + Test Infrastructure
+
+1. Add `@playwright/test` as dev dependency (justified: testing infrastructure)
+2. Create `playwright.config.ts` — configure for the wizard server (localhost:3141)
+3. Create test helper: start wizard server before tests, stop after
+4. Add `npm run test:e2e` script to package.json
+5. Add E2E step to `.github/workflows/validate-branches.yml` (main branch only)
+6. Write 1 smoke test: server starts, lobby page loads, title is correct
+
+#### Mission 2 — Lobby + Login E2E Tests
+
+1. **Lobby:** Page loads, project list renders (empty state), import modal keyboard navigation (Escape closes, Tab cycles), link modal
+2. **Login:** Form renders, validation errors on empty submit, TOTP field appears after password, redirect on success (mock auth)
+3. Test error states: server down, invalid credentials
+
+#### Mission 3 — Setup Wizard E2E Tests
+
+1. **Act 1 (Identity):** Project name input, domain selection
+2. **Act 2 (PRD):** PRD text area, upload, generation (mock Anthropic)
+3. **Act 3 (Operations):** Operations menu renders, vault password creation, credential entry flow
+4. Focus trap verification: modals trap focus, Escape closes
+
+#### Mission 4 — Danger Room + Growth Tabs E2E Tests
+
+1. **Tab navigation:** All tabs clickable, content switches correctly
+2. **Growth tab:** KPI cards render (with sandbox data), empty state without Cultivation
+3. **Campaigns tab:** Table renders, empty state guidance
+4. **Treasury tab:** Budget bar renders, vault status
+5. **Heartbeat tab:** Daemon status, token health display
+6. **WebSocket activity feed:** Mock WebSocket, verify ticker updates
+
+#### Mission 5 — Deploy + Tower + Version Bump
+
+1. **Deploy wizard:** Target selection renders, provision progress UI
+2. **Tower:** Terminal session UI loads (PTY mocked — node-pty not in E2E)
+3. **War Room:** Basic page load + tab verification
+4. Version bump to v18.0.0, changelog, push all branches
+
+### Campaign Structure
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Playwright setup + smoke test | Infra + test | 1.5 |
+| 2 | Lobby + Login E2E | Tests | 1.5 |
+| 3 | Setup Wizard E2E | Tests | 2 |
+| 4 | Danger Room + Growth Tabs E2E | Tests | 2 |
+| 5 | Deploy + Tower + Version Bump | Tests + release | 1.5 |
+
+**Version bump:** MAJOR (v18.0.0) — new testing dependency (Playwright), CI pipeline change, development workflow change.
+
+### Technical Notes
+
+- Playwright runs against the real wizard server (not mocked). The server starts in local mode on a test port.
+- Tests that need auth (remote mode pages) use a test helper that creates a user and logs in via the API.
+- Tests that need Cultivation data write sandbox campaign/treasury files to a temp `~/.voidforge/` directory.
+- Terminal tests mock node-pty (native module) — verify UI only, not PTY data flow.
+- Anthropic API calls (PRD generation) are intercepted and mocked.
+
+### After v18.0
+
+| Version | Direction |
+|---------|-----------|
+| **v19.0** | CLI Distribution — `npx voidforge init` global installer |
+| **v17.3+** | Platform Adapters — as developer accounts become available |
+
+---
+
+## v17.2 — The Security Test Pass
+
+*"Trust, but verify." — Picard*
+
+**Origin:** v17.1 reassessment gate identified 7 security-critical modules (1,362 lines) with zero test coverage: totp, tower-rate-limit, tower-session, user-manager, compliance, treasury-backup, autonomy-controller. These handle auth, rate limiting, RBAC, 2FA, encrypted backups, and autonomous execution controls.
+
+### Mission 1 — Security Module Tests (P0)
+
+Write tests for all 7 security-critical modules:
+1. `totp.test.ts` — TOTP generation, verification, replay protection, clock drift
+2. `tower-session.test.ts` — Session creation, validation, expiry, IP binding
+3. `tower-rate-limit.test.ts` — Per-IP rate limiting, window reset
+4. `user-manager.test.ts` — RBAC: create, invite, roles, removal
+5. `compliance.test.ts` — Privacy/email/platform ToS checks
+6. `treasury-backup.test.ts` — Encrypted backup create, restore, pruning
+7. `autonomy-controller.test.ts` — Circuit breakers, kill switch, tier controls
+
+### Mission 2 — TS Error Fix + Version Bump
+
+1. Fix the 2 remaining TypeScript errors (test mock types)
+2. Verify `tsc --noEmit` = 0 errors
+3. Version bump, changelog, push all branches
+
+**Version bump:** PATCH (v17.2.0) — tests only, no feature changes.
+
+---
+
+## v17.1 — The Gauntlet Cleanup
+
+*"Polish before expansion."*
+
+**Origin:** Victory Gauntlet Round 1 flagged 6 Medium findings, TypeScript compilation warnings, and test coverage gaps. These don't block functionality but erode confidence. Fix them before building anything new.
+
+### Mission 1 — Security + Edge Case Fixes
+
+1. **Timing-safe vault password comparison** (`heartbeat.ts:72-76`) — Replace length-gated `timingSafeEqual` with HMAC comparison (hash both inputs to fixed-length before comparing). Currently leaks password length via timing.
+2. **Negative amountCents validation** (`heartbeat.ts readTreasurySummary()` + `danger-room.ts`) — Clamp or reject negative values in spend/revenue log parsing. Negative spend produces nonsensical ROAS and inflated net.
+3. **Inverted date range handling** (`sandbox.ts`, `sandbox-bank.ts`) — Throw or return empty when `end < start` instead of silently treating as 1 day.
+4. **IPv6 proxy shutdown** (`server.ts`) — Store the `ipv6Proxy` reference and close it in the shutdown handler.
+
+### Mission 2 — TypeScript Strict Compliance
+
+1. **Fix 31 pattern file compilation warnings** — `docs/patterns/ad-platform-adapter.ts`, `revenue-source-adapter.ts`, `financial-transaction.ts`. These are the canonical type definitions consumed by the wizard; they should compile cleanly.
+2. **Add `npm run typecheck` to CI** (`.github/workflows/validate-branches.yml`) — `tsc --noEmit` on main branch push/PR. This prevents the type drift that caused 76 errors to accumulate undetected.
+
+### Mission 3 — Test Coverage Expansion
+
+1. **`wizard/__tests__/stripe-adapter.test.ts`** — Test against response fixtures (mock `node:https` requests). Cover: connect, getTransactions, getBalance, error handling for non-JSON responses.
+2. **`wizard/__tests__/heartbeat.test.ts`** — Test: readCampaigns, readTreasurySummary, buildStateSnapshot (mock filesystem). Don't test the full daemon lifecycle (that needs integration tests).
+3. **`wizard/__tests__/audit-log.test.ts`** — Test 7-rotation scheme: write past threshold, verify .1-.7 cascade.
+4. **Sandbox module-level Map** — Move campaigns Map to instance scope in `sandbox.ts` to prevent state leaks between tests.
+
+### Mission 4 — ADRs + Reassessment
+
+1. Write 3 ADRs from v17.0 decisions:
+   - **ADR-032: No Stubs Doctrine** — Why stubs were removed, the policy, enforcement points
+   - **ADR-033: Sandbox Demo Pipeline** — Why sandbox adapters instead of mocks, how they relate to real adapters
+   - **ADR-034: Raw HTTPS for External APIs** — Why node:https instead of Stripe SDK (zero-dependency constraint)
+2. **Run `/assess`** on the cleaned-up codebase — a fresh assessment to see where VoidForge stands after v17.0 + v17.1. This produces the decision point for what comes next.
+
+### Campaign Structure
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Security + edge case fixes | Code | 1 |
+| 2 | TypeScript strict compliance | Code + CI | 1 |
+| 3 | Test coverage expansion | Tests | 1.5 |
+| 4 | ADRs + reassessment | Docs + assess | 1 |
+
+**Version bump:** MINOR (v17.1.0) — new tests, new ADRs, no breaking changes.
+
+### After v17.1: The Reassessment Gate
+
+v17.1 Mission 4 produces a fresh `/assess` report. That report determines what v18.0 is. Possible outcomes:
+
+| Assessment Result | Next Version |
+|---|---|
+| Clean bill of health | v18.0 is a new feature (E2E, marketplace, CLI distribution) |
+| New findings from pattern/type fixes | v17.2 to resolve before expanding |
+| Platform adapter accounts available | v17.2 implements real adapters (Google Ads, Meta, etc.) |
+
+**The rule: don't plan v18.0 until the assessment says the foundation is solid.** This prevents the pattern that led to v17.0 — building 5 versions of features on top of stubs.
+
+---
+
+## v17.0 — The Complete Implementation
+
+*"No more stubs. No more lies."*
+
+**Breaking change:** The No Stubs Doctrine — a fundamental behavioral policy change. VoidForge will never again ship stub code that returns fake success, throws "not implemented", or exists as an empty interface placeholder. If a feature is scoped, it is fully implemented. If it's not ready, no file is committed. This policy is enforced across all method docs, build protocol phases, and review commands.
+
+**Origin:** Pre-build assessment (2026-03-24) found 8 adapter stubs with 77 `throw new Error('Implement...')` calls, a freeze endpoint returning fake success, an AWS validation stub, and hollow heartbeat daemon handlers — all shipped as if functional. The Cultivation Growth Engine was architecturally complete but externally non-functional. This version eliminates every stub and makes Cultivation work end-to-end.
+
+### Track 1: The No Stubs Doctrine (Methodology)
+
+**The policy:**
+- Never ship a function that returns hardcoded success without side effects
+- Never ship a `throw new Error('Implement...')` placeholder
+- Never ship a handler that logs a message but performs no work
+- If a feature isn't ready to implement: don't create the file. Document it as "planned" in the ROADMAP with explicit scope. No code artifact.
+- `/architect` ADRs must include implementation scope: "fully implemented" vs "deferred (no stub code)"
+- `/campaign` Dax must flag existing stubs as mandatory remediation before new feature work
+- `/gauntlet` RC-STUB is a first-class root cause category (auto-High severity)
+- `/assess` stub detection is a primary assessment target
+
+**Files modified:**
+- `CLAUDE.md` — Coding Standards: add No Stubs rule
+- `docs/methods/BUILD_PROTOCOL.md` — Implementation completeness gate per phase
+- `docs/methods/CAMPAIGN.md` — Dax stub detection in Step 1
+- `docs/methods/SYSTEMS_ARCHITECT.md` — ADR implementation scope requirement
+- `docs/methods/GAUNTLET.md` — RC-STUB root cause category
+- `.claude/commands/assess.md` — Formalize stub detection
+- `docs/methods/GROWTH_STRATEGIST.md` — Remove "implement later" language
+- `docs/LESSONS.md` — Cross-project lesson
+
+### Track 2: Security Remediation (P0 + P1)
+
+**P0 — Fix Now:**
+1. `wizard/lib/tower-auth.ts` — Fix `getClientIp()`: use `parts[0].trim()` (leftmost X-Forwarded-For entry, not rightmost). All rate limiting and session IP binding is currently broken in remote mode — every user maps to `127.0.0.1`.
+2. `wizard/server.ts` — Implement dual loopback binding (`127.0.0.1` + `::1`) in local mode per PRD §9.20.1. Currently binds to `::` (IPv6 wildcard), exposing financial vault data to LAN.
+3. `wizard/api/credentials.ts` — Replace `req.socket.remoteAddress` with `getClientIp(req)` for vault unlock rate limiting. Currently all users behind proxy share one rate limit bucket.
+4. `wizard/lib/tower-rate-limit.ts` — Remove duplicate dead `getClientIp()` export.
+
+**P1 — Stub Elimination:**
+5. `wizard/api/danger-room.ts` — Wire `/freeze` endpoint to daemon Unix socket. Return `{ ok: false, error: 'Daemon not running' }` when daemon is down instead of fake success.
+6. `wizard/api/cloud-providers.ts` — `validateAws()`: call `STS.GetCallerIdentity()` (SDK already a dependency). No more format-only stub.
+7. `wizard/api/auth.ts` — Remove outer `hasUsers()` TOCTOU race. Rely on `createUser()`'s serialized check.
+
+**P2 — Storage Hardening:**
+8. `wizard/lib/audit-log.ts` — 7-rotation scheme or date-based naming (currently single `.1` rotation loses financial audit trail).
+9. `wizard/lib/tower-auth.ts` — Backup-before-write for `auth.json` (currently no backup; corruption = remote lockout).
+10. `wizard/server.ts` — Register `/api/server/status` via `addRoute()` for auth middleware coverage.
+11. `wizard/lib/treasury-backup.ts` — File size limit (100MB) before memory read.
+
+### Track 3: Cultivation Activation
+
+**Mission 5 — Sandbox Adapter Layer:**
+- New `wizard/lib/adapters/sandbox.ts` — Full `AdPlatformSetup` + `AdPlatformAdapter` + `RevenueSourceAdapter` implementation with realistic fake data. Every method returns valid-shaped data. No throws. This IS a full implementation for a sandbox platform.
+- New `wizard/lib/adapters/sandbox-bank.ts` — Sandbox bank adapter with realistic transactions/balances.
+- Wire `wizard/lib/heartbeat.ts` handlers — `readCampaigns()` reads campaign state files. `readTreasurySummary()` reads treasury files. All 8 scheduled jobs call real adapter logic. No more hollow handlers.
+- Update `wizard/lib/adapters/index.ts` — Sandbox in PLATFORM_REGISTRY with `sandbox: true` flag.
+
+**Mission 6 — Stripe Revenue Adapter:**
+- New `wizard/lib/adapters/stripe.ts` — Real implementation via `node:https` (zero new dependencies):
+  - `connect()` → `GET /v1/account` (verify key, return account name)
+  - `getTransactions()` → `GET /v1/charges` with date range
+  - `getBalance()` → `GET /v1/balance`
+  - `detectCurrency()` → account default currency
+- Tests against response fixtures (not live API in CI).
+
+**Mission 7 — Danger Room Growth Tabs:**
+- Add 4 growth tabs to `wizard/ui/danger-room.html`: #growth, #campaigns, #treasury, #heartbeat
+- Tab rendering in `wizard/ui/danger-room.js`: KPI cards, campaign table, vault status, daemon status
+- Expand `/api/danger-room/heartbeat` to return campaign + treasury data.
+
+**Mission 8 — Cultivation Test Coverage:**
+- New tests: financial-vault, TOTP, reconciliation, campaign-state-machine, sandbox-adapter, stripe-adapter.
+
+**Mission 9 — Stub Cleanup (Doctrine Enforcement):**
+- Delete all 6 ad platform adapter stub files (meta.ts, google.ts, tiktok.ts, linkedin.ts, twitter.ts, reddit.ts) and 2 bank adapter stubs (mercury.ts, brex.ts).
+- Update `adapters/index.ts` to list available (sandbox, stripe) vs planned (meta, google, etc.).
+- No file with `throw new Error('Implement...')` may exist after this mission.
+
+### Campaign Structure (10 missions)
+
+| # | Mission | Track | Type | Effort |
+|---|---------|-------|------|--------|
+| 1 | The No Stubs Doctrine | Methodology | Method docs + CLAUDE.md | 1.5 |
+| 2 | P0 Security Fixes | Security | Code (tower-auth, server, credentials) | 1 |
+| 3 | P1 Stub Elimination | Security | Code (danger-room, cloud-providers, auth) | 1 |
+| 4 | Storage Hardening | Security | Code (audit-log, tower-auth, treasury-backup) | 1 |
+| 5 | Sandbox Adapter Layer | Cultivation | Code (new adapters, heartbeat wiring) | 2 |
+| 6 | Stripe Revenue Adapter | Cultivation | Code (new adapter, real API) | 1.5 |
+| 7 | Danger Room Growth Tabs | Cultivation | Code + UI (dashboard wiring) | 1.5 |
+| 8 | Cultivation Test Coverage | Cultivation | Tests (6 new test files) | 1.5 |
+| 9 | Stub Cleanup | Doctrine | Code (delete stubs, update registry) | 0.5 |
+| 10 | Docs + Victory Gauntlet | All | PRD, ROADMAP, VERSION, CHANGELOG + Gauntlet | 2 |
+
+**Version bump:** MAJOR (v17.0.0) — behavioral policy change (No Stubs Doctrine).
+
+### BLOCKED (deferred to v17.1+)
+
+| Item | Reason | Unblocked By |
+|------|--------|--------------|
+| Google Ads adapter | Requires MCC + developer token | User creates developer account |
+| Meta Marketing adapter | Requires Business Manager app review | User creates developer account |
+| TikTok/LinkedIn/Twitter/Reddit adapters | Require platform developer accounts | User creates accounts |
+| Mercury/Brex bank adapters | Require business banking accounts with API access | User has accounts |
+| Paddle revenue adapter | Requires Paddle account | User creates account |
+
+These will ship as fully-implemented adapters in v17.1+ when developer accounts are available. Per the No Stubs Doctrine, no stub code will be committed — only real implementations when real testing is possible.
 
 ---
 
