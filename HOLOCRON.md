@@ -24,7 +24,7 @@
 
 ### What VoidForge Is
 
-VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 247 AI agents across 8 fictional universes builds your application through a 13-phase protocol.
+VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 260+ AI agents across 9 fictional universes builds your application through a 13-phase protocol.
 
 **From nothing, everything.**
 
@@ -47,7 +47,7 @@ npm run wizard
 **Best for:** Users who want the guided experience. Gandalf walks you through setup, Haku handles deployment. After creation, Avengers Tower gives you a full terminal in the browser — type `/build`, `/campaign`, SSH to production, all from one tab. The Lobby shows all your projects. The Penthouse adds team access.
 
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 25 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 26 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -60,7 +60,7 @@ git clone --branch scaffold https://github.com/tmcleod3/voidforge.git .
 **Best for:** Developers who know what they're doing and want to skip the wizard. You manage your own infrastructure. VoidForge manages your build process.
 
 #### Core (`core` branch)
-The lightest possible version. CLAUDE.md, all 25 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
+The lightest possible version. CLAUDE.md, all 26 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
 
 ```bash
 # Option A: Drop into an existing project
@@ -77,11 +77,11 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **25 slash commands** — `/prd`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`
+- **26 slash commands** — `/prd`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
 - **13-phase build protocol** — PRD to production with verification gates
-- **17 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
-- **247 named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, and Cosmere
-- **20 code patterns** — Reference implementations with framework adaptations
+- **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
+- **260+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
+- **26 code patterns** — Reference implementations with framework adaptations
 - **Meta-Workflow** — How VoidForge uses itself to develop itself (`docs/META_WORKFLOW.md`)
 - **This Holocron** — The guide you're reading now
 
@@ -270,7 +270,7 @@ Long builds span multiple Claude Code sessions. The build journal system handles
 
 ### How the Agent System Works
 
-VoidForge uses 17 lead agents across 8 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
+VoidForge uses 18 lead agents across 9 fictional universes, each commanding a roster of themed sub-agents. This isn't decoration — it serves three purposes:
 
 1. **Scope boundaries.** When Stark is leading, you're doing backend work. When Galadriel takes over, you're doing frontend. The character tells you which domain you're in.
 2. **Scannable logs.** Build journal entries tagged with agent names are instantly searchable. "What did Batman find?" is faster than "What happened during QA?"
@@ -297,6 +297,7 @@ VoidForge uses 17 lead agents across 8 fictional universes, each commanding a ro
 | Growth Strategist | **Kelsier** | Cosmere | Growth strategy, campaign orchestration, ad platforms, SEO | The Survivor. Burns metals to fuel growth. Always has another plan. |
 | Deep Current | **Tuvok** | Star Trek | Autonomous campaign intelligence — scan, analyze, propose | Vulcan logic applied to market signals. Processes data without emotional bias. |
 | Treasury | **Dockson** | Cosmere | Revenue ingest, budget allocation, spend execution | The crew's bookkeeper. Every boxing tracks, every ledger balances. |
+| AI Intelligence | **Hari Seldon** | Foundation | AI Intelligence Architect — models, prompts, tools, orchestration, safety, evals | The psychohistorian. Predicts outcomes, designs systems that endure across generations. |
 
 ### Sub-Agent Highlights
 
@@ -351,7 +352,7 @@ Each lead has a deep bench. Here are some standouts:
 - **Idaho** keeps the connection alive — the eternal ghola who always returns
 - **Thufir** parses every signal — Mentat precision, a million calculations per second
 
-The full roster of 247 characters lives in `docs/NAMING_REGISTRY.md`.
+The full roster of 260+ characters lives in `docs/NAMING_REGISTRY.md`.
 
 ### How Handoffs Work
 
@@ -380,7 +381,7 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Twenty-five commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Twenty-six commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/prd` — Sisko's PRD Generator
 **When:** Starting a new project and you need a PRD. Or when the existing PRD needs a rewrite.
@@ -459,7 +460,7 @@ Setup: `/thumper setup` (one-time). Control: `/thumper on` / `/thumper off` / `/
 
 Fury assembles every agent in VoidForge and runs the complete pipeline: architecture review, full build, three rounds of code review, UX pass, two rounds of security audit, infrastructure review, QA, and test suite — then the Crossfire (adversarial agents from four universes attack each other's work) and the Council (domain specialists verify nobody broke anyone else's fixes).
 
-13 phases, all 8 universes, 40+ agents. Checkpoints after every phase so you can resume across sessions with `/assemble --resume`. Skip the build with `--skip-build` to re-run reviews on existing code. Skip the Crossfire and Council with `--fast` for lower-stakes projects.
+13 phases, all 9 universes, 40+ agents. Checkpoints after every phase so you can resume across sessions with `/assemble --resume`. Skip the build with `--skip-build` to re-run reviews on existing code. Skip the Crossfire and Council with `--fast` for lower-stakes projects.
 
 This is the nuclear option. Use it when quality is non-negotiable.
 
@@ -559,13 +560,20 @@ Steris aggregates spend and revenue across all projects in your VoidForge portfo
 
 Flags: `--summary` (overview), `--optimize` (reallocation suggestions), `--export` (CSV/JSON).
 
+#### `/ai` — Seldon's AI Intelligence Audit
+**When:** Your project uses LLM/AI features — model selection, prompt engineering, tool use, orchestration, or safety.
+
+Hari Seldon audits your AI integration: model selection rationale, prompt quality and versioning, tool-use patterns, orchestration architecture, safety guardrails, and evaluation coverage. Produces a structured report with findings and recommendations. Foundation universe agents provide psychohistorical precision — predicting failure modes before they manifest.
+
+Flags: `--prompts` (prompt audit only), `--safety` (safety review only), `--evals` (evaluation coverage), `--full` (all domains).
+
 ---
 
 ## 6. The Craft
 
 ### Code Patterns
 
-Twenty reference implementations live in `docs/patterns/`. Every pattern includes framework adaptations for Next.js, Express, Django, FastAPI, and Rails. Mobile and game patterns added in v9.2-v9.3. Financial, daemon, SSE, ad platform, and OAuth patterns added in v11-v15.
+Twenty-six reference implementations live in `docs/patterns/`. Every pattern includes framework adaptations for Next.js, Express, Django, FastAPI, and Rails. Mobile and game patterns added in v9.2-v9.3. Financial, daemon, SSE, ad platform, and OAuth patterns added in v11-v15.
 
 | Pattern | File | What It Teaches |
 |---------|------|----------------|
@@ -589,6 +597,12 @@ Twenty reference implementations live in `docs/patterns/`. Every pattern include
 | **Revenue Source Adapter** | `revenue-source-adapter.ts` | Read-only revenue interface with Stripe + Paddle reference implementations |
 | **OAuth Token Lifecycle** | `oauth-token-lifecycle.ts` | Refresh at 80% TTL, failure escalation, vault integration, session token rotation |
 | **Outbound Rate Limiter** | `outbound-rate-limiter.ts` | Token bucket with backpressure, per-provider limits, retry-after handling |
+| **AI Orchestrator** | `ai-orchestrator.ts` | Agent loop, tool use, retry, circuit breaker, fallback |
+| **AI Classifier** | `ai-classifier.ts` | Classification with confidence thresholds, human fallback |
+| **AI Router** | `ai-router.ts` | Intent-based routing with fallback chains |
+| **Prompt Template** | `prompt-template.ts` | Versioned prompts with variable injection, testing |
+| **AI Eval** | `ai-eval.ts` | Golden datasets, scoring, regression detection |
+| **AI Tool Schema** | `ai-tool-schema.ts` | Type-safe tool definitions with provider adapters |
 
 ### Coding Standards
 
