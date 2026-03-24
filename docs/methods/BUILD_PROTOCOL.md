@@ -154,6 +154,16 @@ This catches architecture mistakes that currently escape until Phase 9-11 review
 2. Verify: dev server starts, build passes, lint passes, typecheck passes, `npm test` passes
 3. Log to `/logs/phase-02-infrastructure.md`
 
+**Migration Safety Gate (conditional — if database migrations exist):**
+Before applying any migration to a production database, verify:
+- [ ] New columns added as nullable (or with defaults) — never bare NOT NULL on existing tables
+- [ ] Column removals preceded by code change that stops reading the column (deploy code first, migrate second)
+- [ ] Large table operations use batched processing (no full-table locks on tables >100k rows)
+- [ ] Every migration has a tested rollback/down migration
+- [ ] Data backfills are idempotent (safe to re-run if interrupted)
+- [ ] Migration tested against production-volume data (not just dev fixtures)
+See `docs/patterns/database-migration.ts` for reference implementations.
+
 **Phase 3 — Auth (Kenobi Reviews).**
 1. Providers, login, signup, password reset, sessions, middleware, roles
 2. Password manager compatible
