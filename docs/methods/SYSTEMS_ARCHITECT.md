@@ -90,8 +90,8 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 - **Data's Tech Debt:** Wrong abstractions, missing abstractions, premature optimization, deferred decisions, dependency debt, documentation debt. Each with impact, risk, effort, urgency.
 
 **Step 5 — ADRs + Riker's Decision Review:**
-- **Picard writes ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives.
-- **Riker reviews:** "Number One, does this hold up?" Riker challenges each ADR's trade-offs — are the alternatives truly worse? Are the consequences acceptable? Did we consider the second-order effects? Riker's review prevents architectural decisions made in a vacuum.
+- **Picard writes ADRs:** Architecture Decision Records for every non-obvious choice. Status, context, decision, consequences, alternatives. **Each ADR must include an Implementation Scope field:** "Fully implemented in vX.Y" or "Deferred to vX.Y — no stub code committed." This prevents the pattern where architecture is decided, stubs are shipped as placeholders, and the real implementation never arrives. (Field report: v17.0 assessment found 3,500+ lines of infrastructure built on stub adapters that were "deferred" in v11.0 and never completed through v16.1.)
+- **Riker reviews:** "Number One, does this hold up?" Riker challenges each ADR's trade-offs — are the alternatives truly worse? Are the consequences acceptable? Did we consider the second-order effects? **Riker also verifies the implementation scope is honest** — if an ADR says "fully implemented" but the code throws `'Implement...'`, that's a finding. Riker's review prevents architectural decisions made in a vacuum.
 
 ### `--adr-only` Lightweight Mode
 

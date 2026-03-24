@@ -40,6 +40,7 @@ Autonomous campaign execution: read the PRD, figure out what's next, build it, v
 3. **Scope small.** Each mission is 1-3 PRD sections — a buildable unit, not the whole product.
 4. **Dependency order.** Auth before anything gated. Schema before API. Core before supporting.
 5. **Checkpoint everything.** Update `campaign-state.md` after every mission.
+5.1. **No stubs in missions.** Dax's Step 1 analysis must grep for `throw new Error('Implement` and functions returning hardcoded success without side effects. Existing stubs are mandatory remediation missions before new feature work. New missions may not introduce stubs under any circumstances.
 6. **Context is not a concern at 1M.** The window supports 10+ missions, 40+ agent launches, and full Infinity Gauntlets in a single session. Only suggest a fresh session if `/context` shows >85%. Never reduce quality for context reasons.
 7. **One mission at a time.** Don't plan three missions ahead. Plan one, execute one, reassess.
 8. **Mission scoping follows PRD Section 16** (Launch Sequence) when available.

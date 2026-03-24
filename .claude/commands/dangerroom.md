@@ -22,6 +22,7 @@ Start the wizard server and open the Danger Room:
 2. If not running: start with `node wizard/server.js` or `npx voidforge start`
 3. Open `http://localhost:3141/danger-room` in the default browser
 4. If Cultivation is installed: opens to `#growth` tab by default
+5. **Remote server:** If running on EC2/VPS where port 3141 is not publicly exposed, guide the user to use an SSH tunnel: `ssh -i your-key.pem -L 3141:localhost:3141 user@host` — then open `http://localhost:3141/danger-room` in their local browser. (Field report #122)
 
 ### `/dangerroom install`
 

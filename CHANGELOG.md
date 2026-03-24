@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [17.0.0] - 2026-03-24
+
+### Added
+- **No Stubs Doctrine** — enforced across CLAUDE.md, BUILD_PROTOCOL, CAMPAIGN, GAUNTLET (RC-STUB), ARCHITECT (ADR scope), ASSESS, GROWTH_STRATEGIST, LESSONS. Never ship stub code again.
+- **Sandbox ad platform adapter** — full implementation with realistic campaign data, spend tracking, performance metrics. Enables Cultivation pipeline demo without real API credentials.
+- **Sandbox bank adapter** — full implementation with realistic transactions and balances for treasury demo.
+- **Stripe revenue adapter** — real Stripe API integration via `node:https` (zero new dependencies). connect, getTransactions, getBalance. Free test mode supported.
+- **Danger Room growth tabs** — 4 new tabs: #growth (KPI cards), #campaigns (campaign table), #treasury (vault + budget status), #heartbeat (daemon + token health). 30-second auto-refresh.
+- **Implementation Completeness Policy** (PRD §8.1) — formal policy codifying the No Stubs Doctrine
+- **74 new tests** — financial-vault (13), reconciliation (11), campaign-state-machine (33), sandbox-adapter (17). Total: 93 → 167.
+
+### Changed
+- **Heartbeat daemon wired to real data** — readCampaigns() reads treasury/campaigns/*.json, readTreasurySummary() reads spend/revenue JSONL logs, all 8 scheduled jobs perform real reads and meaningful logging
+- **Heartbeat handlers return 501** (honest "not yet wired") instead of 200 (fake success) for campaign pause/resume/launch/budget — No Stubs Doctrine enforcement
+- **Adapter registry** tracks `implemented: true/false` per platform and `REVENUE_ADAPTERS` registry added
+- **PRD counts corrected** — 260+ agents (was 185+), 30 patterns (was 10), 17 leads (was 15), 9 universes (was 8)
+- **PRD roadmap collapsed** — shipped versions (v4-v16.1) summarized, v17.0 + v17.1+ plan added
+
+### Fixed
+- **X-Forwarded-For parsing** — use leftmost entry (real client IP) not rightmost (proxy 127.0.0.1). Rate limiting and session IP binding were completely broken in remote mode.
+- **Local mode loopback binding** — bind to `127.0.0.1` + `::1` proxy instead of `::` (IPv6 wildcard). Prevents LAN exposure of vault data. (PRD §9.20.1)
+- **Vault unlock rate limiting** — use getClientIp() instead of req.socket.remoteAddress. All users shared one rate limit bucket behind proxy.
+- **Freeze endpoint** — wired to daemon Unix socket with auth token instead of returning fake `{ ok: true }`. Requires deployer RBAC.
+- **AWS credential validation** — calls STS.GetCallerIdentity (SDK already a dependency) instead of format-only check
+- **TOCTOU race in auth setup** — removed outer hasUsers() check, rely on createUser()'s serialized atomic check
+- **Audit log 7-rotation** — retains .1 through .7 instead of single .1 that lost financial audit trail
+- **auth.json backup-before-write** — prevents remote mode lockout on corruption
+- **/api/server/status** — registered via addRoute() for auth middleware coverage in remote mode
+- **Treasury backup size limit** — 100MB per file to prevent unbounded memory allocation
+- **Missing await on buildStateSnapshot()** — heartbeat.json was writing `{}` instead of real state
+- **Stripe error handling** — non-JSON error responses (proxy 502) no longer cause SyntaxError
+- **Sandbox adapter type alignment** — return types match pattern interfaces (externalId, spend, platform, scopes)
+
+### Removed
+- **8 stub adapter files deleted** — meta.ts, google.ts, tiktok.ts, linkedin.ts, twitter.ts, reddit.ts, mercury.ts, brex.ts (610 lines, 77 `throw new Error('Implement...')` calls). Per No Stubs Doctrine: real adapters ship when developer accounts are available (v17.1+).
+- **Dead getClientIp** from tower-rate-limit.ts — single source of truth in tower-auth.ts
+
+### Security
+- Freeze endpoint requires `deployer` role minimum (was accessible to any authenticated user)
+- 3 P0 fixes verified by Kenobi: XFF parsing, loopback binding, vault rate limit IP
+
 ## [16.1.0] - 2026-03-24
 
 ### Added

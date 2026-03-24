@@ -49,6 +49,7 @@ Transform a deployed product into a growing business. The 6-phase growth protoco
 ## Operating Rules
 
 1. **Product does not need to be deployed for installation.** Cultivation's Day-0 setup (vault, treasury, revenue tracking) works pre-launch. The 6-phase growth protocol (below) requires a deployed product for Phases 1+ (reconnaissance reads the live site). Install early, grow when ready.
+1.1. **No stub adapters.** Platform adapters (ad platforms, banks, revenue sources) are either fully implemented with real API calls and tests, or they don't exist as files. A sandbox adapter with realistic fake data counts as a full implementation. A file with `throw new Error('Implement with node:https')` in every method does not ship. Document planned adapters in ROADMAP.md instead.
 2. **Phase order matters.** Reconnaissance before content. Content before distribution. Compliance before launch. Measurement after everything.
 3. **No money without Treasury.** Distribution (Phase 4) can create campaign structures but cannot launch them without `/treasury` set up and heartbeat daemon running.
 4. **Three channels minimum.** Never put all growth eggs in one basket. Organic + Paid + Outreach.
