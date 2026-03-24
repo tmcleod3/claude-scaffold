@@ -97,7 +97,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/void` | Bombadil's forge sync — update VoidForge methodology from upstream | All |
 | `/thumper` | Chani's worm rider — Telegram bridge with Gom Jabbar authentication | Full |
 | `/assemble` | Fury's Initiative — full pipeline: architect → build → 3x review → UX → 2x security → devops → QA → test → crossfire → council | All |
-| `/gauntlet` | Thanos's Comprehensive Review — 5 rounds, 30+ agents, 7 universes. Review-only (no build). 4x QA, 4x UX, 4x security, crossfire, council. The ultimate test. | All |
+| `/gauntlet` | Thanos's Comprehensive Review — 5 rounds, 30+ agents, 9 universes. Review-only (no build). 4x QA, 4x UX, 4x security, crossfire, council. The ultimate test. | All |
 | `/campaign` | Sisko's War Room — read the PRD, pick the next mission, finish the fight, repeat until done | All |
 | `/imagine` | Celebrimbor's Forge — AI image generation from PRD visual descriptions | All |
 | `/debrief` | Bashir's Field Report — post-mortem analysis, upstream feedback via GitHub issues | All |
