@@ -2,7 +2,7 @@
 
 From nothing, everything.
 
-A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 170+ AI agents across 7 fictional universes.
+A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 247 AI agents across 8 fictional universes. 25 slash commands. 20 code patterns. 91 automated tests.
 
 **New here?** Read the **[Holocron](HOLOCRON.md)** -- the complete guide. **Curious about what's next?** Read the **[Prophecy](PROPHECY.md)** -- the roadmap.
 
@@ -42,7 +42,7 @@ voidforge/
 │
 ├── .claude/
 │   ├── settings.json             ← Permissions, hooks
-│   └── commands/                 ← 15 slash commands
+│   └── commands/                 ← 25 slash commands
 │       ├── build.md              ← /build — 13-phase protocol
 │       ├── qa.md                 ← /qa — Batman's QA pass (double-pass)
 │       ├── test.md               ← /test — Batman's test-writing mode
@@ -55,13 +55,23 @@ voidforge/
 │       ├── void.md              ← /void — Bombadil's forge sync
 │       ├── thumper.md           ← /thumper — Chani's worm rider
 │       ├── assemble.md          ← /assemble — Fury's Initiative
-│       ├── campaign.md          ← /campaign — Sisko's Danger Room
+│       ├── campaign.md          ← /campaign — Sisko's War Room
 │       ├── imagine.md           ← /imagine — Celebrimbor's Forge
-│       └── debrief.md           ← /debrief — Bashir's Field Report
+│       ├── debrief.md           ← /debrief — Bashir's Field Report
+│       ├── gauntlet.md          ← /gauntlet — Thanos's Comprehensive Review
+│       ├── deploy.md            ← /deploy — Kusanagi's Deploy Agent
+│       ├── prd.md               ← /prd — Sisko's PRD Generator
+│       ├── assess.md            ← /assess — Picard's Pre-Build Assessment
+│       ├── dangerroom.md        ← /dangerroom — Mission Control Dashboard
+│       ├── cultivation.md       ← /cultivation — Growth Engine Install
+│       ├── grow.md              ← /grow — Kelsier's Growth Protocol
+│       ├── current.md           ← /current — Tuvok's Deep Current
+│       ├── treasury.md          ← /treasury — Dockson's Financial Ops
+│       └── portfolio.md         ← /portfolio — Steris's Cross-Project Financials
 │
 ├── docs/
 │   ├── PRD.md                    ← PRD template with YAML frontmatter
-│   ├── NAMING_REGISTRY.md        ← 170+ characters, 7 universes
+│   ├── NAMING_REGISTRY.md        ← 247 characters, 8 universes
 │   ├── LESSONS.md                ← Cross-project learnings
 │   ├── ARCHITECTURE.md           ← System overview + data flow
 │   ├── SCALING.md                ← Three-tier scaling assessment
@@ -89,7 +99,15 @@ voidforge/
 │   │   ├── MCP_INTEGRATION.md         ← External tool connections
 │   │   ├── PRD_GENERATOR.md           ← PRD auto-generation prompt
 │   │   ├── THUMPER.md                ← Chani — worm rider (Dune)
-│   │   └── ASSEMBLER.md             ← Fury — the initiative
+│   │   ├── ASSEMBLER.md             ← Fury — the initiative
+│   │   ├── FIELD_MEDIC.md           ← Bashir — post-mortems
+│   │   ├── FORGE_ARTIST.md          ← Celebrimbor — image generation
+│   │   ├── CAMPAIGN.md              ← Sisko — war room
+│   │   ├── GAUNTLET.md              ← Thanos — comprehensive review
+│   │   ├── GROWTH_STRATEGIST.md     ← Kelsier — growth, SEO, ads
+│   │   ├── DEEP_CURRENT.md          ← Tuvok — autonomous intelligence
+│   │   ├── TREASURY.md              ← Dockson — financial operations
+│   │   └── HEARTBEAT.md             ← Daemon operations
 │   │
 │   └── patterns/                 ← Reference implementations
 │       ├── api-route.ts          ← Validation, auth, service call
@@ -98,7 +116,18 @@ voidforge/
 │       ├── middleware.ts         ← Auth, logging, rate limiting
 │       ├── error-handling.ts     ← Canonical error strategy
 │       ├── job-queue.ts          ← Idempotency, retry, DLQ
-│       └── multi-tenant.ts       ← Workspace scoping, RBAC
+│       ├── multi-tenant.ts       ← Workspace scoping, RBAC
+│       ├── sse-endpoint.ts       ← Server-Sent Events lifecycle
+│       ├── game-loop.ts          ← Fixed timestep, interpolation
+│       ├── game-state.ts         ← Hierarchical state machine
+│       ├── game-entity.ts        ← Entity Component System
+│       ├── mobile-screen.tsx     ← React Native screen pattern
+│       ├── mobile-service.ts     ← Offline-first with sync
+│       ├── ad-platform-adapter.ts ← Split setup/runtime interfaces
+│       ├── financial-transaction.ts ← Branded Cents, hash chain
+│       ├── daemon-process.ts     ← PID management, signals
+│       ├── oauth-token-lifecycle.ts ← Token refresh at 80% TTL
+│       └── (+ 2 more)           ← revenue-source, rate-limiter
 │
 ├── logs/                         ← Build journal (per-project)
 │   └── build-state.md            ← Master state file
@@ -117,8 +146,9 @@ voidforge/
     ├── server.ts                 ← Local HTTP server (127.0.0.1)
     ├── router.ts                 ← API route registry
     ├── api/                      ← API handlers
-    ├── ui/                       ← Gandalf (setup) + Haku (deploy)
-    └── lib/                      ← Vault, model resolution, provisioners
+    ├── ui/                       ← Gandalf, Haku, Lobby, Tower, Danger Room, War Room, Login
+    ├── __tests__/                ← 91 vitest tests (vault, auth, parser, network, etc.)
+    └── lib/                      ← Vault, auth, provisioners, dashboards, growth, financial
         └── provisioners/         ← Docker, AWS VPS, Vercel, Railway, Cloudflare, S3
 ```
 
@@ -139,8 +169,12 @@ voidforge/
 | Campaign Command | **Sisko** | Star Trek | PRD-to-product campaign, mission sequencing |
 | Forge Artist | **Celebrimbor** | Lord of the Rings | AI image generation from PRD descriptions |
 | Field Medic | **Bashir** | Star Trek | Post-mortem analysis, upstream feedback |
+| The Gauntlet | **Thanos** | Marvel | Comprehensive 5-round review — every domain, every agent |
+| Growth Strategist | **Kelsier** | Cosmere | Growth campaigns, SEO, ads, A/B testing |
+| Deep Current | **Tuvok** | Star Trek | Autonomous campaign intelligence — scan, analyze, propose |
+| Treasury | **Dockson** | Cosmere | Revenue ingest, budget allocation, spend execution |
 
-170+ sub-agents across all 7 universes. See `docs/NAMING_REGISTRY.md`.
+247 sub-agents across all 8 universes. See `docs/NAMING_REGISTRY.md`.
 
 ### Build Protocol
 
@@ -165,6 +199,16 @@ voidforge/
 | `/campaign` | Sisko | Danger Room — autonomous PRD-to-product mission sequencing |
 | `/imagine` | Celebrimbor | Forge — AI image generation from PRD visual descriptions |
 | `/debrief` | Bashir | Field Report — post-mortem analysis, upstream feedback |
+| `/gauntlet` | Thanos | Comprehensive review — 5 rounds, 30+ agents, 6 domains |
+| `/deploy` | Kusanagi | Deploy agent — target detection, health check, rollback |
+| `/prd` | Sisko | PRD generator — 5-act structured interview |
+| `/assess` | Picard | Pre-build assessment — architecture + gap analysis |
+| `/dangerroom` | — | Mission control dashboard — live agent monitoring |
+| `/cultivation` | — | Growth engine install — Cosmere growth universe |
+| `/grow` | Kelsier | 6-phase growth protocol — SEO, ads, content, A/B |
+| `/current` | Tuvok | Deep Current — autonomous campaign intelligence |
+| `/treasury` | Dockson | Financial operations — revenue, budgets, spend |
+| `/portfolio` | Steris | Cross-project financials — aggregated spend/revenue |
 
 ### Wizards (Full Tier)
 
