@@ -69,4 +69,5 @@ jobs:
         if: matrix.branch == 'main'
         run: |
           npm ci
+          npm run typecheck
           npm test

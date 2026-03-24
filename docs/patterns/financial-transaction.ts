@@ -235,10 +235,10 @@ async function atomicWrite(filePath: string, content: string): Promise<void> {
     if (platform() === 'darwin') {
       // macOS: fsync() does NOT guarantee physical durability
       // Must use fcntl(fd, F_FULLFSYNC) — 51 is the macOS constant
-      // @ts-expect-error — fcntl is available via native binding
-      await fd.datasync(); // Node.js datasync maps to fdatasync, not F_FULLFSYNC
+      // Node.js datasync maps to fdatasync, not F_FULLFSYNC
       // In production: use native addon or child_process to call fcntl(fd, 51)
-      // For now: document the gap — fsync is sufficient for crash safety, not power loss
+      // For now: document the gap — datasync is sufficient for crash safety, not power loss
+      await fd.datasync();
     } else {
       await fd.sync();
     }

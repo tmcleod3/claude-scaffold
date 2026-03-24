@@ -30,7 +30,7 @@ addRoute('GET', '/api/server/status', async (_req: IncomingMessage, res: ServerR
 });
 
 // Lazy import — may not exist if node-pty is not installed
-let handleTerminalUpgrade: ((req: IncomingMessage, socket: import('node:stream').Duplex, head: Buffer, session?: unknown) => void) | null = null;
+let handleTerminalUpgrade: ((req: IncomingMessage, socket: import('node:stream').Duplex, head: Buffer, userSession?: SessionInfo) => void) | null = null;
 try { handleTerminalUpgrade = (await import('./api/terminal.js')).handleTerminalUpgrade; } catch { /* node-pty not available */ }
 import { handleDangerRoomUpgrade, closeDangerRoom } from './api/danger-room.js';
 import { handleWarRoomUpgrade, closeWarRoom } from './api/war-room.js';

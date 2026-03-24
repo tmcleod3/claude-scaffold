@@ -230,8 +230,8 @@ class MetaAdapter implements AdPlatformSetup, AdPlatformAdapter {
     return {
       connected: true,
       accountId: this.adAccountId,
-      accountName: res.name,
-      currency: res.currency,
+      accountName: res.name as string | undefined,
+      currency: res.currency as string | undefined,
     };
   }
 
@@ -248,7 +248,7 @@ class MetaAdapter implements AdPlatformSetup, AdPlatformAdapter {
       grant_type: 'fb_exchange_token',
       fb_exchange_token: token.accessToken,
     });
-    return { ...token, accessToken: res.access_token, expiresAt: res.expires_at };
+    return { ...token, accessToken: res.access_token as string, expiresAt: res.expires_at as string };
   }
 
   async createCampaign(config: CampaignConfig): Promise<CampaignResult> {
@@ -260,7 +260,7 @@ class MetaAdapter implements AdPlatformSetup, AdPlatformAdapter {
       special_ad_categories: [],
     });
     return {
-      externalId: res.id,
+      externalId: res.id as string,
       platform: 'meta',
       status: 'created',
       dashboardUrl: `https://www.facebook.com/adsmanager/manage/campaigns?act=${this.adAccountId}&campaign_ids=${res.id}`,
@@ -309,11 +309,12 @@ class MetaAdapter implements AdPlatformSetup, AdPlatformAdapter {
       time_range: JSON.stringify({ since: dateRange.start, until: dateRange.end }),
       level: 'campaign',
     });
+    const resData = res.data as Array<Record<string, string>>;
     return {
       platform: 'meta',
       dateRange,
-      totalSpend: toCents(res.data.reduce((sum: number, r: { spend: string }) => sum + parseFloat(r.spend), 0)),
-      campaigns: res.data.map((r: Record<string, string>) => ({
+      totalSpend: toCents(resData.reduce((sum: number, r: Record<string, string>) => sum + parseFloat(r.spend), 0)),
+      campaigns: resData.map((r: Record<string, string>) => ({
         externalId: r.campaign_id,
         spend: toCents(parseFloat(r.spend)),
         impressions: parseInt(r.impressions),
@@ -328,7 +329,7 @@ class MetaAdapter implements AdPlatformSetup, AdPlatformAdapter {
     const res = await this.apiCall('GET', `/${campaignId}/insights`, undefined, {
       fields: 'impressions,clicks,conversions,spend,ctr,cpc',
     });
-    const d = res.data[0];
+    const d = (res.data as Array<Record<string, string>>)[0];
     const spend = toCents(parseFloat(d.spend));
     const conversions = parseInt(d.conversions || '0');
     const revenue = 0 as Cents; // Revenue comes from Stripe, not the ad platform
@@ -349,7 +350,7 @@ class MetaAdapter implements AdPlatformSetup, AdPlatformAdapter {
     const res = await this.apiCall('GET', `/${campaignId}/insights`, undefined, {
       fields: metrics.join(','),
     });
-    return { campaignId, metrics: res.data[0] ?? {} };
+    return { campaignId, metrics: (res.data as Array<Record<string, number>>)[0] ?? {} };
   }
 
   // ── Helpers ──────────────────────

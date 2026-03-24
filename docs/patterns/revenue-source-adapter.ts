@@ -88,6 +88,44 @@ interface BalanceResult {
   currency: 'USD';
 }
 
+// ── API Response Shapes (for type-safe access on apiCall results) ─────
+
+/** Shape of Stripe /account response fields we access */
+interface StripeAccountResponse {
+  id: string;
+  business_profile?: { name?: string };
+  email?: string;
+  default_currency?: string;
+  [key: string]: unknown;
+}
+
+/** Shape of Stripe /events list response */
+interface StripeEventsResponse {
+  data: Array<Record<string, unknown>>;
+  has_more: boolean;
+  [key: string]: unknown;
+}
+
+/** Shape of Stripe /balance response */
+interface StripeBalanceResponse {
+  available: Array<{ currency: string; amount: number }>;
+  pending: Array<{ currency: string; amount: number }>;
+  [key: string]: unknown;
+}
+
+/** Shape of Paddle /businesses response */
+interface PaddleBusinessesResponse {
+  data: Array<{ id: string; name: string; currency_code: string }>;
+  [key: string]: unknown;
+}
+
+/** Shape of Paddle /transactions response */
+interface PaddleTransactionsResponse {
+  data: Array<Record<string, unknown>>;
+  meta?: { pagination?: { next?: string } };
+  [key: string]: unknown;
+}
+
 // ── Reference Implementation: Stripe ──────────────────
 
 class StripeAdapter implements RevenueSourceAdapter {
@@ -97,7 +135,7 @@ class StripeAdapter implements RevenueSourceAdapter {
   async connect(credentials: RevenueCredentials): Promise<ConnectionResult> {
     this.apiKey = credentials.apiKey || '';
     try {
-      const account = await this.apiCall('GET', '/account');
+      const account = await this.apiCall('GET', '/account') as StripeAccountResponse;
       return {
         connected: true,
         accountId: account.id,
@@ -124,7 +162,7 @@ class StripeAdapter implements RevenueSourceAdapter {
     };
     if (cursor) params.starting_after = cursor;
 
-    const data = await this.apiCall('GET', '/events', params);
+    const data = await this.apiCall('GET', '/events', params) as StripeEventsResponse;
     const transactions: RevenueTransaction[] = data.data.map((event: Record<string, unknown>) => {
       const charge = (event.data as Record<string, unknown>)?.object as Record<string, unknown>;
       return {
@@ -142,15 +180,15 @@ class StripeAdapter implements RevenueSourceAdapter {
 
     return {
       transactions,
-      hasMore: data.has_more,
-      cursor: data.data.length > 0 ? data.data[data.data.length - 1].id : undefined,
+      hasMore: data.has_more as boolean,
+      cursor: data.data.length > 0 ? data.data[data.data.length - 1].id as string : undefined,
     };
   }
 
   async getBalance(): Promise<BalanceResult> {
-    const data = await this.apiCall('GET', '/balance');
-    const usd = data.available?.find((b: Record<string, unknown>) => b.currency === 'usd');
-    const pending = data.pending?.find((b: Record<string, unknown>) => b.currency === 'usd');
+    const data = await this.apiCall('GET', '/balance') as StripeBalanceResponse;
+    const usd = data.available.find((b) => b.currency === 'usd');
+    const pending = data.pending.find((b) => b.currency === 'usd');
     return {
       available: (usd?.amount || 0) as Cents,
       pending: (pending?.amount || 0) as Cents,
@@ -198,7 +236,7 @@ class PaddleAdapter implements RevenueSourceAdapter {
   async connect(credentials: RevenueCredentials): Promise<ConnectionResult> {
     this.apiKey = credentials.apiKey || '';
     try {
-      const data = await this.apiCall('GET', '/businesses');
+      const data = await this.apiCall('GET', '/businesses') as PaddleBusinessesResponse;
       const biz = data.data?.[0];
       return {
         connected: true,
@@ -224,18 +262,24 @@ class PaddleAdapter implements RevenueSourceAdapter {
     };
     if (cursor) params.after = cursor;
 
-    const data = await this.apiCall('GET', '/transactions', params);
-    const transactions: RevenueTransaction[] = data.data.map((txn: Record<string, unknown>) => ({
-      externalId: txn.id as string,
-      type: mapPaddleStatus(txn.status as string),
-      amount: Math.round(parseFloat(txn.details?.totals?.total as string || '0') * 100) as Cents,
-      currency: 'USD' as const,
-      description: (txn.items?.[0]?.price?.description as string) || '',
-      customerId: txn.customer_id ? hashCustomerId(txn.customer_id as string) : undefined,
-      subscriptionId: txn.subscription_id as string | undefined,
-      metadata: (txn.custom_data as Record<string, string>) || {},
-      createdAt: txn.created_at as string,
-    }));
+    const data = await this.apiCall('GET', '/transactions', params) as PaddleTransactionsResponse;
+    const transactions: RevenueTransaction[] = data.data.map((txn: Record<string, unknown>) => {
+      const details = txn.details as Record<string, unknown> | undefined;
+      const totals = details?.totals as Record<string, unknown> | undefined;
+      const items = txn.items as Array<Record<string, unknown>> | undefined;
+      const firstItemPrice = items?.[0]?.price as Record<string, unknown> | undefined;
+      return {
+        externalId: txn.id as string,
+        type: mapPaddleStatus(txn.status as string),
+        amount: Math.round(parseFloat(totals?.total as string || '0') * 100) as Cents,
+        currency: 'USD' as const,
+        description: (firstItemPrice?.description as string) || '',
+        customerId: txn.customer_id ? hashCustomerId(txn.customer_id as string) : undefined,
+        subscriptionId: txn.subscription_id as string | undefined,
+        metadata: (txn.custom_data as Record<string, string>) || {},
+        createdAt: txn.created_at as string,
+      };
+    });
 
     return {
       transactions,
