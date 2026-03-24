@@ -128,6 +128,13 @@
 
 ---
 
+## Common Deployment Issues
+
+### Never build on a running production server
+Running `npm run build` (or `npx next build`, `bundle exec rails assets:precompile`, etc.) on a server actively serving traffic replaces compiled assets (`.next/`, `dist/`, `public/assets/`) while the process manager serves old HTML referencing old chunk hashes. Result: all client JS 404s, blank pages. **Always stop the server, build, then restart.** Or better: build on a separate machine and deploy the artifact. (Field report #149)
+
+---
+
 ## Common Cross-Phase Failures
 
 ### Static asset returns text/html

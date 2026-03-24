@@ -92,15 +92,15 @@
     const pct = Math.round(usage.percent);
     const offset = 88 - (88 * pct / 100);
     fill.style.strokeDashoffset = offset;
-    if (pct < 50) fill.setAttribute('stroke', '#34d399');
-    else if (pct < 70) fill.setAttribute('stroke', '#fbbf24');
-    else fill.setAttribute('stroke', '#ef4444');
+    if (pct < 50) fill.style.stroke = 'var(--success)';
+    else if (pct < 70) fill.style.stroke = 'var(--warning)';
+    else fill.style.stroke = 'var(--error)';
     text.textContent = pct + '%';
     if (gauge) gauge.setAttribute('aria-valuenow', pct);
     // Compact header indicator (always visible — Gauntlet UX-005)
     if (headerCtx) {
       headerCtx.textContent = pct + '%';
-      headerCtx.style.color = pct < 50 ? '#34d399' : pct < 70 ? '#fbbf24' : '#ef4444';
+      headerCtx.style.color = pct < 50 ? 'var(--success)' : pct < 70 ? 'var(--warning)' : 'var(--error)';
       headerCtx.style.borderColor = headerCtx.style.color;
     }
     if (modelDisplay && usage.model) modelDisplay.textContent = usage.model;
@@ -186,7 +186,7 @@
     const pct = total > 0 ? Math.round(complete / total * 100) : 0;
     container.innerHTML = `<div style="margin-bottom:6px">${complete}/${total} sections (${pct}%)</div>` +
       `<div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">` +
-      `<div style="height:100%;width:${pct}%;background:#34d399;border-radius:3px;transition:width 0.5s"></div></div>`;
+      `<div style="height:100%;width:${pct}%;background:var(--success);border-radius:3px;transition:width 0.5s"></div></div>`;
   }
 
   // ── Test Suite ───────────────────────────────────
@@ -195,8 +195,8 @@
     const container = document.getElementById('test-status');
     if (!testData) { container.textContent = 'No test data'; return; }
     container.innerHTML =
-      `<span style="color:#34d399">${testData.pass || 0} pass</span> · ` +
-      `<span style="color:#ef4444">${testData.fail || 0} fail</span> · ` +
+      `<span style="color:var(--success)">${testData.pass || 0} pass</span> · ` +
+      `<span style="color:var(--error)">${testData.fail || 0} fail</span> · ` +
       `<span style="color:var(--text-dim)">${testData.skip || 0} skip</span>`;
   }
 
@@ -212,8 +212,8 @@
     var running = data.experiments.filter(function(e) { return e.status === 'running'; }).length;
     var planned = data.experiments.filter(function(e) { return e.status === 'planned'; }).length;
     container.innerHTML =
-      '<span style="color:#34d399">' + complete + ' complete</span> · ' +
-      '<span style="color:#fbbf24">' + running + ' running</span> · ' +
+      '<span style="color:var(--success)">' + complete + ' complete</span> · ' +
+      '<span style="color:var(--warning)">' + running + ' running</span> · ' +
       '<span style="color:var(--text-dim)">' + planned + ' planned</span>';
   }
 

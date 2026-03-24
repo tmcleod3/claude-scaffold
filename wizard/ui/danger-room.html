@@ -9,9 +9,9 @@
   <style>
     body { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); }
 
-    /* Danger Room Layout */
-    .danger-room { display: grid; grid-template-columns: 1fr 280px; grid-template-rows: auto 1fr auto; height: 100vh; }
-    .danger-room-header { grid-column: 1 / -1; padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    /* Danger Room Layout — 5-row grid: header, tab-bar, banner, main+sidebar, ticker */
+    .danger-room { display: grid; grid-template-columns: 1fr 280px; grid-template-rows: auto auto auto 1fr auto; height: 100vh; }
+    .danger-room-header { grid-column: 1 / -1; grid-row: 1; padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .danger-room-title { font-size: 16px; font-weight: 700; color: var(--accent); }
     .danger-room-version { font-size: 12px; color: var(--text-dim); }
     .danger-room-nav { display: flex; gap: 8px; }
@@ -19,10 +19,10 @@
     .danger-room-nav a:hover { background: var(--bg-card); color: var(--text); }
 
     /* Main Panel Area */
-    .main-panels { padding: 16px; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+    .main-panels { grid-column: 1; grid-row: 4; padding: 16px; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
 
     /* Sidebar */
-    .sidebar { border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .sidebar { grid-column: 2; grid-row: 4; border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 
     /* Panel Card */
     .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
@@ -32,8 +32,8 @@
     /* Campaign Timeline */
     .timeline { display: flex; gap: 4px; flex-wrap: wrap; }
     .timeline-item { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
-    .timeline-complete { background: #065f46; color: #34d399; }
-    .timeline-active { background: #713f12; color: #fbbf24; animation: pulse 2s infinite; }
+    .timeline-complete { background: #065f46; color: var(--success); }
+    .timeline-active { background: #713f12; color: var(--warning); animation: pulse 2s infinite; }
     .timeline-pending { background: var(--bg); color: var(--text-dim); border: 1px solid var(--border); }
     .timeline-blocked { background: #7f1d1d; color: #fca5a5; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
@@ -42,8 +42,8 @@
     .pipeline { display: flex; flex-direction: column; gap: 3px; }
     .pipeline-phase { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 3px 0; }
     .pipeline-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .pipeline-dot.complete { background: #34d399; }
-    .pipeline-dot.active { background: #fbbf24; animation: pulse 2s infinite; }
+    .pipeline-dot.complete { background: var(--success); }
+    .pipeline-dot.active { background: var(--warning); animation: pulse 2s infinite; }
     .pipeline-dot.pending { background: var(--border); }
     .pipeline-dot.skipped { background: var(--text-dim); opacity: 0.5; }
     .pipeline-label { color: var(--text-dim); }
@@ -62,11 +62,11 @@
     .gauge { position: relative; width: 80px; height: 80px; margin: 0 auto; }
     .gauge svg { width: 80px; height: 80px; transform: rotate(-90deg); }
     .gauge-track { fill: none; stroke: var(--border); stroke-width: 6; }
-    .gauge-fill { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.5s, stroke 0.5s; }
+    .gauge-fill { fill: none; stroke: var(--success); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.5s, stroke 0.5s; }
     .gauge-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
 
     /* Agent Activity Ticker */
-    .ticker { grid-column: 1 / -1; border-top: 1px solid var(--border); padding: 6px 20px; font-size: 11px; color: var(--text-dim); overflow: hidden; white-space: nowrap; }
+    .ticker { grid-column: 1 / -1; grid-row: 5; border-top: 1px solid var(--border); padding: 6px 20px; font-size: 11px; color: var(--text-dim); overflow: hidden; white-space: nowrap; }
     .ticker-item { display: inline; margin-right: 24px; }
     .ticker-agent { color: var(--accent); font-weight: 600; }
 
@@ -74,8 +74,8 @@
     .tier-section { grid-column: 1 / -1; margin-top: 4px; }
     .tier-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); opacity: 0.85; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .tier-label::before { content: ''; width: 8px; height: 8px; flex-shrink: 0; }
-    .tier-live .tier-label::before { background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
-    .tier-campaign .tier-label::before { background: #fbbf24; border-radius: 2px; } /* square = campaign */
+    .tier-live .tier-label::before { background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
+    .tier-campaign .tier-label::before { background: var(--warning); border-radius: 2px; } /* square = campaign */
     .tier-system .tier-label::before { opacity: 0.5; border-radius: 50%; border: 1px solid var(--text-dim); background: none; } /* hollow circle = system */
     .tier-live .tier-content { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
     .tier-campaign .tier-content { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -91,8 +91,8 @@
     /* Deploy Status */
     .deploy-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
     .deploy-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .deploy-dot.live { background: #34d399; }
-    .deploy-dot.down { background: #ef4444; }
+    .deploy-dot.live { background: var(--success); }
+    .deploy-dot.down { background: var(--error); }
     .deploy-dot.unknown { background: var(--border); }
 
     /* Version Badge */
@@ -103,7 +103,7 @@
     a:focus-visible, .panel:focus-visible, .tab-panel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
     /* ── Tab Navigation (§9.20.2) ── */
-    .tab-bar { display: none; gap: 2px; padding: 0 20px; border-bottom: 1px solid var(--border); background: var(--bg); }
+    .tab-bar { display: none; gap: 2px; padding: 0 20px; border-bottom: 1px solid var(--border); background: var(--bg); grid-column: 1 / -1; grid-row: 2; }
     .tab-bar.active { display: flex; }
     .tab-bar [role="tab"] {
       padding: 8px 16px; font-size: 12px; font-weight: 600; color: var(--text-dim);
@@ -116,17 +116,7 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
 
-    /* ── Financial Color Tokens (§9.15.3) ── */
-    :root {
-      --fin-positive: #22c55e;
-      --fin-negative: #ef4444;
-      --fin-warning: #f59e0b;
-      --fin-neutral: #94a3b8;
-      --fin-healthy: #22c55e;
-      --fin-error: #ef4444;
-      --fin-inactive: #475569;
-      --fin-frozen: #3b82f6;
-    }
+    /* Financial Color Tokens — defined in styles.css :root (§9.15.3) */
 
     /* ── Growth Tab Panels ── */
     .kpi-row { display: flex; gap: 12px; grid-column: 1 / -1; }
@@ -150,7 +140,7 @@
     .freeze-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     /* ── Reconnection Banner (§9.19.9) ── */
-    .reconnect-banner { display: none; grid-column: 1 / -1; padding: 8px 20px; font-size: 12px; text-align: center; }
+    .reconnect-banner { display: none; grid-column: 1 / -1; grid-row: 3; padding: 8px 20px; font-size: 12px; text-align: center; }
     .reconnect-banner.reconnecting { display: block; background: var(--fin-warning); color: #000; }
     .reconnect-banner.failed { display: block; background: var(--fin-negative); color: white; }
 
@@ -159,9 +149,13 @@
 
     /* ── Responsive ── */
     @media (max-width: 700px) {
-      .danger-room { grid-template-columns: 1fr; }
-      .sidebar { border-left: none; border-top: 1px solid var(--border); }
-      .main-panels { grid-template-columns: 1fr; }
+      .danger-room { grid-template-columns: 1fr; grid-template-rows: auto auto auto 1fr auto auto; }
+      .danger-room-header { grid-column: 1; grid-row: 1; }
+      .tab-bar { grid-column: 1; grid-row: 2; }
+      .reconnect-banner { grid-column: 1; grid-row: 3; }
+      .main-panels { grid-column: 1; grid-row: 4; grid-template-columns: 1fr; }
+      .sidebar { grid-column: 1; grid-row: 5; border-left: none; border-top: 1px solid var(--border); }
+      .ticker { grid-column: 1; grid-row: 6; }
       .tab-panel.active { grid-template-columns: 1fr; }
       .tier-live .tier-content { grid-template-columns: 1fr; }
       .tier-campaign .tier-content { grid-template-columns: 1fr; }
@@ -231,7 +225,7 @@
           <!-- Context Gauge (inline — moved from sidebar for prominence) -->
           <div class="panel" role="region" aria-label="Context Usage">
             <div class="gauge" id="context-gauge" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Context window usage">
-              <svg viewBox="0 0 36 36"><circle class="gauge-track" cx="18" cy="18" r="14" /><circle class="gauge-fill" id="gauge-fill" cx="18" cy="18" r="14" stroke-dasharray="88" stroke-dashoffset="88" stroke="#34d399" /></svg>
+              <svg viewBox="0 0 36 36"><circle class="gauge-track" cx="18" cy="18" r="14" /><circle class="gauge-fill" id="gauge-fill" cx="18" cy="18" r="14" stroke-dasharray="88" stroke-dashoffset="88" /></svg>
               <div class="gauge-text" id="gauge-text">&mdash;%</div>
             </div>
             <div style="text-align:center;margin-top:4px;font-size:10px;color:var(--text-dim);" id="context-model"></div>
