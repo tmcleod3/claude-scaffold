@@ -2,9 +2,123 @@
 
 > The plan for the plan-maker.
 
-**Current:** v15.2.1 (2026-03-23)
-**Status:** All planned versions through v15.2 shipped. v4.0–v15.2 below are historical — completed work, not future plans. Zero open issues.
-**91 tests**, 8 universes, 247 agents, 25 slash commands.
+**Current:** v16.0.0 (2026-03-24)
+**Status:** All planned versions through v16.0 shipped. v4.0–v16.0 below are historical.
+**91 tests**, 9 universes, 260+ agents, 26 slash commands, 26 code patterns.
+
+---
+
+## v16.0 — The Psychohistorians (AI Intelligence Layer)
+
+*"Violence is the last refuge of the incompetent." — Salvor Hardin*
+
+**The problem:** Modern applications increasingly include an AI/LLM intelligence layer — model-powered decision-making that replaces or augments traditional business logic (routing, classification, generation, orchestration, tool-use). No VoidForge agent currently owns this domain. Batman tests code but not AI behavior. Kenobi audits security but not prompt injection. Picard reviews architecture but not orchestration patterns. The AI layer falls through the cracks.
+
+**The solution:** A dedicated agent domain — the **Foundation universe (Isaac Asimov)** — owning everything about the AI intelligence layer: model selection, prompt engineering, tool-use schemas, orchestration patterns, failure modes, token economics, evaluation, safety, versioning, and observability.
+
+### The Metaphor
+
+Psychohistory IS predictive AI. Hari Seldon created a system that predicts outcomes from data patterns, adapts when reality deviates (Seldon Crises), and maintains a "Plan" across centuries. The Foundation universe maps perfectly:
+
+| Foundation Concept | AI Intelligence Concept |
+|---|---|
+| Psychohistory | The predictive model — statistical patterns → decisions |
+| The Seldon Plan | The system prompt / orchestration strategy |
+| Seldon Crises | AI failure modes — when reality deviates from the model |
+| The Mule | Adversarial inputs — something the model can't predict |
+| The Second Foundation | The evaluation layer — secretly monitoring and correcting |
+| The Encyclopedia | The training data / knowledge base / RAG corpus |
+| Terminus | Production — where AI decisions have real consequences |
+| Trantor | The infrastructure — massive scale, single point of failure |
+
+### Lead Agent: Hari Seldon — AI Intelligence Architect
+
+*"The fall is inevitable. The recovery can be guided."*
+
+**Domain ownership:** All AI/LLM-powered decision-making within a VoidForge-built application. Model selection, prompt engineering, tool-use schemas, orchestration patterns, failure modes, token optimization, evaluation, AI safety, model versioning, and LLM observability.
+
+**Behavioral directives:**
+1. **Predictive, not reactive.** Identify AI failure modes before they manifest.
+2. **Measure everything.** If you can't measure whether AI output is correct, you can't ship it.
+3. **The right model for the job.** Opus for reasoning, Sonnet for speed, Haiku for classification.
+4. **Prompts are code.** Versioned, tested, reviewed with the same rigor as source code.
+5. **Trust, but verify.** AI outputs are suggestions until validated.
+6. **Defense in depth.** Prompt injection is the new SQL injection. Guard inputs, outputs, and the system prompt.
+7. **Graceful degradation.** When the model fails, the application must still function.
+
+### Sub-Agent Roster (12 agents)
+
+| # | Agent | Name | Universe | Role |
+|---|---|---|---|---|
+| 1 | Model Selector | **Salvor Hardin** | Foundation | Right model for the task, cost-performance, latency budgets |
+| 2 | Prompt Architect | **Gaal Dornick** | Foundation | Prompt structure, guardrails, few-shot strategy, testability |
+| 3 | Tool Schema Validator | **Hober Mallow** | Foundation | Function definitions, parameter types, tool descriptions |
+| 4 | Orchestration Reviewer | **Bel Riose** | Foundation | Chains, agent loops, workflows, reliability, bounded iteration |
+| 5 | Failure Mode Analyst | **The Mule** | Foundation | Hallucination, refusal, timeout, context overflow, adversarial |
+| 6 | Token Economist | **Ducem Barr** | Foundation | Token tracking, caching, batching, cost optimization |
+| 7 | Eval Specialist | **Bayta Darell** | Foundation | Golden datasets, A/B testing, regression detection, scoring |
+| 8 | Safety Guardian | **Bliss** | Foundation (Gaia) | Prompt injection, PII, content filtering, alignment |
+| 9 | Versioning Specialist | **R. Daneel Olivaw** | Foundation/Robots | Model migration, prompt versioning, behavior regression |
+| 10 | Observability Engineer | **Dors Venabili** | Foundation | Traces, decision audit trails, quality dashboards |
+| 11 | Context Engineer | **Janov Pelorat** | Foundation | RAG pipelines, embeddings, retrieval, chunking, context windows |
+| 12 | Output Validator | **Wanda Seldon** | Foundation | Schema validation, parse-failure retry, structured output |
+
+### New Command: `/ai` — Seldon's Intelligence Audit
+
+Standalone command + integrated into existing commands:
+
+| Command | Integration Point |
+|---------|------------------|
+| `/build` | Phase 4+ when AI features detected (frontmatter `ai: yes`) |
+| `/campaign` | Missions with AI features get Seldon review |
+| `/gauntlet` | 7th Stone: **Wisdom** — full AI audit in Rounds 2-5 |
+| `/assemble` | Phase 6.5 after integrations, before admin/ops |
+| `/security` | Bliss handoff from Kenobi for AI safety |
+| `/qa` | Bayta handoff from Batman for AI behavior testing |
+| `/prd` | New AI Architecture section + frontmatter fields |
+| `/review` | Seldon's team reviews AI code alongside Picard |
+
+### New Pattern Files (6)
+
+| Pattern | File | Purpose |
+|---------|------|---------|
+| AI Orchestrator | `ai-orchestrator.ts` | Agent loop, tool use, retry, circuit breaker, fallback |
+| AI Classifier | `ai-classifier.ts` | Classification with confidence thresholds, human fallback |
+| AI Router | `ai-router.ts` | Intent-based routing with fallback chains |
+| Prompt Template | `prompt-template.ts` | Versioned prompts with variable injection, testing |
+| AI Eval | `ai-eval.ts` | Golden datasets, scoring functions, regression detection |
+| Tool Schema | `ai-tool-schema.ts` | Type-safe tool definitions with provider adapters |
+
+### New Method Doc: `AI_INTELLIGENCE.md`
+
+5-phase protocol:
+1. **Phase 0 — AI Surface Map:** Find all LLM integration points
+2. **Phase 1 — Parallel Audits:** Salvor Hardin (models) + Gaal Dornick (prompts) + Hober Mallow (tools) + Bliss (safety)
+3. **Phase 2 — Sequential Audits:** Bel Riose (orchestration) → The Mule (failures) → Ducem Barr (cost) → Bayta Darell (evals) → Dors Venabili (observability)
+4. **Phase 3 — Remediate:** Fix all Critical + High findings
+5. **Phase 4 — Re-Verify:** The Mule + Wanda Seldon re-probe fixed areas
+
+### New PRD Frontmatter
+
+```yaml
+ai: yes                           # Activates Seldon's review across all commands
+ai_provider: "anthropic"          # anthropic | openai | local | multi
+ai_models: ["claude-sonnet-4-6"]  # Models used in the application
+ai_features: ["classification", "generation", "tool-use", "routing"]
+```
+
+### Campaign Structure (estimated 5-6 missions)
+
+| Mission | What Gets Built |
+|---------|----------------|
+| 1 | Foundation universe in NAMING_REGISTRY.md, agent definitions, `/ai` command file |
+| 2 | `AI_INTELLIGENCE.md` method doc — full 5-phase protocol |
+| 3 | 6 new pattern files (`ai-orchestrator.ts` through `ai-tool-schema.ts`) |
+| 4 | Integration points — modify `/build`, `/gauntlet`, `/assemble`, `/campaign`, `/security`, `/qa`, `/review`, `/prd` |
+| 5 | PRD frontmatter + CLAUDE.md updates + HOLOCRON.md AI section |
+| 6 | Victory Gauntlet |
+
+**Breaking changes:** New universe (9th), new lead agent (18th), new command (26th). Version: **MAJOR (v16.0)**.
 
 ---
 

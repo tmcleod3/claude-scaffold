@@ -2,7 +2,7 @@
 
 From nothing, everything.
 
-A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 247 AI agents across 8 fictional universes. 25 slash commands. 20 code patterns. 91 automated tests.
+A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 260+ AI agents across 9 fictional universes. 26 slash commands. 26 code patterns. 91 automated tests.
 
 **New here?** Read the **[Holocron](HOLOCRON.md)** -- the complete guide. **Curious about what's next?** Read the **[Prophecy](PROPHECY.md)** -- the roadmap.
 
@@ -42,7 +42,7 @@ voidforge/
 │
 ├── .claude/
 │   ├── settings.json             ← Permissions, hooks
-│   └── commands/                 ← 25 slash commands
+│   └── commands/                 ← 26 slash commands
 │       ├── build.md              ← /build — 13-phase protocol
 │       ├── qa.md                 ← /qa — Batman's QA pass (double-pass)
 │       ├── test.md               ← /test — Batman's test-writing mode
@@ -67,11 +67,12 @@ voidforge/
 │       ├── grow.md              ← /grow — Kelsier's Growth Protocol
 │       ├── current.md           ← /current — Tuvok's Deep Current
 │       ├── treasury.md          ← /treasury — Dockson's Financial Ops
-│       └── portfolio.md         ← /portfolio — Steris's Cross-Project Financials
+│       ├── portfolio.md         ← /portfolio — Steris's Cross-Project Financials
+│       └── ai.md                ← /ai — Seldon's AI Intelligence Audit
 │
 ├── docs/
 │   ├── PRD.md                    ← PRD template with YAML frontmatter
-│   ├── NAMING_REGISTRY.md        ← 247 characters, 8 universes
+│   ├── NAMING_REGISTRY.md        ← 260+ characters, 9 universes
 │   ├── LESSONS.md                ← Cross-project learnings
 │   ├── ARCHITECTURE.md           ← System overview + data flow
 │   ├── SCALING.md                ← Three-tier scaling assessment
@@ -107,7 +108,8 @@ voidforge/
 │   │   ├── GROWTH_STRATEGIST.md     ← Kelsier — growth, SEO, ads
 │   │   ├── DEEP_CURRENT.md          ← Tuvok — autonomous intelligence
 │   │   ├── TREASURY.md              ← Dockson — financial operations
-│   │   └── HEARTBEAT.md             ← Daemon operations
+│   │   ├── HEARTBEAT.md             ← Daemon operations
+│   │   └── AI_INTELLIGENCE.md         ← Hari Seldon — AI intelligence
 │   │
 │   └── patterns/                 ← Reference implementations
 │       ├── api-route.ts          ← Validation, auth, service call
@@ -127,7 +129,14 @@ voidforge/
 │       ├── financial-transaction.ts ← Branded Cents, hash chain
 │       ├── daemon-process.ts     ← PID management, signals
 │       ├── oauth-token-lifecycle.ts ← Token refresh at 80% TTL
-│       └── (+ 2 more)           ← revenue-source, rate-limiter
+│       ├── revenue-source-adapter.ts ← Read-only revenue interface
+│       ├── outbound-rate-limiter.ts ← Token bucket with backpressure
+│       ├── ai-orchestrator.ts   ← Agent loop, tool use, retry
+│       ├── ai-classifier.ts    ← Classification with confidence thresholds
+│       ├── ai-router.ts        ← Intent-based routing with fallback chains
+│       ├── prompt-template.ts   ← Versioned prompts with variable injection
+│       ├── ai-eval.ts          ← Golden datasets, scoring, regression
+│       └── ai-tool-schema.ts   ← Type-safe tool definitions
 │
 ├── logs/                         ← Build journal (per-project)
 │   └── build-state.md            ← Master state file
@@ -173,8 +182,9 @@ voidforge/
 | Growth Strategist | **Kelsier** | Cosmere | Growth campaigns, SEO, ads, A/B testing |
 | Deep Current | **Tuvok** | Star Trek | Autonomous campaign intelligence — scan, analyze, propose |
 | Treasury | **Dockson** | Cosmere | Revenue ingest, budget allocation, spend execution |
+| AI Intelligence | **Hari Seldon** | Foundation | Model selection, prompts, orchestration, AI safety |
 
-247 sub-agents across all 8 universes. See `docs/NAMING_REGISTRY.md`.
+260+ sub-agents across all 9 universes. See `docs/NAMING_REGISTRY.md`.
 
 ### Build Protocol
 
@@ -209,6 +219,7 @@ voidforge/
 | `/current` | Tuvok | Deep Current — autonomous campaign intelligence |
 | `/treasury` | Dockson | Financial operations — revenue, budgets, spend |
 | `/portfolio` | Steris | Cross-project financials — aggregated spend/revenue |
+| `/ai` | Hari Seldon | AI intelligence audit — models, prompts, tools, safety, evals |
 
 ### Wizards (Full Tier)
 

@@ -147,6 +147,7 @@ Dax reads the Prophets' plan:
    - **Asset** — images, illustrations, SVGs, OG images, custom icons (require external generation)
    - **Copy** — marketing text, metadata descriptions, numeric claims (buildable but need accuracy verification)
    - **Infrastructure** — DNS, env vars, deployments, third-party dashboard setup (require CLI/dashboard access)
+   - **AI** — features using LLM APIs for classification, generation, routing, orchestration, or tool-use. AI features trigger Seldon review during or after the build mission.
    - **Vault-Available** — infrastructure items where credentials exist in `~/.voidforge/vault.enc` but haven't been injected into `.env`. When scanning `.env.example` against `.env`, check if missing vars are in the vault before marking BLOCKED. Vault-backed credentials can be auto-resolved by running `voidforge deploy`. (Field report #40: 5 items classified as BLOCKED for an entire 10-mission campaign when the vault had the credentials.)
 7. Diff: PRD requirements vs. implemented features (structural AND semantic — not just "does the route exist?" but "does the component render what the PRD describes?")
 8. Produce: **The Prophecy Board** — ordered list of missions with scope, plus a separate list of BLOCKED items (assets, credentials, user decisions)

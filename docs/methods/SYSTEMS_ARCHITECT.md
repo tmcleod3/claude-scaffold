@@ -76,6 +76,8 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 
 Synthesize findings from all three agents.
 
+**Seldon Review (conditional — if AI architecture detected):** When the system includes AI/LLM components, Picard delegates AI-specific architecture review to Hari Seldon. Seldon evaluates: orchestration pattern appropriateness, model selection justification, prompt management strategy, and AI observability architecture. Findings feed into Picard's ADR process.
+
 **Step 2 — Scotty's Service Architecture:** Boundary assessment, monolith vs services (default: monolith until specific reason to split), async vs sync decisions. Informed by Spock's schema, Uhura's integrations, and Worf's security flags.
 
 **Step 3 — Scotty's Scaling Assessment + Torres's Performance Architecture:**

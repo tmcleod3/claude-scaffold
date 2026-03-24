@@ -30,8 +30,8 @@ Fury calls ALL of them. That's the point.
 |-------|-----------|----------|
 | Architecture | Picard | Star Trek |
 | Build | Stark + Galadriel + Kusanagi | Marvel + Tolkien + Anime |
-| Review (3x) | Picard (Spock, Seven, Data) | Star Trek |
-| UX | Galadriel | Tolkien |
+| Review (3x) | Picard (Spock, Seven, Data + Rogers, Banner, Strange, Barton, Romanoff, Thor, Wanda, T'Challa + Nightwing, Bilbo, Troi, Constantine, Samwise) | Star Trek + Marvel + cross-domain |
+| UX | Galadriel (full Tolkien roster) | Tolkien |
 | Security (2x) | Kenobi | Star Wars |
 | DevOps | Kusanagi | Anime |
 | QA | Batman | DC Comics |
@@ -63,12 +63,17 @@ Fury calls ALL of them. That's the point.
 | 2.5 | Smoke test (Hawkeye) | 1 | Endpoints return expected status, no route collisions, no render loops |
 | 3-5 | /review | 3 | Zero Must Fix items. **UI→server trace:** for every `fetch()` in UI code, verify the server route exists. |
 | 6 | /ux (usability + a11y) | 1 | Zero critical usability or a11y findings |
+| 6.5 | Seldon's AI Review (conditional) | 1 | Zero Critical/High AI findings |
 | 7-8 | /security | 2 | Zero Critical/High findings |
 | 9 | /devops (+ deployment verification) | 1 | Deploy scripts, monitoring, smoke tests, live deploy status |
 | 10 | /qa | 1 | All critical/high bugs fixed |
 | 11 | /test | 1 | Suite green, coverage acceptable |
 | 12 | Crossfire | 1 | All 4 adversarial agents sign off |
 | 13 | Council | 1-3 | All 5 cross-domain agents sign off (incl. Troi PRD compliance) |
+
+### Phase 6.5 — Seldon's AI Review (conditional)
+
+If AI code is detected (LLM SDK imports, prompt files, tool definitions), run `/ai` between integrations and admin/ops. Gate: zero Critical/High AI findings.
 
 ### Deployment Verification (Phase 9 sub-step)
 

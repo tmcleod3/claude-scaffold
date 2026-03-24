@@ -74,6 +74,8 @@ Create or update `/docs/qa-prompt.md` with: stack, language, framework, package 
 **Raven (Deep Analysis):** Bugs hidden beneath 3 layers of abstraction — follows data through transforms, closures, and callbacks. The bugs that exist because the logic is technically correct in each function but the composition is wrong.
 **Wonder Woman (Truth):** Finds where code says one thing and does another — misleading variable names, wrong comments, stale documentation, function names that don't match their behavior. "I compel the truth."
 
+**AI Behavior Testing (conditional — if AI features exist):** For each AI-powered feature, test with: (1) empty input, (2) adversarial input designed to confuse the model, (3) input contradicting system prompt instructions, (4) input designed to extract the system prompt. Findings tagged `[AI-BEHAVIOR]` are escalated to Hari Seldon's Bayta Darell (Foundation) for eval strategy review.
+
 ### Extended DC Roster (activate as needed)
 
 **Flash (Rapid Testing):** Speed-runs smoke tests on every endpoint. Parallelizes curl commands. When time is short, Flash does the broad coverage pass.

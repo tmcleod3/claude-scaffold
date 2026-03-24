@@ -168,6 +168,8 @@ This catches architecture mistakes that currently escape until Phase 9-11 review
 4. **Visual intent confirmation:** For visual/layout changes, confirm placement intent (replace vs augment) before coding. "Add logo to hero" and "logo IS the hero" produce very different implementations. Ask: "Should this replace the existing content, or be added alongside it?" (Field report #111)
 5. Log to `/logs/phase-04-core.md`
 
+**AI Gate (conditional — if `ai: yes` in frontmatter):** After the vertical slice is built, Hari Seldon reviews the first AI integration point. Validates: model selection, prompt structure, basic error handling, eval strategy exists. If no AI features in this phase, skip.
+
 ### Integration Wiring Check
 
 After building a new service, worker, or pipeline, verify it's connected to the system:
@@ -217,7 +219,8 @@ The review phases use a double-pass pattern: find → fix → re-verify. This ca
 1. Batman executes `/docs/methods/QA_ENGINEER.md` through Step 5 (find + fix). Oracle, Red Hood, Alfred, Deathstroke, Constantine scan in parallel.
 2. Galadriel executes `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` through Step 6. Elrond, Arwen, Samwise analyze in parallel.
 3. Kenobi executes `/docs/methods/SECURITY_AUDITOR.md` Phase 1-2. Leia, Chewie, Rex, Maul scan in parallel, then Yoda, Windu, Ahsoka, Padmé sequentially.
-4. Log findings to `/logs/phase-09-qa-audit.md`, `/logs/phase-10-ux-audit.md`, `/logs/phase-11-security-audit.md`
+4. If AI code exists, The Oracle (Hari Seldon) runs alongside Batman, Galadriel, and Kenobi in the review cycle. Seldon deploys: Salvor Hardin (models) + Gaal Dornick (prompts) + Hober Mallow (tools) + Bliss (safety) in parallel.
+5. Log findings to `/logs/phase-09-qa-audit.md`, `/logs/phase-10-ux-audit.md`, `/logs/phase-11-security-audit.md`
 
 *Fix batch:*
 5. Resolve all critical/high findings across all three audits. Where findings conflict between agents (e.g., security fix degrades UX), apply conflict resolution from SUB_AGENTS.md.

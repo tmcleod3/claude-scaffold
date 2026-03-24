@@ -108,6 +108,16 @@ For each feature:
 - File upload security
 - Secret management
 
+## 13.5 AI Architecture (conditional — if the product uses AI/LLM features)
+Ask the user: "Does your product use AI or LLM features? If yes: What models? What do they do (classify, generate, route, orchestrate)? What happens when the AI is wrong?" Generate a PRD section:
+
+## AI Architecture
+- **Provider:** [anthropic / openai / local / multi]
+- **Models:** [list with justification]
+- **AI Features:** [classification, generation, tool-use, routing, orchestration]
+- **Failure strategy:** [what happens when the AI fails]
+- **Eval strategy:** [how you'll measure quality]
+
 ## 14. Brand Voice & Personality
 - How the product speaks
 - Example microcopy for: buttons, errors, empty states, confirmations, destructive actions
