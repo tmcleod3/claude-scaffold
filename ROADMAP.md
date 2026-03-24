@@ -2,10 +2,68 @@
 
 > The plan for the plan-maker.
 
-**Current:** v17.0.0 (2026-03-24)
-**Next:** v17.1 — Platform Adapters (as developer accounts become available)
-**Status:** v17.0 shipped. No Stubs Doctrine enforced. Cultivation functional.
-**167 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+**Current:** v17.1.0 (2026-03-24)
+**Next:** Reassessment gate → determines v18.0 direction
+**Status:** v17.1 shipped. Gauntlet cleanup complete. TypeScript 0 errors. 193 tests.
+**193 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+
+---
+
+## v17.1 — The Gauntlet Cleanup
+
+*"Polish before expansion."*
+
+**Origin:** Victory Gauntlet Round 1 flagged 6 Medium findings, TypeScript compilation warnings, and test coverage gaps. These don't block functionality but erode confidence. Fix them before building anything new.
+
+### Mission 1 — Security + Edge Case Fixes
+
+1. **Timing-safe vault password comparison** (`heartbeat.ts:72-76`) — Replace length-gated `timingSafeEqual` with HMAC comparison (hash both inputs to fixed-length before comparing). Currently leaks password length via timing.
+2. **Negative amountCents validation** (`heartbeat.ts readTreasurySummary()` + `danger-room.ts`) — Clamp or reject negative values in spend/revenue log parsing. Negative spend produces nonsensical ROAS and inflated net.
+3. **Inverted date range handling** (`sandbox.ts`, `sandbox-bank.ts`) — Throw or return empty when `end < start` instead of silently treating as 1 day.
+4. **IPv6 proxy shutdown** (`server.ts`) — Store the `ipv6Proxy` reference and close it in the shutdown handler.
+
+### Mission 2 — TypeScript Strict Compliance
+
+1. **Fix 31 pattern file compilation warnings** — `docs/patterns/ad-platform-adapter.ts`, `revenue-source-adapter.ts`, `financial-transaction.ts`. These are the canonical type definitions consumed by the wizard; they should compile cleanly.
+2. **Add `npm run typecheck` to CI** (`.github/workflows/validate-branches.yml`) — `tsc --noEmit` on main branch push/PR. This prevents the type drift that caused 76 errors to accumulate undetected.
+
+### Mission 3 — Test Coverage Expansion
+
+1. **`wizard/__tests__/stripe-adapter.test.ts`** — Test against response fixtures (mock `node:https` requests). Cover: connect, getTransactions, getBalance, error handling for non-JSON responses.
+2. **`wizard/__tests__/heartbeat.test.ts`** — Test: readCampaigns, readTreasurySummary, buildStateSnapshot (mock filesystem). Don't test the full daemon lifecycle (that needs integration tests).
+3. **`wizard/__tests__/audit-log.test.ts`** — Test 7-rotation scheme: write past threshold, verify .1-.7 cascade.
+4. **Sandbox module-level Map** — Move campaigns Map to instance scope in `sandbox.ts` to prevent state leaks between tests.
+
+### Mission 4 — ADRs + Reassessment
+
+1. Write 3 ADRs from v17.0 decisions:
+   - **ADR-032: No Stubs Doctrine** — Why stubs were removed, the policy, enforcement points
+   - **ADR-033: Sandbox Demo Pipeline** — Why sandbox adapters instead of mocks, how they relate to real adapters
+   - **ADR-034: Raw HTTPS for External APIs** — Why node:https instead of Stripe SDK (zero-dependency constraint)
+2. **Run `/assess`** on the cleaned-up codebase — a fresh assessment to see where VoidForge stands after v17.0 + v17.1. This produces the decision point for what comes next.
+
+### Campaign Structure
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Security + edge case fixes | Code | 1 |
+| 2 | TypeScript strict compliance | Code + CI | 1 |
+| 3 | Test coverage expansion | Tests | 1.5 |
+| 4 | ADRs + reassessment | Docs + assess | 1 |
+
+**Version bump:** MINOR (v17.1.0) — new tests, new ADRs, no breaking changes.
+
+### After v17.1: The Reassessment Gate
+
+v17.1 Mission 4 produces a fresh `/assess` report. That report determines what v18.0 is. Possible outcomes:
+
+| Assessment Result | Next Version |
+|---|---|
+| Clean bill of health | v18.0 is a new feature (E2E, marketplace, CLI distribution) |
+| New findings from pattern/type fixes | v17.2 to resolve before expanding |
+| Platform adapter accounts available | v17.2 implements real adapters (Google Ads, Meta, etc.) |
+
+**The rule: don't plan v18.0 until the assessment says the foundation is solid.** This prevents the pattern that led to v17.0 — building 5 versions of features on top of stubs.
 
 ---
 
