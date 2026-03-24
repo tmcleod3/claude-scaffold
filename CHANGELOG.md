@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [17.2.0] - 2026-03-24
+
+### Added
+- **101 new security tests** for 7 P0 modules: totp (14), tower-session (20), tower-rate-limit (9), user-manager (16), compliance (12), treasury-backup (7), autonomy-controller (23). Total: 193 → 294.
+
+### Fixed
+- **TypeScript mock type error** in stripe-adapter.test.ts — `req.end` mock now returns req for ClientRequest compatibility. `tsc --noEmit` clean.
+
 ## [17.1.0] - 2026-03-24
 
 ### Added

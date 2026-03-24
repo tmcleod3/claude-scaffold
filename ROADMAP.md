@@ -2,10 +2,37 @@
 
 > The plan for the plan-maker.
 
-**Current:** v17.1.0 (2026-03-24)
-**Next:** Reassessment gate → determines v18.0 direction
-**Status:** v17.1 shipped. Gauntlet cleanup complete. TypeScript 0 errors. 193 tests.
-**193 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+**Current:** v17.2.0 (2026-03-24)
+**Next:** v18.0 — TBD (reassessment gate passed)
+**Status:** v17.2 shipped. All 7 P0 security modules tested. 0 TypeScript errors. Foundation verified.
+**294 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+
+---
+
+## v17.2 — The Security Test Pass
+
+*"Trust, but verify." — Picard*
+
+**Origin:** v17.1 reassessment gate identified 7 security-critical modules (1,362 lines) with zero test coverage: totp, tower-rate-limit, tower-session, user-manager, compliance, treasury-backup, autonomy-controller. These handle auth, rate limiting, RBAC, 2FA, encrypted backups, and autonomous execution controls.
+
+### Mission 1 — Security Module Tests (P0)
+
+Write tests for all 7 security-critical modules:
+1. `totp.test.ts` — TOTP generation, verification, replay protection, clock drift
+2. `tower-session.test.ts` — Session creation, validation, expiry, IP binding
+3. `tower-rate-limit.test.ts` — Per-IP rate limiting, window reset
+4. `user-manager.test.ts` — RBAC: create, invite, roles, removal
+5. `compliance.test.ts` — Privacy/email/platform ToS checks
+6. `treasury-backup.test.ts` — Encrypted backup create, restore, pruning
+7. `autonomy-controller.test.ts` — Circuit breakers, kill switch, tier controls
+
+### Mission 2 — TS Error Fix + Version Bump
+
+1. Fix the 2 remaining TypeScript errors (test mock types)
+2. Verify `tsc --noEmit` = 0 errors
+3. Version bump, changelog, push all branches
+
+**Version bump:** PATCH (v17.2.0) — tests only, no feature changes.
 
 ---
 
