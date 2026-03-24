@@ -49,6 +49,10 @@ Check these values exist and are valid:
 
 If a value is missing or invalid, log it and use the default. If the entire frontmatter block is missing, flag it as a Phase 0 gap and use all defaults.
 
+### Implementation Completeness Gate (every phase)
+
+Before marking any phase complete, verify: **no function returns hardcoded success without side effects, no method throws `'Implement...'` or `'Not implemented'`, no handler logs a message but performs no work.** If a feature within the phase cannot be fully implemented (e.g., requires external API credentials not yet available), do not create stub files — document it as deferred in ROADMAP.md and move on. Sandbox adapters returning realistic fake data are full implementations, not stubs. This gate is non-negotiable. (Field report: v17.0 assessment found 77 `throw new Error('Implement...')` calls across 8 adapter files shipped as functional.)
+
 ### Python Framework Detection
 
 When `framework` is `django` or `fastapi`:

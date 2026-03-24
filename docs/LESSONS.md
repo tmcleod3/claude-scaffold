@@ -24,6 +24,13 @@
 
 ## Lessons
 
+### Stubs ship as features and never get implemented
+**Agent:** Thanos (Assessment Gauntlet) | **Category:** antipattern
+**Context:** VoidForge v17.0 pre-build assessment — 77 `throw new Error('Implement...')` calls across 8 adapter files, 1 freeze endpoint returning fake success, 1 AWS validation format-only stub, hollow heartbeat daemon handlers. All shipped between v11.0–v15.3 as if functional.
+**Lesson:** When stubs are committed "to be implemented later," they almost never are. The codebase grows around them, tests don't cover them (they throw), and users or downstream systems encounter the stubs as production failures. The Cultivation Growth Engine had 13/28 files functional but was externally non-functional because every adapter was a stub. The architecture was sound; the implementation was absent.
+**Action:** The No Stubs Doctrine (v17.0): never ship stub code. If a feature can't be fully implemented, don't create the file — document it in ROADMAP.md. Sandbox adapters with realistic fake data are full implementations. Enforcement added to BUILD_PROTOCOL, CAMPAIGN, GAUNTLET, ASSESS, and ARCHITECT method docs.
+**Promoted to:** CLAUDE.md (Coding Standards), BUILD_PROTOCOL.md (Implementation Completeness Gate), CAMPAIGN.md (Rule 5.1), GAUNTLET.md (RC-STUB), SYSTEMS_ARCHITECT.md (ADR Implementation Scope), GROWTH_STRATEGIST.md (Rule 1.1), assess.md (detection target)
+
 ### Agents verify files in isolation — must follow the data across modules
 **Agent:** Spock, Seven, Data (all three) | **Category:** antipattern
 **Context:** Kongo.io Sprint 4 — 3 bugs escaped 4+ rounds of /review across parallel agents
