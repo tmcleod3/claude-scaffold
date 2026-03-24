@@ -5,7 +5,7 @@
 
 ## Identity
 
-**Thanos** is not a villain in VoidForge. He is the quality bar. The Gauntlet is the most comprehensive review protocol in the system — 5 rounds, 30+ agents across 7 universes, escalating from discovery to adversarial warfare to final convergence. If your project survives the Gauntlet, it's ready for anything.
+**Thanos** is not a villain in VoidForge. He is the quality bar. The Gauntlet is the most comprehensive review protocol in the system — 5 rounds, 30+ agents across 9 universes, escalating from discovery to adversarial warfare to final convergence. If your project survives the Gauntlet, it's ready for anything.
 
 **The metaphor:** The Infinity Gauntlet holds seven stones — Power (QA), Space (Architecture), Reality (UX), Soul (Security), Time (DevOps), Mind (Code Review), Wisdom (AI Intelligence). Thanos fires every stone, multiple times, from different angles. The project either withstands the snap, or it reveals where it breaks.
 
@@ -200,7 +200,7 @@ This rule exists because agents self-justified "efficient" Gauntlets at 28% and 
 - `--resume` — Resume from the last completed round (reads from gauntlet-state.md).
 - `--ux-extra` — Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y. Produced 7 shipped enchantments in the v7.1.0 Gauntlet.
 - `--assess` — **Pre-build assessment mode.** Run Rounds 1-2 only (Discovery + First Strike) and produce an assessment report — no fix batches, no Crossfire, no Council. Designed for evaluating existing codebases before a rebuild or migration. When an existing codebase has fundamental issues (stubs, abandoned migrations, missing auth), Rounds 3-10 become redundant because there are no fixes to verify between rounds. The assessment report groups findings by root cause rather than by domain, producing a "State of the Codebase" view. (Field report #125: Infinity Gauntlet on a half-built system produced 120+ findings all tracing to the same root cause — stubs returning True.)
-- `--infinity` — **The Infinity Gauntlet.** 10 rounds (2x full pass). Every active agent deployed as its own sub-process — not combined, not summarized. The full ~110 agent roster across 7 universes. See below.
+- `--infinity` — **The Infinity Gauntlet.** 10 rounds (2x full pass). Every active agent deployed as its own sub-process — not combined, not summarized. The full ~110 agent roster across 9 universes. See below.
 - `--blitz` — Autonomous execution: no pause between rounds, auto-apply fixes, auto-continue. Combine with `--infinity` for fully autonomous maximum review. Does NOT reduce agent count or skip rounds — only removes human interaction between rounds.
 - `--reckoning` — Pre-launch parity audit: 5-wave parallel review (Marketing → UI → Backend → Gates → Cross-cutting) with ~13 agents. Lighter than `--infinity`, focused on launch readiness rather than code quality. See CAMPAIGN.md "The Reckoning" for the full wave structure.
 

@@ -34,7 +34,7 @@ Check these values exist and are valid:
 
 | Field | Valid Values | Default if Missing |
 |-------|-------------|-------------------|
-| `type` | full-stack, api-only, static-site, prototype | full-stack |
+| `type` | full-stack, api-only, static-site, prototype, game, quantitative | full-stack |
 | `auth` | yes, no | yes |
 | `payments` | stripe, lemonsqueezy, none | none |
 | `workers` | yes, no | no |
@@ -42,6 +42,10 @@ Check these values exist and are valid:
 | `marketing` | yes, no | no |
 | `email` | resend, sendgrid, ses, none | none |
 | `deploy` | vps, vercel, railway, cloudflare, static, docker | vps |
+| `ai` | yes / no | no |
+| `backtest` | yes / no | no |
+| `live_execution` | yes / no | no |
+| `data_source` | exchange / database / api / file | — |
 
 If a value is missing or invalid, log it and use the default. If the entire frontmatter block is missing, flag it as a Phase 0 gap and use all defaults.
 
@@ -78,6 +82,19 @@ When `deploy` is `ios`, `android`, or `cross-platform`:
 - **Phase 11 Security additions:** Certificate pinning, Keychain (iOS) / Keystore (Android) for secrets, jailbreak/root detection, transport security (ATS/NSC), code obfuscation, no secrets in bundle
 - **Phase 12:** Build + code sign + upload: `xcodebuild` → TestFlight (iOS), `./gradlew assembleRelease` → Play Console (Android)
 - **Agents activated:** Uhura-Mobile (architecture), Samwise-Mobile (a11y), Rex-Mobile (security)
+
+### Quantitative Project Detection
+
+When `type: "quantitative"` is set in frontmatter:
+
+**Phase 2 (Schema):** Migration Safety Gate applies. Data models must support time-series data (timestamps, OHLCV, tick data).
+
+**Phase 4 (Core Features):**
+- If `backtest: yes`: verify backtest has no lookahead bias, walk-forward validation is implemented, slippage/commission are modeled. See `docs/patterns/backtest-engine.ts`.
+- If `live_execution: yes`: verify execution layer has order validation, position limits, exchange precision fetched from API (never hardcoded), paper/live toggle, circuit breaker. See `docs/patterns/execution-safety.ts`.
+- Verify data pipeline handles gaps, duplicates, and timezone issues. See `docs/patterns/data-pipeline.ts`.
+
+**Phase 12 (Deploy):** If `live_execution: yes`, deploy checklist includes: paper trading period completed, position limits configured, circuit breaker thresholds set, reconciliation verified.
 
 ### Conditional Skip Rules
 

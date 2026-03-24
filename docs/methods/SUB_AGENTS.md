@@ -9,7 +9,7 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 
 **All orchestration uses the build journal.** Every delegation, handoff, and resolution is logged to `/logs/handoffs.md`. Agents read journal files to recover context. See `/docs/methods/BUILD_JOURNAL.md`.
 
-**Full character roster: `/docs/NAMING_REGISTRY.md`** — 170+ named characters across 7 universes. No duplicates allowed.
+**Full character roster: `/docs/NAMING_REGISTRY.md`** — 260+ named characters across 9 universes. No duplicates allowed.
 
 ---
 
