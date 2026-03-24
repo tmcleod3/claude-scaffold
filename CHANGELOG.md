@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [15.3.0] - 2026-03-23
+
+### Changed
+- **README.md** — 247 agents / 8 universes / 25 commands / 20 patterns / 17 leads
+- **HOLOCRON.md** — Same count updates + 8 missing command descriptions + Cosmere universe
+- **ARCHITECTURE.md** — Updated to v15.2.1: 5 subsystems, tower-auth split, vault security, LAN mode
+- **FAILURE_MODES.md** — 11 new failure modes (vault brute-force, deploy, Danger Room, heartbeat)
+- **SCALING.md** — 7 new scaling improvements (batch writes, LAN mode, tiered polling, test suite)
+- **TECH_DEBT.md** — Full rewrite: 17 resolved items, 11 current items
+- **ROADMAP.md** — Header fixed from v12.6.4 to v15.2.1
+- **COMPATIBILITY.md** — Engine range corrected, vitest added
+- **patterns/README.md** — 7 → 20 patterns indexed
+
 ## [15.2.1] - 2026-03-23
 
 ### Changed
