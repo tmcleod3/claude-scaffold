@@ -30,7 +30,7 @@ deploy: "static"
 - **Name:** VoidForge
 - **One-liner:** From nothing, everything. A methodology framework for building full-stack applications with Claude Code.
 - **Domain:** Developer tooling / AI-assisted development
-- **What it does:** Drop in a PRD, and a named team of 185+ AI agents across 8 fictional universes builds, ships, and grows your application. Build pipeline (13 phases), growth pipeline (6 phases), financial operations, ad platform orchestration. Works with any tech stack. Ships to any cloud. Grows on any channel.
+- **What it does:** Drop in a PRD, and a named team of 260+ AI agents across 9 fictional universes builds, ships, and grows your application. Build pipeline (13 phases), growth pipeline (6 phases), financial operations, ad platform orchestration. Works with any tech stack. Ships to any cloud. Grows on any channel.
 - **Who it's for:** Developers using Claude Code who want a repeatable, quality-gated build-to-growth process — from solo founders shipping MVPs to teams standardizing their AI-assisted workflow and growth strategy.
 - **Brand personality:** Confident, cinematic, warm. The agents have personality. The methodology has teeth. The Holocron welcomes you in.
 
@@ -56,15 +56,15 @@ deploy: "static"
    (16 protocols)       │  Provisioners   │ │  Reconciliation  │
         │               │ ┌────────────┐  │ │  Anomaly Detect  │
    Code Patterns        │ │ AWS VPS    │  │ └──────┬──────────┘
-   (10 reference        │ │ Vercel     │  │        │
+   (30 reference        │ │ Vercel     │  │        │
     implementations)    │ │ Railway    │  │  Ad Platform Adapters
         │               │ │ Cloudflare │  │  ┌─────────────────┐
    Build Journal        │ │ S3 Static  │  │  │ Meta Marketing   │
    (/logs/)             │ │ Docker     │  │  │ Google Ads       │
         │               │ └────────────┘  │  │ TikTok Marketing │
    Character Registry   │ + GitHub + DNS  │  │ LinkedIn Mktg    │
-   (185+ agents,        │ + SSH Deploy    │  │ Twitter/X Ads    │
-    8 universes)        │ + S3 Upload     │  │ Reddit Ads       │
+   (260+ agents,        │ + SSH Deploy    │  │ Twitter/X Ads    │
+    9 universes)        │ + S3 Upload     │  │ Reddit Ads       │
                         └─────────────────┘  └─────────────────┘
                                 │                    │
                        ┌────────┴────────┐  ┌───────┴────────┐
@@ -153,8 +153,8 @@ deploy: "static"
 4. Findings are tagged by agent name for traceability
 
 **Key behaviors:**
-- 15 leads across 8 universes (Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere)
-- 185+ named characters with role-appropriate personalities
+- 17 leads across 9 universes (Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, Foundation)
+- 260+ named characters with role-appropriate personalities
 - No duplicate names across active sessions
 - Character traits encode behavioral directives
 
@@ -288,32 +288,54 @@ Changes to shared files must propagate to all branches:
 
 ## 6. Roadmap (What to Build Next)
 
-See `ROADMAP.md` for the full plan. Summary:
+See `ROADMAP.md` for the full plan. Summary of shipped and upcoming versions:
 
-| Version | Codename | Focus |
-|---------|----------|-------|
-| **v4.0** | The Reliability Release | Pre-deploy build step, CI/CD generation, env validation, Railway API fix, credential scoping |
-| **v4.1** | The Observability Release | Health monitoring, error tracking (Sentry), deploy logs, cost estimation |
-| **v4.2** | The DX Release | Type generation, API docs, ERD, integration templates (Stripe/Resend/S3), database seeding |
-| **v4.3** | The Resilience Pack | Opt-in operational hardening in Gandalf's Act 3 menu: multi-env, preview deploys, rollback, migrations, backups, health checks, graceful shutdown, error boundaries, rate limiting, DLQ |
-| **v4.4** | The Imagination Release | `/imagine` (Celebrimbor — AI image generation) + `/debrief` (Bashir — post-mortem analysis, upstream feedback via GitHub issues) |
-| **v4.5** | The Seamless Release | PRD-driven credential collection in Gandalf, headless deploy mode (`--headless`), PostgreSQL extension support |
-| **v5.0** | The Intelligence Release | Lessons integration, build analytics, smart scoping, template marketplace |
-| **v5.5** | Avengers Tower Local | Browser terminal (xterm.js + node-pty), never leave the browser, Claude Code in the wizard |
-| **v6.0** | Avengers Tower Multi | Project registry, The Lobby dashboard, multi-terminal per project, health poller |
-| **v6.5** | Avengers Tower Remote | Self-hosted mode, 5-layer security (network + auth + vault + sandbox + audit), TOTP 2FA, two-password architecture |
-| **v7.0** | The Penthouse | Multi-user RBAC, per-project permissions, linked services, coordinated deploys, rollback dashboard, cost tracker, agent memory |
-| **v7.1** | The Redesign | Three-act wizard flow, operations menu replaces simple/advanced toggle, Resilience Pack as opt-in card, Éowyn's enchantment layer |
-| **v7.6** | The Vault Pipeline | `deploy --env-only`, standalone vault reader, campaign auto-injects vault → .env |
-| **v8.0** | The Hive Mind | Agent Memory (active lessons read-back), Conflict Prediction (Phase 0.5), Auto-PRD generation (`/prd` command) |
-| **v8.1** | The Evolution | Self-Improving Methodology (auto-draft from lesson clusters), Agent Specialization (custom sub-agents) |
-| **v8.2** | The Autonomy | Autonomous Campaigns (`/campaign --autonomous` with guardrails and git checkpoints) |
-| **v9.0+** | The Horizon | Pattern Evolution, Cross-Project Orchestration, Multi-Language Forge, The Forge Builds the Forge |
-| **v10.0** | The Danger Room | Mission control dashboard, agent confidence scoring, agent debates, Living PRD, A/B testing, Prophecy Visualizer |
-| **v11.0** | The Consciousness | Cosmere universe (18 agents) + `/grow` (audit, SEO, content) + financial vault + TOTP + safety tiers. See PRD §9.14, ADR-2. |
-| **v11.1** | The Treasury | `/treasury` + revenue ingest (read-only) + reconciliation + heartbeat daemon (monitoring). See PRD §9.14. |
-| **v11.2** | The Distribution | Ad platform adapters + spend execution (protected by v11.0/v11.1 safety). See PRD §9.14. |
-| **v11.3** | The Heartbeat | `/portfolio` + anomaly detection + backup + cross-project financials. See PRD §9.14. |
+### Shipped (v4.0 — v16.1)
+
+| Version | Codename | Status |
+|---------|----------|--------|
+| **v4.0–v4.5** | Reliability → Seamless | Shipped |
+| **v5.0–v5.5** | Intelligence → Avengers Tower Local | Shipped |
+| **v6.0–v6.5** | Avengers Tower Multi → Remote | Shipped |
+| **v7.0–v7.6** | Penthouse → Vault Pipeline | Shipped |
+| **v8.0–v8.2** | Hive Mind → Autonomy | Shipped |
+| **v9.0–v9.3** | Multi-Language → Game Forge | Shipped |
+| **v10.0–v10.2** | Danger Room + features | Shipped |
+| **v11.0–v11.3** | Cosmere Growth Universe | Shipped (infrastructure; adapters were stubs) |
+| **v12.0–v12.6** | Deep Current + Scanner | Shipped |
+| **v13.0–v13.1** | Living Dashboard | Shipped |
+| **v14.0** | Day-0 Engine | Shipped |
+| **v15.0–v15.3** | Last Mile → Chronicle | Shipped |
+| **v16.0–v16.1** | Psychohistorians + Hardened Methodology | Shipped |
+
+### Next: v17.0 — The Complete Implementation
+
+*"No more stubs. No more lies."*
+
+| Track | Focus |
+|-------|-------|
+| **Methodology** | No Stubs Doctrine — enforced across all method docs, build protocol, campaign, gauntlet, assess |
+| **Security** | XFF parsing fix, loopback binding, TOCTOU race, audit rotation, auth backup, endpoint auth |
+| **Cultivation** | Sandbox adapter (full pipeline demo), Stripe real adapter, heartbeat wiring, growth tabs, test coverage |
+| **Cleanup** | Delete 8 stub adapter files (No Stubs enforcement), update PRD counts and references |
+
+See ROADMAP.md for full 10-mission campaign structure.
+
+### Future: v17.1+ — Platform Adapters (as developer accounts become available)
+
+| Adapter | Blocked By | Ships When |
+|---------|-----------|------------|
+| Google Ads | MCC + developer token | Account created |
+| Meta Marketing | Business Manager app review | Account created |
+| TikTok Marketing | Developer account | Account created |
+| LinkedIn Marketing | Campaign Manager API | Account created |
+| Twitter/X Ads | Developer account | Account created |
+| Reddit Ads | Developer account | Account created |
+| Mercury | Business banking API | Account exists |
+| Brex | Business banking OAuth | Account exists |
+| Paddle | Paddle account | Account created |
+
+Per the No Stubs Doctrine (v17.0): no stub code will be committed for these adapters. Each ships as a fully-implemented, tested adapter only when real API testing is possible.
 
 ---
 
@@ -388,6 +410,35 @@ How to know VoidForge is working:
 13. **Budget safety** (v11.2+) — zero overspend incidents past hard stop
 14. **Reconciliation accuracy** (v11.2+) — daily spend/revenue match within 5%
 15. **Heartbeat uptime** (v11.3+) — daemon availability >99.5%
+
+---
+
+## 8.1 Implementation Completeness Policy (v17.0+)
+
+> *"No more stubs. No more lies."*
+
+**The No Stubs Doctrine:** VoidForge will never ship stub code. This is a first-class policy enforced across all methodology docs, build protocol phases, and review commands.
+
+### What constitutes a stub:
+- A function that returns hardcoded success (`{ ok: true }`) without performing the described operation
+- A method body containing `throw new Error('Implement...')` or `throw new Error('Not implemented')`
+- A handler that logs a message but performs no work (hollow handler)
+- An endpoint that tells the user an action was taken when nothing happened (false success)
+
+### What to do instead:
+- **If the feature is ready:** implement it fully with tests
+- **If the feature is not ready:** do not create the file. Document it as "planned" in ROADMAP.md with explicit scope and blocking dependencies. No code artifact ships.
+- **If the feature needs external accounts (API keys, developer tokens):** implement a sandbox adapter that returns realistic fake data (the sandbox IS a full implementation). Ship the real adapter only when real API testing is possible.
+
+### Enforcement points:
+- **`/build`** (BUILD_PROTOCOL.md) — Implementation completeness gate per phase: no function may return hardcoded success, throw "not implemented", or skip its documented side effects
+- **`/campaign`** (CAMPAIGN.md) — Dax's Step 1 analysis flags existing stubs as mandatory remediation missions before new feature work
+- **`/architect`** (SYSTEMS_ARCHITECT.md) — ADRs must include implementation scope: "fully implemented in this version" vs "deferred to vX.Y (no stub code)"
+- **`/gauntlet`** (GAUNTLET.md) — RC-STUB is a first-class root cause category. Any stub detected is automatically High severity.
+- **`/assess`** (assess.md) — Stub detection is a primary assessment target alongside abandoned migrations, auth-free defaults, and dead code
+
+### Origin:
+Pre-build assessment (2026-03-24) found 77 `throw new Error('Implement...')` calls across 8 adapter files, a freeze endpoint returning fake success, an AWS validation format-only stub, and hollow heartbeat daemon handlers — all shipped across versions v11.0-v15.3 as if functional. The Cultivation Growth Engine was architecturally complete but externally non-functional. This policy ensures it never happens again.
 
 ---
 
@@ -2098,7 +2149,7 @@ The daemon needs the vault decryption key for token refresh and credential reads
 
 **Vault session model:**
 1. On `voidforge heartbeat start`, prompt for the financial vault password.
-2. Derive the AES key using Argon2id (per §9.17) and hold it in process memory.
+2. Derive the AES key using scrypt (N=131072, r=8, p=1 — memory-hard, zero-dependency; PRD originally specified Argon2id but Node.js has no built-in Argon2id, and scrypt is the closest built-in memory-hard KDF) and hold it in process memory.
 3. On SIGTERM: zero the key memory before exit.
 4. On system sleep/wake: key persists in memory (survives sleep).
 5. `--vault-timeout N` flag (default: 12 hours): zero the key after N hours of idle. When the key is expired, the daemon enters `degraded` state — it can still write heartbeat.json and read cached data, but cannot refresh tokens or access vault credentials. Alert: "Vault session expired. Run `voidforge heartbeat unlock` to re-enter the vault password." The 12-hour default bounds exposure for laptop theft scenarios while covering a normal work day.
