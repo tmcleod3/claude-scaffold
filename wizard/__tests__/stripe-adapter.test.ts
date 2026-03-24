@@ -29,9 +29,10 @@ function createFakeResponse(): IncomingMessage {
 vi.mock('node:https', () => ({
   request: (_options: unknown, callback: RequestCallback): ClientRequest => {
     const req = new EventEmitter() as ClientRequest;
-    req.end = vi.fn(() => {
+    req.end = vi.fn((..._args: unknown[]) => {
       const res = createFakeResponse();
       callback(res);
+      return req;
     });
     req.destroy = vi.fn();
     return req;
