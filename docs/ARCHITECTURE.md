@@ -1,17 +1,19 @@
 # VoidForge — Architecture
 
-**Version:** 8.0.0
-**Last reviewed:** 2026-03-16
+**Version:** 15.2.1
+**Last reviewed:** 2026-03-23
 
 ## Overview
 
-VoidForge is a CLI-launched local web server with three subsystems:
+VoidForge is a CLI-launched local web server with five subsystems:
 
 - **Gandalf** (`voidforge init`) — Three-act setup wizard: vault, PRD generation, project scaffolding
 - **Haku** (`voidforge deploy`) — Infrastructure provisioning for 6 deploy targets
 - **Avengers Tower** — Browser-based operations console: PTY terminals, multi-project dashboard, RBAC
+- **Danger Room** — Real-time mission control dashboard: build status, agent activity, growth campaigns, financial ops
+- **Cultivation** — Growth engine: ad platform adapters, campaign state machine, spend execution, treasury
 
-Single-process Node.js monolith. TypeScript strict mode. Vanilla JS frontend (no framework). Runtime dependencies: AWS SDK (lazy-loaded), `ws` (WebSocket), `node-pty` (terminal).
+Single-process Node.js monolith. TypeScript strict mode. Vanilla JS frontend (no framework). Runtime dependencies: AWS SDK (lazy-loaded), `ws` (WebSocket), `node-pty` (terminal). Test suite: 91 vitest tests across 8 files. Three-tier access: local / LAN / remote.
 
 ## System Diagram
 
@@ -44,13 +46,17 @@ Node.js HTTP Server (:::3141, dual-stack IPv4/IPv6)
   │
   ├─ /api/projects ────────── Project Registry (multi-project)
   ├─ /api/users ───────────── User Manager (RBAC)
-  ├─ /api/auth ────────────── Tower Auth (TOTP 2FA)
+  ├─ /api/auth ────────────── Tower Auth (TOTP 2FA) — split: tower-auth + tower-session + tower-rate-limit
+  ├─ /api/danger-room ─────── Dashboard data (campaign, build, findings, experiments, deploy, drift)
+  ├─ /api/war-room ──────────── Dashboard data (subset of Danger Room, legacy)
   └─ /api/server/status ───── Native module mtime detection
 
   Avengers Tower:
   ├─ The Lobby ──── Project grid, health badges, import/link
   ├─ Tower Room ─── xterm.js + WebSocket → PTY sessions
-  └─ The Penthouse ── RBAC, coordinated deploys, rollback
+  ├─ Danger Room ── Real-time dashboard: build pipeline, agent ticker, growth tabs, financial ops
+  ├─ War Room ────── Lightweight dashboard (legacy subset of Danger Room)
+  └─ Login ────────── Remote mode authentication (TOTP 2FA)
 
 State:
   ~/.voidforge/vault.enc           Encrypted credentials
@@ -59,6 +65,11 @@ State:
   ~/.voidforge/projects.json       Project registry
   ~/.voidforge/deploys/            Deploy history
   ~/.voidforge/audit.log           Security audit trail
+  ~/.voidforge/auth.json           User accounts (remote mode)
+  ~/.voidforge/financial-vault.enc Financial vault (scrypt KDF)
+  ~/.voidforge/experiments.json    A/B test experiments
+  ~/.voidforge/autonomy-state.json Circuit breakers, kill switch
+  ~/.voidforge/treasury/           Spend logs, revenue logs, budgets
 ```
 
 ## Key Design Decisions
@@ -80,6 +91,16 @@ State:
 | Monolith (not microservices) | Single user, single machine, same lifecycle | — |
 | No frontend framework | Keeps bundle at zero, avoids dependency churn | — |
 | Native module mtime detection | Detects when npm install changed .node files while server is running | Tech debt #11 |
+| Tower auth 3-module split | Separate session, rate-limit, and auth logic for maintainability (636→424+149+87) | v15.2 |
+| Provisioner registry | Single source of truth for provisioners, credential scoping, GitHub targets | v15.1 |
+| Proxy modules for pattern imports | 6 barrel files break wizard/ → docs/patterns/ runtime dependency | v15.1 |
+| Vault rate limiting | 5 attempts/min, 30-min lockout after 10 failures — separate from login rate limits | v15.1 |
+| Vault auto-lock | 15-min idle timeout clears session password | v15.1 |
+| Terminal HMAC key rotation | Per-boot random 32-byte key, not vault password | v15.1 |
+| SSH SG restriction post-provision | Detect deployer IP, restrict SSH from 0.0.0.0/0 | v15.2 |
+| LAN mode (3-tier access) | local (no auth), LAN (dashboard-only), remote (full TOTP 2FA) | v13.0 |
+| sendJson consolidation | 10 duplicate implementations → 1 shared http-helpers.ts | v15.1 |
+| Health poller batch writes | N individual → 1 batch registry update per poll cycle | v15.1 |
 
 ## Subsystem: Avengers Tower
 
@@ -104,19 +125,22 @@ interface Provisioner {
 }
 ```
 
-Adding a new deploy target = implement this interface + register in `wizard/api/provision.ts`.
+Adding a new deploy target = implement this interface + register in `wizard/lib/provisioner-registry.ts`.
 
 ## Security Model
 
-- Credentials encrypted at rest with AES-256-GCM (PBKDF2 key derivation, 100k iterations)
-- Session password held in memory only — never written to disk
+- Credentials encrypted at rest with AES-256-GCM (PBKDF2 key derivation, 100k iterations for vault / 210k for auth)
+- Financial vault uses scrypt KDF (N=131072, r=8, p=1) with 12-char minimum password
+- Session password held in memory only — auto-locks after 15 minutes idle
+- Vault unlock rate-limited: 5 attempts/min, 30-min lockout after 10 consecutive failures
 - Server binds to `::` (dual-stack) locally, `0.0.0.0` in remote mode
 - CORS scoped to wizard's own origin
 - CSRF protection via X-VoidForge-Request header on all POST requests
 - Directory traversal prevented via `resolve()` + prefix check + symlink resolution
 - Generated infrastructure scripts include: fail2ban, SSH hardening, HSTS, firewall lockdown
 - Remote mode: 5-layer security (network + TOTP 2FA + vault + sandboxing + audit trail)
-- PTY sessions: per-session HMAC-SHA256 auth tokens, user isolation in multi-user mode
+- PTY sessions: per-session HMAC-SHA256 auth tokens (keyed with per-boot random secret, NOT vault password), user isolation in multi-user mode
+- SSH security groups restricted to deployer's IP post-provisioning (was 0.0.0.0/0)
 - Vault key naming: hyphenated keys for global creds, `env:`-prefixed for project-specific
 
 ## External Dependencies
@@ -132,6 +156,7 @@ Adding a new deploy target = implement this interface + register in `wizard/api/
 | `node-pty` | PTY process spawning | Always (Tower terminals) |
 | `tsx` | TypeScript execution | Dev only |
 | `typescript` | Type checking | Dev only |
+| `vitest` | Test framework (91 tests, --pool forks) | Dev only |
 
 ### Infrastructure Dependency Exception
 
@@ -145,4 +170,4 @@ Custom implementations of standard protocols save one dependency and cost days o
 
 ### Node.js Compatibility
 
-Engine requirement: `>=20.0.0 <25.0.0`. See `docs/COMPATIBILITY.md` for tested versions and the v7.2→v7.3 node-pty ABI incident.
+Engine requirement: `>=20.11.0 <25.0.0`. See `docs/COMPATIBILITY.md` for tested versions and the v7.2→v7.3 node-pty ABI incident.
