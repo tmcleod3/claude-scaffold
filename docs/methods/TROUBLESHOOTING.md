@@ -130,6 +130,10 @@
 
 ## Common Cross-Phase Failures
 
+### Static asset returns text/html
+
+The hosting platform is serving the SPA fallback (index.html) because the file doesn't exist in the deployment. This is NOT a CDN cache issue — cache lag serves stale versions of the correct file, not a different file entirely. Check: (1) Was the file included in the deploy? (2) Was the deploy targeted at the correct environment? (3) Did the build step generate the file? (Field report #114: favicon.svg returned text/html because it was deployed to the wrong Vercel environment.)
+
 ### TypeScript won't compile
 
 1. `npx tsc --noEmit` — read the first error, fix it, repeat

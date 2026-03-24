@@ -161,6 +161,8 @@ Status:      Open / Fixed / Verified / Won't Fix
 
 **Verification Gate:** Every Critical or High finding MUST include a direct code quote (3+ lines) from the actual file with file path and line numbers. Findings without exact code quotes are classified as 'Unverified' and must be verified before counting toward severity tallies. This prevents hallucinated findings from driving fix batches.
 
+**RC-STUB (Root Cause — Stub Code):** Any function that returns hardcoded success without performing its documented side effects, any method that throws `new Error('Implement...')` or `'Not implemented'`, any handler that logs but performs no work, or any endpoint that reports an action was taken when nothing happened. RC-STUB findings are automatically **High severity** — they represent false functionality that misleads users and downstream systems. Grep for: `throw new Error('Implement`, `throw new Error('Not implemented`, `throw new Error('TODO`, `{ ok: true }` in handlers that have no side effects. (Field report: v17.0 assessment found 77 stub throws + 1 false-success endpoint across 9 files.)
+
 ## State Tracking
 
 Write progress to `/logs/gauntlet-state.md` after every round:

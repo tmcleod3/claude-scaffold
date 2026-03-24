@@ -26,6 +26,7 @@
 - **Accessibility is not optional.** Keyboard nav, focus management, contrast, ARIA.
 - **Small batches.** One flow per batch, max ~200 lines changed. Verify after each.
 - **Commits:** Small, explainable in one sentence.
+- **No stubs.** Never ship a function that returns hardcoded success without side effects, throws `'Implement...'`, or logs without acting. If a feature isn't ready, don't create the file — document it as planned in ROADMAP.md. Sandbox adapters with realistic fake data are full implementations, not stubs.
 
 ## Build Journal — Log Everything
 

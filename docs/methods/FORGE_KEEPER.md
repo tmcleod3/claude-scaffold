@@ -171,6 +171,7 @@ Verify and celebrate:
    - Conflicts resolved: [list]
    ```
 4. Check for handoffs — if new commands or agents were added, mention them
+5. **Content drift check:** If the sync changed methodology counts (agent counts, command counts, pattern counts) AND the project has a data layer that displays VoidForge metadata (e.g., `releases.ts`, `commands.ts`, site content), flag: "The sync changed [N] agents/commands/patterns. If your project displays these counts, update the data layer to match." This prevents stale counts on marketing sites and docs pages after version bumps. (Field report #113)
 5. **Version history check:** If VERSION.md was updated, compare the version table entries against any project pages that display release history (roadmap pages, changelog displays, "shipped versions" sections). Flag versions present in VERSION.md that are missing from site content. This prevents version drift between the methodology's version history and user-facing release pages.
 6. Announce: *"Hey dol! merry dol! The forge burns bright! VoidForge vA.B.C — all tools sharp, all songs true. The world is good."*
 

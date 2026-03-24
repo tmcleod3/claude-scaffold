@@ -51,10 +51,14 @@ Mandatory runtime verification BEFORE code review begins:
 
 **Gate:** All endpoints return expected status codes. No route collisions. No infinite render loops detected. Update assemble-state.
 
-## Phase 3 — Review Round 1 (Spock + Seven + Data)
-**Fury:** "Picard's team — first pass. Find everything."
+## Phase 3 — Review Round 1 (Full Roster — see Agent Deployment Manifest)
+**Fury:** "Picard's team — first pass. Find everything. Full roster deployed."
 
-Run `/review`. Fix all Must Fix and Should Fix items. Log findings count.
+Run `/review` with full Agent Deployment Manifest (Stark's Marvel team + cross-domain agents). Fix all Must Fix and Should Fix items.
+
+**A11y spot-check (Samwise, during review):** Semantic headings (h1-h6 hierarchy), aria-hidden on decorative elements, aria-labels on ambiguous links, skip-nav link, landmark roles. This catches structural a11y issues early — before the full `/ux` pass. (Field report #118)
+
+Log findings count.
 
 ## Phase 4 — Review Round 2 (Re-verify)
 **Fury:** "Again. Verify the fixes didn't break anything."

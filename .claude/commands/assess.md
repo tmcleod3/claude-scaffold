@@ -17,6 +17,7 @@ Run `/architect` — full bridge crew analysis. This maps the system: schema, in
 Run `/gauntlet --assess` — Rounds 1-2 only (Discovery + First Strike). No fix batches. Produces an assessment report grouped by root cause rather than domain.
 
 **Key detection targets for pre-build:**
+- **RC-STUB: Stub code** — Grep for `throw new Error('Implement`, `throw new Error('Not implemented`, `throw new Error('TODO`. Also detect functions returning `{ ok: true }` or `{ success: true }` without side effects, and handlers that log but perform no work. This is the #1 source of false functionality. (Field report: v17.0 assessment found 77 stub throws across 8 files.)
 - **Abandoned migrations:** Duplicate implementations in competing directories (RC-1 pattern)
 - **Stubs returning success:** Methods that return True/ok without side effects (RC-2 pattern)
 - **Auth-free defaults:** HTTP endpoints with no authentication middleware (RC-3 pattern)

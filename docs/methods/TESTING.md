@@ -88,6 +88,7 @@ describe('calculateProration', () => {
 4. Validate response shape, status codes, and error formats.
 5. Test auth: authenticated, unauthenticated, wrong role, wrong owner.
 6. **Validation constraint smoke test:** For each model with validation constraints (Pydantic `Field`, Zod schema, Joi, class-validator decorators), write at least one test that sends invalid input and verifies rejection. Frameworks may silently ignore constraints on incompatible types (e.g., Pydantic v2 ignores `max_length` on dict). The test catches this. (Field report #99: `max_length=50` on a dict field was silently ignored — no size validation occurred.)
+7. **Route integration test mandate:** For each API route, at least one test must exercise the full HTTP → handler → service → response path. Unit tests on service functions are not sufficient — they miss middleware, auth guards, request parsing, and response formatting. A route with no integration test is an untested route. (Field report #119: zero integration tests across 278 unit tests — route-level regressions were invisible.)
 
 ### Pattern
 
