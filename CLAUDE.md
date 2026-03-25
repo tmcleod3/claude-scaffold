@@ -28,6 +28,7 @@
 - **Small batches.** One flow per batch, max ~200 lines changed. Verify after each.
 - **Commits:** Small, explainable in one sentence.
 - **No stubs.** Never ship a function that returns hardcoded success without side effects, throws `'Implement...'`, or logs without acting. If a feature isn't ready, don't create the file — document it as planned in ROADMAP.md. Sandbox adapters with realistic fake data are full implementations, not stubs.
+- **Screenshot every page during review.** When reviewing a runnable application (`/qa`, `/ux`, `/gauntlet`), start the server, take screenshots of every page via Playwright, and READ them via the Read tool. The agent must visually inspect each screenshot. Without screenshots, the review is code-reading — not visual verification. Screenshots are saved to a temp directory, not committed.
 
 ## Build Journal — Log Everything
 
