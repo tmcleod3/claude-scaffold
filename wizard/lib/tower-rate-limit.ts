@@ -20,6 +20,11 @@ const LOCKOUT_DURATION_MS = 30 * 60 * 1000;
 const rateLimits = new Map<string, RateLimitEntry>();
 
 export function checkRateLimit(ip: string): { allowed: boolean; retryAfterMs: number } {
+  // VOIDFORGE_TEST: skip rate limiting so E2E tests aren't throttled
+  if (process.env['VOIDFORGE_TEST'] === '1') {
+    return { allowed: true, retryAfterMs: 0 };
+  }
+
   const now = Date.now();
   const entry = rateLimits.get(ip);
 

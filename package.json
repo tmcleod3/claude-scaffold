@@ -15,7 +15,9 @@
     "typecheck": "npx tsc --noEmit",
     "test": "vitest run --pool forks",
     "test:watch": "vitest --pool forks",
-    "test:coverage": "vitest run --pool forks --coverage"
+    "test:coverage": "vitest run --pool forks --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:local": "playwright test --project=chromium"
   },
   "dependencies": {
     "@aws-sdk/client-ec2": "^3.700.0",
@@ -28,6 +30,8 @@
     "ws": "^8.19.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.58.2",
     "@types/node": "^25.5.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.0",

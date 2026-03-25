@@ -210,6 +210,11 @@ function generateTotp(secret: string, timeStep?: number): string {
 }
 
 function verifyTotp(secret: string, code: string, lastUsedStep: number): number {
+  // VOIDFORGE_TEST: accept 000000 as valid TOTP for E2E test bypass
+  if (process.env['VOIDFORGE_TEST'] === '1' && code === '000000') {
+    return Math.floor(Date.now() / 1000 / TOTP_STEP);
+  }
+
   const currentStep = Math.floor(Date.now() / 1000 / TOTP_STEP);
   for (let offset = -1; offset <= 1; offset++) {
     const step = currentStep + offset;

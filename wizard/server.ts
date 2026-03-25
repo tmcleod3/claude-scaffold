@@ -426,3 +426,16 @@ export function startServer(port: number, options?: { remote?: boolean; lan?: bo
     process.on('SIGTERM', shutdown);
   });
 }
+
+// ── Test mode self-start ────────────────────────────
+// When VOIDFORGE_TEST=1, server.ts can be run directly: `npx tsx wizard/server.ts`
+// This enables Playwright's webServer to start the server without going through the CLI.
+if (process.env['VOIDFORGE_TEST'] === '1') {
+  const testPort = parseInt(process.env['PORT'] ?? '3199', 10);
+  startServer(testPort).then(() => {
+    console.log(`  VoidForge test server running on http://127.0.0.1:${testPort}`);
+  }).catch((err: unknown) => {
+    console.error('Test server failed to start:', err);
+    process.exit(1);
+  });
+}
