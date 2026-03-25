@@ -28,6 +28,7 @@ workers: no         # yes | no — Phase 6 queue section
 admin: no           # yes | no — Phase 7
 marketing: no       # yes | no — Phase 8
 email: none         # resend | sendgrid | ses | none — Phase 6
+e2e: yes            # yes | no — Phase 10 E2E tests (default: yes for full-stack/static-site, no for api-only/prototype)
 
 # Deployment
 deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker | ios | android | cross-platform

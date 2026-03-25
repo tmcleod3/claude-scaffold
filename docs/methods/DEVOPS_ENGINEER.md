@@ -131,6 +131,16 @@ If a process manager (PM2, systemd, Docker, supervisord) owns the application po
 
 **Detection rule:** When writing CLAUDE.md "How to Run" sections or session restart commands, check if the project uses a process manager (`ecosystem.config.js`, `docker-compose.yml`, `*.service` files). If yes, the restart command MUST go through the PM — not through port killing.
 
+## E2E CI Architecture
+
+E2E tests run as a separate CI job, parallel with unit tests. Browser binaries cached via `actions/cache` (GitHub Actions) or equivalent CI cache. E2E failures are informational for the first release (v18.0-v18.1), then enforced as blocking. Playwright uses Chromium only in CI to minimize binary size (~250MB cached). Configuration:
+
+- **Job isolation:** E2E job runs independently from unit test job — a flaky E2E test never blocks the unit test gate
+- **Browser cache:** Cache `~/.cache/ms-playwright` (Linux) or `~/Library/Caches/ms-playwright` (macOS) between runs. Key on Playwright version from `package-lock.json`
+- **Retry policy:** Failed E2E tests retry once in CI before reporting failure (catches transient timing issues)
+- **Artifacts:** On failure, upload Playwright trace files and screenshots as CI artifacts for debugging
+- **Enforcement timeline:** v18.0-v18.1 informational only (report but don't block). v18.2+ E2E failures block merge.
+
 ## Deploy Automation (`/deploy` command)
 
 The `/deploy` command automates the build-deploy-verify cycle. Kusanagi leads, Levi executes, L monitors, Valkyrie handles rollback.

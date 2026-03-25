@@ -210,6 +210,12 @@ Lucius reviews config separately (reads .env files — sensitive, don't delegate
 
 Run the full test suite: `npm test`. Analyze failures. Cross-reference with Oracle, Red Hood, Deathstroke, and Constantine findings. For every bug found in Steps 3A-3E, ask: "Can this be caught by an automated test?" If yes, write the test. See `/docs/methods/TESTING.md` for patterns and conventions.
 
+### Browser Verification Step (when `e2e: yes`)
+
+After unit test review, Batman verifies critical user journeys work in a real browser. Run `npm run test:e2e` and review results. For each failing E2E test, trace to root cause (UI regression, API change, state management). E2E tests are the third regression defense layer: Unit catches logic errors, Integration catches API contract breaks, E2E catches CSS regressions, JS initialization order, cross-component state, and a11y violations invisible to unit tests.
+
+**Huntress — Flaky Test Monitoring:** After the QA pass, Huntress checks E2E test stability. Tests that fail non-deterministically are quarantined with `@flaky` annotation and a tracked fix task. Quarantined tests run in a separate CI job that does not block merges. Common flaky sources: animation timing, network-dependent waits, viewport-sensitive assertions, test isolation failures (shared state between tests).
+
 ## Step 4 — Bug Tracker (MUST MAINTAIN)
 
 | ID | Title | Severity | Area | Repro Steps | Expected | Actual | Root Cause | Fix | Verified By | Regression Item | Risk |

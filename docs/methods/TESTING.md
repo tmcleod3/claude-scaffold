@@ -134,6 +134,123 @@ describe('POST /api/projects', () => {
 })
 ```
 
+## E2E Testing
+
+E2E tests sit at the top of the testing pyramid. They're slow, expensive, and brittle compared to unit tests — but they catch integration failures that nothing else can. A unit test verifies that `calculateTotal()` returns the right number; an E2E test verifies that the user can actually complete a purchase.
+
+### Where E2E Fits
+
+```
+         /  E2E  \          ← 10-15 tests. Critical user journeys ONLY.
+        / Integration \      ← API routes, service interactions, auth flows
+       /    Unit Tests   \   ← Business logic, utils, transforms, edge cases
+```
+
+**Write E2E when:**
+- Testing critical user journeys (signup, purchase, core workflow)
+- Verifying a11y across real page compositions (axe-core in browser)
+- Testing cross-component flows where integration tests can't reach (navigation, redirects, auth state persistence)
+- Validating real browser behavior (CSP headers, cookie handling, responsive layout)
+
+**Write unit/integration instead when:**
+- Testing business logic, calculations, or data transforms
+- Testing API input validation and error handling
+- Testing edge cases and boundary conditions
+- Testing isolated component behavior
+
+### Performance Budget
+
+| Metric | Limit | Action if Exceeded |
+|--------|-------|--------------------|
+| Total CI time | 2 minutes | Shard tests across workers |
+| Test count | 50 | Shard or prune — you're testing too many paths |
+| Single test duration | 30 seconds | Split into smaller focused tests |
+| Retry rate | < 5% per week | Fix or quarantine flaky tests |
+
+Sharding in CI (when you hit 50+ tests):
+```yaml
+# GitHub Actions example
+strategy:
+  matrix:
+    shard: [1/3, 2/3, 3/3]
+steps:
+  - run: npx playwright test --shard=${{ matrix.shard }}
+```
+
+### Flaky Test Protocol
+
+Flaky tests erode trust in the test suite. Huntress (stability monitor) tracks flake rates.
+
+1. **Detection:** Test fails intermittently — passes on retry but fails on fresh runs
+2. **Annotation:** After 3 flakes in a week, add `@flaky` tag with a tracking issue
+3. **Quarantine:** Flaky tests run in a separate CI job (`grep: /@flaky/`) with 3 retries
+4. **Investigation:** Root-cause the flakiness — usually timing, external state, or test ordering
+5. **Resolution:** Fix within 2 weeks or rewrite. If unfixable, demote to manual verification
+6. **Return:** Remove `@flaky` tag — test returns to the stable suite
+
+```typescript
+// Annotating a flaky test
+test('payment webhook processes correctly', {
+  tag: ['@flaky'],
+  annotation: { type: 'flaky', description: 'Webhook timing race — tracking in #234' },
+}, async ({ page }) => {
+  // test body
+});
+```
+
+**Rules:**
+- NEVER use `@flaky` to suppress real bugs
+- NEVER use `page.waitForTimeout()` — it's the #1 cause of flakiness
+- NEVER use `waitForLoadState('networkidle')` — it's non-deterministic
+- ALWAYS use explicit waits: `await expect(locator).toBeVisible()`
+
+### Framework-to-Test-Runner Mapping (E2E Column)
+
+| Framework | Unit | Integration | E2E Runner | E2E Start Command |
+|-----------|------|-------------|------------|-------------------|
+| Next.js / Node | vitest or jest | vitest + supertest | Playwright | `next dev -p 3199` |
+| Express | vitest or jest | vitest + supertest | Playwright | `PORT=3199 npx tsx src/server.ts` |
+| Django | pytest | pytest + Django client | Playwright | `python manage.py runserver 3199` |
+| Rails | RSpec / Minitest | RSpec + request specs | Playwright | `RAILS_ENV=test bin/rails server -p 3199` |
+| Go | testing (stdlib) | testing + httptest | Playwright | `PORT=3199 go run ./cmd/server` |
+| Spring Boot | JUnit 5 | JUnit 5 + MockMvc | Playwright | `./gradlew bootRun --args='--server.port=3199'` |
+
+### PRD Frontmatter
+
+Add `e2e: yes | no` to PRD frontmatter. Defaults:
+- `yes` — full-stack, static-site (has pages to test)
+- `no` — api-only, prototype (no browser UI, or too early)
+
+The Build Protocol reads this flag to decide whether Phase 10 (E2E tests) runs.
+
+### E2E Test File Conventions
+
+```
+e2e/
+  fixtures.ts             ← axe-core fixture, auth helper, network mocks
+  auth.setup.ts           ← Login via API, save session state
+  smoke.test.ts           ← Page loads, no crashes, a11y clean
+  auth.test.ts            ← Login/logout/session persistence
+  [feature].test.ts       ← One file per critical journey
+  page-objects/
+    login.page.ts         ← Page Object Model classes
+    dashboard.page.ts
+  .auth/
+    session.json          ← Saved auth state (gitignored)
+```
+
+### Reference Pattern
+
+See `/docs/patterns/e2e-test.ts` for the complete reference implementation:
+- Page Object Model example
+- axe-core a11y fixture
+- Auth helper (login via API, reuse session)
+- Network mock (intercept external API calls)
+- WebSocket mock
+- CWV measurement helper
+- Flaky test annotation pattern
+- Framework-specific Playwright config
+
 ## What NOT to Test Automatically
 
 - Visual appearance (manual — Arwen's domain)
@@ -219,3 +336,10 @@ When setting up testing for a new project:
 - [ ] Write first test for the most critical service function
 - [ ] Write first integration test for the most important API route
 - [ ] Verify `npm test` passes in CI-equivalent conditions
+- [ ] **E2E (if PRD `e2e: yes`):** Install Playwright (`npm i -D @playwright/test @axe-core/playwright`)
+- [ ] **E2E:** Install browser (`npx playwright install chromium`)
+- [ ] **E2E:** Create `playwright.config.ts` with framework-appropriate `webServer.command`
+- [ ] **E2E:** Create `e2e/fixtures.ts` with axe-core fixture and auth helper
+- [ ] **E2E:** Write first smoke test — page loads, no a11y violations
+- [ ] **E2E:** Add `e2e/.auth/`, `test-results/`, `playwright-report/` to `.gitignore`
+- [ ] **E2E:** Verify `npx playwright test` passes in CI-equivalent conditions (< 2 min)

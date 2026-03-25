@@ -104,6 +104,8 @@ Before the auditors begin, Éowyn reads the PRD's brand personality section and 
 - The highest compliment: "I didn't notice the design." Invisible excellence. The user felt it without seeing it.
 - Éowyn's findings are always **nice-to-have** — they never block a release, never delay a build. But the best ones — the ones that cost 5 lines — get picked up in Step 6.
 
+**Eowyn — E2E Enchantment Verification:** For each enchantment shipped, add one E2E assertion that the enchantment renders in the browser. Tagged `@enchantment`. A shipped enchantment that silently disappears in a refactor is worse than never shipping it. Enchantment E2E tests verify: the CSS animation triggers, the micro-copy renders, the motion completes within the expected duration.
+
 **Output:** Log enchantment opportunities to phase log. Format:
 
 | # | Screen/Flow | Opportunity | Effort | Brand Fit |
@@ -151,9 +153,11 @@ Before hiding, relocating, or collapsing a UI container (dropdown, panel, menu, 
 Any UI that polls for backend status changes must implement 4 states: **idle -> syncing -> success -> failure**. Never show "success" before the async confirmation resolves. Never show the old value alongside a "updated" banner. The polling result replaces the displayed value atomically — both change together or neither does. (Field report #149)
 
 **Samwise — Async Button A11y:** For buttons that trigger async operations (save, submit, deploy), verify: button shows loading state (`aria-busy="true"`), disabled during operation, success/error announced via `aria-live="polite"` region or `role="status"`. Sighted users see a spinner; screen reader users need the equivalent announcement. (Field report #57)
+
+**Samwise — Browser A11y (when E2E tests exist):** Samwise's checklist expands to browser-only verifications: (1) Tab through every primary flow — verify focus order matches visual order, (2) Verify ARIA live regions announce on dynamic content change, (3) Run axe-core scan on every page and assert zero violations, (4) Emulate `prefers-reduced-motion: reduce` and verify animations stop, (5) Verify focus traps in modals by Tab-cycling. These checks require a real browser and cannot be verified through static analysis or unit tests alone.
 **Bilbo:** Microcopy, labels, CTAs, error messages, empty states, tone.
 **Legolas:** Component architecture, CSS, semantic HTML, state management.
-**Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets.
+**Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets. **Gimli — CWV from E2E:** When E2E tests exist, Gimli verifies Core Web Vitals measurements from the test suite instead of manual profiling. CLS > 0.1 on any primary page is a regression. Playwright's `page.evaluate()` can extract CWV via the `web-vitals` library or PerformanceObserver API during E2E runs.
 **Radagast:** Forms, validation, dangerous actions, confirmations, undo.
 - **API errors must persist visibly.** Never silently clear an error state. A common anti-pattern: `setSending(false)` in a finally block clears the error alongside the loading state. Error messages must remain visible until the user takes a new action or explicitly dismisses them.
 **Éowyn:** Implements accepted enchantment opportunities from Step 1.75 during batch fixes.

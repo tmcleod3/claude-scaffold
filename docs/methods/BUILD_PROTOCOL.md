@@ -166,7 +166,8 @@ This catches architecture mistakes that currently escape until Phase 9-11 review
 2. **Auth-from-Day-One:** When scaffolding includes HTTP endpoints, require at minimum an API key middleware stub that returns 401 by default. Full auth (JWT, OAuth, 2FA) stays in Phase 3, but every endpoint is locked from birth. The cost of a simple API key check is minutes; the cost of public exposure during Phases 1-2 is catastrophic for financial or data-sensitive systems. (Field report #125: all endpoints shipped with `allow_origins=["*"]`, zero authentication, bound to `0.0.0.0` — existed unprotected for 2+ build phases.)
 3. Initialize framework, configs, schema, directory structure, types, utils, root layout
 4. Set up test runner per `/docs/methods/TESTING.md`
-5. Every placeholder references its PRD section
+5. When `e2e: yes` in frontmatter, include Playwright setup in test runner initialization: install `@playwright/test`, create `playwright.config.ts`, write 1 smoke test that verifies the app loads in a browser.
+6. Every placeholder references its PRD section
 6. **Tailwind v4 projects:** If framework is Next.js and styling is Tailwind, create `postcss.config.mjs` (`export default { plugins: { "@tailwindcss/postcss": {} } }`) and ensure `globals.css` starts with `@import "tailwindcss" source("../.."). Tailwind v4's implicit scanning breaks in deployed environments when non-source files (methodology docs, build logs) are scanned.
 7. Log to `/logs/phase-01-scaffold.md`
 
@@ -196,7 +197,8 @@ See `docs/patterns/database-migration.ts` for reference implementations.
 1. Single most important user journey, end-to-end vertical slice
 2. Follow patterns: `/docs/patterns/api-route.ts`, `/docs/patterns/service.ts`, `/docs/patterns/component.tsx`
 3. Write unit tests for core service logic + integration tests for API routes
-4. **Visual intent confirmation:** For visual/layout changes, confirm placement intent (replace vs augment) before coding. "Add logo to hero" and "logo IS the hero" produce very different implementations. Ask: "Should this replace the existing content, or be added alongside it?" (Field report #111)
+4. When `e2e: yes`, write one E2E test for the core user journey. This test becomes the canary for all future regressions — if this test breaks, the build is broken.
+5. **Visual intent confirmation:** For visual/layout changes, confirm placement intent (replace vs augment) before coding. "Add logo to hero" and "logo IS the hero" produce very different implementations. Ask: "Should this replace the existing content, or be added alongside it?" (Field report #111)
 5. Log to `/logs/phase-04-core.md`
 
 **AI Gate (conditional — if `ai: yes` in frontmatter):** After the vertical slice is built, Hari Seldon reviews the first AI integration point. Validates: model selection, prompt structure, basic error handling, eval strategy exists. If no AI features in this phase, skip.
@@ -256,7 +258,7 @@ New infrastructure that isn't wired to consumers is dead code. This check runs a
 The review phases use a double-pass pattern: find → fix → re-verify. This catches fix-induced regressions — the #1 source of shipped bugs.
 
 *Pass 1 — Find (parallel):*
-1. Batman executes `/docs/methods/QA_ENGINEER.md` through Step 5 (find + fix). Oracle, Red Hood, Alfred, Deathstroke, Constantine scan in parallel.
+1. Batman executes `/docs/methods/QA_ENGINEER.md` through Step 5 (find + fix). Oracle, Red Hood, Alfred, Deathstroke, Constantine scan in parallel. When E2E tests exist, run `npm run test:e2e` alongside unit tests. E2E failures in the review cycle are treated as findings.
 2. Galadriel executes `/docs/methods/PRODUCT_DESIGN_FRONTEND.md` through Step 6. Elrond, Arwen, Samwise analyze in parallel.
 3. Kenobi executes `/docs/methods/SECURITY_AUDITOR.md` Phase 1-2. Leia, Chewie, Rex, Maul scan in parallel, then Yoda, Windu, Ahsoka, Padmé sequentially.
 4. If AI code exists, Hari Seldon runs alongside Batman, Galadriel, and Kenobi in the review cycle. Seldon deploys: Salvor Hardin (models) + Gaal Dornick (prompts) + Hober Mallow (tools) + Bliss (safety) in parallel.

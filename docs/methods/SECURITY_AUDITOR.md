@@ -249,6 +249,17 @@ if (!realDir.startsWith(expectedBase)) throw 'symlink escape';
 **Cassian (Intelligence):** Threat modeling and recon before anyone audits. Maps the attack surface, identifies high-value targets, produces the threat model that guides the rest of the audit.
 **Sabine (Unconventional):** Tries attack vectors no standard checklist covers — supply chain attacks, dependency confusion, prototype pollution, CSP bypass via CDN. "You've never seen anyone fight like me."
 
+### Browser-Based Security Checks (when E2E exists)
+
+When E2E test infrastructure exists, Kenobi verifies in a real browser:
+1. **CORS headers on cross-origin requests** — open browser DevTools Network tab and verify `Access-Control-Allow-Origin` is not wildcard for credentialed requests
+2. **CSP enforcement** — inject an inline `<script>` via page manipulation and verify it is blocked by Content-Security-Policy
+3. **Cookie attributes** — inspect Set-Cookie headers in the browser: verify `HttpOnly`, `Secure`, and `SameSite` flags are present on session cookies
+4. **Auth redirect behavior** — navigate to a protected route while unauthenticated and verify redirect to login (not a 403 page that leaks the route exists, and not partial content served before redirect)
+5. **Session fixation** — capture session token before login, complete login, verify a new session token is issued (old token invalidated)
+
+These checks complement static code analysis — CSP and cookie attributes are often set by middleware/framework configuration that is invisible to grep-based auditing.
+
 ### Phase 3 — Remediate
 
 Fix critical and high findings immediately. Medium findings get tracked. For each fix:
