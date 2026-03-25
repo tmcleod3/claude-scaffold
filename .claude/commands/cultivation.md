@@ -91,6 +91,8 @@ Growth infrastructure from the first commit, not the first customer. (Field repo
 
 ## /cultivation status
 
+Also available as `--status` flag for consistency.
+
 Show current Cultivation state:
 - Heartbeat daemon: running/stopped/degraded
 - Growth tabs: enabled/disabled

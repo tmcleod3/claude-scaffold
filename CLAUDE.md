@@ -112,6 +112,45 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 
 **Tier key:** `All` = works on main, scaffold, and core. `Full` = requires `wizard/` directory (main branch only). Full-tier commands will warn scaffold/core users to switch branches.
 
+## Flag Taxonomy
+
+Flags are standardized across commands. Same flag name = same meaning everywhere.
+
+### Tier 1 — Universal Flags
+
+| Flag | Meaning | Available On |
+|------|---------|-------------|
+| `--resume` | Resume from saved state | `/campaign`, `/gauntlet`, `/assemble`, `/build`, `/grow` |
+| `--plan` | Plan without executing | `/campaign`, `/architect`, `/grow` |
+| `--fast` | Reduced review passes (skip last 2 rounds/phases), still comprehensive | `/campaign`, `/assemble`, `/gauntlet` |
+| `--dry-run` | Show what would happen without doing it | `/deploy`, `/debrief`, `/treasury`, `/grow`, `/git` |
+| `--status` | Show current state | `/cultivation`, `/treasury`, `/deploy`, `/portfolio`, `/dangerroom`, `/thumper` |
+| `--blitz` | Autonomous execution, no human pauses | `/campaign`, `/assemble`, `/build` |
+
+### Tier 2 — Scope Flags
+
+| Flag | Meaning | Available On |
+|------|---------|-------------|
+| `--security-only` | Security domain focus | `/gauntlet` |
+| `--ux-only` | UX domain focus | `/gauntlet` |
+| `--qa-only` | QA domain focus | `/gauntlet` |
+
+### Tier 3 — Intensity Flags
+
+```
+--fast        Fewer agents/rounds (reduced but still comprehensive)
+(default)     Standard agent deployment for the command
+--muster      Every viable agent across all 9 universes, 3 waves
+--infinity    Every agent as own sub-process, 10 rounds (Gauntlet only)
+```
+
+| Flag | Meaning | Available On |
+|------|---------|-------------|
+| `--muster` | Full 9-universe deployment (30-50 agents in 3 waves) | `/architect`, `/campaign`, `/build`, `/gauntlet` |
+| `--infinity` | 10-round 2x pass with ~80 agent launches | `/gauntlet` |
+
+See `/docs/methods/MUSTER.md` for the full Muster Protocol.
+
 ## Docs Reference
 
 | Doc | Location | When to Read |
@@ -147,6 +186,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | **PRD Generator** | `/docs/methods/PRD_GENERATOR.md` | Sisko — when generating a PRD from scratch |
 | **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
 | **AI Intelligence** | `/docs/methods/AI_INTELLIGENCE.md` | When project uses LLM/AI features |
+| **The Muster** | `/docs/methods/MUSTER.md` | When using `--muster` flag on any command |
 | **Patterns** | `/docs/patterns/` | When writing code (30 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 

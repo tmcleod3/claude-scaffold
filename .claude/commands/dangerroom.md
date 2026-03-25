@@ -30,6 +30,8 @@ Alias for starting the wizard server. Ensures the server is running and the Dang
 
 ### `/dangerroom status`
 
+Also available as `--status` flag for consistency.
+
 Check the current state:
 - Is the wizard server running? (check port 3141)
 - Which tabs are available? (Ops always; Growth/Campaigns/Treasury/Heartbeat/Deep Current if Cultivation installed)
