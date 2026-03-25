@@ -44,6 +44,7 @@ Generate every visual asset the PRD describes, maintain style consistency, and v
 5. **Sequential generation.** Call the API one image at a time to respect rate limits. Show progress after each image.
 6. **Retry gracefully.** Up to 3 retries on API errors. Report failures clearly — don't silently skip.
 7. **Integration check is mandatory.** After generating, scan the codebase for references. Flag images that exist but aren't used, and components that reference images that don't exist.
+8. **Image format verification:** When converting images to WebP, use `cwebp` (not manual rename). After conversion, verify the output file is genuine WebP format (check magic bytes or use `file` command). A PNG renamed to .webp is not a WebP file and wastes bandwidth.
 
 ## PRD Asset Patterns
 

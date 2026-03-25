@@ -155,6 +155,7 @@ Any UI that polls for backend status changes must implement 4 states: **idle -> 
 **Legolas:** Component architecture, CSS, semantic HTML, state management.
 **Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets.
 **Radagast:** Forms, validation, dangerous actions, confirmations, undo.
+- **API errors must persist visibly.** Never silently clear an error state. A common anti-pattern: `setSending(false)` in a finally block clears the error alongside the loading state. Error messages must remain visible until the user takes a new action or explicitly dismisses them.
 **Éowyn:** Implements accepted enchantment opportunities from Step 1.75 during batch fixes.
 **Celeborn:** Design system governance — are spacing tokens consistent? Is the typography scale followed? Are colors from the palette? Are component naming conventions respected? Celeborn audits the *system* behind the components, not the components themselves. "Quiet authority." Catches when one component uses `gap-4` while another uses `gap-[18px]` for the same spacing, or when a color is hardcoded instead of using a design token.
 
