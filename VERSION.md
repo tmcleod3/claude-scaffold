@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 18.0.0
+**Current:** 18.1.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 18.1.0 | 2026-03-25 | The Eyes — browser-review.ts pattern, console error capture, behavioral walkthroughs, security inspection. Browser intelligence in QA, UX, Security, Gauntlet method docs. 32 patterns. |
 | 18.0.0 | 2026-03-24 | The Proving Ground — Playwright E2E + axe-core a11y (21 browser tests), browser verification in 6 method docs, e2e-test.ts pattern, 315 total tests |
 | 17.3.0 | 2026-03-24 | The Muster — --muster flag (full 9-universe deployment), flag nomenclature (8 fixes across 13 files), CLAUDE.md flag taxonomy (3 tiers) |
 | 17.2.0 | 2026-03-24 | The Security Test Pass — 101 new tests for 7 P0 security modules (294 total), 0 TypeScript errors |

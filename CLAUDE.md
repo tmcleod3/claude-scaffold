@@ -188,7 +188,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
 | **AI Intelligence** | `/docs/methods/AI_INTELLIGENCE.md` | When project uses LLM/AI features |
 | **The Muster** | `/docs/methods/MUSTER.md` | When using `--muster` flag on any command |
-| **Patterns** | `/docs/patterns/` | When writing code (31 reference implementations) |
+| **Patterns** | `/docs/patterns/` | When writing code (32 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team

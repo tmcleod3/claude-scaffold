@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v18.0.0 (2026-03-25)
-**Next:** v18.1 — The Eyes (Agent Browser Intelligence)
-**Status:** v18.0 shipped. Browser verification integrated. E2E testing operational.
-**315 tests** (294 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 31 code patterns.
+**Current:** v18.1.0 (2026-03-25)
+**Next:** v19.0 — CLI Distribution (`npx voidforge init`)
+**Status:** v18.1 shipped. Agents can see running applications. Browser intelligence operational.
+**315 tests** (294 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 32 code patterns.
 
 ---
 
