@@ -2,10 +2,76 @@
 
 > The plan for the plan-maker.
 
-**Current:** v18.0.0 (2026-03-24)
-**Next:** v19.0 — CLI Distribution (`npx voidforge init`)
+**Current:** v18.0.0 (2026-03-25)
+**Next:** v18.1 — The Eyes (Agent Browser Intelligence)
 **Status:** v18.0 shipped. Browser verification integrated. E2E testing operational.
 **315 tests** (294 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 31 code patterns.
+
+---
+
+## v18.1 — The Eyes
+
+*"Agents can now INTERACT with the product and take receipts. The interacting is the capability. The programmatic assertions are the eyes. Screenshots are the memory."*
+
+**Designed by: Full Muster (2 waves, 8+ agents). Riker's dissent preserved and adopted.**
+
+**What this is:** Agents use Playwright to interact with running applications during review passes (`/qa`, `/ux`, `/security`, `/gauntlet`). Console error capture, behavioral walkthroughs, cookie inspection, and screenshots as debug artifacts when something fails.
+
+**What this is NOT:** Screenshot-based design review. Claude cannot reliably judge "is this spacing correct" from a screenshot (Wave 3, Riker). The real eyes are programmatic assertions (`toBeVisible()`, `toHaveCSS()`, `toHaveAttribute()`, axe-core). Screenshots are proof-of-life and failure evidence, not the primary review mechanism.
+
+### Three Capabilities
+
+**1. Console Error Capture (highest value, lowest noise)**
+
+During any agent review of a running app, `page.on('pageerror')` and `page.on('console', 'error')` are attached. Any uncaught exception during normal navigation is an automatic High finding. Error-level console output from application code (not browser extensions, not React dev warnings) is flagged.
+
+**Integration:** QA_ENGINEER.md (Batman Step 3.6), GAUNTLET.md (Hawkeye R2.5), SECURITY_AUDITOR.md (CSP violation capture).
+
+**2. Behavioral Walkthrough (agents click, not just assert)**
+
+Agents navigate the product like users: click buttons, fill forms, open modals, submit, and verify the response. This already works via Playwright page objects (v18.0). v18.1 adds the protocol to method docs so agents do it consistently:
+- Click every interactive element on primary routes, verify something visible changes
+- Fill every form with valid and invalid data, verify validation and success states
+- Open every modal, verify keyboard dismissibility (Escape) and focus trapping
+- Force error states via `page.route()` interception, verify error UX is helpful
+
+**Integration:** PRODUCT_DESIGN_FRONTEND.md (Galadriel Step 1.5 walkthrough), QA_ENGINEER.md (Batman error state gallery), SECURITY_AUDITOR.md (Kenobi auth redirect testing, cookie inspection).
+
+**3. Screenshots as Evidence (not as review)**
+
+When an agent finds an issue via programmatic assertion or console error, a screenshot is taken as evidence. Screenshots are session-local (temp dir, JPEG 80%, 1x DPI, cleaned up after review). They are NOT committed, NOT compared across runs, NOT used as the primary detection mechanism. They prove what the agent saw when the bug occurred.
+
+Additionally: a "proof of life" screenshot of every primary route as a binary gate — "page renders correctly" or "page is broken." This is triage, not review.
+
+**Integration:** All review commands as evidence capture. GAUNTLET.md R2.5 proof-of-life gallery.
+
+### Blockers Resolved in Design (Wave 3)
+
+| Blocker | Solution |
+|---|---|
+| Server startup timing race | HTTP health check URL (not TCP port), ready signal wait before any navigation |
+| Console error false positives | Error-level only, allowlist for known noise (React dev, HMR), `--disable-extensions` |
+| Cross-platform screenshot variance | Fixed viewport/media/DPI, never compare cross-environment, session-local only |
+| Complex page state prerequisites | Visual coverage map per project, `seed-visual-state.ts` helper, documented gaps |
+
+### Mission Plan (5 missions)
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | `browser-review.ts` pattern — review browser launcher, console capture, screenshot helper, cookie/header inspection, behavioral walkthrough protocol | Pattern | 2 |
+| 2 | QA_ENGINEER.md — Batman Step 3.6 "Browser Forensic Review" (console sweep, error state gallery, form torture, network failure) | Methodology | 1.5 |
+| 3 | PRODUCT_DESIGN_FRONTEND.md — Galadriel browser walkthrough protocol, Samwise browser a11y (tab walkthrough, media emulation), responsive proof-of-life | Methodology | 1.5 |
+| 4 | SECURITY_AUDITOR.md + GAUNTLET.md — Kenobi browser security checks (CORS, CSP, cookies, auth redirects), Hawkeye R2.5 proof-of-life gallery + console capture | Methodology | 1.5 |
+| 5 | Version bump + Victory Gauntlet | Release | 1 |
+
+**Version bump:** MINOR (v18.1.0) — new capability within existing infrastructure, no new dependencies.
+
+### After v18.1
+
+| Version | Direction |
+|---|---|
+| **v19.0** | CLI Distribution — `npx voidforge init` global installer |
+| **v17.4+** | Platform Adapters — as developer accounts become available |
 
 ---
 
