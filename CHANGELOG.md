@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [18.1.0] - 2026-03-25
+
+### Added
+- **`browser-review.ts` pattern** (32nd pattern) — Review browser launcher with network isolation, console error capture with noise filtering, page state capture (screenshot + a11y + headings), responsive capture (3 viewports), behavioral walkthrough (click all buttons, fill all forms), security inspection (cookies, CORS, CSP)
+- **QA Step 3.6 "Browser Forensic Review"** — console error sweep, error state gallery (force API failures + screenshot), form torture (empty/max/unicode/XSS), network failure simulation
+- **UX Browser-Assisted Walkthrough** — proof-of-life screenshots, behavioral verification (click + verify response), form interaction, keyboard walkthrough, responsive proof-of-life at 3 viewports. Samwise browser a11y with axe-core + color scheme emulation.
+- **Security browser checks expanded** — cookie inspection via `inspectCookies()`, CORS verification via `captureCORSHeaders()`, CSP violation capture via `captureCSPViolations()`, auth redirect verification, mixed content detection
+- **Gauntlet Hawkeye R2.5 Browser Intelligence** — console error capture, proof-of-life screenshots shared with Round 2 agents, cookie/CORS inspection forwarded to Kenobi
+
+### Changed
+- Agents now interact with running applications during review passes — console errors, behavioral walkthroughs, and security inspection reduce human eyeball dependency. Screenshots are evidence (not design review — Riker's dissent adopted from the Muster).
+
 ## [18.0.0] - 2026-03-24
 
 ### Added

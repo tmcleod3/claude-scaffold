@@ -252,11 +252,12 @@ if (!realDir.startsWith(expectedBase)) throw 'symlink escape';
 ### Browser-Based Security Checks (when E2E exists)
 
 When E2E test infrastructure exists, Kenobi verifies in a real browser:
-1. **CORS headers on cross-origin requests** — open browser DevTools Network tab and verify `Access-Control-Allow-Origin` is not wildcard for credentialed requests
-2. **CSP enforcement** — inject an inline `<script>` via page manipulation and verify it is blocked by Content-Security-Policy
-3. **Cookie attributes** — inspect Set-Cookie headers in the browser: verify `HttpOnly`, `Secure`, and `SameSite` flags are present on session cookies
-4. **Auth redirect behavior** — navigate to a protected route while unauthenticated and verify redirect to login (not a 403 page that leaks the route exists, and not partial content served before redirect)
-5. **Session fixation** — capture session token before login, complete login, verify a new session token is issued (old token invalidated)
+1. **Cookie inspection:** After authenticating, dump all cookies via `context.cookies()`. Flag: session cookies missing `HttpOnly`, missing `Secure`, missing `SameSite`. Use `inspectCookies()` from `browser-review.ts`.
+2. **CORS verification:** Intercept API responses via `page.route()`. Check `Access-Control-Allow-Origin` headers. Flag wildcard `*` on authenticated endpoints. Use `captureCORSHeaders()`.
+3. **CSP violation capture:** Monitor `securitypolicyviolation` events. Report each violation with the directive, blocked URI, and source. Use `captureCSPViolations()`.
+4. **Auth redirect verification:** Navigate to protected routes without session. Verify: redirect to login page (not 403 with content leak), no partial content rendered before redirect.
+5. **Mixed content detection:** Monitor console for `Mixed Content` warnings during HTTPS navigation.
+6. **Session fixation** — capture session token before login, complete login, verify a new session token is issued (old token invalidated)
 
 These checks complement static code analysis — CSP and cookie attributes are often set by middleware/framework configuration that is invisible to grep-based auditing.
 
