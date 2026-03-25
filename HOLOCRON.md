@@ -81,7 +81,7 @@ Every tier includes:
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **260+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
-- **30 code patterns** — Reference implementations with framework adaptations
+- **31 code patterns** — Reference implementations with framework adaptations (including E2E testing)
 - **Meta-Workflow** — How VoidForge uses itself to develop itself (`docs/META_WORKFLOW.md`)
 - **This Holocron** — The guide you're reading now
 

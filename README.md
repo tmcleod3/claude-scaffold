@@ -2,7 +2,7 @@
 
 From nothing, everything.
 
-A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 260+ AI agents across 9 fictional universes. 26 slash commands. 30 code patterns. 91 automated tests.
+A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 260+ AI agents across 9 fictional universes. 26 slash commands. 31 code patterns. 315 automated tests.
 
 **New here?** Read the **[Holocron](HOLOCRON.md)** -- the complete guide. **Curious about what's next?** Read the **[Prophecy](PROPHECY.md)** -- the roadmap.
 
