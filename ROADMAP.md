@@ -3,9 +3,76 @@
 > The plan for the plan-maker.
 
 **Current:** v17.2.0 (2026-03-24)
-**Next:** v18.0 — The Proving Ground (E2E testing with Playwright)
-**Status:** v17.2 shipped. Foundation verified. Ready for E2E.
+**Next:** v17.3 — The Muster + Flag Nomenclature (--muster flag, standardized flags across commands)
+**Status:** v17.2 shipped. Foundation verified. Flag audit identified 8 inconsistencies.
 **294 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+
+---
+
+## v17.3 — The Muster
+
+*"The beacons are lit! Gondor calls for aid!"*
+
+**Two changes:** (1) The `--muster` flag — deploy every viable agent across all 9 universes for a single task. (2) Flag nomenclature standardization — fix 8 inconsistencies so flags work the same way across every command.
+
+### Part 1: The Muster Protocol (`--muster`)
+
+When `--muster` is passed, instead of the standard agent roster for a command, every agent that has relevant expertise for the specific task gets deployed in 3 waves:
+
+- **Wave 1 (5-8 agents):** Domain leads + strongest cross-cutting experts
+- **Wave 2 (5-10 agents):** Supporting experts from each relevant universe
+- **Wave 3 (3-5 agents):** Adversarial/challenge agents (Deathstroke, Maul, The Mule, Constantine)
+
+Each agent gets the task brief and returns findings in standard format. A synthesis step (Théoden + Gandalf) deduplicates, resolves conflicts, and presents a unified recommendation with dissenting opinions preserved.
+
+**Applies to:** `/campaign --muster`, `/architect --muster`, `/build --muster`, `/gauntlet --muster` (synonym for `--infinity`)
+
+**Intensity spectrum:** `--fast` < standard < `--infinity`/`--muster`
+
+**New file:** `docs/methods/MUSTER.md` — reusable protocol for any command that wants the full roster.
+
+### Part 2: Flag Nomenclature Standardization
+
+**8 inconsistencies to fix:**
+
+#### Fix 1: `--quick` → `--fast` (Gauntlet)
+`/gauntlet --quick` means "skip last 2 rounds." `/assemble --fast` means "skip last 2 phases." Same concept, different names. Rename `--quick` to `--fast` across Gauntlet. Keep `--quick` as a deprecated alias for one version.
+
+#### Fix 2: `--plan` standardized
+Add `--plan` to `/architect` and `/grow`. Any command that can plan without executing should accept it. Currently only `/campaign` has it.
+
+#### Fix 3: `--status` always a flag, never a subcommand
+Currently mixed: `/cultivation status` (subcommand) vs `/treasury --status` (flag). Standardize: always `--status`. Keep subcommand form as alias.
+
+#### Fix 4: `--dry-run` where it matters
+Add `--dry-run` to: `/treasury --launch`, `/grow` (Phase 4), `/git`. Show what would happen before doing it.
+
+#### Fix 5: `--blitz` on more commands
+Add `--blitz` to `/assemble` and `/build`. The concept (autonomous, no human pauses) applies beyond campaigns.
+
+#### Fix 6: `--resume` completeness
+Add `--resume` to `/build` (it has resumable state via build-state.md but no explicit flag).
+
+#### Fix 7: `--muster` as Tier 3 intensity
+Add `--muster` as the maximum-agent flag. Sits above `--infinity` (which is Gauntlet-specific) as a universal "everyone in the room" flag.
+
+#### Fix 8: Document the flag taxonomy
+Add a "Flags" section to CLAUDE.md documenting the 3 tiers:
+- **Tier 1 (Universal):** `--resume`, `--plan`, `--fast`, `--dry-run`, `--status`, `--blitz`
+- **Tier 2 (Scope):** `--security-only`, `--ux-only`, `--qa-only`
+- **Tier 3 (Intensity):** `--fast` (reduced) < standard < `--muster` (maximum)
+
+### Campaign Structure (5 missions)
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Write `docs/methods/MUSTER.md` — the Muster Protocol | Methodology | 1 |
+| 2 | Flag nomenclature: rename `--quick` → `--fast`, add `--plan`/`--blitz` to more commands | Methodology | 1.5 |
+| 3 | Add `--muster` flag to `/architect`, `/campaign`, `/build`, `/gauntlet` commands | Commands | 1 |
+| 4 | CLAUDE.md flag taxonomy + HOLOCRON flag reference section | Docs | 1 |
+| 5 | Version bump + Victory Gauntlet | Release | 1 |
+
+**Version bump:** MINOR (v17.3.0) — new flag, new method doc, no breaking changes (deprecated aliases preserved).
 
 ---
 
