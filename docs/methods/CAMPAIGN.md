@@ -286,7 +286,7 @@ After each mission's review round, two agents run quick checks:
 After every 4th completed mission (missions 4, 8, 12, etc.), Thanos runs a Gauntlet checkpoint:
 
 1. **Count completed missions.** If `completedMissions % 4 === 0`, trigger checkpoint.
-2. **Run `/gauntlet --quick`** (3 rounds: Discovery → First Strike → Second Strike). Individual `/assemble` runs review one mission's changeset. The Gauntlet reviews the **combined system** — catching cross-module integration bugs: missing imports between modules built in different missions, inconsistent auth enforcement across endpoints, CORS/CSP gaps for new connection patterns.
+2. **Run `/gauntlet --fast`** (3 rounds: Discovery → First Strike → Second Strike). Individual `/assemble` runs review one mission's changeset. The Gauntlet reviews the **combined system** — catching cross-module integration bugs: missing imports between modules built in different missions, inconsistent auth enforcement across endpoints, CORS/CSP gaps for new connection patterns.
 3. **Fix all Critical and High findings** before the next mission.
 4. **Commit fixes** via `/git`: `Gauntlet checkpoint after mission N: X fixes`
 5. **Extract Learned Rules.** After fixing, classify each finding by root cause. If the same root cause appears 2+ times across checkpoints (or 2+ times within the same checkpoint), append a Learned Rule to `campaign-state.md`:

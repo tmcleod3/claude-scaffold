@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 17.2.0
+**Current:** 17.3.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 17.3.0 | 2026-03-24 | The Muster — --muster flag (full 9-universe deployment), flag nomenclature (8 fixes across 13 files), CLAUDE.md flag taxonomy (3 tiers) |
 | 17.2.0 | 2026-03-24 | The Security Test Pass — 101 new tests for 7 P0 security modules (294 total), 0 TypeScript errors |
 | 17.1.0 | 2026-03-24 | The Gauntlet Cleanup — HMAC vault comparison, negative spend clamping, TypeScript 0 errors, tsc in CI, 26 new tests (193 total), 3 ADRs, sandbox instance scoping |
 | 17.0.0 | 2026-03-24 | The Complete Implementation — No Stubs Doctrine, P0/P1 security fixes, Cultivation activation (sandbox + Stripe adapters, heartbeat wiring, growth tabs), 74 new tests (167 total), 8 stub files deleted |

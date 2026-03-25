@@ -197,7 +197,7 @@ This rule exists because agents self-justified "efficient" Gauntlets at 28% and 
 
 ## Flags
 
-- `--quick` — Skip Rounds 4 (Crossfire) and 5 (Council). For projects where a lighter review is acceptable. Still 3 rounds, still comprehensive.
+- `--fast` — Skip Rounds 4 (Crossfire) and 5 (Council). For projects where a lighter review is acceptable. Still 3 rounds, still comprehensive. (formerly `--quick` — renamed v17.3 for cross-command consistency)
 - `--security-only` — Run 4 rounds of security only: inventory, full audit, re-probe, adversarial. Kenobi's marathon. For when you specifically need a deep security review.
 - `--ux-only` — Run 4 rounds of UX only: surface map, full audit, re-verify, enchantment. Galadriel's marathon.
 - `--qa-only` — Run 4 rounds of QA only: discovery, full pass, re-probe, adversarial. Batman's marathon.

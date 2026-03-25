@@ -110,6 +110,10 @@ For specific conflicts:
 5. FAILURE_MODES.md
 6. All findings logged to appropriate `/logs/` file
 
+## Arguments
+- `--plan [description]` → Planning mode: analyze and recommend without executing. Present findings and proposed changes for review.
+- `--muster` → Full 9-universe deployment. Instead of the Star Trek bridge crew, deploy every viable agent across all universes in 3 waves (Vanguard → Main Force → Adversarial). See `docs/methods/MUSTER.md`.
+
 ## Handoffs
 - API/DB implementation → Stark, log to `/logs/handoffs.md`
 - UI impacts → Galadriel, log to `/logs/handoffs.md`

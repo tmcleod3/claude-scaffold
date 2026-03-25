@@ -75,7 +75,7 @@ curl -s -X POST "https://api.telegram.org/bot<TOKEN>/setMyCommands" \
       {"command": "ux", "description": "Galadriel'\''s UX/UI review"},
       {"command": "devops", "description": "Kusanagi'\''s infrastructure audit"},
       {"command": "architect", "description": "Picard'\''s architecture review"},
-      {"command": "gauntlet", "description": "Thanos'\''s review (add --quick for 3 rounds)"},
+      {"command": "gauntlet", "description": "Thanos'\''s review (add --fast for 3 rounds)"},
       {"command": "test", "description": "Batman'\''s test-writing mode"},
       {"command": "debrief", "description": "Bashir'\''s post-mission analysis"},
       {"command": "git", "description": "Coulson'\''s version & release"},
@@ -104,6 +104,8 @@ Ask: "Thumper is configured and personalized. Want me to start the bridge now? (
 ---
 
 ## For all other arguments (`on`, `off`, `status`, or no args):
+
+Note: `status` subcommand is also available as `--status` flag for consistency.
 
 Run the shell script directly:
 

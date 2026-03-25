@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [17.3.0] - 2026-03-24
+
+### Added
+- **`--muster` flag** — Full 9-universe agent deployment in 3 waves (Vanguard → Main Force → Adversarial). Available on `/architect`, `/campaign`, `/build`, `/gauntlet`. 30-50 agents for decisions that matter. See `docs/methods/MUSTER.md`.
+- **`MUSTER.md` method doc** — Reusable protocol: beacons, muster roll, the ride, the council. 40+ agents mapped with inclusion criteria.
+- **Flag taxonomy in CLAUDE.md** — 3-tier system: Universal (--resume, --plan, --fast, --dry-run, --status, --blitz), Scope (--security-only, --ux-only, --qa-only), Intensity (--fast < standard < --muster < --infinity)
+
+### Changed
+- **`--quick` renamed to `--fast`** on Gauntlet for cross-command consistency (deprecated alias noted)
+- **`--plan` added** to `/architect` and `/grow`
+- **`--status`** standardized as flag (not subcommand) on `/cultivation`, `/dangerroom`, `/thumper`
+- **`--dry-run` added** to `/treasury`, `/grow`, `/git`
+- **`--blitz` added** to `/assemble` and `/build`
+- **`--resume` added** to `/build`
+
 ## [17.2.0] - 2026-03-24
 
 ### Added

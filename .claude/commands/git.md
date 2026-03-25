@@ -95,6 +95,9 @@ If any `docs/methods/*.md` file was modified, verify the paired `.claude/command
 
 If a method doc gained a new section, flag, or checklist item — flag it: "Method doc X changed but command file Y may need matching update." The user decides whether the command file needs updating.
 
+## Arguments
+- `--dry-run` → Show version bump, changelog entry, and commit message without executing.
+
 ## Handoffs
 - If changes include security fixes → note for Kenobi (`/security`)
 - If changes include infrastructure → note for Kusanagi (`/devops`)

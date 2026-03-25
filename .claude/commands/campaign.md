@@ -147,7 +147,7 @@ After every 4th mission (missions 4, 8, 12, etc.), run a Gauntlet checkpoint bef
 
 **ENFORCEMENT:** After committing each mission, increment your mission counter. Check: if completedMissionsThisCampaign is divisible by 4, trigger the checkpoint. In blitz mode, this check is mandatory and automatic — do not skip or defer it. Log the count in campaign-state.md after each mission: "Missions completed: N. Next checkpoint at: N+X."
 
-2. **Run `/gauntlet --quick`** (3 rounds: Discovery → First Strike → Second Strike). This catches cross-module integration bugs that individual `/assemble` runs miss — each `/assemble` only reviews its own changeset, but the Gauntlet reviews the **combined system**.
+2. **Run `/gauntlet --fast`** (3 rounds: Discovery → First Strike → Second Strike). This catches cross-module integration bugs that individual `/assemble` runs miss — each `/assemble` only reviews its own changeset, but the Gauntlet reviews the **combined system**.
 3. **Fix all Critical and High findings** before proceeding to the next mission.
 4. **Commit fixes** via `/git` with message: `Gauntlet checkpoint after mission N: X fixes`
 5. If `$ARGUMENTS` includes `--fast`, skip the checkpoint gauntlets (but NOT the final gauntlet in Step 6).
@@ -195,6 +195,7 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 - `--autonomous` → supervised autonomy: same as blitz PLUS `git tag` before each mission, critical-finding rollback, 5-mission human checkpoints. Safer for 10+ mission campaigns. See CAMPAIGN.md "Autonomous Mode" for full guardrails.
 - `--continuous` → after Victory, auto-start the next roadmap version within the same major (v9.3→v9.4, stops before v10.0). Add `--major` to cross major boundaries and never stop cooking.
 - `--mission "Name"` → jump to a specific PRD section
+- `--muster` → Per-mission full-roster deployment. Every viable agent across all 9 universes reviews each mission in 3 waves. Expensive — use for critical missions. See `docs/methods/MUSTER.md`.
 - No arguments → start fresh or auto-detect state
 
 **VICTORY GAUNTLET IS NEVER SKIPPED.** Not for methodology-only campaigns. Not for "no code changes." The Gauntlet checks methodology consistency (cross-references, command↔doc sync, agent assignments, version drift) in addition to code. Five campaigns (v8.1-v9.2) shipped without Gauntlets — this is a protocol violation.

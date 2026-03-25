@@ -105,6 +105,11 @@ After build and before launch, log which patterns were used: pattern name, frame
 2. Log final status to `/logs/phase-13-launch.md`
 3. Update `/logs/build-state.md` to "LAUNCHED"
 
+## Flags
+- `--blitz` — Autonomous execution: no confirmation between phases. Does NOT reduce quality.
+- `--resume` — Resume from last completed phase in build-state.md.
+- `--muster` — Full 9-universe review on every build phase. See `docs/methods/MUSTER.md`.
+
 ## At Every Phase
 - Update `/logs/build-state.md` when starting and completing each phase
 - Log non-obvious decisions to `/logs/decisions.md`

@@ -13,6 +13,7 @@ If `wizard/` does not exist (scaffold/core users):
 - `--setup` → Ad platform onboarding only (interactive credential setup for Google/Meta/LinkedIn/Twitter/Reddit). See GROWTH_STRATEGIST.md "Ad Platform Setup" section. Does NOT require a deployed product.
 - `--audit-only` → Run Phase 1 (Reconnaissance) only — quick audit without building
 - `--resume` → Resume from last completed phase in growth-state.md
+- `--plan` → Planning mode: analyze and recommend without executing. Present findings and proposed changes for review.
 
 ## `/grow --setup` (Ad Platform Onboarding)
 
@@ -104,6 +105,7 @@ On "no" at any gate: save state to `growth-state.md`, exit with "Resume with `/g
 - `--distribute` → Phase 4 only (assumes 1-3 done)
 - `--budget N` → set total monthly budget for Phase 4
 - `--explain` → show daemon rules and thresholds
+- `--dry-run` → Show what Phase 4 (Distribution) would create without submitting to platforms.
 
 ## Arguments
 $ARGUMENTS

@@ -61,6 +61,9 @@ When no treasury vault exists:
 - `/treasury --hard-stop N` — set daily hard stop amount
 - `/treasury --export [path]` — export all financial data (encrypted)
 
+### Preview
+- `/treasury --dry-run` — Show what --launch would do without executing. Preview campaign submissions and spend amounts.
+
 ### Emergency
 - `/treasury --freeze` — pause ALL automated spending immediately
 - `/treasury --unfreeze` — resume (requires vault password + TOTP)
