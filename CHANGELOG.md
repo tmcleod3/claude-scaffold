@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [18.0.0] - 2026-03-24
+
+### Added
+- **Playwright E2E testing infrastructure** — `@playwright/test` + `@axe-core/playwright` with network isolation, test port 3199, VOIDFORGE_TEST mode, separate CI job with browser caching
+- **21 E2E tests** across 4 test files: lobby (empty state, keyboard nav, modal, a11y), login (form, validation, a11y), setup wizard (load, input, a11y, keyboard), danger room (5-tab navigation, growth empty state, a11y), deploy (load, a11y), tower (UI shell), war room (load)
+- **`e2e-test.ts` pattern file** — Page Object Model, axe-core fixture, auth helper, network mock, WebSocket mock, CWV measurement, flaky test protocol, framework adaptations (Next.js, Express, Django, Rails)
+- **Browser verification in 6 method docs** — QA (Batman browser verification + Huntress flaky monitoring), UX (Samwise browser a11y + Éowyn enchantment verification + Gimli CWV), Gauntlet (Hawkeye R2.5 browser smoke + Troi browser PRD compliance), Build Protocol (Playwright in Phase 1/4/9-11), Security (5 browser-based checks), DevOps (E2E CI architecture)
+- **TESTING.md E2E section** — testing pyramid position, 2-min performance budget, flaky test protocol, sharding guidance
+- **PRD frontmatter `e2e` field** — `yes | no`, defaults by project type
+
+### Changed
+- **CI pipeline** expanded from typecheck + unit tests to include a separate Playwright E2E job (parallel, Chromium-only, cached browsers)
+- **VOIDFORGE_TEST mode** — rate limit bypass, TOTP 000000 accept, self-start on PORT env var (for test isolation)
+
 ## [17.3.0] - 2026-03-24
 
 ### Added

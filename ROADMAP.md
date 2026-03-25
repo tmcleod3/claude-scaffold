@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v17.3.0 (2026-03-24)
-**Next:** v18.0 — The Proving Ground (E2E testing with Playwright)
-**Status:** v17.3 shipped. Muster protocol + flag standardization complete.
-**294 tests**, 9 universes, 260+ agents, 26 slash commands, 30 code patterns.
+**Current:** v18.0.0 (2026-03-24)
+**Next:** v19.0 — CLI Distribution (`npx voidforge init`)
+**Status:** v18.0 shipped. Browser verification integrated. E2E testing operational.
+**315 tests** (294 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 31 code patterns.
 
 ---
 
