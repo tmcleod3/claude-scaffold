@@ -80,81 +80,153 @@ Add a "Flags" section to CLAUDE.md documenting the 3 tiers:
 
 *"The Gauntlet tests the code. The Proving Ground tests the product."*
 
-**Breaking change:** First external testing dependency (Playwright). CI pipeline expanded from typecheck + unit tests to include browser-based E2E. This changes the development workflow — broken UI is now a CI failure, not a Gauntlet surprise.
+**Designed by: Full Muster (3-wave, 20+ agents across 6 universes)**
 
-**Origin:** Deferred since v16.1 (3 versions). 7 HTML pages with JavaScript that can break silently. 294 unit tests cover the backend; zero automated tests touch the UI. Every Gauntlet finds UI issues via manual review — E2E catches them on every commit.
+**Breaking change:** Two new capabilities: (1) Playwright browser automation as a first-class test dependency, (2) browser-based verification integrated into the methodology — `/qa`, `/ux`, `/security`, and `/gauntlet` can now interact with running applications, not just read code. This changes how VoidForge reviews every project it builds.
 
-### What Gets Tested
+**Origin:** Deferred since v16.1 (3 versions). The methodology teaches E2E testing but doesn't practice it. VoidForge's 7 HTML pages break silently. More broadly: all review commands read code but never see the rendered site. v18.0 gives VoidForge eyes.
 
-| Page | File | Key Flows |
-|------|------|-----------|
-| **Lobby** | `lobby.html` + `lobby.js` | Project list renders, import modal opens/closes, project cards show health status, delete confirmation |
-| **Setup Wizard** | `index.html` + `app.js` | 3-act flow: identity → PRD → operations. Vault password creation. Credential entry. |
-| **Deploy Wizard** | `deploy.html` + `deploy.js` | Target selection, provision progress (SSE), deploy status |
-| **Tower** | `tower.html` + `tower.js` | Terminal session creation, PTY data flow (WebSocket), Claude Code launch |
-| **Danger Room** | `danger-room.html` + `danger-room.js` | Tab navigation (including 4 growth tabs), campaign timeline, findings panel, WebSocket activity feed |
-| **War Room** | `war-room.html` + `war-room.js` | Alternative dashboard view, experiment panel |
-| **Login** | `login.html` + `login.js` | Username/password form, TOTP input, error states, redirect after login |
+### Two Deliverables
 
-### Mission Plan (5 missions)
+**Deliverable 1 — Methodology: browser verification as a fundamental capability**
+Every project VoidForge builds can now have agents verify the running application:
 
-#### Mission 1 — Playwright Setup + Test Infrastructure
+| Command | Before v18.0 (reads code) | After v18.0 (sees the site) |
+|---|---|---|
+| `/qa` | Batman reads test files, checks edge cases in code | Batman launches the app, clicks through flows, runs axe-core a11y |
+| `/ux` | Galadriel reads HTML/CSS, checks ARIA in source | Galadriel opens pages, navigates with keyboard, checks rendered contrast |
+| `/gauntlet` R2.5 | Hawkeye runs `curl` against endpoints | Hawkeye opens a browser, walks the full user journey |
+| `/security` | Kenobi reads auth middleware | Kenobi tests CORS headers, cookie attributes, redirect behavior in a real browser |
+| `/test` | Batman writes unit tests | Batman writes E2E tests alongside unit tests for user-facing features |
+| `/build` Phase 9-11 | Review cycle reads the diff | Review cycle includes browser verification when `e2e: yes` |
 
-1. Add `@playwright/test` as dev dependency (justified: testing infrastructure)
-2. Create `playwright.config.ts` — configure for the wizard server (localhost:3141)
-3. Create test helper: start wizard server before tests, stop after
-4. Add `npm run test:e2e` script to package.json
-5. Add E2E step to `.github/workflows/validate-branches.yml` (main branch only)
-6. Write 1 smoke test: server starts, lobby page loads, title is correct
+**Deliverable 2 — VoidForge's own E2E tests**
+Apply the methodology to VoidForge itself: 10-15 focused E2E tests for the 7 wizard pages.
 
-#### Mission 2 — Lobby + Login E2E Tests
+### Architecture (Muster-Informed)
 
-1. **Lobby:** Page loads, project list renders (empty state), import modal keyboard navigation (Escape closes, Tab cycles), link modal
-2. **Login:** Form renders, validation errors on empty submit, TOTP field appears after password, redirect on success (mock auth)
-3. Test error states: server down, invalid credentials
+**5 blockers resolved in design:**
 
-#### Mission 3 — Setup Wizard E2E Tests
+| Blocker | Solution |
+|---|---|
+| E2E flakiness | Explicit retry policy (1 retry), Huntress quarantine protocol, deterministic server state (clean temp dir per test), explicit waits only (no `waitForTimeout`) |
+| CI job blocking | Separate E2E CI job, parallel with unit tests, does NOT block on flake (informational for first 2 versions, then enforced) |
+| Secret exfiltration via page.evaluate() | Network isolation (`--host-resolver-rules="MAP * 127.0.0.1"`), minimal env for test server process |
+| CI env secrets accessible | E2E job runs without deployment secrets (separate GitHub Actions job, no `secrets: inherit`) |
+| 400MB browser binary | Install Chromium only (`npx playwright install chromium`), cache in CI via `actions/cache` |
 
-1. **Act 1 (Identity):** Project name input, domain selection
-2. **Act 2 (PRD):** PRD text area, upload, generation (mock Anthropic)
-3. **Act 3 (Operations):** Operations menu renders, vault password creation, credential entry flow
-4. Focus trap verification: modals trap focus, Escape closes
+**Key design decisions (from Muster):**
 
-#### Mission 4 — Danger Room + Growth Tabs E2E Tests
+- **axe-core integrated** (Samwise): `@axe-core/playwright` (~200KB) added alongside Playwright. Every page E2E test includes a free a11y scan. Automates 60-70% of Samwise's current manual checks.
+- **CWV optional** (Torres): `measureWebVitals(page)` helper available but not mandatory. Projects opt in via `performance: true` in frontmatter.
+- **No visual regression** (Nightwing): Screenshot comparison too fragile across platforms. Use `toHaveCSS()` for critical layout assertions instead.
+- **No Lighthouse in CI** (Torres): Too heavy (500MB + 15-20s per page), too noisy. CWV measurement covers 80% of value at 1% of cost.
+- **10-15 tests, not 30+** (Riker): Focus on a11y assertions + interaction contracts. The Gauntlet handles edge cases better than automated tests.
+- **PTY gap documented** (Constantine): Terminal E2E tests verify UI only (node-pty mocked). The hardest feature is not E2E-testable in CI. Separate `test:e2e:local` for developers with node-pty.
+- **Test mode server** (Constantine): `VOIDFORGE_TEST=1` flag disables rate limiting and accepts static TOTP, while still exercising real auth flow.
+- **Non-browser projects excluded** (Constantine): E2E applies to `type: full-stack` and `type: static-site` only. API-only projects use integration tests as their top-of-pyramid.
 
-1. **Tab navigation:** All tabs clickable, content switches correctly
-2. **Growth tab:** KPI cards render (with sandbox data), empty state without Cultivation
-3. **Campaigns tab:** Table renders, empty state guidance
-4. **Treasury tab:** Budget bar renders, vault status
-5. **Heartbeat tab:** Daemon status, token health display
-6. **WebSocket activity feed:** Mock WebSocket, verify ticker updates
+### PRD Frontmatter Addition
 
-#### Mission 5 — Deploy + Tower + Version Bump
+```yaml
+e2e: yes                    # Activates browser testing in /build, /qa, /gauntlet
+e2e_framework: playwright   # playwright | cypress (default: playwright)
+```
 
-1. **Deploy wizard:** Target selection renders, provision progress UI
-2. **Tower:** Terminal session UI loads (PTY mocked — node-pty not in E2E)
-3. **War Room:** Basic page load + tab verification
-4. Version bump to v18.0.0, changelog, push all branches
+### Mission Plan (8 missions)
+
+#### Mission 1 — E2E Infrastructure + Security Hardening
+
+1. Add `@playwright/test` + `@axe-core/playwright` as dev dependencies
+2. Create `playwright.config.ts` with: Chromium only, network isolation, random port, test mode env
+3. Create test helpers: server start/stop with health check wait, auth helper with test-mode TOTP, axe-core fixture
+4. Add `npm run test:e2e` and `npm run test:e2e:local` scripts
+5. Add separate E2E CI job to `validate-branches.yml` with browser caching
+6. Add `VOIDFORGE_TEST=1` mode to server.ts (rate limit bypass, static TOTP)
+7. Write 1 smoke test: server starts, lobby page loads, axe-core passes
+8. Design flake management: retry policy, quarantine protocol in test config
+
+#### Mission 2 — `e2e-test.ts` Pattern File + TESTING.md Update
+
+1. New pattern: `docs/patterns/e2e-test.ts` — Page Object Model, axe-core fixture, CWV helper, network mock, WebSocket mock, auth helper, flaky test annotation
+2. TESTING.md update: E2E tier in testing pyramid, performance budget (2min max, 50-test shard threshold), flaky test protocol (Huntress), framework-specific E2E setup
+3. PRD template: add `e2e: yes | no` field with defaults by project type
+
+#### Mission 3 — Method Doc Integration (QA, UX, Security, Gauntlet, Build)
+
+1. **QA_ENGINEER.md**: Batman's protocol gets browser verification steps, Huntress flaky test monitoring, E2E as third regression defense line
+2. **PRODUCT_DESIGN_FRONTEND.md**: Samwise gets browser a11y checks (axe-core, focus order, ARIA live regions, reduced motion). Éowyn gets E2E enchantment verification. Gimli gets CWV from test suite.
+3. **GAUNTLET.md**: Round 2.5 Hawkeye upgrade from curl to Playwright. Troi Council round gets browser-based PRD compliance verification with screenshots.
+4. **BUILD_PROTOCOL.md**: Phases 1 (scaffold), 4 (core feature), 9-11 (review) get E2E integration points
+5. **SECURITY_AUDITOR.md**: Kenobi gets browser-based checks (CORS, CSP, cookie attributes, auth flow bypass)
+6. **DEVOPS_ENGINEER.md**: Separate E2E CI job architecture, browser caching strategy
+
+#### Mission 4 — Lobby + Login + Setup Wizard E2E
+
+1. **Lobby**: Page load, empty state, project cards, import modal (keyboard nav, Escape closes), axe-core scan
+2. **Login**: Form render, validation, TOTP field, auth flow (test mode), redirect, error states, axe-core
+3. **Setup Wizard**: 3-act flow, vault password creation, focus trap in modals, axe-core per act
+
+#### Mission 5 — Danger Room + Growth Tabs E2E
+
+1. **Tab navigation**: All tabs clickable, content switches, axe-core per tab
+2. **Growth/Campaigns/Treasury/Heartbeat tabs**: KPI render, empty states, data with sandbox files
+3. **WebSocket activity feed**: Mock WebSocket, verify ticker updates
+
+#### Mission 6 — Deploy + Tower + War Room E2E
+
+1. **Deploy wizard**: Target selection, provision UI (SSE mocked)
+2. **Tower**: Terminal UI loads (node-pty mocked), session creation UI, axe-core
+3. **War Room**: Page load, tab verification, axe-core
+
+#### Mission 7 — VoidForge Dogfood Verification
+
+1. Run the full E2E suite with `npm run test:e2e`
+2. Run axe-core across all 7 pages — fix any a11y violations found
+3. Verify CWV measurements are within thresholds
+4. Document the PTY gap and `test:e2e:local` for developers
+
+#### Mission 8 — Version Bump + Victory Gauntlet
+
+1. Version bump to v18.0.0
+2. CHANGELOG, VERSION.md, package.json
+3. Victory Gauntlet (now with Hawkeye running Playwright in Round 2.5)
+4. Push all 3 branches
 
 ### Campaign Structure
 
 | # | Mission | Type | Effort |
 |---|---------|------|--------|
-| 1 | Playwright setup + smoke test | Infra + test | 1.5 |
-| 2 | Lobby + Login E2E | Tests | 1.5 |
-| 3 | Setup Wizard E2E | Tests | 2 |
-| 4 | Danger Room + Growth Tabs E2E | Tests | 2 |
-| 5 | Deploy + Tower + Version Bump | Tests + release | 1.5 |
+| 1 | E2E infrastructure + security hardening | Infra | 2 |
+| 2 | e2e-test.ts pattern + TESTING.md | Pattern + methodology | 1.5 |
+| 3 | Method doc integration (6 docs) | Methodology | 2 |
+| 4 | Lobby + Login + Setup Wizard E2E | Tests | 2 |
+| 5 | Danger Room + Growth Tabs E2E | Tests | 1.5 |
+| 6 | Deploy + Tower + War Room E2E | Tests | 1.5 |
+| 7 | Dogfood verification + a11y fixes | Tests + fixes | 1 |
+| 8 | Version bump + Victory Gauntlet | Release | 1.5 |
 
-**Version bump:** MAJOR (v18.0.0) — new testing dependency (Playwright), CI pipeline change, development workflow change.
+**Version bump:** MAJOR (v18.0.0) — new dependencies (Playwright, axe-core), CI pipeline restructured, methodology capability added (browser verification).
 
-### Technical Notes
+### Dependencies (justified per CLAUDE.md)
 
-- Playwright runs against the real wizard server (not mocked). The server starts in local mode on a test port.
-- Tests that need auth (remote mode pages) use a test helper that creates a user and logs in via the API.
-- Tests that need Cultivation data write sandbox campaign/treasury files to a temp `~/.voidforge/` directory.
-- Terminal tests mock node-pty (native module) — verify UI only, not PTY data flow.
-- Anthropic API calls (PRD generation) are intercepted and mocked.
+| Package | Size | Justification |
+|---|---|---|
+| `@playwright/test` | ~5MB (npm) + ~250MB (Chromium binary, cached) | Core v18.0 deliverable: browser automation for E2E testing |
+| `@axe-core/playwright` | ~200KB | Automates 60-70% of Samwise's manual a11y checks. Unconditional — a11y is not optional per CLAUDE.md. |
+
+### Known Gaps (documented, not deferred as stubs)
+
+- **PTY terminal**: E2E tests verify UI only, not data flow. `test:e2e:local` available for developers with node-pty.
+- **Non-browser projects**: E2E pattern applies to `type: full-stack` and `type: static-site` only. API-only, CLI, mobile, and game projects use integration tests as top-of-pyramid.
+- **Visual regression**: Deferred. `toHaveCSS()` assertions cover critical layout; screenshot comparison revisited if VoidForge adds a design system.
+
+### After v18.0
+
+| Version | Direction |
+|---------|-----------|
+| **v19.0** | CLI Distribution — `npx voidforge init` global installer |
+| **v17.4+** | Platform Adapters — as developer accounts become available |
 
 ### After v18.0
 
