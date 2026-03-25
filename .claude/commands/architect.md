@@ -112,6 +112,7 @@ For specific conflicts:
 
 ## Arguments
 - `--plan [description]` → Planning mode: analyze and recommend without executing. Present findings and proposed changes for review.
+- `--muster` → Full 9-universe deployment. Instead of the Star Trek bridge crew, deploy every viable agent across all universes in 3 waves (Vanguard → Main Force → Adversarial). See `docs/methods/MUSTER.md`.
 
 ## Handoffs
 - API/DB implementation → Stark, log to `/logs/handoffs.md`

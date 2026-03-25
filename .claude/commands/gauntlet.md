@@ -121,6 +121,7 @@ Present them with severity and recommendation. The user decides whether to ship 
 - `--ux-extra` → Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y.
 - `--assess` → **Pre-build assessment.** Rounds 1-2 only (Discovery + First Strike), no fix batches. Produces assessment report grouped by root cause. For evaluating existing codebases before a rebuild or migration — not for post-build hardening. See also `/assess` command which chains this with architecture review and PRD gap analysis.
 - `--infinity` → **The Infinity Gauntlet.** 10 rounds (2x full pass). Every active agent deployed as its own dedicated sub-process — not combined, not summarized. ~60-80 agent launches across all 9 universes. The full ~110 active roster called off the bench. See GAUNTLET.md "The Infinity Gauntlet" section for the complete wave structure. Use after completing a major version or before first production ship.
+- `--muster` → Synonym for `--infinity`. The Gauntlet already deploys the full roster at maximum intensity — `--muster` is the universal flag name for the same concept.
 
 ## Operating Rules
 - Update `/logs/gauntlet-state.md` after EVERY round
