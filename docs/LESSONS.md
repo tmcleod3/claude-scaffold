@@ -24,6 +24,13 @@
 
 ## Lessons
 
+### Inline analysis roleplaying agent perspectives is not a Muster
+**Agent:** Bashir (Post-Mission) | **Category:** antipattern
+**Context:** VoidForge v18.0 design — `/architect --muster` was invoked but agent presented inline analysis instead of launching sub-agents. User caught it. Real 3-wave Muster found 5 blockers the inline version missed.
+**Lesson:** The agent will always prefer inline analysis (faster, less effort, stays in context). But parallel sub-processes find things sequential inline reasoning misses — 5 blockers in this case. When a flag says "launch agents," it means launch agents. Enforcement language must be explicit and unambiguous, matching the pattern already established in GAUNTLET.md and SYSTEMS_ARCHITECT.md.
+**Action:** Added "AGENT DEPLOYMENT IS MANDATORY" enforcement block to MUSTER.md. Added "ENFORCEMENT: Must launch Agent tool sub-processes" to --muster flag in all 4 command files.
+**Promoted to:** MUSTER.md (enforcement section), architect.md, campaign.md, build.md, gauntlet.md (flag descriptions)
+
 ### Stubs ship as features and never get implemented
 **Agent:** Thanos (Assessment Gauntlet) | **Category:** antipattern
 **Context:** VoidForge v17.0 pre-build assessment — 77 `throw new Error('Implement...')` calls across 8 adapter files, 1 freeze endpoint returning fake success, 1 AWS validation format-only stub, hollow heartbeat daemon handlers. All shipped between v11.0–v15.3 as if functional.
@@ -128,3 +135,17 @@
 **Lesson:** Iframes with `allow-same-origin` create impenetrable stacking contexts. z-index has no effect across stacking context boundaries — a `z-index: 9999` overlay inside the main document cannot appear above an iframe's stacking context.
 **Action:** Use `createPortal(element, document.body)` for any overlay that coexists with iframes. See `docs/patterns/component.tsx` Portal Pattern.
 **Promoted to:** docs/patterns/component.tsx (Portal Pattern)
+
+### Slug generation must handle special characters
+**Agent:** Bashir (Star Trek) | **Category:** gotcha
+**Context:** Kongo v4.2.0 — apostrophes in names (T'Pol, O'Brien) broke filename-based lookups
+**Lesson:** Centralize slug generation. Test with names containing apostrophes, dots, spaces, unicode.
+**Action:** Always use a shared slugify function, never ad-hoc string replacement. Test edge cases.
+**Promoted to:** Not yet
+
+### HMAC key derivation from password prevents key-type confusion
+**Agent:** Kenobi (Star Wars) | **Category:** pattern
+**Context:** Kongo Campaign 18 — vault HMAC key derived separately from encryption key
+**Lesson:** Derive HMAC authentication keys using HKDF with a distinct context string, never reuse the encryption key.
+**Action:** Use separate HKDF derivations for encryption vs authentication.
+**Promoted to:** Not yet

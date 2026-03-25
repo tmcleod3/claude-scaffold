@@ -4,6 +4,12 @@
 > *"The beacons are lit! Gondor calls for aid!" — Gandalf*
 > *"And Rohan will answer." — Théoden*
 
+## AGENT DEPLOYMENT IS MANDATORY
+
+**When `--muster` is invoked, you MUST launch agents via the Agent tool as separate sub-processes.** Do NOT shortcut to inline analysis. Do NOT "think through" each agent's perspective in your own response. The Muster exists because parallel sub-processes catch things sequential inline reasoning misses. Inline analysis that roleplays agent perspectives is NOT a Muster — it is a protocol violation.
+
+**Why this rule exists:** In the v18.0 design session, the agent presented an inline analysis that "covered" 6 domain leads' perspectives in a single response. When the user demanded real agent deployment, the actual 3-wave Muster found 5 blockers and expanded the plan from 5 to 8 missions. The inline version missed all 5 blockers. Inline reasoning is not a substitute for parallel sub-process analysis. (Field report #154)
+
 ## Identity
 
 The Muster is VoidForge's maximum-agent protocol. When `--muster` is passed, every agent across all 9 universes that has relevant expertise for the specific task gets deployed. It is not a review protocol (that's the Gauntlet). It is not a build protocol (that's /assemble). It is a **decision-density protocol** — the flag you use when you want every perspective in the room before committing to a direction.

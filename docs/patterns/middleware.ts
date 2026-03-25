@@ -163,7 +163,14 @@ export function rateLimit(
   { limit = 60, windowMs = 60_000 }: { limit?: number; windowMs?: number } = {}
 ): NextResponse | null {
   // Rate limit by IP or user ID (Ahsoka — access control)
-  const key = req.headers.get('x-user-id') || req.headers.get('x-forwarded-for') || 'unknown'
+  // IP extraction priority: cf-connecting-ip (Cloudflare, set at edge, cannot be spoofed by client)
+  // > x-real-ip (nginx) > x-forwarded-for first entry (client-spoofable) > fallback
+  const key =
+    req.headers.get('x-user-id') ||
+    req.headers.get('cf-connecting-ip') ||
+    req.headers.get('x-real-ip') ||
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    'unknown'
   const now = Date.now()
 
   const entry = rateLimitMap.get(key)

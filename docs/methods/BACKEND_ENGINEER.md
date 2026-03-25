@@ -121,6 +121,18 @@ In multi-output AI pipelines, cache intermediate results on the entity model. Ru
 
 When adding authentication to existing endpoints, use optional parameters to preserve backward compatibility during migration. Pattern: `def get_widget(widget_id: str, user_id: str | None = None)` — the function works without `user_id` (existing call sites), and new auth-aware call sites pass it. This allows incremental migration without breaking existing consumers. After all call sites are updated, remove the default and make the parameter required. (Field report #99: auth retrofit broke 3 existing call sites that didn't pass the new required parameter.)
 
+### IP Extraction Priority
+
+When extracting client IP behind a reverse proxy, use this priority: `cf-connecting-ip` (Cloudflare) > `x-real-ip` (nginx) > `x-forwarded-for` (first entry) > `req.socket.remoteAddress`. Never trust `x-forwarded-for` alone — it is client-spoofable. Cloudflare's `cf-connecting-ip` is set at the edge and cannot be spoofed by the client.
+
+### Diagnostic Endpoints Must Use Production Code
+
+Diagnostic, preview, or test-routing endpoints must call production code paths — not reimplement logic with different step ordering. A diagnostic endpoint that reimplements routing logic will give wrong answers when the production logic changes.
+
+### Pricing Cap Validation
+
+When implementing usage tiers with cost caps, verify the cap exceeds the maximum single-operation cost. A $2.00 cap with $2.09 single-generation cost blocks the user after one operation.
+
 ## Step 5 — Deliverables
 
 1. BACKEND_AUDIT.md
