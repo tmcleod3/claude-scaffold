@@ -108,7 +108,7 @@ After build and before launch, log which patterns were used: pattern name, frame
 ## Flags
 - `--blitz` — Autonomous execution: no confirmation between phases. Does NOT reduce quality.
 - `--resume` — Resume from last completed phase in build-state.md.
-- `--muster` — Full 9-universe review on every build phase. See `docs/methods/MUSTER.md`.
+- `--muster` — Full 9-universe review on every build phase. See `docs/methods/MUSTER.md`. **ENFORCEMENT: Must launch Agent tool sub-processes. Inline analysis is not a Muster.**
 
 ## At Every Phase
 - Update `/logs/build-state.md` when starting and completing each phase

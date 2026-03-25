@@ -182,6 +182,8 @@ Cross-module data contracts are invisible to single-mission review. A field that
 
 **Regression-test-as-validation:** For data-dependent systems (trading, financial, analytics), if Phase 0 produced regression tests against historical data, include those tests in the mission's verification step. Each mission that modifies strategy logic must re-run the regression suite — if tests fail, the mission is not complete until the strategy is re-validated or the test expectations are updated with justification. (Field report #126)
 
+- **AI-generated backfill verification:** When a mission backfills historical data using AI (e.g., generating recommendations from past messages), verify a sample of generated content against source data. AI backfills can hallucinate plausible-looking data that has no basis in the source material.
+
 **Priority cascade for mission ordering:**
 1. Section 16 (Launch Sequence) — if the user defined phases, follow them
 2. Dependency graph — Auth before gated features, Schema before API, API before UI
