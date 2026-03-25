@@ -63,6 +63,11 @@ This catches what static analysis misses: IPv6 binding, native module ABI compat
 
 **Browser smoke test (when `e2e: yes`):** Hawkeye runs `npm run test:e2e` as part of Round 2.5. If E2E tests exist, they replace curl-based endpoint checks for UI routes. API endpoint verification via curl remains for non-UI routes. axe-core results from E2E are included in the Gauntlet findings.
 
+**Hawkeye's Browser Intelligence (v18.1):** After E2E tests pass, Hawkeye launches the review browser and:
+1. Navigates every primary route, capturing console errors. Console errors become Gauntlet findings.
+2. Takes a proof-of-life screenshot of each route at desktop viewport. Shared with Round 2 agents as context.
+3. Inspects cookies and CORS headers. Security findings forwarded to Kenobi's team.
+
 **Env var audit (after smoke test):** If the project uses build-time environment variables (Next.js `NEXT_PUBLIC_*`, Vite `VITE_*`, CRA `REACT_APP_*`), grep the built JS bundle for references and verify each has a non-empty value in the deployment environment. Build succeeding does NOT mean env vars are set — missing build-time vars cause features to silently disappear without errors. (Field report #104: OAuth buttons rendered conditionally on `NEXT_PUBLIC_GOOGLE_CLIENT_ID` which was never created — build passed, buttons vanished.)
 
 **Round 3 — Second Strike (targeted re-verification):**

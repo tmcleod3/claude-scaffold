@@ -216,6 +216,20 @@ After unit test review, Batman verifies critical user journeys work in a real br
 
 **Huntress — Flaky Test Monitoring:** After the QA pass, Huntress checks E2E test stability. Tests that fail non-deterministically are quarantined with `@flaky` annotation and a tracked fix task. Quarantined tests run in a separate CI job that does not block merges. Common flaky sources: animation timing, network-dependent waits, viewport-sensitive assertions, test isolation failures (shared state between tests).
 
+### Step 3.6 — Browser Forensic Review (when app is runnable)
+
+After running E2E tests, if the project has a running server, Batman launches the review browser (per `browser-review.ts` pattern) and performs targeted forensic checks:
+
+1. **Console error sweep:** Navigate to every primary route. Capture all `pageerror` and `console.error` events (filtered per `browser-review.ts` pattern). Each uncaught exception is an automatic **High** finding with the error message, stack trace, and URL.
+
+2. **Error state gallery:** For each primary API endpoint, use `page.route()` to force a 500 response. Screenshot the page. Verify: (a) user sees a meaningful error message, (b) page remains navigable, (c) no leaked internals (stack traces, SQL queries, file paths) in the error display.
+
+3. **Form torture:** Fill every form with: empty values (verify validation), maximum-length strings (verify truncation/rejection), unicode/emoji (verify encoding), HTML `<script>` tags (verify sanitization). Screenshot validation states.
+
+4. **Network failure simulation:** Use `page.route('**/*', route => route.abort())` on API calls. Navigate the primary flow. Verify: loading states resolve (no infinite spinners), error messages appear, retry buttons exist where applicable.
+
+Screenshots are evidence — taken when issues are found, attached to findings. Not taken for every assertion.
+
 ## Step 4 — Bug Tracker (MUST MAINTAIN)
 
 | ID | Title | Severity | Area | Repro Steps | Expected | Actual | Root Cause | Fix | Verified By | Regression Item | Risk |

@@ -77,6 +77,17 @@ Trace the primary user flow step by step. This is a narrative walkthrough, not a
 
 **Tailwind v4 content scanning check:** Tailwind v4 auto-scans ALL files for class names (no explicit `content` config by default). Non-source files — methodology docs (`.md`), pattern examples (`.tsx` in `docs/`), build logs, `.claude/` commands — can contain class-like strings that Tailwind tries to generate utilities for. This produces invalid CSS in some PostCSS environments (notably Vercel's build pipeline). For Tailwind v4 projects: verify the project has a `tailwind.config.ts` (or CSS `@source` directive) that explicitly limits scanning to `src/`, `app/`, `components/`, and `pages/` directories. Exclude: `docs/`, `.claude/`, `logs/`, `node_modules/`, and any directory containing `.md` files with inline code blocks.
 
+**Browser-Assisted Walkthrough (when app is runnable):**
+
+1. Launch review browser via `browser-review.ts` pattern. Navigate to each primary route.
+2. **Proof of life:** Screenshot each page at desktop viewport. Binary gate: page renders content (not blank, not error, not stuck spinner).
+3. **Behavioral verification:** Click every button, link, tab on primary routes. After each click, verify something visible changed (DOM mutation, navigation, modal). Flag non-responsive interactive elements.
+4. **Form interaction:** Fill every form. Verify: focus rings visible on Tab, validation triggers on blur/submit, error messages appear next to correct fields, success state shows after valid submission.
+5. **Keyboard walkthrough:** Tab through each page. Verify: focus order matches visual order, no focus traps except intentional modals, Escape closes overlays.
+6. **Responsive proof-of-life:** Screenshot at 375px, 768px, 1440px. Verify: no horizontal scroll at mobile, content is reachable at all sizes, touch targets are adequate.
+
+Console errors captured during walkthrough are forwarded to Batman's findings. Screenshots are session-local evidence, not committed artifacts.
+
 **If you cannot run the app:** Trace the state flow through the store and component tree to simulate what the user would see at each step. Follow the chain: user action → event handler → store action → state update → which components re-render → what they display.
 
 ## Step 1.75 — Éowyn's Enchantment Review
@@ -155,6 +166,8 @@ Any UI that polls for backend status changes must implement 4 states: **idle -> 
 **Samwise — Async Button A11y:** For buttons that trigger async operations (save, submit, deploy), verify: button shows loading state (`aria-busy="true"`), disabled during operation, success/error announced via `aria-live="polite"` region or `role="status"`. Sighted users see a spinner; screen reader users need the equivalent announcement. (Field report #57)
 
 **Samwise — Browser A11y (when E2E tests exist):** Samwise's checklist expands to browser-only verifications: (1) Tab through every primary flow — verify focus order matches visual order, (2) Verify ARIA live regions announce on dynamic content change, (3) Run axe-core scan on every page and assert zero violations, (4) Emulate `prefers-reduced-motion: reduce` and verify animations stop, (5) Verify focus traps in modals by Tab-cycling. These checks require a real browser and cannot be verified through static analysis or unit tests alone.
+
+**Samwise — Browser Review A11y (when review browser is available):** When browser review is available, Samwise runs axe-core via the review browser on every primary route (supplementing the E2E test axe-core scans). Captures: focus order verification via Tab walkthrough, `prefers-reduced-motion` emulation, `prefers-color-scheme: dark` emulation if dark mode exists.
 **Bilbo:** Microcopy, labels, CTAs, error messages, empty states, tone.
 **Legolas:** Component architecture, CSS, semantic HTML, state management.
 **Gimli:** Skeletons, optimistic UI, debounce, layout shift, mobile, touch targets. **Gimli — CWV from E2E:** When E2E tests exist, Gimli verifies Core Web Vitals measurements from the test suite instead of manual profiling. CLS > 0.1 on any primary page is a regression. Playwright's `page.evaluate()` can extract CWV via the `web-vitals` library or PerformanceObserver API during E2E runs.
