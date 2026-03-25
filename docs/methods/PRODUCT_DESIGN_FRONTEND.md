@@ -80,7 +80,7 @@ Trace the primary user flow step by step. This is a narrative walkthrough, not a
 **Browser-Assisted Walkthrough (when app is runnable):**
 
 1. Launch review browser via `browser-review.ts` pattern. Navigate to each primary route.
-2. **Proof of life:** Screenshot each page at desktop viewport. Binary gate: page renders content (not blank, not error, not stuck spinner).
+2. **MANDATORY: Screenshot every page.** Save screenshots to temp directory. The agent MUST read each screenshot via the Read tool and visually analyze it for: layout integrity, content completeness, visual hierarchy, spacing consistency, state correctness. This is how Galadriel "sees" the product — without screenshots, the review is code-reading, not visual review. Take at desktop viewport (1440x900) for primary analysis.
 3. **Behavioral verification:** Click every button, link, tab on primary routes. After each click, verify something visible changed (DOM mutation, navigation, modal). Flag non-responsive interactive elements.
 4. **Form interaction:** Fill every form. Verify: focus rings visible on Tab, validation triggers on blur/submit, error messages appear next to correct fields, success state shows after valid submission.
 5. **Keyboard walkthrough:** Tab through each page. Verify: focus order matches visual order, no focus traps except intentional modals, Escape closes overlays.
