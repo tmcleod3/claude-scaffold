@@ -195,7 +195,7 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 - `--autonomous` → supervised autonomy: same as blitz PLUS `git tag` before each mission, critical-finding rollback, 5-mission human checkpoints. Safer for 10+ mission campaigns. See CAMPAIGN.md "Autonomous Mode" for full guardrails.
 - `--continuous` → after Victory, auto-start the next roadmap version within the same major (v9.3→v9.4, stops before v10.0). Add `--major` to cross major boundaries and never stop cooking.
 - `--mission "Name"` → jump to a specific PRD section
-- `--muster` → Per-mission full-roster deployment. Every viable agent across all 9 universes reviews each mission in 3 waves. Expensive — use for critical missions. See `docs/methods/MUSTER.md`.
+- `--muster` → Per-mission full-roster deployment. Every viable agent across all 9 universes reviews each mission in 3 waves. Expensive — use for critical missions. See `docs/methods/MUSTER.md`. **ENFORCEMENT: Must launch Agent tool sub-processes per MUSTER.md. Inline analysis is not a Muster.**
 - No arguments → start fresh or auto-detect state
 
 **VICTORY GAUNTLET IS NEVER SKIPPED.** Not for methodology-only campaigns. Not for "no code changes." The Gauntlet checks methodology consistency (cross-references, command↔doc sync, agent assignments, version drift) in addition to code. Five campaigns (v8.1-v9.2) shipped without Gauntlets — this is a protocol violation.
