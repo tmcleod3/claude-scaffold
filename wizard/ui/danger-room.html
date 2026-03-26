@@ -347,6 +347,22 @@
           </div>
         </div>
 
+        <!-- Funding Indicators (v19.0 — hidden until stablecoin data exists) -->
+        <div class="kpi-row" id="growth-funding-row" style="display:none;">
+          <div class="kpi-card">
+            <div class="kpi-value" id="growth-runway-badge" style="font-size:18px;">&mdash;</div>
+            <div class="kpi-label">Runway</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" id="growth-funding-risk" style="font-size:14px;">&mdash;</div>
+            <div class="kpi-label">Funding Risk</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" id="growth-next-event" style="font-size:12px;font-weight:400;">&mdash;</div>
+            <div class="kpi-label">Next Event</div>
+          </div>
+        </div>
+
         <!-- ROAS by Platform (placeholder) -->
         <div class="panel panel-full" id="growth-roas-panel" style="display:none;" role="region" aria-label="ROAS by Platform">
           <h2 class="panel-title">ROAS by Platform</h2>
@@ -413,6 +429,12 @@
         <div class="empty-state" id="treasury-empty-state">
           <div>No treasury data yet.</div>
           <div style="margin-top:8px;">Run <code>/treasury setup</code> to connect revenue sources.</div>
+        </div>
+
+        <!-- Stablecoin Funding Rail (v19.0 — hidden until configured) -->
+        <div class="panel panel-full" id="treasury-funding-panel" style="display:none;" role="region" aria-label="Stablecoin Funding Rail">
+          <h2 class="panel-title">Funding Rail</h2>
+          <div id="treasury-funding-content" style="font-size:13px;"></div>
         </div>
 
         <!-- Financial Summary (hidden until data) -->
@@ -499,6 +521,11 @@
         <div class="panel panel-full" id="heartbeat-alerts-panel" style="display:none;" role="region" aria-label="Alerts" aria-live="assertive">
           <h2 class="panel-title">Alerts</h2>
           <div id="hb-alerts" style="font-size:13px;">No alerts</div>
+        </div>
+        <!-- Funding Operations (v19.0 — provider sync, pending ops, reconciliation) -->
+        <div class="panel panel-full" id="heartbeat-funding-ops-panel" style="display:none;" role="region" aria-label="Funding Operations">
+          <h2 class="panel-title">Funding Operations</h2>
+          <div id="hb-funding-ops" style="font-size:13px;color:var(--text-dim);">No funding operations data</div>
         </div>
       </div><!-- /panel-heartbeat -->
 

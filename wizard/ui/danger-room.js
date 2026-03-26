@@ -271,6 +271,40 @@
       netEl.style.color = treasury.net >= 0 ? 'var(--fin-positive)' : 'var(--fin-negative)';
     }
     if (roasEl) roasEl.textContent = formatRoas(treasury.roas);
+
+    // ── Stablecoin funding indicators (v19.0) ──
+    var fundingRow = document.getElementById('growth-funding-row');
+    if (fundingRow) {
+      var hasFunding = treasury.fundingState != null || treasury.runwayDays != null;
+      fundingRow.style.display = hasFunding ? '' : 'none';
+
+      // Runway badge
+      var runwayBadge = document.getElementById('growth-runway-badge');
+      if (runwayBadge && treasury.runwayDays != null) {
+        runwayBadge.textContent = treasury.runwayDays + ' days runway';
+        runwayBadge.style.color = treasury.runwayDays > 14 ? 'var(--success)'
+          : treasury.runwayDays >= 7 ? 'var(--warning)' : 'var(--error)';
+      } else if (runwayBadge) {
+        runwayBadge.textContent = '\u2014';
+        runwayBadge.style.color = 'var(--text-dim)';
+      }
+
+      // Funding risk indicator
+      var fundingRisk = document.getElementById('growth-funding-risk');
+      if (fundingRisk && treasury.fundingState != null) {
+        fundingRisk.textContent = 'Funding: ' + treasury.fundingState;
+        fundingRisk.style.color = treasury.fundingState === 'healthy' ? 'var(--success)'
+          : treasury.fundingState === 'degraded' ? 'var(--warning)' : 'var(--error)';
+      } else if (fundingRisk) {
+        fundingRisk.textContent = '';
+      }
+
+      // Next treasury event
+      var nextEvent = document.getElementById('growth-next-event');
+      if (nextEvent) {
+        nextEvent.textContent = treasury.nextTreasuryEvent ? 'Next: ' + treasury.nextTreasuryEvent : '';
+      }
+    }
   }
 
   // ── Campaigns Tab: Table Rendering ────────────────
@@ -311,13 +345,28 @@
         : c.status === 'paused' ? 'var(--fin-warning)'
         : 'var(--fin-inactive)';
 
+      // Billing capability badge (v19.0)
+      var capState = c.capabilityState || c.billingCapability || null;
+      var capBadge = '';
+      if (capState) {
+        var capColor = capState === 'FULLY_FUNDABLE' ? 'var(--success)'
+          : capState === 'MONITORED_ONLY' ? 'var(--warning)' : 'var(--error)';
+        capBadge = '<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:' + capColor + '20;color:' + capColor + ';">' + escapeHtml(capState) + '</span>';
+      }
+
+      // Warning if campaign healthy but billing rail degraded
+      var billingWarn = '';
+      if (c.status === 'active' && capState && capState !== 'FULLY_FUNDABLE') {
+        billingWarn = ' <span style="color:var(--warning);font-size:10px;" title="Billing rail is not fully fundable">\u26a0</span>';
+      }
+
       tr.innerHTML =
-        '<td style="padding:6px 8px;">' + escapeHtml(c.platform || '\u2014') + '</td>' +
+        '<td style="padding:6px 8px;">' + escapeHtml(c.platform || '\u2014') + ' ' + capBadge + '</td>' +
         '<td style="padding:6px 8px;">' + escapeHtml(c.name || c.id || '\u2014') + '</td>' +
         '<td style="padding:6px 8px;">' + formatCents(c.spendCents || c.spend || 0) + '</td>' +
         '<td style="padding:6px 8px;">' + (c.conversions != null ? c.conversions : '\u2014') + '</td>' +
         '<td style="padding:6px 8px;">' + formatRoas(c.roas) + '</td>' +
-        '<td style="padding:6px 8px;color:' + statusColor + ';">' + escapeHtml(c.status || 'unknown') + '</td>';
+        '<td style="padding:6px 8px;color:' + statusColor + ';">' + escapeHtml(c.status || 'unknown') + billingWarn + '</td>';
       tbody.appendChild(tr);
     }
   }
@@ -343,6 +392,72 @@
     if (budgetPanel) budgetPanel.style.display = '';
     if (connectionsPanel) connectionsPanel.style.display = '';
     if (reconciliationPanel) reconciliationPanel.style.display = '';
+
+    // ── Stablecoin funding rail section (v19.0) ──
+    var fundingPanel = document.getElementById('treasury-funding-panel');
+    if (fundingPanel) {
+      var hasFundingData = treasury.stablecoinBalance != null || treasury.bankAvailable != null
+        || treasury.pendingOfframps > 0 || treasury.unsettledInvoices > 0;
+      fundingPanel.style.display = hasFundingData ? '' : 'none';
+
+      if (hasFundingData) {
+        var fundingHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+
+        // Stablecoin balance card
+        if (treasury.stablecoinBalance != null) {
+          fundingHtml += '<div style="padding:10px;background:var(--bg);border-radius:4px;">' +
+            '<div style="font-size:10px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;">USDC Balance</div>' +
+            '<div style="font-size:18px;font-weight:700;">' + formatCents(treasury.stablecoinBalance) + ' <span style="font-size:11px;color:var(--text-dim);">USDC</span></div></div>';
+        }
+
+        // Pending off-ramps card
+        if (treasury.pendingOfframps > 0) {
+          fundingHtml += '<div style="padding:10px;background:var(--bg);border-radius:4px;">' +
+            '<div style="font-size:10px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;">Pending Transfers</div>' +
+            '<div style="font-size:18px;font-weight:700;color:var(--warning);">' + treasury.pendingOfframps + ' <span style="font-size:11px;">off-ramp' + (treasury.pendingOfframps !== 1 ? 's' : '') + '</span></div></div>';
+        }
+
+        // Bank balance card
+        if (treasury.bankAvailable != null) {
+          var reservedText = treasury.bankReserved != null && treasury.bankReserved > 0
+            ? ' / ' + formatCents(treasury.bankReserved) + ' reserved'
+            : '';
+          fundingHtml += '<div style="padding:10px;background:var(--bg);border-radius:4px;">' +
+            '<div style="font-size:10px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;">Bank Balance</div>' +
+            '<div style="font-size:18px;font-weight:700;">' + formatCents(treasury.bankAvailable) + ' <span style="font-size:11px;color:var(--text-dim);">available' + escapeHtml(reservedText) + '</span></div></div>';
+        }
+
+        // Unsettled invoices card
+        if (treasury.unsettledInvoices > 0) {
+          fundingHtml += '<div style="padding:10px;background:var(--bg);border-radius:4px;">' +
+            '<div style="font-size:10px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;">Unsettled Invoices</div>' +
+            '<div style="font-size:18px;font-weight:700;color:var(--warning);">' + treasury.unsettledInvoices + ' <span style="font-size:11px;">invoice' + (treasury.unsettledInvoices !== 1 ? 's' : '') + '</span></div></div>';
+        }
+
+        fundingHtml += '</div>';
+
+        // Status badges row
+        fundingHtml += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">';
+
+        // Funding state badge
+        if (treasury.fundingState != null) {
+          var fsColor = treasury.fundingState === 'healthy' ? 'var(--success)'
+            : treasury.fundingState === 'degraded' ? 'var(--warning)' : 'var(--error)';
+          fundingHtml += '<span style="font-size:11px;padding:3px 10px;border-radius:4px;background:' + fsColor + '20;color:' + fsColor + ';font-weight:600;">' + escapeHtml(treasury.fundingState.toUpperCase()) + '</span>';
+        }
+
+        // Reconciliation status badge
+        if (treasury.reconciliationStatus != null) {
+          var reconColor = treasury.reconciliationStatus === 'matched' ? 'var(--success)' : 'var(--error)';
+          fundingHtml += '<span style="font-size:11px;padding:3px 10px;border-radius:4px;background:' + reconColor + '20;color:' + reconColor + ';font-weight:600;">Recon: ' + escapeHtml(treasury.reconciliationStatus) + '</span>';
+        }
+
+        fundingHtml += '</div>';
+
+        var fundingContent = document.getElementById('treasury-funding-content');
+        if (fundingContent) fundingContent.innerHTML = fundingHtml;
+      }
+    }
 
     // KPI row
     var revEl = document.getElementById('treasury-revenue');
@@ -429,6 +544,7 @@
     var tokensPanel = document.getElementById('heartbeat-tokens-panel');
     var jobsPanel = document.getElementById('heartbeat-jobs-panel');
     var alertsPanel = document.getElementById('heartbeat-alerts-panel');
+    var fundingOpsPanel = document.getElementById('heartbeat-funding-ops-panel');
 
     if (!cultivationInstalled || !heartbeat) {
       if (emptyState) emptyState.style.display = '';
@@ -436,6 +552,7 @@
       if (tokensPanel) tokensPanel.style.display = 'none';
       if (jobsPanel) jobsPanel.style.display = 'none';
       if (alertsPanel) alertsPanel.style.display = 'none';
+      if (fundingOpsPanel) fundingOpsPanel.style.display = 'none';
       return;
     }
 
@@ -517,6 +634,29 @@
               '<span style="font-weight:600;color:' + alertColor + ';">' + escapeHtml(a.type || 'alert') + '</span> ' +
               '<span>' + escapeHtml(a.message || '') + '</span></div>';
           }).join('');
+        }
+      }
+    }
+
+    // ── Funding operations (v19.0 — provider sync, pending ops, reconciliation) ──
+    if (fundingOpsPanel) {
+      var hasProviderSync = heartbeat.lastProviderSync || heartbeat.pendingOpsCount != null || heartbeat.lastReconciliation;
+      fundingOpsPanel.style.display = hasProviderSync ? '' : 'none';
+
+      if (hasProviderSync) {
+        var opsContent = document.getElementById('hb-funding-ops');
+        if (opsContent) {
+          var html = '';
+          html += '<div style="margin-bottom:6px;"><span style="color:var(--text-dim);">Last provider sync:</span> ' +
+            '<span>' + formatRelativeTime(heartbeat.lastProviderSync) + '</span></div>';
+          html += '<div style="margin-bottom:6px;"><span style="color:var(--text-dim);">Pending operations:</span> ' +
+            '<span' + (heartbeat.pendingOpsCount > 0 ? ' style="color:var(--warning);"' : '') + '>' +
+            (heartbeat.pendingOpsCount != null ? heartbeat.pendingOpsCount : '\u2014') + '</span></div>';
+          html += '<div style="margin-bottom:6px;"><span style="color:var(--text-dim);">Last reconciliation:</span> ' +
+            '<span>' + formatRelativeTime(heartbeat.lastReconciliation) + '</span></div>';
+          html += '<div style="margin-top:8px;padding:6px 8px;background:var(--bg);border-radius:4px;font-size:11px;color:var(--text-dim);">' +
+            'Heartbeat is the single financial writer.</div>';
+          opsContent.innerHTML = html;
         }
       }
     }
