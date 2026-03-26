@@ -81,7 +81,10 @@ Every tier includes:
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **260+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
-- **31 code patterns** — Reference implementations with framework adaptations (including E2E testing)
+- **35 code patterns** — Reference implementations with framework adaptations (including E2E testing)
+- **No Stubs Doctrine** — Zero placeholder code. Every file does what it claims. Enforced across all method docs.
+- **E2E browser testing** — Playwright + axe-core. Agents take screenshots, capture console errors, and interact with running applications.
+- **Flag taxonomy** — Standardized flags across all commands: `--fast`, `--blitz`, `--muster`, `--plan`, `--dry-run`, `--resume`
 - **Meta-Workflow** — How VoidForge uses itself to develop itself (`docs/META_WORKFLOW.md`)
 - **This Holocron** — The guide you're reading now
 
@@ -94,6 +97,9 @@ The Full tier adds:
 - **The Lobby** — Multi-project dashboard. Health monitoring, cost tracking, deploy history. Import existing projects.
 - **Remote mode** — Deploy VoidForge on a VPS. Access from any browser, phone, iPad. 5-layer security: network + auth (TOTP 2FA) + vault + sandboxing + audit trail.
 - **The Penthouse (v7.0)** — Multi-user RBAC (admin/deployer/viewer), per-project access control, linked services for monorepo orchestration, coordinated deploys, rollback dashboard, cost tracker, cross-project agent memory.
+- **Cultivation Growth Engine** — Treasury, revenue tracking, ad platform management, heartbeat daemon, Danger Room growth tabs. Sandbox + Stripe adapters for demo and real revenue.
+- **Stablecoin Funding Rail (v19.0)** — USDC → Circle off-ramp → Mercury bank → Google/Meta billing. Treasury planner, funding policy engine, reconciliation, circuit breakers. Complete crypto-to-ad-spend pipeline.
+- **Browser Intelligence** — Agents use Playwright to see running applications: console error capture, behavioral walkthroughs, security inspection (cookies, CORS, CSP). Screenshots mandatory in all reviews.
 
 ---
 
@@ -106,8 +112,13 @@ Here's the complete flow from idea to live application. This walkthrough uses th
 #### Step 1: Ignite
 
 ```bash
-npx voidforge init
+git clone https://github.com/tmcleod3/voidforge.git my-project
+cd my-project
+npm install
+npm run wizard
 ```
+
+**Windows users:** See [QUICKSTART-WINDOWS.md](docs/QUICKSTART-WINDOWS.md) for Windows-specific setup.
 
 **Gandalf** opens in your browser. Walk through:
 1. **Vault** — Create a password-encrypted credential store (AES-256-GCM)
@@ -567,13 +578,27 @@ Hari Seldon audits your AI integration: model selection rationale, prompt qualit
 
 Flags: `--prompts` (prompt audit only), `--safety` (safety review only), `--evals` (evaluation coverage), `--full` (all domains).
 
+### Flag System
+
+VoidForge flags are standardized across all 26 commands. Same flag = same meaning everywhere.
+
+**Tier 1 — Universal:** `--resume` (resume from state), `--plan` (plan without executing), `--fast` (reduced review passes), `--dry-run` (preview without doing), `--status` (show state), `--blitz` (autonomous, no pauses)
+
+**Tier 2 — Scope:** `--security-only`, `--ux-only`, `--qa-only` (focus on one domain)
+
+**Tier 3 — Intensity:**
+- `--fast` — fewer agents, still comprehensive
+- *(default)* — standard deployment
+- `--muster` — every viable agent across all 9 universes, 3 waves (Vanguard → Main Force → Adversarial). The beacons are lit.
+- `--infinity` — 10 rounds, ~80 agent launches (Gauntlet only)
+
 ---
 
 ## 6. The Craft
 
 ### Code Patterns
 
-Thirty reference implementations live in `docs/patterns/`. Every pattern includes framework adaptations for Next.js, Express, Django, FastAPI, and Rails. Mobile and game patterns added in v9.2-v9.3. Financial, daemon, SSE, ad platform, and OAuth patterns added in v11-v15.
+Thirty-five reference implementations live in `docs/patterns/`. Every pattern includes framework adaptations for Next.js, Express, Django, FastAPI, and Rails. Mobile and game patterns added in v9.2-v9.3. Financial, daemon, SSE, ad platform, and OAuth patterns added in v11-v15.
 
 | Pattern | File | What It Teaches |
 |---------|------|----------------|
@@ -607,6 +632,11 @@ Thirty reference implementations live in `docs/patterns/`. Every pattern include
 | **Data Pipeline** | `data-pipeline.ts` | ETL pipeline: typed stages, checkpoint/resume, quality checks, idempotent processing |
 | **Backtest Engine** | `backtest-engine.ts` | Walk-forward backtesting: no-lookahead, slippage, Sharpe/drawdown/profit factor |
 | **Execution Safety** | `execution-safety.ts` | Trading execution: order validation, position limits, exchange precision, paper/live toggle |
+| **E2E Test** | `e2e-test.ts` | Page Object Model, axe-core fixture, auth helper, network mock, CWV measurement |
+| **Browser Review** | `browser-review.ts` | Console capture, behavioral walkthrough, security inspection, screenshot evidence |
+| **Stablecoin Adapter** | `stablecoin-adapter.ts` | Off-ramp lifecycle, balance reads, transfer tracking, Circle reference |
+| **Ad Billing Adapter** | `ad-billing-adapter.ts` | Billing capability classification, invoice reads, settlement instructions |
+| **Funding Plan** | `funding-plan.ts` | Branded Cents, FundingPlan FSM, runway calculation, reconciliation matching |
 
 ### Coding Standards
 
@@ -621,6 +651,8 @@ These are enforced across every phase:
 - **Ownership checks on every query.** No IDOR. Return 404, not 403.
 - **Accessibility is not optional.** Keyboard nav, focus management, contrast, ARIA.
 - **Small batches.** Max ~200 lines changed, one flow per batch, verify after each.
+- **No stubs.** Never ship placeholder code. If it's not ready, don't create the file.
+- **Screenshot every page during review.** Agents must visually inspect running applications.
 
 ### Testing Philosophy
 
@@ -730,6 +762,8 @@ If Phase 12 or a deploy script fails:
 | Deploy script hangs | Check SSH connectivity, verify key permissions (0600) |
 | Test runner not found | Phase 1 should set it up — re-run scaffold if missing |
 | Context fills mid-phase | Checkpoint to journal, new session, continue |
+| `npx voidforge init` doesn't work | Not available yet. Clone the repo directly. See QUICKSTART.md |
+| npm install fails on Windows | node-pty needs C++ tools. Use `--ignore-scripts` or scaffold branch |
 
 ---
 
