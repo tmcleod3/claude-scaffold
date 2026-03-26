@@ -376,7 +376,9 @@ export class CircleAdapter implements StablecoinAdapter {
         const fees = p.fees as Record<string, string> | undefined;
         const amountCents = toCents(parseFloat(amount.amount));
         const feesCents = fees ? toCents(parseFloat(fees.amount)) : toCents(0);
-        const id = randomUUID();
+        // Use Circle payout ID as stable identifier instead of randomUUID()
+        // to ensure idempotent reads return consistent IDs for the same payout.
+        const id = p.id as string;
 
         const record: Omit<TransferRecord, 'hash'> = {
           id,

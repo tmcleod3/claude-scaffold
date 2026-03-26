@@ -13,7 +13,7 @@
 
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
-import { readFile, appendFile, mkdir } from 'node:fs/promises';
+import { readFile, appendFile, mkdir, stat, rename } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 
 import { TREASURY_DIR, appendToLog, atomicWrite } from './financial-core.js';
@@ -77,6 +77,15 @@ interface TreasuryHeartbeatState {
   lastCircuitBreakerCheck: string | null;
   dailyMovementCents: number;
   dailyMovementDate: string;
+  /** Pending obligations from billing scans (invoices + expected debits). */
+  pendingObligationsCents: number;
+  /** Google invoice data from last scan. */
+  googleInvoiceDueSoon: boolean;
+  googleInvoiceCents: number;
+  /** Meta debit data from last scan. */
+  metaDebitFailed: boolean;
+  metaPaymentRisk: boolean;
+  metaForecast7DayCents: number;
 }
 
 function defaultTreasuryState(): TreasuryHeartbeatState {
@@ -94,6 +103,12 @@ function defaultTreasuryState(): TreasuryHeartbeatState {
     lastCircuitBreakerCheck: null,
     dailyMovementCents: 0,
     dailyMovementDate: new Date().toISOString().slice(0, 10),
+    pendingObligationsCents: 0,
+    googleInvoiceDueSoon: false,
+    googleInvoiceCents: 0,
+    metaDebitFailed: false,
+    metaPaymentRisk: false,
+    metaForecast7DayCents: 0,
   };
 }
 
@@ -164,10 +179,139 @@ interface WalEntry {
   error?: string;
 }
 
+const WAL_FILE = join(TREASURY_DIR, 'pending-ops.jsonl');
+const WAL_MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB rotation threshold
+const WAL_MAX_ROTATIONS = 7;
+
+/** Rotate WAL file using 7-file rotation (same as audit-log pattern). */
+async function rotateWalIfNeeded(): Promise<void> {
+  try {
+    const stats = await stat(WAL_FILE);
+    if (stats.size >= WAL_MAX_SIZE_BYTES) {
+      for (let i = WAL_MAX_ROTATIONS - 1; i >= 1; i--) {
+        try {
+          await rename(WAL_FILE + '.' + i, WAL_FILE + '.' + (i + 1));
+        } catch { /* file doesn't exist at this slot — skip */ }
+      }
+      await rename(WAL_FILE, WAL_FILE + '.1');
+    }
+  } catch {
+    // File doesn't exist yet — that's fine
+  }
+}
+
 async function writeWalEntry(entry: WalEntry): Promise<void> {
-  const walFile = join(TREASURY_DIR, 'pending-ops.jsonl');
   await mkdir(TREASURY_DIR, { recursive: true });
-  await appendFile(walFile, JSON.stringify(entry) + '\n', 'utf-8');
+  await rotateWalIfNeeded();
+  await appendFile(WAL_FILE, JSON.stringify(entry) + '\n', 'utf-8');
+}
+
+/** Read all pending WAL entries for recovery. */
+async function readPendingWalEntries(): Promise<WalEntry[]> {
+  try {
+    if (!existsSync(WAL_FILE)) return [];
+    const content = await readFile(WAL_FILE, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+    const entries: WalEntry[] = [];
+    for (const line of lines) {
+      try {
+        const entry = JSON.parse(line) as WalEntry;
+        if (entry.status === 'pending') {
+          entries.push(entry);
+        }
+      } catch { /* skip malformed */ }
+    }
+    return entries;
+  } catch {
+    return [];
+  }
+}
+
+/** Complete a WAL entry by writing a completion record. */
+async function completeWalEntry(
+  intentId: string,
+  operation: string,
+  result: 'completed' | 'failed',
+  error?: string,
+): Promise<void> {
+  await writeWalEntry({
+    intentId,
+    operation,
+    params: {},
+    status: result,
+    createdAt: new Date().toISOString(),
+    completedAt: new Date().toISOString(),
+    error,
+  });
+}
+
+/** WAL recovery: check pending ops against adapter and resolve them. */
+async function recoverPendingOps(
+  vaultKey: string | null,
+  logger: Logger,
+): Promise<void> {
+  const pendingOps = await readPendingWalEntries();
+  if (pendingOps.length === 0) return;
+
+  logger.log(`WAL recovery: found ${pendingOps.length} pending operation(s)`);
+
+  for (const op of pendingOps) {
+    try {
+      if (op.operation === 'offramp') {
+        const params = op.params as { transferId?: string; providerTransferId?: string } | null;
+        const providerTransferId = params?.providerTransferId;
+        if (!providerTransferId) {
+          // No provider transfer ID means the offramp never initiated — mark failed
+          await completeWalEntry(op.intentId, op.operation, 'failed', 'No provider transfer ID — offramp never initiated');
+          logger.log(`WAL recovery: ${op.intentId} marked failed (no provider transfer ID)`);
+          continue;
+        }
+
+        const { getStablecoinAdapter } = await import('./financial/adapter-factory.js');
+        const adapter = await getStablecoinAdapter(vaultKey, logger);
+        const status = await adapter.getTransferStatus(providerTransferId);
+
+        if (status.status === 'completed') {
+          await completeWalEntry(op.intentId, op.operation, 'completed');
+          logger.log(`WAL recovery: ${op.intentId} confirmed completed`);
+        } else if (status.status === 'failed') {
+          await completeWalEntry(op.intentId, op.operation, 'failed', 'Transfer failed at provider');
+          logger.log(`WAL recovery: ${op.intentId} confirmed failed`);
+        } else {
+          logger.log(`WAL recovery: ${op.intentId} still ${status.status} — will retry next startup`);
+        }
+      } else if (op.operation === 'auto-funding-execute') {
+        const params = op.params as { providerTransferId?: string } | null;
+        const providerTransferId = params?.providerTransferId;
+        if (!providerTransferId) {
+          await completeWalEntry(op.intentId, op.operation, 'failed', 'No provider transfer ID');
+          logger.log(`WAL recovery: ${op.intentId} marked failed (no provider transfer ID)`);
+          continue;
+        }
+
+        const { getStablecoinAdapter } = await import('./financial/adapter-factory.js');
+        const adapter = await getStablecoinAdapter(vaultKey, logger);
+        const status = await adapter.getTransferStatus(providerTransferId);
+
+        if (status.status === 'completed') {
+          await completeWalEntry(op.intentId, op.operation, 'completed');
+          logger.log(`WAL recovery: ${op.intentId} confirmed completed`);
+        } else if (status.status === 'failed') {
+          await completeWalEntry(op.intentId, op.operation, 'failed', 'Transfer failed at provider');
+          logger.log(`WAL recovery: ${op.intentId} confirmed failed`);
+        } else {
+          logger.log(`WAL recovery: ${op.intentId} still ${status.status} — will retry next startup`);
+        }
+      } else {
+        // Unknown op type — mark failed to avoid infinite recovery loop
+        await completeWalEntry(op.intentId, op.operation, 'failed', `Unknown operation type: ${op.operation}`);
+        logger.log(`WAL recovery: ${op.intentId} marked failed (unknown operation: ${op.operation})`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      logger.log(`WAL recovery: ${op.intentId} check failed: ${msg}`);
+    }
+  }
 }
 
 // ── Circuit Breaker Conditions (PRD S13.2) ───────────
@@ -272,6 +416,168 @@ export function evaluateBillingBreakers(opts: {
   };
 }
 
+// ── Funding Plan Persistence ─────────────────────────
+
+interface FundingPlanEntry {
+  id: string;
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
+  requiredCents?: number;
+  reason?: string;
+  sourceFundingId?: string;
+  destinationBankId?: string;
+  idempotencyKey?: string;
+  hash?: string;
+  previousHash?: string;
+  [key: string]: unknown;
+}
+
+/** Read all funding plans from the JSONL log. */
+async function readFundingPlans(): Promise<FundingPlanEntry[]> {
+  try {
+    if (!existsSync(FUNDING_PLANS_LOG)) return [];
+    const content = await readFile(FUNDING_PLANS_LOG, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+    const plans: FundingPlanEntry[] = [];
+    for (const line of lines) {
+      try {
+        plans.push(JSON.parse(line) as FundingPlanEntry);
+      } catch { /* skip malformed */ }
+    }
+    return plans;
+  } catch {
+    return [];
+  }
+}
+
+/** Rewrite the full funding plans log (after status transitions). */
+async function writeFundingPlans(plans: FundingPlanEntry[]): Promise<void> {
+  await mkdir(TREASURY_DIR, { recursive: true });
+  const content = plans.map(p => JSON.stringify(p)).join('\n') + '\n';
+  await atomicWrite(FUNDING_PLANS_LOG, content);
+}
+
+// ── Auto-Funding Plan Executor ───────────────────────
+
+/** Execute approved funding plans: initiate offramp, track pending, write WAL. */
+async function executeApprovedPlans(
+  vaultKey: string | null,
+  logger: Logger,
+  triggerFreeze: FreezeFn,
+): Promise<void> {
+  const plans = await readFundingPlans();
+  const approvedPlans = plans.filter(p => p.status === 'APPROVED');
+
+  if (approvedPlans.length === 0) return;
+
+  logger.log(`Executing ${approvedPlans.length} approved funding plan(s)`);
+
+  const { getStablecoinAdapter } = await import('./financial/adapter-factory.js');
+  const adapter = await getStablecoinAdapter(vaultKey, logger);
+
+  for (const plan of approvedPlans) {
+    const intentId = randomUUID();
+
+    // Write WAL entry before execution (ADR-3)
+    await writeWalEntry({
+      intentId,
+      operation: 'auto-funding-execute',
+      params: { planId: plan.id, requiredCents: plan.requiredCents },
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    });
+
+    try {
+      const planRef = {
+        id: plan.id ?? randomUUID(),
+        sourceFundingId: plan.sourceFundingId ?? 'default-source',
+        destinationBankId: plan.destinationBankId ?? 'default-bank',
+        requiredCents: (plan.requiredCents ?? 0) as Cents,
+        idempotencyKey: plan.idempotencyKey ?? randomUUID(),
+      };
+
+      const transfer = await adapter.initiateOfframp(planRef, plan.hash ?? '');
+
+      // Transition plan to PENDING_SETTLEMENT
+      plan.status = 'PENDING_SETTLEMENT';
+      plan.updatedAt = new Date().toISOString();
+      await writeFundingPlans(plans);
+
+      // Log the transfer
+      await mkdir(TREASURY_DIR, { recursive: true });
+      await appendFile(TRANSFERS_LOG, JSON.stringify(transfer) + '\n', 'utf-8');
+
+      // Track pending transfer
+      const pending = await readPendingTransfers();
+      pending.push({
+        id: transfer.id,
+        fundingPlanId: plan.id,
+        providerTransferId: transfer.providerTransferId,
+        amountCents: transfer.amountCents as number,
+        status: 'pending',
+        initiatedAt: transfer.initiatedAt,
+        lastPolledAt: transfer.initiatedAt,
+      });
+      await writePendingTransfers(pending);
+
+      // Update treasury state
+      treasuryState.pendingTransferCount += 1;
+      treasuryState.lastOfframpAt = new Date().toISOString();
+
+      // Track daily movement for CB-6
+      const today = new Date().toISOString().slice(0, 10);
+      if (treasuryState.dailyMovementDate !== today) {
+        treasuryState.dailyMovementCents = 0;
+        treasuryState.dailyMovementDate = today;
+      }
+      treasuryState.dailyMovementCents += (plan.requiredCents ?? 0) as number;
+
+      // Complete WAL
+      await writeWalEntry({
+        intentId,
+        operation: 'auto-funding-execute',
+        params: { planId: plan.id, transferId: transfer.id, providerTransferId: transfer.providerTransferId },
+        status: 'completed',
+        createdAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+      });
+
+      logger.log(
+        `Auto-funding executed: plan ${plan.id}, ` +
+        `$${(((plan.requiredCents ?? 0) as number) / 100).toFixed(2)} ` +
+        `via ${transfer.provider} (transfer ${transfer.id})`,
+      );
+
+      // CB-6: Check daily movement limits
+      const cb = evaluateCircuitBreakers(treasuryState);
+      if (cb.shouldFreeze && !treasuryState.fundingFrozen) {
+        await triggerFreeze(cb.reasons.join('; '));
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      logger.log(`Auto-funding execution failed for plan ${plan.id}: ${msg}`);
+
+      // Mark plan as FAILED
+      plan.status = 'FAILED';
+      plan.updatedAt = new Date().toISOString();
+      await writeFundingPlans(plans);
+
+      // Mark WAL as failed
+      await writeWalEntry({
+        intentId,
+        operation: 'auto-funding-execute',
+        params: { planId: plan.id },
+        status: 'failed',
+        createdAt: new Date().toISOString(),
+        error: msg,
+      });
+    }
+  }
+
+  await saveTreasuryState();
+}
+
 // ── Treasury Heartbeat Jobs (PRD S10.4) ──────────────
 
 export function registerTreasuryJobs(
@@ -289,6 +595,12 @@ export function registerTreasuryJobs(
   // Load persisted treasury state on registration
   void loadTreasuryState().catch(() => {
     /* state will use defaults */
+  });
+
+  // WAL recovery: resolve pending operations from prior crash/restart
+  void recoverPendingOps(vaultKey, logger).catch((err: unknown) => {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    logger.log(`WAL recovery failed: ${msg}`);
   });
 
   // Job 1: stablecoin-balance-check (hourly)
@@ -353,6 +665,23 @@ export function registerTreasuryJobs(
 
             if (status.status === 'completed') {
               treasuryState.pendingTransferCount = Math.max(0, treasuryState.pendingTransferCount - 1);
+
+              // Mark matching funding plan as SETTLED
+              if (transfer.fundingPlanId) {
+                try {
+                  const plans = await readFundingPlans();
+                  const plan = plans.find(p => p.id === transfer.fundingPlanId);
+                  if (plan && (plan.status === 'PENDING_SETTLEMENT' || plan.status === 'APPROVED')) {
+                    plan.status = 'SETTLED';
+                    plan.updatedAt = new Date().toISOString();
+                    await writeFundingPlans(plans);
+                    logger.log(`Funding plan ${plan.id} marked SETTLED`);
+                  }
+                } catch (planErr: unknown) {
+                  const planMsg = planErr instanceof Error ? planErr.message : 'Unknown error';
+                  logger.log(`Failed to update funding plan status: ${planMsg}`);
+                }
+              }
             }
           }
         } catch (err: unknown) {
@@ -417,16 +746,67 @@ export function registerTreasuryJobs(
   scheduler.add('google-invoice-scan', 86_400_000, async () => {
     logger.log('Google invoice scan starting');
     try {
-      const { GoogleBillingAdapter } = await import('./financial/billing/google-billing.js');
-      // In production, config comes from encrypted vault
-      // For now, log that the scan was attempted
-      logger.log('Google invoice scan: adapter loaded — requires credentials from vault');
+      const { getBillingAdapter } = await import('./financial/adapter-factory.js');
+      const billingAdapter = await getBillingAdapter('google', vaultKey, logger);
+      if (!billingAdapter) {
+        logger.log('Google invoice scan: no billing adapter available — skipping');
+        await writeCurrentState();
+        return;
+      }
 
-      // When credentials are available:
-      // const adapter = new GoogleBillingAdapter(config);
-      // const invoices = await adapter.readInvoices('google', dateRange);
-      // Log pending/overdue invoices and update treasury state
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const today = now.toISOString().slice(0, 10);
+      const start = thirtyDaysAgo.toISOString().slice(0, 10);
 
+      const invoices = await billingAdapter.readInvoices('google', { start, end: today });
+
+      // Identify pending/overdue invoices for obligation tracking
+      const pendingInvoices = invoices.filter(
+        i => i.status === 'pending' || i.status === 'overdue',
+      );
+      const totalInvoiceCents = pendingInvoices.reduce(
+        (sum, i) => sum + (i.amountCents as number), 0,
+      );
+
+      // Check for invoices due within 7 days
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const dueSoon = pendingInvoices.some(i => {
+        const dueDate = new Date(i.dueDate);
+        return dueDate.getTime() <= sevenDaysFromNow.getTime();
+      });
+
+      // Update treasury state with invoice data
+      treasuryState.googleInvoiceDueSoon = dueSoon;
+      treasuryState.googleInvoiceCents = totalInvoiceCents;
+
+      // Update pending obligations (add google invoices portion)
+      // Recalculate: google invoices + meta debits
+      treasuryState.pendingObligationsCents =
+        totalInvoiceCents + treasuryState.metaForecast7DayCents;
+
+      logger.log(
+        `Google invoice scan: ${invoices.length} invoice(s), ` +
+        `${pendingInvoices.length} pending/overdue ` +
+        `($${(totalInvoiceCents / 100).toFixed(2)}), ` +
+        `due soon: ${dueSoon}`,
+      );
+
+      // CB-4: Evaluate billing breakers with invoice data
+      const cbResult = evaluateBillingBreakers({
+        googleInvoiceDueSoon: dueSoon,
+        googleInvoiceCents: totalInvoiceCents,
+        bankBalanceCents: treasuryState.bankBalanceCents,
+        minimumBufferCents: 50_000, // $500 minimum buffer
+        metaDebitFailed: treasuryState.metaDebitFailed,
+        metaPaymentRisk: treasuryState.metaPaymentRisk,
+      });
+
+      if (cbResult.shouldFreeze && !treasuryState.fundingFrozen) {
+        await triggerFreeze(cbResult.reasons.join('; '));
+      }
+
+      await saveTreasuryState();
       await writeCurrentState();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -438,15 +818,71 @@ export function registerTreasuryJobs(
   scheduler.add('meta-debit-monitor', 86_400_000, async () => {
     logger.log('Meta debit monitor starting');
     try {
-      const { MetaBillingAdapter } = await import('./financial/billing/meta-billing.js');
-      // In production, config comes from encrypted vault
-      logger.log('Meta debit monitor: adapter loaded — requires credentials from vault');
+      const { getBillingAdapter } = await import('./financial/adapter-factory.js');
+      const billingAdapter = await getBillingAdapter('meta', vaultKey, logger);
+      if (!billingAdapter) {
+        logger.log('Meta debit monitor: no billing adapter available — skipping');
+        await writeCurrentState();
+        return;
+      }
 
-      // When credentials are available:
-      // const adapter = new MetaBillingAdapter(config);
-      // const debits = await adapter.readExpectedDebits('meta', dateRange);
-      // Log expected debits and update treasury state
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const end = sevenDaysFromNow.toISOString().slice(0, 10);
 
+      let debits: Awaited<ReturnType<typeof billingAdapter.readExpectedDebits>> = [];
+      let metaDebitFailed = false;
+      try {
+        debits = await billingAdapter.readExpectedDebits('meta', { start: today, end });
+      } catch (debitErr: unknown) {
+        // If we can't read debits, Meta may be in a bad state
+        metaDebitFailed = true;
+        const msg = debitErr instanceof Error ? debitErr.message : 'Unknown error';
+        logger.log(`Meta debit read failed: ${msg}`);
+        debits = [];
+      }
+
+      // Sum expected debits for obligation tracking
+      const totalDebitCents = debits.reduce(
+        (sum, d) => sum + (d.estimatedAmountCents as number), 0,
+      );
+
+      // Check for failed or risky debits
+      const hasFailedDebit = debits.some(d => d.status === 'failed');
+      // Meta "payment risk" = debit failed or adapter call failed
+      const paymentRisk = metaDebitFailed || hasFailedDebit;
+
+      // Update treasury state with debit data
+      treasuryState.metaDebitFailed = metaDebitFailed || hasFailedDebit;
+      treasuryState.metaPaymentRisk = paymentRisk;
+      treasuryState.metaForecast7DayCents = totalDebitCents;
+
+      // Update pending obligations (google invoices + meta debits)
+      treasuryState.pendingObligationsCents =
+        treasuryState.googleInvoiceCents + totalDebitCents;
+
+      logger.log(
+        `Meta debit monitor: ${debits.length} expected debit(s) ` +
+        `($${(totalDebitCents / 100).toFixed(2)} next 7 days), ` +
+        `failed: ${hasFailedDebit}, risk: ${paymentRisk}`,
+      );
+
+      // CB-5: Evaluate billing breakers with debit data
+      const cbResult = evaluateBillingBreakers({
+        googleInvoiceDueSoon: treasuryState.googleInvoiceDueSoon,
+        googleInvoiceCents: treasuryState.googleInvoiceCents,
+        bankBalanceCents: treasuryState.bankBalanceCents,
+        minimumBufferCents: 50_000, // $500 minimum buffer
+        metaDebitFailed: treasuryState.metaDebitFailed,
+        metaPaymentRisk: paymentRisk,
+      });
+
+      if (cbResult.shouldFreeze && !treasuryState.fundingFrozen) {
+        await triggerFreeze(cbResult.reasons.join('; '));
+      }
+
+      await saveTreasuryState();
       await writeCurrentState();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -481,7 +917,7 @@ export function registerTreasuryJobs(
       }
 
       const bankBalance = treasuryState.bankBalanceCents as Cents;
-      const pendingObligations = 0 as Cents; // TODO: sum from invoice/debit scans
+      const pendingObligations = treasuryState.pendingObligationsCents as Cents;
 
       const forecast = forecastRunway(bankBalance, campaigns, pendingObligations);
       treasuryState.runwayDays = forecast.runwayDays;
@@ -521,10 +957,10 @@ export function registerTreasuryJobs(
           },
           pendingSpendCents: pendingObligations,
           obligations: [],
-          googleInvoiceDueSoon: false,
-          googleInvoiceCents: 0 as Cents,
-          metaUsesDirectDebit: false,
-          metaForecast7DayCents: 0 as Cents,
+          googleInvoiceDueSoon: treasuryState.googleInvoiceDueSoon,
+          googleInvoiceCents: treasuryState.googleInvoiceCents as Cents,
+          metaUsesDirectDebit: treasuryState.metaForecast7DayCents > 0,
+          metaForecast7DayCents: treasuryState.metaForecast7DayCents as Cents,
           debitProtectionBufferCents: 0 as Cents,
           discrepancyExists: treasuryState.consecutiveMismatches > 0,
           previousHash: '',
@@ -537,7 +973,7 @@ export function registerTreasuryJobs(
             `Auto-funding approved: $${((autoResult.plan.requiredCents as number) / 100).toFixed(2)} ` +
             `(reason: ${autoResult.plan.reason}) — queuing for execution`,
           );
-          // Log the approved plan for the offramp-status-poll job to pick up
+          // Log the approved plan
           await mkdir(TREASURY_DIR, { recursive: true });
           await appendFile(
             FUNDING_PLANS_LOG,
@@ -547,6 +983,9 @@ export function registerTreasuryJobs(
         } else {
           logger.log('Auto-funding: no action needed or policy blocked');
         }
+
+        // Execute approved funding plans
+        await executeApprovedPlans(vaultKey, logger, triggerFreeze);
       }
 
       await saveTreasuryState();
@@ -667,7 +1106,7 @@ export function registerTreasuryJobs(
     }
   });
 
-  logger.log('Treasury heartbeat jobs registered (8 jobs)');
+  logger.log('Treasury heartbeat jobs registered (8 jobs, WAL recovery active)');
 }
 
 // ── Treasury Socket Handlers ─────────────────────────

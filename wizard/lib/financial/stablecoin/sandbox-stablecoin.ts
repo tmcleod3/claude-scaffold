@@ -172,16 +172,16 @@ export class SandboxStablecoinAdapter implements StablecoinAdapter {
   async getTransferStatus(transferId: string): Promise<TransferStatusDetail> {
     const state = this.transfers.get(transferId);
     if (!state) {
-      // Return a completed status for unknown IDs (idempotent reads)
+      // Return failed status for unknown IDs — unknown transfers should not
+      // be reported as completed (could cause false settlement in reconciliation).
       return {
         transferId,
         providerTransferId: 'unknown',
-        status: 'completed',
+        status: 'failed',
         amountCents: 0 as Cents,
         feesCents: 0 as Cents,
         initiatedAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-        providerRawStatus: 'complete',
+        providerRawStatus: 'not_found',
       };
     }
 
