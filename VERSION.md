@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 18.2.0
+**Current:** 19.0.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 19.0.0 | 2026-03-25 | The Funding Rail — Stablecoin treasury to ad billing: Circle, Mercury, Google/Meta billing adapters, 8 heartbeat jobs, 6 circuit breakers, funding policy engine, treasury planner, reconciliation, reporting. 14 new financial modules, 3 new patterns (35 total). |
 | 18.2.0 | 2026-03-25 | The Dogfood — browser intelligence on VoidForge: 6 a11y heading fixes, CDN fallback for tower, security verified clean |
 | 18.1.0 | 2026-03-25 | The Eyes — browser-review.ts pattern, console error capture, behavioral walkthroughs, security inspection. Browser intelligence in QA, UX, Security, Gauntlet method docs. 32 patterns. |
 | 18.0.0 | 2026-03-24 | The Proving Ground — Playwright E2E + axe-core a11y (21 browser tests), browser verification in 6 method docs, e2e-test.ts pattern, 315 total tests |

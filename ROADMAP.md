@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v18.2.0 (2026-03-25)
-**Next:** v19.0 — The Funding Rail (Stablecoin Treasury → Ad Platform Billing)
-**Status:** v18.2 shipped. Stablecoin Ads PRD accepted. Phase 0 buildable immediately.
-**315 tests** (294 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 32 code patterns.
+**Current:** v19.0.0 (2026-03-25)
+**Next:** v19.1 — Bridge adapter + additional billing rails
+**Status:** v19.0 shipped. Stablecoin Funding Rail complete. Circle, Mercury, Google/Meta billing live.
+**334 tests** (314 unit + 20 treasury-planner + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 35 code patterns.
 
 ---
 
