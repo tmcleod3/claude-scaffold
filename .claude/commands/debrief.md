@@ -95,11 +95,12 @@ Present the full report. The user can:
 
 If user approves submission:
 1. Check for `gh` CLI authentication or `github-token` in vault
-2. Create issue on `tmcleod3/voidforge` with:
+2. Detect the current repository via `gh repo view --json nameWithOwner`. Use the detected repo for issue creation. When running on a non-VoidForge project, field reports go to THAT project's repo (where the bugs were found), not to upstream VoidForge.
+3. Create issue on the detected repo with:
    - Title: `Field Report: [one-line summary]`
    - Label: `field-report`
    - Body: the full post-mortem markdown
-3. Confirm: "Report filed — Starfleet will review. Issue #XX"
+4. Confirm: "Report filed — Starfleet will review. Issue #XX"
 
 If `$ARGUMENTS` contains `--dry-run`, generate report but skip submission.
 

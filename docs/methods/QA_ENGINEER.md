@@ -232,6 +232,8 @@ After running E2E tests, if the project has a running server, Batman launches th
 
 Screenshots are evidence — taken when issues are found, attached to findings. Not taken for every assertion.
 
+**Post-fix screenshot verification:** After fixing any UI-affecting bug, re-take the screenshot and verify the fix renders correctly. Do not rely on "the code looks right" — confirm visually. A fix that breaks rendering differently than the original bug is worse than no fix.
+
 ## Step 4 — Bug Tracker (MUST MAINTAIN)
 
 | ID | Title | Severity | Area | Repro Steps | Expected | Actual | Root Cause | Fix | Verified By | Regression Item | Risk |

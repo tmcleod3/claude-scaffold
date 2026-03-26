@@ -199,7 +199,9 @@ See `docs/patterns/database-migration.ts` for reference implementations.
 3. Write unit tests for core service logic + integration tests for API routes
 4. When `e2e: yes`, write one E2E test for the core user journey. This test becomes the canary for all future regressions — if this test breaks, the build is broken.
 5. **Visual intent confirmation:** For visual/layout changes, confirm placement intent (replace vs augment) before coding. "Add logo to hero" and "logo IS the hero" produce very different implementations. Ask: "Should this replace the existing content, or be added alongside it?" (Field report #111)
-5. Log to `/logs/phase-04-core.md`
+6. **Fail-closed defaults:** Privacy-sensitive gates (content filters, scope permissions, visibility rules) MUST default to deny. The unknown/default case blocks access — never allows it. Fail-open is a security bug.
+7. **Sibling grep at build time:** Before committing, grep the codebase for the same pattern in sibling locations (constants, SQL queries, function signatures, router files). Fix ALL instances, not just the one you changed. This catches the #1 source of partial fixes.
+8. Log to `/logs/phase-04-core.md`
 
 **AI Gate (conditional — if `ai: yes` in frontmatter):** After the vertical slice is built, Hari Seldon reviews the first AI integration point. Validates: model selection, prompt structure, basic error handling, eval strategy exists. If no AI features in this phase, skip.
 
@@ -224,6 +226,9 @@ After building a new service, worker, or pipeline, verify it's connected to the 
 8. **Cross-language contract check:** When the project has multiple languages (e.g., Python backend + TypeScript frontend), verify field names match across boundaries. A Python model returning `sender` while TypeScript expects `sender_jid` causes silent data loss. Grep both codebases for shared entity field names.
 
 New infrastructure that isn't wired to consumers is dead code. This check runs at the end of every build mission, not deferred to review. (Field report #33: entire enrichment pipeline was dead code — orchestrator built but never connected to conversation engine.)
+
+### Deferred Wiring Check
+Grep for deferred wiring comments: `Set after`, `Wire after`, `None #`, `TODO: wire`. Verify each was resolved. Unresolved deferred wiring is decorative code.
 
 **Multi-tenant sweep (conditional):** If this phase adds or modifies auth, ownership, or multi-tenant logic, run an org_id/ownership sweep: grep all `WHERE id = ?` (or ORM equivalent) queries across all routes/services and verify each includes an ownership check (`AND org_id = ?`, `AND userId = ?`, or equivalent). This catches IDOR vulnerabilities from queries that filter by primary key without scoping to the authenticated user's tenant.
 
@@ -256,6 +261,8 @@ New infrastructure that isn't wired to consumers is dead code. This check runs a
 **Phases 9-11 — Double-Pass Review Cycle (Batman + Galadriel + Kenobi).**
 
 The review phases use a double-pass pattern: find → fix → re-verify. This catches fix-induced regressions — the #1 source of shipped bugs.
+
+**Screenshot before commit for visual changes:** If the change affects visual output (CSS, HTML, component render), capture a Playwright screenshot before committing. Verify the render matches expectations. Three broken versions were deployed before screenshots caught a chart rendering bug.
 
 *Pass 1 — Find (parallel):*
 1. Batman executes `/docs/methods/QA_ENGINEER.md` through Step 5 (find + fix). Oracle, Red Hood, Alfred, Deathstroke, Constantine scan in parallel. When E2E tests exist, run `npm run test:e2e` alongside unit tests. E2E failures in the review cycle are treated as findings.
@@ -342,6 +349,8 @@ Tests are written alongside features, not bolted on later. This is the authorita
 | 12 | Smoke tests in production | Yes — health check must pass |
 
 "Breaking gate" = failing tests prevent phase advancement. No exceptions.
+
+**Emergency callback testing:** Test emergency/shutdown callbacks for actual behavior, not just invocation count. A callback that calls `pause()` instead of `cancel()` passes a mock test but fails in production.
 
 ---
 

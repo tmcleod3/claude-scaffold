@@ -202,6 +202,8 @@ Before starting mission #1, Odo verifies:
 4. Are there blocking issues from previous missions?
 5. **Data model retrofit check:** If this campaign adds a new data model layer (e.g., ProjectVersion, WorkspaceScope), identify all existing endpoints that read/write the old model and flag them for review. Prior-campaign features that reference the old model directly will silently break or return stale data. (Field report #38: variant endpoint missed the version model because it was built in a prior campaign.)
 
+**BLOCKED Validation Rule:** Before declaring a mission BLOCKED, verify the block is real. If credentials exist in .env or vault, attempt the API call. "Needs dashboard access" is NOT a valid blocker if an API endpoint exists. "Needs developer account" is NOT valid if the API is publicly documented and callable with `node:https`. Try before blocking.
+
 Flag blockers. Suggest resolutions.
 
 ### Step 3 — Sisko's Mission Brief

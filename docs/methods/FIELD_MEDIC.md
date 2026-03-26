@@ -108,11 +108,12 @@ When Bombadil pulls updates from upstream, he checks for resolved field reports:
 When the user approves submission:
 
 1. Use `gh` CLI or `github-token` from vault
-2. Create issue on `tmcleod3/voidforge`:
+2. **Detect the current repository** via `gh repo view --json nameWithOwner`. Use the detected repo for issue creation and listing. When running on a non-VoidForge project, field reports go to THAT project's repo (where the bugs were found), not to upstream VoidForge.
+3. Create issue on the detected repo:
    - Title: `Field Report: [one-line summary]`
    - Labels: `field-report`
    - Body: the full post-mortem markdown
-3. Confirm: *"Report filed — Starfleet will review. Issue #[number]"*
+4. Confirm: *"Report filed — Starfleet will review. Issue #[number]"*
 
 ## Inbox Mode (`--inbox`)
 
@@ -146,7 +147,7 @@ Bombadil (`/void`) carries messages — he syncs files. He doesn't read, think, 
 
 ### Guard rails
 
-- Only works on the upstream repo (`tmcleod3/voidforge`). If run on a downstream project, warns and exits.
+- Inbox mode (`--inbox`) only works on the upstream repo (`tmcleod3/voidforge`). Report submission (`--submit`) works on any repo — field reports go to the current project's repo by default.
 - Requires `gh` CLI authentication
 - Never auto-applies fixes — always presents for user review first
 - Comments on issues are factual and professional (triage results, not opinions)

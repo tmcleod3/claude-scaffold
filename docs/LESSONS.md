@@ -149,3 +149,45 @@
 **Lesson:** Derive HMAC authentication keys using HKDF with a distinct context string, never reuse the encryption key.
 **Action:** Use separate HKDF derivations for encryption vs authentication.
 **Promoted to:** Not yet
+
+### Fail-open defaults in privacy gates
+**Agent:** Bashir (Star Trek) | **Category:** antipattern
+**Context:** Field report triage — content filter defaulted to allow on unknown case
+**Lesson:** The unknown/default case in a privacy-sensitive gate (content filter, scope permission, visibility rule) allowed access instead of blocking it. Fail-open is a security bug in any gate that controls who sees what.
+**Action:** Default case in privacy gates MUST deny access. Added to BUILD_PROTOCOL Phase 4 as "Fail-closed defaults."
+**Promoted to:** BUILD_PROTOCOL.md (Phase 4 — Fail-closed defaults)
+
+### Date objects from Prisma raw queries
+**Agent:** Batman (DC) | **Category:** gotcha
+**Context:** Field report triage — date formatting broke when using String() on Prisma Date objects
+**Lesson:** Prisma raw queries return JavaScript Date objects. Using `String()` on a Date produces a locale-dependent, non-standard string. Use `.toISOString().slice(0,10)` for YYYY-MM-DD format, not `String()`.
+**Action:** When extracting date strings from Prisma query results, always use `.toISOString().slice(0,10)`.
+**Promoted to:** Not yet
+
+### CSS percentage heights in flex items
+**Agent:** Galadriel (Tolkien) | **Category:** gotcha
+**Context:** Field report triage — percentage heights inside flex containers resolved to zero
+**Lesson:** CSS percentage heights on flex items don't resolve to the flex container's height — they resolve to the parent's explicit height, which in a flex layout is often undefined. This produces 0px or collapsed elements. Use explicit px values, `min-height`, or flex-based sizing (`flex: 1`) instead of percentage heights inside flex containers.
+**Action:** Avoid percentage heights in flex children. Use px, vh, or flex-grow instead.
+**Promoted to:** Not yet
+
+### Dynamic counts eliminate hardcoded staleness
+**Agent:** Troi (Star Trek) | **Category:** pattern
+**Context:** Field report triage — marketing page claimed "170+ agents" but actual count was 260+
+**Lesson:** Hardcoded numeric claims ("170+ agents", "13 phases", "30 patterns") go stale immediately. Import counts dynamically from the data source (array length, directory listing, config object keys) so the displayed number always matches reality.
+**Action:** Replace hardcoded counts with computed values derived from the authoritative data source.
+**Promoted to:** Not yet
+
+### Every SaaS has an API
+**Agent:** Odo (Star Trek) | **Category:** antipattern
+**Context:** Field report triage — missions declared BLOCKED for "needs dashboard access" when APIs existed
+**Lesson:** Before declaring a mission BLOCKED because it "needs dashboard access" or "needs developer account," check if the service has a public API. Most SaaS platforms expose everything via API that their dashboard does. If credentials exist in .env or vault, attempt the API call before blocking.
+**Action:** Added BLOCKED Validation Rule to CAMPAIGN.md Step 2 (Odo's prerequisite check).
+**Promoted to:** CAMPAIGN.md (Step 2 — BLOCKED Validation Rule)
+
+### Append-only lists need caps in long-running processes
+**Agent:** La Forge (Star Trek) | **Category:** gotcha
+**Context:** Field report triage — memory leak from unbounded array growth in daemon process
+**Lesson:** Append-only arrays (event logs, metrics buffers, history lists) in long-running processes (daemons, servers, workers) grow without bound and eventually exhaust memory. Every append-only collection needs a cap: ring buffer, LRU eviction, periodic flush-to-disk, or max-length with oldest-first truncation.
+**Action:** When creating arrays that grow over time in long-running processes, always set a maximum size and eviction strategy.
+**Promoted to:** Not yet
