@@ -22,7 +22,12 @@ If `--setup` is specified, skip the 6-phase protocol and run the ad platform onb
 2. Read GROWTH_STRATEGIST.md "Ad Platform Setup" section
 3. Present platform options with best-fit guidance per product type
 4. For each selected platform: account check → credential collection → test connection → store in vault
-5. Summary: which platforms are connected, suggest next steps (`/grow` to start campaigns)
+5. **Billing capability verification** (after credential auth succeeds):
+   - **Google Ads:** Check for monthly invoicing, capture billing setup / payments account IDs. Classify as `FULLY_FUNDABLE` (monthly invoicing available), `MONITORED_ONLY` (manual bank transfer only), or `UNSUPPORTED` (no billing API access).
+   - **Meta Ads:** Check billing mode — direct debit, extended credit / invoicing, or card-only. Classify as `FULLY_FUNDABLE` (direct debit or extended credit), `MONITORED_ONLY` (card / unknown), or `UNSUPPORTED` (no billing data).
+   - **Other platforms (LinkedIn, Twitter, Reddit):** Classify as `MONITORED_ONLY` — campaign ops supported, billing automation not available in V1.
+   - Store capability state per platform in vault alongside credentials.
+6. Summary: which platforms are connected, billing capability per platform, suggest next steps (`/grow` to start campaigns, `/treasury --simulate-funding` if stablecoin treasury is configured)
 
 ## Context Setup
 1. Read `/logs/growth-state.md` — if it exists, resume from current phase

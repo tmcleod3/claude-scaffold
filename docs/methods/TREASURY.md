@@ -100,6 +100,77 @@ Daily two-pass reconciliation (§9.17):
 | `--hard-stop N` | Set daily hard stop amount |
 | `--export [path]` | Export all financial data (encrypted) |
 
+## Stablecoin Funding Rail
+
+### Overview
+
+Treasury supports a first-class stablecoin-funded path for ad spend:
+
+**USDC wallet/provider → Circle off-ramp → Mercury USD account → Google/Meta billing rail → campaign spend**
+
+This does not pay Google or Meta in crypto directly. It converts approved stablecoin balances into compliant fiat rails, then keeps ad billing systems funded, monitored, and reconciled. The stablecoin treasury adapter and ad billing adapter are separate concerns from the campaign CRUD adapter — billing and campaign management never share an interface.
+
+### Stablecoin Treasury Commands
+
+| Flag | What It Does |
+|------|-------------|
+| `setup --crypto` | First-time stablecoin funding setup: provider, destination bank, mode, thresholds, TOTP |
+| `--balances` | Show stablecoin source balance, bank available balance, reserved balance, and platform runway |
+| `--funding-status` | Show end-to-end funding chain: pending off-ramps, unsettled invoices, expected debits, freeze state |
+| `--offramp --amount N` | Initiate off-ramp of $N from stablecoin provider to destination bank (requires vault + TOTP) |
+| `--target-balance N` | Set minimum USD operating balance target at destination bank |
+| `--runway` | Forecast days of runway based on projected campaign spend vs available fiat |
+| `--invoice-pay [platform] [invoice-id]` | Settle a specific platform invoice (requires vault + TOTP) |
+| `--reconcile` | Trigger manual reconciliation across stablecoin transfers, bank settlements, and platform spend |
+| `--simulate-funding` | Dry-run: show projected 14-day spend, required float, recommended off-ramp, settlement lead time, freeze triggers |
+
+### Funding Modes
+
+**Maintain buffer (recommended):** Keep a minimum USD operating balance at the destination bank. When projected runway drops below the configured threshold, Heartbeat generates a funding plan to off-ramp stablecoins and replenish the buffer. Suitable for steady-state spend with predictable billing cycles.
+
+**Just-in-time funding:** Off-ramp only when a specific obligation is imminent (invoice due, debit expected, runway below hard floor). Minimizes idle fiat but increases settlement timing risk. Requires tighter monitoring and shorter off-ramp SLA expectations.
+
+### Circuit Breakers
+
+Freeze all autonomous funding if any of the following occur:
+
+1. **Provider unavailable:** Stablecoin provider unreachable for 3 consecutive polls
+2. **Off-ramp stalled:** Off-ramp transfer pending beyond the defined SLA window
+3. **Reconciliation mismatch:** Reconciliation variance exceeds threshold for 2 consecutive daily closes
+4. **Invoice deadline risk:** Google invoice due within N hours and available fiat below hard floor
+5. **Platform payment failure:** Meta direct debit fails or account enters payment-risk state
+6. **Daily movement cap exceeded:** User-defined maximum daily treasury movement breached
+
+When a circuit breaker trips, the system freezes spend increases and new off-ramps but allows read-only monitoring and campaign intelligence to continue. `/treasury --unfreeze` requires vault + TOTP.
+
+### Authorization Model
+
+**Read-only operations** (standard active vault session):
+- Read stablecoin balances and bank balances
+- Read platform spend and invoices/debits
+- Forecast runway
+- Generate funding recommendations
+- Run `--simulate-funding`
+
+**Write operations** (vault password + TOTP):
+- Initiate off-ramp (`--offramp`)
+- Settle invoice (`--invoice-pay`)
+- Modify budget ceiling
+- Unfreeze funding (`--unfreeze`)
+- Change destination bank
+- Add new funding provider
+
+All write operations require idempotency keys, append to the immutable financial log, and respect the explicit payee/destination allowlist.
+
+### Reconciliation
+
+Daily two-pass reconciliation applies to stablecoin-funded projects:
+
+1. **Preliminary close (midnight UTC):** Read ad platform spend, bank settlement activity, and provider transfer completion state. Compare against planned funding amounts. Write reconciliation record. Surface mismatch severity in the Danger Room.
+2. **Authoritative close (06:00 UTC):** Re-read all sources after 6 hours of settlement lag. Alerts fire only on this pass. Persistent mismatches trigger the reconciliation circuit breaker.
+
+Stablecoin reconciliation links three layers: provider transfer records, bank transaction records, and platform spend/invoice/debit records. Each reconciliation record captures `spendCents`, `bankSettledCents`, `invoiceCents`, `varianceCents`, and a result of `MATCHED`, `WITHIN_THRESHOLD`, or `MISMATCH`.
+
 ## Deliverables
 
 1. Revenue adapters (Stripe, Paddle — read-only, polling)
@@ -108,3 +179,6 @@ Daily two-pass reconciliation (§9.17):
 4. Budget management (allocation, safety tiers)
 5. Treasury tab in Danger Room
 6. Monthly/weekly financial reports
+7. Stablecoin treasury adapter (Circle primary, Bridge secondary)
+8. Ad billing adapter (Google invoicing, Meta direct debit / extended credit)
+9. Funding planner and settlement lifecycle tracking

@@ -85,5 +85,16 @@ When no treasury vault exists:
 ═══════════════════════════════════════════
 ```
 
+### Stablecoin Funding
+- `/treasury setup --crypto` — First-time stablecoin funding setup: provider selection (Circle / Bridge / manual), destination bank, treasury mode (maintain-buffer / just-in-time), buffer threshold, freeze thresholds, TOTP verification
+- `/treasury --balances` — Show stablecoin source balance, bank available balance, reserved balance, and per-platform runway
+- `/treasury --funding-status` — Show end-to-end funding chain: pending off-ramps, unsettled invoices, expected debits, freeze state, and funding sub-state
+- `/treasury --offramp --amount N` — Initiate off-ramp of $N from stablecoin provider to destination bank (requires vault + TOTP)
+- `/treasury --target-balance N` — Set minimum USD operating balance target at destination bank
+- `/treasury --runway` — Forecast days of runway based on projected campaign spend vs available fiat
+- `/treasury --invoice-pay [platform] [invoice-id]` — Settle a specific platform invoice (requires vault + TOTP)
+- `/treasury --reconcile` — Trigger manual reconciliation across stablecoin transfers, bank settlements, and platform spend
+- `/treasury --simulate-funding` — Dry-run: show projected 14-day spend, required float, recommended off-ramp amount, settlement lead time, and freeze triggers
+
 ## Arguments
 $ARGUMENTS

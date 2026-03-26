@@ -124,9 +124,51 @@ Verify existing adapters (`wizard/lib/adapters/`) support both modes:
 
 If an adapter only handles runtime mode, flag it for code changes before the platform can be onboarded.
 
+### Billing Capability Verification
+
+After API credential verification, `/grow --setup` classifies each platform's **billing capability** for treasury integration. This determines whether Cultivation can manage funding lifecycle for that platform.
+
+**Google Ads checks:**
+1. Ads API access works (credential verification above)
+2. Account has a usable billing configuration
+3. Monthly invoicing enabled or not
+4. Payments account / billing setup identifiers captured
+5. If monthly invoicing unavailable: platform marked as campaign ops only, not eligible for programmatic funding
+
+**Meta Ads checks:**
+1. Marketing API auth works (credential verification above)
+2. Account billing mode classified: bank-backed autopay, invoice/extended credit, or unknown
+3. Ad account funding source and payment method identified
+
+**Capability states** (one per connected platform):
+
+| State | Meaning | Treasury Action |
+|-------|---------|----------------|
+| `FULLY_FUNDABLE` | Billing rail supports programmatic settlement (Google monthly invoicing, Meta direct debit / extended credit) | Cultivation manages treasury readiness and settlement lifecycle |
+| `MONITORED_ONLY` | Campaigns and spend can be monitored, but billing rail is not sufficiently automatable (card-only, manual bank transfer) | Spend monitored, funding not automated — user handles billing manually |
+| `UNSUPPORTED` | Platform billing configuration blocks automation entirely | Campaign CRUD only, no treasury integration |
+
+**Stablecoin-aware messaging:** When the project treasury uses stablecoin funding (configured via `/cultivation install`), the setup summary shows billing capability alongside each platform:
+
+```
+═══════════════════════════════════════════
+AD PLATFORM BILLING CAPABILITIES
+═══════════════════════════════════════════
+Google Ads:  FULLY_FUNDABLE
+  Billing mode: monthly invoicing
+  Treasury action: invoice settlement supported
+
+Meta Ads:    MONITORED_ONLY
+  Billing mode: card / unknown
+  Treasury action: spend monitored, funding not automated
+═══════════════════════════════════════════
+```
+
+Platforms classified as `MONITORED_ONLY` or `UNSUPPORTED` should never claim autonomous funding support in UI copy or status displays.
+
 ### Output
 
-Updated financial vault with platform credentials. Campaign-state.md records which platforms are connected. The Danger Room Campaigns tab will show connected platforms once `/grow` creates campaigns.
+Updated financial vault with platform credentials and billing capability state per platform. Campaign-state.md records which platforms are connected and their capability classification. The Danger Room Campaigns tab will show connected platforms with billing rail status once `/grow` creates campaigns.
 
 ## The 6-Phase Protocol
 
