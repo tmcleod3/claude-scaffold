@@ -47,6 +47,12 @@ interface HeartbeatState {
   alerts: string[];
   tokenHealth: Record<string, { status: string; expiresAt: string }>;
   lastAgentMessage?: { agent: string; text: string; timestamp: string };
+  // Treasury state (v19.0 — present when stablecoin funding is configured)
+  stablecoinBalanceCents?: number;
+  bankBalanceCents?: number;
+  runwayDays?: number;
+  fundingFrozen?: boolean;
+  pendingTransferCount?: number;
 }
 
 // ── PID Management ────────────────────────────────────

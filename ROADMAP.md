@@ -2,10 +2,105 @@
 
 > The plan for the plan-maker.
 
-**Current:** v18.2.0 (2026-03-25)
-**Next:** v19.0 — CLI Distribution (`npx voidforge init`)
-**Status:** v18.2 shipped. Dogfood complete. Browser intelligence verified on our own wizard.
-**315 tests** (294 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 32 code patterns.
+**Current:** v19.0.0 (2026-03-25)
+**Next:** v19.1 — Bridge adapter + additional billing rails
+**Status:** v19.0 shipped. Stablecoin Funding Rail complete. Circle, Mercury, Google/Meta billing live.
+**334 tests** (314 unit + 20 treasury-planner + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 35 code patterns.
+
+---
+
+## v19.0 — The Funding Rail
+
+*"Cultivation does not pay Google or Meta in crypto. It converts approved stablecoin balances into compliant fiat rails, then keeps your ad billing systems funded, monitored, and reconciled."*
+
+**Designed by: Full Muster. PRD: `/docs/Stablecoin Ads.md` (785 lines)**
+
+**What this does:** Adds a first-class stablecoin-funded treasury rail to Cultivation: USDC → Circle off-ramp → Mercury bank → Google/Meta billing. Two new adapter categories (StablecoinTreasuryAdapter, AdBillingAdapter), 8 new heartbeat daemon jobs, 3 new patterns, extended treasury/cultivation/grow commands, and Danger Room dashboard updates.
+
+**ALL 16 MISSIONS BUILDABLE.** Adapters implemented via `node:https` against documented REST APIs (same pattern as Stripe adapter in v17.0). Sandbox adapters provide full pipeline demo. Real API accounts needed for live testing only, not for implementation. No stubs. No blocks.
+
+### Phase 0 — Architecture and Docs (3 missions)
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Patterns: `stablecoin-adapter.ts`, `ad-billing-adapter.ts`, `funding-plan.ts` | Pattern | 2 |
+| 2 | Method docs: TREASURY.md, HEARTBEAT.md, GROWTH_STRATEGIST.md + command docs | Methodology | 2 |
+| 3 | Data models + directory structure: `wizard/lib/financial/` with interfaces, enums, registries, treasury planner, funding policy engine | Code + Tests | 2 |
+
+### Phase 1 — Provider + Billing Adapters (4 missions)
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 4 | Circle adapter: connect, verify, get balances, list transfers, initiate off-ramp — via `node:https` against Circle API docs. Sandbox stablecoin adapter for demo pipeline. | Code + Tests | 2.5 |
+| 5 | Mercury balance adapter: balance reads, transaction listing — via `node:https` against Mercury API docs. Sandbox bank adapter already exists (v17.0). | Code + Tests | 2 |
+| 6 | Google/Meta billing adapters: billing mode detection, capability classification (FULLY_FUNDABLE / MONITORED_ONLY / UNSUPPORTED), invoice reads — via `node:https` against documented APIs | Code + Tests | 2.5 |
+| 7 | Danger Room extensions: Growth (runway, funding risk), Treasury (stablecoin balance, pending transfers, freeze state), Campaigns (billing capability per platform), Heartbeat (provider sync, pending ops) | Code | 2 |
+
+### Phase 2 — Treasury Operations (5 missions)
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 8 | Treasury planner: runway forecasting, funding plan generation, buffer maintenance, just-in-time vs maintain-buffer modes | Code + Tests | 2.5 |
+| 9 | Off-ramp lifecycle: initiate via Circle adapter, poll status, idempotency keys, WAL entries, settlement detection | Code + Tests | 3 |
+| 10 | Heartbeat new jobs: 8 scheduled jobs wired to adapters (sandbox when no keys, real when configured) — balance check, off-ramp poll, settlement monitor, invoice scan, runway forecast, reconciliation, stale detector | Code + Tests | 3 |
+| 11 | Reconciliation extension: provider → bank → platform three-way matching, variance detection, threshold classification, freeze triggers | Code + Tests | 2.5 |
+| 12 | Freeze/unfreeze + circuit breakers: 6 automatic freeze triggers (PRD S13.2), manual approval gates (PRD S13.3), TOTP on unfreeze, treasury API routes (/balances, /funding-status, /freeze, /unfreeze, /simulate) | Code + Tests | 2 |
+
+### Phase 3 — Policy + Reporting (3 missions)
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 13 | Funding policy engine: 7 deterministic rules (PRD S15), auto-off-ramp for buffer maintenance, daily cap enforcement, invoice priority logic | Code + Tests | 2.5 |
+| 14 | Platform-specific funding planner: Google invoice settlement lifecycle, Meta debit protection buffer, portfolio-aware rebalancing recommendations | Code + Tests | 2.5 |
+| 15 | Reporting + export: daily treasury report (markdown + JSON), monthly ledger for tax/accounting, per-platform reliability report, `/treasury --simulate-funding` | Code + Tests | 2 |
+
+### Release
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 16 | Version bump + Victory Gauntlet + branch sync | Release | 1.5 |
+
+**Version bump:** MAJOR (v19.0.0) — new adapter categories, new financial directory, new heartbeat jobs, new patterns, new treasury commands.
+
+### Architecture (Muster-designed)
+
+**New directory: `wizard/lib/financial/`**
+```
+wizard/lib/financial/
+  stablecoin/
+    base.ts               # Interfaces + types
+    circle.ts             # Real implementation via node:https
+    sandbox-stablecoin.ts # Sandbox with realistic fake data (full implementation)
+  billing/
+    base.ts               # Interfaces + types
+    google-billing.ts     # Real implementation via node:https
+    meta-billing.ts       # Real implementation via node:https
+  treasury-planner.ts     # Pure logic: runway forecasting, funding plans
+  funding-policy.ts       # Pure logic: 7 deterministic rules
+  reconciliation-engine.ts # Pure logic: three-way matching
+```
+
+**Adapter strategy:** Same as Stripe (v17.0) — implement against documented REST APIs using `node:https`. Zero new dependencies. Sandbox adapter provides full pipeline demo without API keys. Real adapters activate when user configures credentials via `/cultivation install`. Tests use response fixtures.
+
+**Bridge adapter:** Deferred to v19.1 (secondary off-ramp path per PRD S9).
+
+### Security (Kenobi-verified)
+
+All existing security infrastructure extends cleanly:
+- Financial vault (scrypt, AES-256-GCM) for new credentials
+- TOTP on all write operations (off-ramp, invoice settlement, unfreeze)
+- WAL with idempotency keys for all financial mutations
+- Hash-chained append-only logs for audit trail
+- Single-writer (Heartbeat daemon only)
+- Circuit breakers: 6 automatic freeze triggers
+- Manual approval gates: first live off-ramp, first invoice settlement, first FULLY_FUNDABLE activation
+
+### After v19.0
+
+| Version | Direction |
+|---------|-----------|
+| **v19.1** | Bridge adapter (secondary off-ramp), TikTok/LinkedIn billing rails |
+| **v20.0** | CLI Distribution — `npx voidforge init` global installer |
 
 ---
 

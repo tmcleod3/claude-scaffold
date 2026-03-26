@@ -113,3 +113,42 @@ The heartbeat is a lightweight Node.js daemon that runs in the background, separ
 `degraded`: N of M platforms unreachable, or vault key expired.
 `recovering`: dirty shutdown detected, reconciling pending ops.
 `recovery_failed`: 3 consecutive recovery attempts failed.
+
+### Funding Sub-States
+
+When stablecoin treasury is configured, the daemon tracks additional funding sub-states in `heartbeat.json`:
+
+- `fundingHealthy`: All funding sources reachable, bank balance above threshold, no pending issues
+- `fundingDegraded`: Provider intermittently unreachable, or bank balance approaching minimum buffer, or settlement lag detected
+- `fundingFrozen`: A circuit breaker has tripped — all autonomous funding halted, read-only monitoring continues
+- `awaitingApproval`: A funding plan has been generated but requires manual approval (first live off-ramp, first invoice settlement, or policy-gated action)
+- `settlementPending`: An off-ramp or invoice payment has been initiated and is waiting for bank settlement confirmation
+
+These sub-states are independent of the main daemon state. The daemon can be `healthy` with `fundingFrozen` (platform monitoring works, but treasury writes are halted).
+
+## Stablecoin Funding Jobs
+
+When stablecoin treasury is configured, Heartbeat adds these scheduled jobs:
+
+| Job | Schedule | What It Does |
+|-----|----------|-------------|
+| Stablecoin balance check | Hourly | Poll the stablecoin provider for current wallet balance. Update `heartbeat.json` funding state. Alert if balance drops below configured threshold. |
+| Off-ramp status poll | Every 15 min (while pending) | Check provider API for transfer completion. Transition funding plan from `PENDING_SETTLEMENT` to `SETTLED` or `FAILED`. Activate only when a transfer is in flight. |
+| Bank settlement monitor | Hourly | Poll Mercury (or destination bank) for new transactions. Match incoming settlements to pending funding plans by amount and reference. |
+| Google invoice scan | Daily | Read Google Ads billing state. Detect upcoming invoice due dates. Generate funding plan if invoice amount exceeds available fiat minus reserve. |
+| Meta debit monitor | Daily | Read Meta Ads billing state. Detect expected direct debits or invoice settlements. Generate funding plan if projected debit would breach bank floor. |
+| Runway forecast | Every 6h | Calculate days of runway from current bank balance, projected platform spend rate, and pending off-ramp settlements. Update Danger Room risk level. |
+| Reconciliation close | Midnight + 06:00 UTC | Two-pass daily close. Read platform spend, bank settlements, and provider transfers. Write reconciliation record. Fire alerts only on the 06:00 authoritative pass. |
+| Stale funding plan detector | Hourly | Scan `pending-ops.jsonl` for funding plans stuck in `DRAFT` or `APPROVED` beyond SLA. Escalate stale plans to `fundingDegraded` state. |
+
+### Funding Planner Integration
+
+Heartbeat uses the treasury planner to generate and execute funding plans:
+
+1. **Forecast:** The runway forecast job calculates required fiat based on projected campaign spend across all connected platforms.
+2. **Plan generation:** When runway drops below the configured threshold (maintain-buffer mode) or a specific obligation is imminent (just-in-time mode), Heartbeat generates a `FundingPlan` record with reason, source, destination, required amount, and approval mode.
+3. **Approval routing:** Plans below the auto-approve threshold execute via policy. Plans above the threshold, or first-time actions (first live off-ramp, first invoice settlement), enter `awaitingApproval` and notify the user via Telegram/Danger Room.
+4. **Execution:** Approved plans trigger the stablecoin provider off-ramp API. The off-ramp status poll tracks completion. On settlement, the bank settlement monitor confirms arrival.
+5. **Reconciliation:** The daily close links the original funding plan to the provider transfer record, the bank transaction record, and the platform spend/invoice/debit record.
+
+All funding plan mutations go through Heartbeat as the single writer. The CLI and Danger Room read funding state but never mutate it directly.

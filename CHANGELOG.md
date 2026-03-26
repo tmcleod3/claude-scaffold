@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [19.0.0] - 2026-03-25
+
+### Added
+- **Stablecoin Ad Funding Rail** — complete USDC → Circle off-ramp → Mercury bank → Google/Meta billing pipeline
+- **3 new pattern files** — `stablecoin-adapter.ts` (511 lines), `ad-billing-adapter.ts` (537 lines), `funding-plan.ts` (462 lines). 35 patterns total.
+- **`wizard/lib/financial/` directory** — 14 modules: stablecoin adapters (Circle real + sandbox), Mercury bank adapter, Google/Meta billing adapters, treasury planner, funding policy engine (7 rules), reconciliation engine (3-way matching), auto-funding evaluator, platform planner (invoice settlement + debit protection + portfolio rebalancing), reporting (daily markdown + monthly JSON + funding simulation), registries
+- **Circle adapter** — real `node:https` against Circle Business Account API v1 (balance, off-ramp, transfer lifecycle)
+- **Mercury adapter** — real `node:https` against Mercury API v1 (balance, transactions)
+- **Google Ads billing adapter** — billing setup detection, invoice reads, settlement instructions, capability classification
+- **Meta Ads billing adapter** — funding source classification, debit projection, direct debit tracking
+- **Sandbox stablecoin adapter** — $50K simulated USDC balance, 3-poll transfer lifecycle
+- **8 new heartbeat daemon jobs** — stablecoin balance, off-ramp poll, settlement monitor, Google invoice scan, Meta debit monitor, runway forecast, funding reconciliation, stale plan detector
+- **6 treasury socket handlers** — /treasury/offramp (vault+TOTP), /treasury/freeze, /treasury/unfreeze (vault+TOTP), /treasury/balances, /treasury/funding-status, /treasury/runway
+- **6 circuit breakers** — provider down (3 polls), SLA breach (24h), recon mismatch (2 consecutive), invoice coverage shortfall, debit failure, daily cap ($50K)
+- **Danger Room funding intelligence** — Growth tab (runway + funding risk + next event), Treasury tab (USDC balance + pending + bank + invoices + reconciliation + freeze state), Campaigns tab (billing capability per platform), Heartbeat tab (funding ops)
+- **20 treasury-planner tests** — runway, offramp triggers, plan generation, spend forecasting
+
+### Changed
+- **Method docs** updated: TREASURY.md (stablecoin section + 9 commands), HEARTBEAT.md (8 jobs + 5 states), GROWTH_STRATEGIST.md (billing capability verification)
+- **Command docs** updated: cultivation.md (stablecoin option), grow.md (billing checks), treasury.md (crypto commands)
+- **Heartbeat daemon** extended with treasury module — backward compatible (stablecoin gated on config)
+- **HeartbeatState** interface extended with 5 optional treasury fields
+
 ## [18.2.0] - 2026-03-25
 
 ### Fixed

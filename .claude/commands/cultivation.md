@@ -33,9 +33,20 @@ Growth infrastructure from the first commit, not the first customer. (Field repo
 
 **Step 1 — Financial Foundation:**
 - "Let's set up your growth treasury. Where will your ad spend come from?"
-- Options: Mercury (API key), Brex (OAuth), existing bank account (manual), manual budget entry
+- Options: Mercury (API key), Brex (OAuth), existing bank account (manual), manual budget entry, **Stablecoin Treasury (USDC / approved stablecoins)**
 - If Mercury/Brex: guide through API key/OAuth setup, test connection, store in financial vault
 - If manual: enter monthly budget allocation ($X/month for growth)
+- If **Stablecoin Treasury**:
+  1. **Provider selection:** Circle (recommended) / Bridge / Manual external off-ramp
+  2. **Destination bank:** Mercury (recommended) / External bank
+  3. **Treasury operating mode:** Maintain buffer (recommended — keep minimum USD balance) / Just-in-time funding (off-ramp only when obligation is imminent)
+  4. **Buffer threshold:** Minimum USD operating balance + minimum days of runway
+  5. **Freeze thresholds:**
+     - Stop off-ramp if reconciliation mismatch exceeds N bps
+     - Stop platform budget increases if bank balance below threshold
+     - Freeze all autonomous spend if provider connectivity fails for N consecutive cycles
+  6. **TOTP verification:** Required before enabling any write operations (off-ramp, invoice settlement, unfreeze)
+  - Store encrypted: provider credentials, source wallet/account IDs, destination bank mapping, approved networks and assets, funding mode and thresholds, TOTP metadata
 - Create financial vault `~/.voidforge/treasury/vault.enc` (AES-256-GCM, scrypt — memory-hard, zero-dep)
 - Set spending limits and circuit breakers from the start: pause if ROAS < 1.0x for 7 days, daily cap per platform
 - TOTP 2FA setup: generate secret, display QR + copyable text, store in keychain
