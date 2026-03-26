@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v19.0.0 (2026-03-25)
-**Next:** v19.1 — Bridge adapter + additional billing rails
-**Status:** v19.0 shipped. Stablecoin Funding Rail complete. Circle, Mercury, Google/Meta billing live.
-**334 tests** (314 unit + 20 treasury-planner + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 35 code patterns.
+**Current:** v19.1.0 (2026-03-26)
+**Next:** v19.2 — Bridge adapter + additional billing rails
+**Status:** v19.1 shipped. All 9 Muster gaps resolved. Funding Rail production-intelligent.
+**401 tests** (380 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 35 code patterns.
 
 ---
 
@@ -95,11 +95,75 @@ All existing security infrastructure extends cleanly:
 - Circuit breakers: 6 automatic freeze triggers
 - Manual approval gates: first live off-ramp, first invoice settlement, first FULLY_FUNDABLE activation
 
-### After v19.0
+### v19.1 — The Live Wire
+
+*"Architecture without wiring is a blueprint. Wiring without intelligence is plumbing. Intelligence means it works when you plug in real keys."*
+
+**Designed by: Full Muster audit of v19.0. Riker's honest assessment: 55% production-ready. This version fixes the other 45%.**
+
+**The problem:** v19.0 built the architecture, pure logic, and API adapters. But the daemon wiring layer hard-codes sandbox adapters in 3 places, billing jobs are no-ops, bank balance is never populated, auto-approved funding plans are never executed, and 2 of 6 circuit breakers can't fire. Plugging in real Circle/Mercury keys today results in a system that polls a sandbox and writes plans nobody reads.
+
+**The fix:** 6 missions that wire everything end-to-end so real credentials produce real operations.
+
+#### Mission 1 — Adapter Factory + Mercury Wiring (CRITICAL)
+
+1. **Adapter factory:** Create `wizard/lib/financial/adapter-factory.ts` — reads `funding-config.json.enc` from vault, returns the correct adapter (CircleAdapter vs SandboxStablecoinAdapter, MercuryBankAdapter vs SandboxBankAdapter) based on configured provider. Replace all 3 hard-coded `SandboxStablecoinAdapter` instantiations in `treasury-heartbeat.ts` with factory calls.
+2. **Mercury wiring:** Job 3 (`bank-settlement-monitor`) calls `MercuryBankAdapter.getBalance()` via the factory and writes `bankBalanceCents` to treasury state. Runway calculations now use real bank data.
+
+#### Mission 2 — Billing Jobs + Obligation Pipeline (HIGH)
+
+1. **Google invoice job:** Job 4 reads Google Ads credentials from vault, instantiates `GoogleBillingAdapter`, calls `readInvoices()`, stores results in treasury state. Updates `pendingObligationsCents`.
+2. **Meta debit job:** Job 5 reads Meta credentials from vault, instantiates `MetaBillingAdapter`, calls `readExpectedDebits()`, stores results. Updates `pendingObligationsCents`.
+3. **Wire `pendingObligationsCents`:** Replace the `0 as Cents` TODO in runway-forecast job with actual sum from invoice/debit data.
+4. **Wire CB-4/CB-5:** Call `evaluateBillingBreakers()` at the end of billing jobs.
+
+#### Mission 3 — Auto-Funding Execution (HIGH)
+
+1. **Plan executor:** New job or extension of runway-forecast — reads APPROVED plans from `funding-plans.jsonl`, calls `adapter.initiateOfframp()` via factory, transitions plan to PENDING_SETTLEMENT, writes WAL entry.
+2. **Plan lifecycle completion:** When offramp-status-poll detects a completed transfer, find the matching plan and transition to SETTLED.
+3. **WAL recovery:** On daemon startup, read `pending-ops.jsonl`, check status of any pending transfers, complete or fail them.
+
+#### Mission 4 — Bug Fixes + Hardening
+
+1. **Circle `listCompletedTransfers` stable IDs:** Use Circle's external payout ID (not random UUID) as the transfer record ID. Cache historical transfers to prevent ID regeneration.
+2. **Sandbox `getTransferStatus` for unknown IDs:** Return `status: 'failed'` with error message instead of `status: 'completed'` with 0 amount.
+3. **WAL rotation:** Add rotation to `pending-ops.jsonl` (same pattern as audit-log 7-rotation).
+
+#### Mission 5 — Pure Logic Tests (6 modules)
+
+1. `funding-policy.test.ts` — all 7 rules with allow/deny/freeze scenarios
+2. `reconciliation-engine.test.ts` — 3-way matching, variance classification, freeze trigger
+3. `funding-auto.test.ts` — policy + planner integration, auto-approve/deny scenarios
+4. `platform-planner.test.ts` — Google settlement priority, Meta debit buffer, rebalancing
+5. `reporting.test.ts` — daily report format, monthly ledger structure, simulation trajectory
+6. `sandbox-stablecoin.test.ts` — lifecycle (pending→processing→completed), balance deduction, cancellation
+
+#### Mission 6 — Version Bump + Victory Gauntlet
+
+1. Version bump to v19.1.0
+2. Victory Gauntlet with Hawkeye browser smoke test
+3. Push all 3 branches
+
+### Campaign Structure
+
+| # | Mission | Type | Effort |
+|---|---------|------|--------|
+| 1 | Adapter factory + Mercury wiring | Code | 2 |
+| 2 | Billing jobs + obligation pipeline + CB-4/CB-5 | Code | 2 |
+| 3 | Auto-funding execution + WAL recovery | Code | 2 |
+| 4 | Bug fixes + hardening | Code | 1 |
+| 5 | Pure logic tests (6 modules) | Tests | 2 |
+| 6 | Version bump + Victory Gauntlet | Release | 1 |
+
+**Version bump:** MINOR (v19.1.0) — production wiring, no new features or breaking changes.
+
+**After v19.1:** Plugging in real Circle + Mercury API keys should produce a system that automatically monitors stablecoin balances, forecasts runway, triggers off-ramps when the buffer is low, monitors bank settlement, tracks Google invoices and Meta debits, reconciles daily, and freezes autonomously when something goes wrong.
+
+### After v19.1
 
 | Version | Direction |
 |---------|-----------|
-| **v19.1** | Bridge adapter (secondary off-ramp), TikTok/LinkedIn billing rails |
+| **v19.2** | Bridge adapter (secondary off-ramp), TikTok/LinkedIn billing rails |
 | **v20.0** | CLI Distribution — `npx voidforge init` global installer |
 
 ---

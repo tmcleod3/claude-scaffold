@@ -191,3 +191,17 @@
 **Lesson:** Append-only arrays (event logs, metrics buffers, history lists) in long-running processes (daemons, servers, workers) grow without bound and eventually exhaust memory. Every append-only collection needs a cap: ring buffer, LRU eviction, periodic flush-to-disk, or max-length with oldest-first truncation.
 **Action:** When creating arrays that grow over time in long-running processes, always set a maximum size and eviction strategy.
 **Promoted to:** Not yet
+
+### Mock tests hide interface mismatches
+**Agent:** Batman (DC) | **Category:** antipattern
+**Context:** Decorative execution shipped 3x — mock tests passed but real SDK method names differed
+**Lesson:** Mocking a method that doesn't exist on the real class creates false confidence. Tests pass, production fails.
+**Action:** Verify mock method signatures match real class. Use type-safe mocks when possible.
+**Promoted to:** TESTING.md (Mock signature verification), QA_ENGINEER.md (Assertion audit)
+
+### State files drift across multi-campaign sessions
+**Agent:** Kira (Star Trek) | **Category:** antipattern
+**Context:** build-state.md showed v4.0 after 10 campaigns reached v6.0 — Danger Room displayed stale data
+**Lesson:** State files not updated at Victory cause cascading staleness in dashboards and assessments.
+**Action:** Update build-state.md at every Victory (now in CAMPAIGN.md Step 6).
+**Promoted to:** CAMPAIGN.md (Step 6 — state file update at Victory)

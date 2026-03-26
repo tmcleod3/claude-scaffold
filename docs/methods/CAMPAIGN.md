@@ -230,6 +230,8 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 3. Only checkpoint if `/context` shows actual usage above 85%. Do not preemptively suggest checkpoints.
 4. On completion → Step 5
 
+**Post-infrastructure enforcement gate:** For infrastructure campaigns (deploy targets, CI/CD, monitoring, staging environments): after the infrastructure is provisioned, run `/architect --plan` to verify workflow enforcement gates exist — not just infrastructure existence. Infrastructure without process gates is incomplete.
+
 ### Campaign-Mode Pipeline
 
 When `/assemble` runs from within `/campaign`, the full 13-phase pipeline is impractical (130 phase executions for a 10-mission campaign). Campaign missions should use a reduced pipeline:
@@ -322,6 +324,8 @@ If actual usage exceeds 85%, capture a **3-line mission summary** appended to `/
 
 Full debrief runs once at campaign end (after Victory Gauntlet), covering all missions together. This reduces per-mission debrief cost from ~5-10% context to ~0.5%. The BLITZ GATE in the command file still applies — this is a lighter alternative that satisfies the gate without invoking the full skill. (Field report #26)
 
+**Phase-level debrief batching:** For bug-fix or cleanup campaigns with 10+ small missions, debrief can be batched per-phase rather than per-mission. Append phase summary to `/logs/campaign-debriefs.md` after each phase boundary. Full debrief at Victory remains mandatory.
+
 ### Context at 1M
 
 The 1M context window eliminates context as a practical concern for single sessions. Evidence: a full Infinity Gauntlet (10 rounds, 40 agent launches) + 4 campaigns (28 missions) + 42 commits used only 600k (60%) of a 1M window.
@@ -398,7 +402,9 @@ Before declaring victory, Sisko may invoke The Reckoning — a 5-wave parallel p
 
 This is lighter than a Victory Gauntlet (~13 agents vs 30+) and focused on "can we ship?" rather than "is the code perfect?" Use when the campaign built a user-facing product and you want to verify parity between PRD and reality before the Gauntlet runs. (Field report #85)
 
-8. Sisko signs off (ONLY after checklist is complete):
+9. **State file update:** After Victory, update `build-state.md` with current version number, test counts, and deployment state. State file drift across multi-campaign sessions causes stale data in the Danger Room and misleading `/assess` reports.
+
+10. Sisko signs off (ONLY after checklist is complete):
 
 > *"The Prophets' plan is fulfilled. The campaign is complete."*
 

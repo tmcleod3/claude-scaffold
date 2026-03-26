@@ -251,6 +251,12 @@ See `/docs/patterns/e2e-test.ts` for the complete reference implementation:
 - Flaky test annotation pattern
 - Framework-specific Playwright config
 
+## Testing Anti-Patterns
+
+**No hardcoded dates:** Never use hardcoded dates in tests. Use relative datetime (e.g., `new Date(Date.now() - 86400000)` for 'yesterday'). A test with `expect(date).toBe('2026-03-15')` becomes a time bomb that fails when the date passes.
+
+**Mock signature verification:** When mocking external dependencies, verify the mocked methods exist on the real class. A mock that defines `sendMessage()` when the real SDK uses `send_message()` creates false confidence — tests pass but the integration fails. Pattern: `expect(Object.keys(mock)).toEqual(expect.arrayContaining(Object.keys(realInstance)))`.
+
 ## What NOT to Test Automatically
 
 - Visual appearance (manual — Arwen's domain)
