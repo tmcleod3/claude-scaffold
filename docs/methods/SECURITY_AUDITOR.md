@@ -60,6 +60,10 @@ These are independent, read-only scans. Run in parallel using the Agent tool:
 
 **Leia — Secrets:** No secrets in source code. No secrets in git history. .env in .gitignore. Different secrets dev/prod. Rotation plan documented. **Fail-closed verification:** When a new feature depends on a security primitive (encrypt, hash, sign, verify), check the primitive's failure mode. If it fails open (returns data instead of raising on misconfiguration), flag as Critical. Security functions must raise on misconfiguration, never silently degrade. (Field report #99: encrypt() silently returned plaintext when ENCRYPTION_KEY was unset — OAuth tokens stored unencrypted for an entire campaign.)
 
+**Credential fallback check:** After fixing a hardcoded credential, grep for fallback patterns: `?? 'defaultValue'`, `|| 'hardcoded'`. An environment variable with a hardcoded fallback is an incomplete fix — the fallback becomes the live credential when the env var is missing.
+
+**No credentials in git-tracked docs:** Never copy credentials from server-local files into git-tracked documentation. Reference the file location instead: 'Credentials are stored at /etc/app/.htpasswd' — not the actual password hash.
+
 ### Crypto Randomness
 
 Verify all random value generation uses `crypto.getRandomValues()` (browser) or `crypto.randomBytes()` (Node.js). Flag `Math.random()` in any code that generates tokens, codes, identifiers, or secrets. `Math.random()` is predictable — an attacker can reconstruct the seed and predict future values. This is the most common security mistake in JavaScript codebases. (Field report #32: referral codes used Math.random() — caught by Gauntlet, not by build.)

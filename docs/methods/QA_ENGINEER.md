@@ -232,6 +232,8 @@ After running E2E tests, if the project has a running server, Batman launches th
 
 Screenshots are evidence — taken when issues are found, attached to findings. Not taken for every assertion.
 
+**Assertion audit:** Grep test files for computed-but-never-asserted variables. Pattern: `const has* = await...` without a corresponding `expect(has*)`. A test that computes a value but never asserts it creates false confidence — the test passes regardless of the result.
+
 **Post-fix screenshot verification:** After fixing any UI-affecting bug, re-take the screenshot and verify the fix renders correctly. Do not rely on "the code looks right" — confirm visually. A fix that breaks rendering differently than the original bug is worse than no fix.
 
 ## Step 4 — Bug Tracker (MUST MAINTAIN)

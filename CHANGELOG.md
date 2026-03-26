@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [19.1.0] - 2026-03-26
+
+### Added
+- **Adapter factory** (`adapter-factory.ts`) — config-driven adapter selection. Reads `funding-config.json.enc` from vault, returns Circle/Mercury/Google/Meta real adapters or sandbox fallback. Zero hard-coded adapter instantiations.
+- **Auto-funding execution** — approved funding plans from `funding-plans.jsonl` now automatically execute off-ramps via the adapter factory. Plan lifecycle: APPROVED → PENDING_SETTLEMENT → SETTLED.
+- **WAL recovery** — daemon startup reads `pending-ops.jsonl` and resumes incomplete operations.
+- **WAL rotation** — 7-file rotation on `pending-ops.jsonl` (same pattern as audit-log).
+- **66 new financial tests** — funding-policy (22), reconciliation-engine (17), platform-planner (15), sandbox-stablecoin (12). Total: 314 → 380.
+
+### Fixed
+- **Billing jobs wired** — Google invoice scan and Meta debit monitor now read real data via adapter factory (were no-ops returning immediately)
+- **`pendingObligationsCents` populated** — runway forecast now includes real invoice/debit obligations (was hardcoded to 0)
+- **CB-4/CB-5 invocable** — billing circuit breakers now called from billing jobs (were dead code)
+- **Mercury wired** — bank-settlement-monitor reads real bank balance via adapter factory (was never populated)
+- **Circle stable IDs** — `listCompletedTransfers` uses Circle payout ID, not random UUID (was breaking reconciliation)
+- **Sandbox unknown transfer** — `getTransferStatus` returns 'failed' for unknown IDs (was returning 'completed' with 0 amount)
+
 ## [19.0.0] - 2026-03-25
 
 ### Added
