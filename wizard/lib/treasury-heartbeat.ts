@@ -30,6 +30,9 @@ import type {
 import { evaluatePolicy, aggregateDecisions } from './financial/funding-policy.js';
 import type { TreasuryState, PolicyDecision } from './financial/funding-policy.js';
 
+import { evaluateAutoFunding } from './financial/funding-auto.js';
+import type { AutoFundingConfig } from './financial/funding-auto.js';
+
 import { reconcileThreeWay, shouldFreeze } from './financial/reconciliation-engine.js';
 import type {
   ProviderTransfer, BankTransaction, PlatformSpendEntry,
@@ -476,6 +479,63 @@ export function registerTreasuryJobs(
         `(bank $${(bankBalance / 100).toFixed(2)}, ` +
         `daily spend $${((forecast.dailySpendCents as number) / 100).toFixed(2)})`,
       );
+
+      // Auto-funding evaluation: if runway is low, check if we should auto-off-ramp
+      if (!treasuryState.fundingFrozen) {
+        const autoConfig: AutoFundingConfig = {
+          source: {
+            id: 'default-source',
+            provider: 'circle',
+            asset: 'USDC',
+            network: 'ETH',
+            sourceAccountId: 'default',
+            whitelistedDestinationBankId: 'default-bank',
+            status: 'active',
+          },
+          bank: {
+            id: 'default-bank',
+            provider: 'mercury',
+            accountId: 'default',
+            currency: 'USD',
+            availableBalanceCents: bankBalance,
+            reservedBalanceCents: 0 as Cents,
+            minimumBufferCents: 50_000 as Cents, // $500
+          },
+          planConfig: {
+            minimumOfframpCents: 10_000 as Cents, // $100
+            bufferTargetCents: 100_000 as Cents, // $1,000
+            maxDailyOfframpCents: 5_000_000 as Cents, // $50,000
+            targetRunwayDays: 30,
+          },
+          pendingSpendCents: pendingObligations,
+          obligations: [],
+          googleInvoiceDueSoon: false,
+          googleInvoiceCents: 0 as Cents,
+          metaUsesDirectDebit: false,
+          metaForecast7DayCents: 0 as Cents,
+          debitProtectionBufferCents: 0 as Cents,
+          discrepancyExists: treasuryState.consecutiveMismatches > 0,
+          previousHash: '',
+        };
+
+        const autoResult = evaluateAutoFunding(autoConfig);
+
+        if (autoResult) {
+          logger.log(
+            `Auto-funding approved: $${((autoResult.plan.requiredCents as number) / 100).toFixed(2)} ` +
+            `(reason: ${autoResult.plan.reason}) — queuing for execution`,
+          );
+          // Log the approved plan for the offramp-status-poll job to pick up
+          await mkdir(TREASURY_DIR, { recursive: true });
+          await appendFile(
+            FUNDING_PLANS_LOG,
+            JSON.stringify(autoResult.plan) + '\n',
+            'utf-8',
+          );
+        } else {
+          logger.log('Auto-funding: no action needed or policy blocked');
+        }
+      }
 
       await saveTreasuryState();
       await writeCurrentState();
