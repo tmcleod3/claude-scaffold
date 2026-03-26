@@ -106,6 +106,7 @@ async function handleRequest(
       method, path, body,
       { vaultVerified, totpVerified },
       logger, treasuryFreeze,
+      vaultKey,
     );
     if (treasuryResult) {
       eventId++;
@@ -575,7 +576,7 @@ export async function startHeartbeat(vaultPassword: string): Promise<void> {
     eventId++;
     await writeCurrentState();
   };
-  registerTreasuryJobs(scheduler, logger, writeCurrentState, treasuryFreeze);
+  registerTreasuryJobs(scheduler, logger, writeCurrentState, treasuryFreeze, vaultKey);
 
   scheduler.start();
 

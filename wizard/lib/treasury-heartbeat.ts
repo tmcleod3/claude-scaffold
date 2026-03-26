@@ -279,6 +279,7 @@ export function registerTreasuryJobs(
   logger: Logger,
   writeCurrentState: WriteStateFn,
   triggerFreeze: FreezeFn,
+  vaultKey: string | null,
 ): void {
   if (!isStablecoinConfigured()) {
     logger.log('Treasury jobs skipped — stablecoin funding not configured');
@@ -294,8 +295,8 @@ export function registerTreasuryJobs(
   scheduler.add('stablecoin-balance-check', 3_600_000, async () => {
     logger.log('Stablecoin balance check starting');
     try {
-      const { SandboxStablecoinAdapter } = await import('./financial/stablecoin/sandbox-stablecoin.js');
-      const adapter = new SandboxStablecoinAdapter();
+      const { getStablecoinAdapter } = await import('./financial/adapter-factory.js');
+      const adapter = await getStablecoinAdapter(vaultKey, logger);
       const balances = await adapter.getBalances();
 
       treasuryState.stablecoinBalanceCents = balances.totalStablecoinCents as number;
@@ -334,8 +335,8 @@ export function registerTreasuryJobs(
     logger.log(`Polling ${activePending.length} pending off-ramp transfers`);
 
     try {
-      const { SandboxStablecoinAdapter } = await import('./financial/stablecoin/sandbox-stablecoin.js');
-      const adapter = new SandboxStablecoinAdapter();
+      const { getStablecoinAdapter } = await import('./financial/adapter-factory.js');
+      const adapter = await getStablecoinAdapter(vaultKey, logger);
       let updated = false;
 
       for (const transfer of activePending) {
@@ -380,11 +381,21 @@ export function registerTreasuryJobs(
   scheduler.add('bank-settlement-monitor', 3_600_000, async () => {
     logger.log('Bank settlement monitor starting');
     try {
-      // Read bank balance from Mercury adapter (or sandbox)
-      // In production, this would use MercuryBankAdapter.getBalance()
-      // For now, read from treasury state (updated by external reconciliation or manual entry)
-      const bankBalance = treasuryState.bankBalanceCents;
-      logger.log(`Bank balance: $${(bankBalance / 100).toFixed(2)}`);
+      const { getBankAdapter } = await import('./financial/adapter-factory.js');
+      const bankAdapter = await getBankAdapter(vaultKey, logger);
+
+      if (!bankAdapter.getBalance) {
+        logger.log('Bank adapter does not support getBalance — skipping');
+        await writeCurrentState();
+        return;
+      }
+
+      const balance = await bankAdapter.getBalance();
+      treasuryState.bankBalanceCents = balance.available as number;
+      logger.log(
+        `Bank balance: $${((balance.available as number) / 100).toFixed(2)} available, ` +
+        `$${((balance.pending as number) / 100).toFixed(2)} pending`,
+      );
 
       // Check for newly settled transfers
       const pending = await readPendingTransfers();
@@ -394,6 +405,7 @@ export function registerTreasuryJobs(
         logger.log(`${recentlyCompleted.length} transfer(s) settled since last check`);
       }
 
+      await saveTreasuryState();
       await writeCurrentState();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -667,6 +679,7 @@ export async function handleTreasuryRequest(
   auth: { vaultVerified: boolean; totpVerified: boolean },
   logger: Logger,
   triggerFreeze: FreezeFn,
+  vaultKey: string | null,
 ): Promise<{ status: number; body: unknown } | null> {
 
   // POST /treasury/offramp — vault+TOTP required
@@ -705,8 +718,8 @@ export async function handleTreasuryRequest(
     });
 
     try {
-      const { SandboxStablecoinAdapter } = await import('./financial/stablecoin/sandbox-stablecoin.js');
-      const adapter = new SandboxStablecoinAdapter();
+      const { getStablecoinAdapter } = await import('./financial/adapter-factory.js');
+      const adapter = await getStablecoinAdapter(vaultKey, logger);
 
       // Generate a funding plan using treasury planner
       const bankBalance = treasuryState.bankBalanceCents as Cents;
