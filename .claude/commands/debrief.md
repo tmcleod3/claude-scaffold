@@ -95,11 +95,12 @@ Present the full report. The user can:
 
 If user approves submission:
 1. Check for `gh` CLI authentication or `github-token` in vault
-2. Create issue on `tmcleod3/voidforge` with:
+2. **Always submit to `tmcleod3/voidforge`.** Field reports are methodology feedback — they belong upstream regardless of which project found the issue. Use `--repo tmcleod3/voidforge` explicitly.
+3. Create issue on `tmcleod3/voidforge` with:
    - Title: `Field Report: [one-line summary]`
    - Label: `field-report`
    - Body: the full post-mortem markdown
-3. Confirm: "Report filed — Starfleet will review. Issue #XX"
+4. Confirm: "Report filed — Starfleet will review. Issue #XX"
 
 If `$ARGUMENTS` contains `--dry-run`, generate report but skip submission.
 
@@ -122,8 +123,8 @@ The user reviews and approves every word before submission.
 
 If `$ARGUMENTS` contains `--inbox`, skip Steps 0-5 and triage incoming field reports instead:
 
-1. Verify this is the VoidForge upstream repo: `gh repo view --json nameWithOwner` — if not `tmcleod3/voidforge`, warn: "Inbox mode is for the upstream VoidForge repo. Run from your local clone of tmcleod3/voidforge."
-2. Fetch open field reports: `gh issue list --repo tmcleod3/voidforge --label field-report --state open --json number,title,body,createdAt`
+1. **Detect the current repository** via `gh repo view --json nameWithOwner`. Inbox mode reads from the current repo — when triaging, you work on whatever project you're in.
+2. Fetch open field reports: `gh issue list --repo [current-repo] --label field-report --state open --json number,title,body,createdAt`
 3. If no open reports → "Bashir's inbox is empty. No field reports pending."
 4. For each report:
    - Read the full body
