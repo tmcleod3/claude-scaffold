@@ -119,9 +119,19 @@ When a function delegates to another function (e.g., `handleRequest` calls `proc
 
 **Client-Side Reliability:** When a client flow sends multiple network requests (beacon pairs, multi-step forms, chained API calls), test: "What happens when request 1 of N succeeds but request 2 fails?" Verify the system doesn't reach an inconsistent state (e.g., record created but counter not incremented, payment charged but order not confirmed). Test with network throttling and selective request blocking. (Field report #46: dual-beacon tracking — sendBeacon succeeded but fetch failed due to CORS, creating records without incrementing view counts.)
 
+**Robots.txt & Domain Reference Audit:** Verify robots.txt sitemap URL and hardcoded domain references match production hostname. Grep for hardcoded domains across all config files, sitemap generators, canonical tags, and OG meta tags. A staging domain in robots.txt blocks production indexing; a wrong sitemap URL means search engines never find your pages. (Triage fix from field report batch #149-#153.)
+
+**CTA Fact-Check Pass:** Fact-check every CTA claim ("start with X", "X first", "no dependencies required") against actual dependency chain. If the landing page says "run one command to start," verify that one command actually works without prerequisites. If it says "no account required," verify the feature works without auth. Marketing claims that contradict the actual user experience are credibility bugs. (Triage fix from field report batch #149-#153.)
+
 **Copy Accuracy Pass:** Grep for numeric claims in rendered content (e.g., "10 lead agents", "12 commands", "53 pages"). Cross-reference against actual data counts. Any mismatch is a bug — inaccurate numbers undermine credibility. This is automatable and should run on every QA pass.
 
 **Image Size Audit:** For projects with static images (especially `/imagine` output), check every image in `public/` or `static/`: flag any image > 200KB, flag any image >4x its display dimensions (a 1024px source rendered at 40px is a 97% bandwidth waste). Total asset directory should be < 10MB for marketing sites, < 50MB for apps. If `/imagine` was used, verify Gimli's optimization step (Step 5.5) produced WebP files at 2x display dimensions, not raw 1024px DALL-E PNGs.
+
+### Install/CTA Command Verification
+Verify all install/CTA terminal commands shown on the site actually work in a clean environment. Copy each command from the rendered page, run it in a fresh shell (no project-specific PATH, no aliases), and verify the expected outcome. Marketing pages with broken install commands are worse than no install commands. (Triage fix from field report batch #149-#153.)
+
+### Constructor Sibling Check
+When adding attributes to `__init__` (or constructor), grep for `ClassName.__new__` or test helper constructors that may need matching updates. Factory methods, deserialization helpers, and `from_dict` class methods often bypass `__init__` — a new required field in `__init__` that isn't in the factory produces broken instances at runtime. (Triage fix from field report batch #149-#153.)
 
 ### File Upload Coverage Checklist
 For any feature that accepts file uploads, verify the parser handles: PDF, DOCX, XLSX, CSV, TXT, RTF, PPTX, images (PNG/JPG/GIF/WebP). Missing format support should be flagged as Medium. (Field report #149)
