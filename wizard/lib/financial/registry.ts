@@ -24,6 +24,7 @@ export const BANK_ADAPTERS: Record<string, ProviderEntry> = {
 export const BILLING_ADAPTERS: Record<string, ProviderEntry> = {
   google: { name: 'Google Ads Billing', implemented: true },
   meta:   { name: 'Meta Ads Billing', implemented: true },
+  tiktok: { name: 'TikTok Ads Billing', implemented: false },
 } as const;
 
 export type StablecoinProviderId = keyof typeof STABLECOIN_PROVIDERS;

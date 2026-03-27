@@ -22,7 +22,7 @@ import { SandboxBankAdapter } from '../adapters/sandbox-bank.js';
 
 import type { StablecoinAdapter } from './stablecoin/base.js';
 import type { RevenueSourceAdapter } from '../revenue-types.js';
-import type { AdBillingAdapter } from './billing/base.js';
+import type { AdBillingAdapter, AdPlatform } from './billing/base.js';
 
 // ── Internal Types ───────────────────────────────────
 
@@ -148,7 +148,7 @@ export async function getBankAdapter(
  * Platform credentials are read from the financial vault.
  */
 export async function getBillingAdapter(
-  platform: 'google' | 'meta',
+  platform: AdPlatform,
   vaultKey: string | null,
   logger: FactoryLogger = noopLogger,
 ): Promise<AdBillingAdapter | null> {
@@ -183,6 +183,20 @@ export async function getBillingAdapter(
       const { MetaBillingAdapter } = await import('./billing/meta-billing.js');
       logger.log('Adapter factory: using Meta billing adapter');
       return new MetaBillingAdapter({ adAccountId, accessToken });
+    }
+
+    if (platform === 'tiktok') {
+      const accessToken = await financialVaultGet(vaultKey, 'tiktok-access-token');
+      const appId = await financialVaultGet(vaultKey, 'tiktok-app-id');
+      if (!accessToken || !appId) {
+        logger.log('Adapter factory: TikTok Ads credentials incomplete — billing adapter unavailable');
+        return null;
+      }
+
+      // @ts-expect-error — tiktok-billing.ts created in Mission 2; remove this comment then
+      const { TikTokBillingAdapter } = await import('./billing/tiktok-billing.js');
+      logger.log('Adapter factory: using TikTok billing adapter');
+      return new TikTokBillingAdapter({ appId, accessToken });
     }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';

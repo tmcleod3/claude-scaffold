@@ -58,7 +58,7 @@ type BillingMode =
   | 'card_only'             // credit/debit card — not automatable
   | 'unknown';              // could not determine billing mode
 
-type AdPlatform = 'google' | 'meta';
+type AdPlatform = 'google' | 'meta' | 'tiktok' | 'linkedin' | 'twitter' | 'reddit' | 'snap';
 
 // ── Invoice and Debit Types ─────────────────────────
 
