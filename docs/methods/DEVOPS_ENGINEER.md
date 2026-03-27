@@ -216,6 +216,12 @@ If health check fails after deploy:
 
 **Load testing is NOT a VoidForge automation.** VoidForge tells you to do it and what to look for. The actual test requires infrastructure and traffic generation tools that are project-specific.
 
+## Build Output Protection
+
+**Deploy safety: backup build output before running build.** Before running `npm run build`, `next build`, or equivalent, backup the existing build output directory (`.next/`, `dist/`, `build/`). If the build fails, restore the backup so the previous working build can still be served. Pattern: `cp -r .next .next.bak && npm run build || (rm -rf .next && mv .next.bak .next && echo "Build failed, restored previous build" && exit 1)`. A failed build that destroys the previous working output means zero deployable code until the build is fixed. (Triage fix from field report batch #149-#153.)
+
+**PM2 discipline: never `pm2 delete` + `pm2 start` without `--cwd`.** Always specify the working directory explicitly: `pm2 start ecosystem.config.js --cwd /path/to/project`. Without `--cwd`, PM2 resolves paths relative to the current shell directory, which may differ from the project root — especially in deploy scripts that `cd` between operations. A `pm2 start` from the wrong directory silently starts the process with wrong paths, serving 404s on every route. (Triage fix from field report batch #149-#153.)
+
 ## Deploy Safety Rules
 
 **rsync exclusion mandate:** NEVER use `rsync --delete` without excluding VPS-only directories. User-uploaded files, generated avatars, and data files only exist on the VPS — `--delete` will destroy them. Mandatory exclusions:

@@ -29,6 +29,12 @@
 - **Bashir** (DS9) — Field reports feed the LEARN step
 - **Sisko** (DS9) — Receives campaign proposals from Tuvok
 
+## Architecture
+
+**Two-tier architecture:** OS-level crons handle data collection and state persistence; Claude sessions handle decision-making and strategy. The SENSE loop's data collection (site scanning, analytics pulls, competitor checks) runs via OS-level crons (launchd/systemd) calling lightweight scripts that write to `/logs/deep-current/`. Claude sessions read the collected data, run ANALYZE/PROPOSE, and write proposals. This separation ensures data collection survives session boundaries and doesn't depend on Claude context.
+
+**Docker recommended for data collection isolation.** Site scanning, competitor scraping, and analytics API calls involve network requests to external services. Running these in Docker containers provides: (a) network isolation (containers can only reach intended endpoints), (b) filesystem isolation (scripts can't accidentally modify project code), (c) resource limits (prevent runaway scraping from consuming host resources), (d) reproducibility (same environment on dev and production machines). The Docker container mounts `/logs/deep-current/` as a volume for output.
+
 ## The Loop
 
 ```

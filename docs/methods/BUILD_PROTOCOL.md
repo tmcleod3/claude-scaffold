@@ -173,8 +173,9 @@ This catches architecture mistakes that currently escape until Phase 9-11 review
 
 **Phase 2 — Kusanagi Infrastructure.**
 1. Database (Banner assists) -> Redis -> Environment
-2. Verify: dev server starts, build passes, lint passes, typecheck passes, `npm test` passes
-3. Log to `/logs/phase-02-infrastructure.md`
+2. **Schema-first:** Read the full schema (Prisma schema, Django models, Rails migrations, SQL DDL) for ALL target models before writing any database scripts, seed files, or migration code. Check required fields, unique constraints, foreign keys, default values, and enum types. A migration that misses a NOT NULL constraint or a unique index creates data integrity bugs that compound across every subsequent phase. (Triage fix from field report batch #149-#153.)
+3. Verify: dev server starts, build passes, lint passes, typecheck passes, `npm test` passes
+4. Log to `/logs/phase-02-infrastructure.md`
 
 **Migration Safety Gate (conditional — if database migrations exist):**
 Before applying any migration to a production database, verify:

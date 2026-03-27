@@ -220,6 +220,13 @@
 **Action:** Dry-run validation should query the live data source and diff against the migration plan.
 **Promoted to:** Not yet
 
+### CronCreate and RemoteTrigger limitations for persistent agent operations
+**Agent:** Kusanagi (DevOps) + Bashir (Field Medic) | **Category:** gotcha
+**Context:** Attempting to use Claude Code built-in scheduling for persistent daemon operations
+**Lesson:** CronCreate's `durable` flag silently fails — the cron appears created but doesn't survive session end. RemoteTrigger runs in Anthropic's cloud (no local filesystem access, 1-hour minimum interval). Neither is suitable for persistent local agent operations that need filesystem access, sub-minute intervals, or survival across reboots. For persistent agent operations, use OS-level crons (launchd on macOS, systemd timers on Linux) calling the `claude` CLI directly.
+**Action:** Use OS-level scheduling for any persistent operation. Reserve CronCreate for session-scoped recurring tasks. Reserve RemoteTrigger for cloud-safe operations that don't need local filesystem.
+**Promoted to:** Not yet
+
 ### Sync-to-async signature change cascades to all callers and tests
 **Agent:** Torres (Star Trek) | **Category:** gotcha
 **Context:** Kongo v6.1 — changing a credential helper from sync to async changed its return type from `T` to `Promise<T>`, breaking every caller and every test that used it.
