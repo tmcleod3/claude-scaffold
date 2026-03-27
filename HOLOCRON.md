@@ -578,6 +578,15 @@ Hari Seldon audits your AI integration: model selection rationale, prompt qualit
 
 Flags: `--prompts` (prompt audit only), `--safety` (safety review only), `--evals` (evaluation coverage), `--full` (all domains).
 
+#### `/vault` — Seldon's Time Vault
+**When:** End of session, before context checkpoint, or anytime you want to preserve session intelligence for the next session.
+
+*"I am Hari Seldon. The time I have is short, so I will not waste yours."*
+
+Seldon distills session intelligence into a portable briefing. The Time Vault preserves what's expensive to re-derive — decisions, failed approaches, cross-module relationships, agent findings, execution plans — and excludes what's cheap to re-read (file contents, PRD text, method docs). Gaal Dornick gathers state from build logs, campaign state, git history, and deploy status. Seldon compresses. Jake Sisko writes the vault file to `/logs/vault-YYYY-MM-DD.md` and prints a pickup prompt the next session can paste verbatim to recover context in under 60 seconds.
+
+Flags: `--seal` (auto-confirm), `--open` (read most recent vault), `--list` (list all vaults), `--for <target>` (tailor for `campaign`, `colleague`, or `trigger`).
+
 ### Flag System
 
 VoidForge flags are standardized across all 26 commands. Same flag = same meaning everywhere.

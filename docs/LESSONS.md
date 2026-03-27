@@ -205,3 +205,31 @@
 **Lesson:** State files not updated at Victory cause cascading staleness in dashboards and assessments.
 **Action:** Update build-state.md at every Victory (now in CAMPAIGN.md Step 6).
 **Promoted to:** CAMPAIGN.md (Step 6 — state file update at Victory)
+
+### Config boot with multiple sources needs merge, not single-winner
+**Agent:** Stark (Marvel) | **Category:** antipattern
+**Context:** Kongo v6.1 — boot sequence loaded config from DB or JSON file but not both. DB had 0 rows on first deploy → app booted with empty config → all integrations silently disabled.
+**Lesson:** All-or-nothing config loading (single source wins) is an antipattern. Boot sequences should merge from multiple sources with a priority chain (env vars > DB > file defaults). A boot that succeeds with 0 loaded items is a critical operational risk — fail-closed or log at CRITICAL.
+**Action:** Implement config merge with fallback chain. Assert minimum loaded count before declaring boot healthy.
+**Promoted to:** Not yet
+
+### Migration dry-runs must validate against live state
+**Agent:** Spock (Star Trek) | **Category:** gotcha
+**Context:** Kongo v6.1 — migration dry-run validated against static mapping table but missed dynamically-provisioned OAuth entries (multi-account connections added at runtime).
+**Lesson:** Dry-run scripts that check static config maps miss runtime-created data. Dry-runs must compare against actual live state (DB rows, active connections, vault entries) not just the mapping table that was authored at development time.
+**Action:** Dry-run validation should query the live data source and diff against the migration plan.
+**Promoted to:** Not yet
+
+### CronCreate and RemoteTrigger limitations for persistent agent operations
+**Agent:** Kusanagi (DevOps) + Bashir (Field Medic) | **Category:** gotcha
+**Context:** Attempting to use Claude Code built-in scheduling for persistent daemon operations
+**Lesson:** CronCreate's `durable` flag silently fails — the cron appears created but doesn't survive session end. RemoteTrigger runs in Anthropic's cloud (no local filesystem access, 1-hour minimum interval). Neither is suitable for persistent local agent operations that need filesystem access, sub-minute intervals, or survival across reboots. For persistent agent operations, use OS-level crons (launchd on macOS, systemd timers on Linux) calling the `claude` CLI directly.
+**Action:** Use OS-level scheduling for any persistent operation. Reserve CronCreate for session-scoped recurring tasks. Reserve RemoteTrigger for cloud-safe operations that don't need local filesystem.
+**Promoted to:** Not yet
+
+### Sync-to-async signature change cascades to all callers and tests
+**Agent:** Torres (Star Trek) | **Category:** gotcha
+**Context:** Kongo v6.1 — changing a credential helper from sync to async changed its return type from `T` to `Promise<T>`, breaking every caller and every test that used it.
+**Lesson:** Changing a function from sync to async is a breaking API change that cascades to every call site. Grep all callers before making the change; expect test file updates proportional to call-site count.
+**Action:** Before converting sync → async: grep for all call sites, count the blast radius, and budget the test updates into the mission scope.
+**Promoted to:** Not yet

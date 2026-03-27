@@ -111,6 +111,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/treasury` | Dockson's financial operations — revenue ingest, budget allocation, spend execution, reconciliation | Full |
 | `/portfolio` | Steris's cross-project financials — aggregated spend/revenue, portfolio optimization | Full |
 | `/ai` | Seldon's AI Intelligence Audit — model selection, prompts, tool-use, orchestration, safety, evals | All |
+| `/vault` | Seldon's Time Vault — distill session intelligence into portable briefing for session handoff | All |
 
 **Tier key:** `All` = works on main, scaffold, and core. `Full` = requires `wizard/` directory (main branch only). Full-tier commands will warn scaffold/core users to switch branches.
 
@@ -189,6 +190,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | **Meta-Workflow** | `/docs/META_WORKFLOW.md` | How to use VoidForge to develop VoidForge — campaigns on self, anti-patterns, feedback loop |
 | **AI Intelligence** | `/docs/methods/AI_INTELLIGENCE.md` | When project uses LLM/AI features |
 | **The Muster** | `/docs/methods/MUSTER.md` | When using `--muster` flag on any command |
+| **Time Vault** | `/docs/methods/TIME_VAULT.md` | Seldon — when preserving session intelligence for transfer |
 | **Patterns** | `/docs/patterns/` | When writing code (32 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 

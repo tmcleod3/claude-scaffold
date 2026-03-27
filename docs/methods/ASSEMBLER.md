@@ -119,6 +119,10 @@ Verify no circular calls between store actions and API methods. Specifically che
 
 (Field report #17: recursive 401 loop shipped past /assemble review because no agent traced the cross-file call chain.)
 
+### Cross-Surface Consistency Check
+
+When a feature is added to one surface (API, dashboard, CLI, marketing site), verify all other surfaces displaying the same entities are updated. A new field added to the API response but missing from the dashboard table, or a new tier added to the pricing page but missing from the settings panel, creates an inconsistent product. After each pipeline phase that adds or modifies a feature, grep for the entity name across all surfaces: API routes, React/Vue components, CLI output formatters, marketing page copy, email templates, admin panels. (Triage fix from field report batch #149-#153.)
+
 ### Post-Pipeline: Deploy Offer
 
 After Phase 13 (Council sign-off), if a deployment target is configured (`.vercel/project.json`, `fly.toml`, `railway.toml`, or PRD deploy section), Fury offers: "Council has signed off. Deploy to production?" This closes the loop instead of leaving deployment as an implicit user action. In campaign blitz mode, auto-deploy if the deploy method is known. (Field report #37: user had to prompt three times before agent deployed to Vercel.)
