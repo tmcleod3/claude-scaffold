@@ -2,10 +2,175 @@
 
 > The plan for the plan-maker.
 
-**Current:** v19.2.0 (2026-03-26)
-**Next:** v20.0 — CLI Distribution (`npx voidforge init`)
-**Status:** v19.2 shipped. TikTok billing live. Adapter extensibility proven. Ready for CLI.
-**406 tests** (385 unit + 21 E2E), 9 universes, 260+ agents, 26 slash commands, 35 code patterns.
+**Current:** v19.3.0 (2026-03-30)
+**Next:** v19.4.0 — The Last Mile (campaign execution wiring)
+**Status:** v19.3 shipped (Field Surgeon — 22 field reports triaged, assessment remediation). Cultivation can plan everything. Now it executes.
+**406 tests** (385 unit + 21 E2E), 9 universes, 260+ agents, 27 slash commands, 35 code patterns.
+
+---
+
+## v19.4.0 — The Last Mile
+
+*"Cultivation can plan everything. Monitor everything. Fund everything. Now it executes campaigns."*
+
+**Designed by: Dax + Pike (Muster-planned). Campaign: 5 missions, 0 stubs.**
+
+**What this does:** Wires the final 5 heartbeat daemon stubs (VG-R1-006) to real ad platform adapters. Creates campaign CRUD adapters for Google Ads, Meta Marketing, and TikTok Marketing APIs. Completes the Cultivation execution layer: `/grow` can now create, pause, resume, and budget campaigns autonomously through the daemon. Danger Room shows live campaign metrics. Freeze pauses all active campaigns across all platforms.
+
+**The gap (v19.3 assessment):** Billing adapters exist (invoice/debit reads). Stablecoin adapters exist (off-ramp ops). Campaign adapters (create/pause/resume/budget/creative) DO NOT exist — the 5 heartbeat handlers return 501 because there's nothing to call. This campaign builds the adapters AND wires them.
+
+**ALL 5 MISSIONS BUILDABLE.** AdPlatformAdapter interface fully defined in `docs/patterns/ad-platform-adapter.ts` (lines 167-190). Adapter factory pattern proven (billing + stablecoin use it). Campaign state machine tested. Same `node:https` pattern as existing billing adapters. Sandbox adapter provides full pipeline demo without API keys.
+
+### Mission 1 — Campaign Adapter Foundation
+
+| Aspect | Detail |
+|--------|--------|
+| **Objective** | Interface extraction + sandbox adapter + factory extension |
+| **New files** | `wizard/lib/financial/campaign/base.ts` — AdPlatformAdapter types extracted from pattern |
+| | `wizard/lib/financial/campaign/sandbox-campaign.ts` — full lifecycle with realistic fake metrics |
+| **Modified** | `wizard/lib/financial/adapter-factory.ts` — add `getCampaignAdapter(platform, vaultKey)` |
+| **Tests** | `wizard/__tests__/sandbox-campaign.test.ts` — 10+ tests |
+| **Prereqs** | None (foundation) |
+| **Effort** | ~500 lines + 10 tests |
+
+**Sandbox adapter details:** Realistic fake data covering full lifecycle (create → pending_review → active → paused → resumed → completed). Fake metrics: CTR 1.2-3.8%, CPC $0.45-$2.10, ROAS 1.5-4.2x. Idempotency key tracking. Same interface as real adapters — swap by changing vault config.
+
+### Mission 2 — Platform Campaign Adapters (Google + Meta + TikTok)
+
+| Aspect | Detail |
+|--------|--------|
+| **Objective** | Campaign CRUD for all 3 platforms via `node:https` |
+| **New files** | `wizard/lib/financial/campaign/google-campaign.ts` — Google Ads API v17 |
+| | `wizard/lib/financial/campaign/meta-campaign.ts` — Meta Marketing API v19.0 |
+| | `wizard/lib/financial/campaign/tiktok-campaign.ts` — TikTok Marketing API v1.3 |
+| **Tests** | `wizard/__tests__/campaign-adapters.test.ts` — 15+ tests with API response fixtures |
+| **Prereqs** | Mission 1 (interface + factory) |
+| **Effort** | ~1,200 lines + 15 tests |
+
+**Per adapter:** `createCampaign`, `pauseCampaign`, `resumeCampaign`, `updateBudget`, `updateCreative`, `getSpend`, `getPerformance`, `getInsights`. Platform-specific rate limiting (Google: 15,000 ops/day, Meta: 200 calls/hr/account, TikTok: 10 calls/sec). Error normalization to `PlatformError`. Idempotency keys on all write operations per ADR-3.
+
+### Mission 3 — Heartbeat Handler Wiring
+
+| Aspect | Detail |
+|--------|--------|
+| **Objective** | Wire all 5 VG-R1-006 stub handlers to real adapters |
+| **Modified** | `wizard/lib/heartbeat.ts` — replace 5 stub handlers with full implementations |
+| **Tests** | `wizard/__tests__/heartbeat-handlers.test.ts` — 12+ tests |
+| **Prereqs** | Missions 1-2 (adapters exist) |
+| **Effort** | ~400 lines + 12 tests |
+
+**Handler wiring (complete data flow):**
+
+```
+handleCampaignLaunch(body):
+  validate body (CampaignConfig schema)
+  → classifyTier(body.dailyBudget) — safety check
+  → factory.getCampaignAdapter(body.platform, vaultKey)
+  → adapter.createCampaign(config)
+  → stateMachine.transition(id, 'creating' → 'active')
+  → append to campaign log
+  → return { ok, campaignId, externalId }
+
+handleCampaignPause(id):
+  load campaign state
+  → factory.getCampaignAdapter(campaign.platform, vaultKey)
+  → adapter.pauseCampaign(campaign.externalId)
+  → stateMachine.transition(id, 'paused')
+  → log event
+
+handleCampaignResume(id):
+  load campaign state
+  → adapter.resumeCampaign(campaign.externalId)
+  → stateMachine.transition(id, 'active')
+  → log event
+
+handleBudgetChange(body):
+  validate { campaignId, newBudgetCents }
+  → classifyTier(newBudgetCents) — safety check
+  → adapter.updateBudget(externalId, newBudgetCents)
+  → update campaign state
+  → log event
+
+handleCampaignCreative(id, body):
+  load campaign
+  → adapter.updateCreative(externalId, creative)
+  → log event
+
+handleFreeze (ENHANCED):
+  get all campaigns where status === 'active'
+  → for each: adapter.pauseCampaign(externalId)
+  → for each: stateMachine.transition('suspended')
+  → daemonState = 'frozen'
+  → log freeze event with campaign count
+
+handleUnfreeze (ENHANCED):
+  check: all circuit breakers clear?
+  → get campaigns where status === 'suspended'
+  → for each eligible: adapter.resumeCampaign(externalId)
+  → for each: stateMachine.transition('active')
+  → daemonState = 'healthy'
+  → log unfreeze event
+```
+
+### Mission 4 — Status Polling + Danger Room Integration
+
+| Aspect | Detail |
+|--------|--------|
+| **Objective** | Live campaign status sync + dashboard wiring |
+| **Modified** | `wizard/lib/heartbeat.ts` — new `campaign-status-check` scheduled job |
+| | `wizard/lib/treasury-heartbeat.ts` — campaign spend feeds runway forecast |
+| | `wizard/api/danger-room.ts` — Campaigns tab real adapter data |
+| | `wizard/ui/danger-room.js` — campaign table renders live metrics |
+| **Tests** | `wizard/__tests__/campaign-polling.test.ts` — 8+ tests |
+| **Prereqs** | Mission 3 (handlers wired) |
+| **Effort** | ~400 lines + 8 tests |
+
+**Campaign status job:** Every 5 minutes, poll each active campaign's status from the platform adapter. Detect platform-side changes (approved → active, rejected, budget exhausted, policy violation). Map to state machine transitions. On adapter failure: retry once → circuit breaker → degraded state.
+
+**Danger Room integration:** Campaigns tab shows real-time: platform, status, daily budget, spend today, CTR, CPC, ROAS, actions (pause/resume/edit). Freeze button in header pauses ALL active campaigns across ALL platforms via enhanced handleFreeze.
+
+### Mission 5 — Victory Gauntlet + Release
+
+| Aspect | Detail |
+|--------|--------|
+| **Objective** | Full 5-round Gauntlet, version bump, branch sync |
+| **Version** | v19.4.0 (MINOR — new campaign adapter category, new heartbeat jobs) |
+| **Branch sync** | main → scaffold → core (shared methodology files) |
+| **Effort** | 1 session |
+
+### Architecture
+
+**New directory: `wizard/lib/financial/campaign/`**
+```
+wizard/lib/financial/campaign/
+  base.ts                 # AdPlatformAdapter interface + types
+  sandbox-campaign.ts     # Full lifecycle with fake metrics
+  google-campaign.ts      # Google Ads API v17 via node:https
+  meta-campaign.ts        # Meta Marketing API v19.0 via node:https
+  tiktok-campaign.ts      # TikTok Marketing API v1.3 via node:https
+```
+
+**Adapter strategy:** Same as billing adapters (v19.0) — implement against documented REST APIs using `node:https`. Zero new dependencies. Sandbox adapter provides full pipeline demo without API keys. Real adapters activate when credentials exist in financial vault.
+
+**Dependency chain:** M1 (interface) → M2 (adapters) → M3 (wiring) → M4 (integration) → M5 (release). Linear — each mission builds on the previous.
+
+### What Changes at the End
+
+| Before (v19.3) | After (v19.4) |
+|----------------|---------------|
+| 5 daemon handlers return 501 | All handlers call real adapters |
+| `/grow` plans but can't execute | `/grow` creates campaigns autonomously |
+| Danger Room shows empty campaigns | Live metrics: CTR, CPC, ROAS per campaign |
+| Freeze updates daemon state only | Freeze pauses ALL campaigns on ALL platforms |
+| Sandbox mode: financial ops only | Sandbox mode: full campaign lifecycle demo |
+
+---
+
+## v19.3.0 — The Field Surgeon
+
+*"Bashir examines the patient. 22 field reports triaged. The methodology heals."*
+
+**What this did:** Inbox triage of 22 field reports (14 informational closed, 8 triaged with 13 fixes). Full /assess (findings: 18→6, all Critical/High resolved). /assemble --muster remediation (5 patterns documented, 8 identity headers, confidence scoring dedup, Crossfire caught 3 issues).
 
 ---
 
