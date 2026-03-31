@@ -215,13 +215,22 @@ interface CampaignRecord {
   updatedAt: string;
 }
 
+/** Validate campaign ID — must be UUID-like (alphanumeric + hyphens). Prevents path traversal. */
+function validateCampaignId(id: string): boolean {
+  return /^[a-zA-Z0-9_-]{1,128}$/.test(id);
+}
+
 async function writeCampaignRecord(record: CampaignRecord): Promise<void> {
+  if (!validateCampaignId(record.campaignId)) {
+    throw new Error(`Invalid campaign ID format: ${record.campaignId.slice(0, 20)}`);
+  }
   await mkdir(CAMPAIGNS_DIR, { recursive: true });
   const filePath = join(CAMPAIGNS_DIR, `${record.campaignId}.json`);
   await atomicWrite(filePath, JSON.stringify(record, null, 2));
 }
 
 async function readCampaignRecord(campaignId: string): Promise<CampaignRecord | null> {
+  if (!validateCampaignId(campaignId)) return null;
   const filePath = join(CAMPAIGNS_DIR, `${campaignId}.json`);
   try {
     const content = await readFile(filePath, 'utf-8');
@@ -270,13 +279,17 @@ async function handleFreeze(): Promise<{ status: number; body: unknown }> {
   daemonState = 'degraded';
   eventId++;
   await writeCurrentState();
-  logger.log(`Freeze complete: ${pausedCount}/${activeCampaigns.length} campaigns paused`);
+  const allPaused = errors.length === 0;
+  logger.log(`Freeze complete: ${pausedCount}/${activeCampaigns.length} campaigns paused${allPaused ? '' : ` (${errors.length} failures)`}`);
   return {
-    status: 200,
+    status: allPaused ? 200 : 207,
     body: {
-      ok: true,
-      message: `Freeze initiated: ${pausedCount} campaigns paused`,
+      ok: allPaused,
+      message: allPaused
+        ? `Freeze complete: ${pausedCount} campaigns paused`
+        : `Freeze partial: ${pausedCount}/${activeCampaigns.length} campaigns paused, ${errors.length} failed`,
       pausedCount,
+      totalCampaigns: activeCampaigns.length,
       errors: errors.length > 0 ? errors : undefined,
     },
   };
@@ -400,6 +413,11 @@ async function handleCampaignLaunch(body: unknown): Promise<{ status: number; bo
     return { status: 400, body: { ok: false, error: 'Missing required fields: name, platform, dailyBudgetCents, idempotencyKey' } };
   }
 
+  // Budget validation — must be positive finite integer
+  if (!Number.isFinite(config.dailyBudgetCents) || config.dailyBudgetCents <= 0 || !Number.isInteger(config.dailyBudgetCents)) {
+    return { status: 400, body: { ok: false, error: 'dailyBudgetCents must be a positive integer' } };
+  }
+
   // Safety tier check (SEC-004)
   const tier = classifyTier(config.dailyBudgetCents as Cents, DEFAULT_TIERS);
   if (!isAutonomouslyAllowed(tier)) {
@@ -484,6 +502,21 @@ async function handleBudgetChange(body: unknown): Promise<{ status: number; body
   if (!params.campaignId || params.newBudgetCents === undefined) {
     return { status: 400, body: { ok: false, error: 'Missing required fields: campaignId, newBudgetCents' } };
   }
+
+  // Budget validation — must be positive finite integer
+  if (!Number.isFinite(params.newBudgetCents) || params.newBudgetCents <= 0 || !Number.isInteger(params.newBudgetCents)) {
+    return { status: 400, body: { ok: false, error: 'newBudgetCents must be a positive integer' } };
+  }
+
+  // WAL entry before platform call (ADR-3)
+  await writePendingOp({
+    intentId: `budget_${params.campaignId}_${Date.now()}`,
+    operation: 'budget_change',
+    platform: 'unknown',
+    params,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  });
 
   // Safety tier check (SEC-004)
   const tier = classifyTier(params.newBudgetCents as Cents, DEFAULT_TIERS);

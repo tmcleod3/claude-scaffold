@@ -102,6 +102,17 @@ function safeParseJson(body: string): Record<string, unknown> {
   }
 }
 
+/** Sanitize GAQL parameter — allow only alphanumeric, underscores, hyphens, dots. */
+function sanitizeGaqlParam(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_.\-]/g, '');
+}
+
+/** Sanitize a date string for GAQL — must be YYYY-MM-DD. */
+function sanitizeDate(value: string): string {
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : new Date().toISOString().slice(0, 10);
+}
+
 function makePlatformError(
   code: PlatformError['code'],
   originalCode: number,
@@ -304,7 +315,7 @@ export class GoogleCampaignAdapter implements AdPlatformAdapter {
       this.config.accessToken,
       this.config.developerToken,
       {
-        query: `SELECT campaign_budget.resource_name FROM campaign WHERE campaign.id = ${id} LIMIT 1`,
+        query: `SELECT campaign_budget.resource_name FROM campaign WHERE campaign.id = ${sanitizeGaqlParam(id)} LIMIT 1`,
       },
     );
 
@@ -352,7 +363,7 @@ export class GoogleCampaignAdapter implements AdPlatformAdapter {
       this.config.accessToken,
       this.config.developerToken,
       {
-        query: `SELECT ad_group_ad.ad.resource_name, ad_group_ad.ad.id FROM ad_group_ad WHERE campaign.id = ${id} LIMIT 1`,
+        query: `SELECT ad_group_ad.ad.resource_name, ad_group_ad.ad.id FROM ad_group_ad WHERE campaign.id = ${sanitizeGaqlParam(id)} LIMIT 1`,
       },
     );
 
@@ -417,7 +428,7 @@ export class GoogleCampaignAdapter implements AdPlatformAdapter {
           'SELECT campaign.id, metrics.cost_micros, metrics.impressions,',
           'metrics.clicks, metrics.conversions',
           'FROM campaign',
-          `WHERE segments.date BETWEEN '${dateRange.start}' AND '${dateRange.end}'`,
+          `WHERE segments.date BETWEEN '${sanitizeDate(dateRange.start)}' AND '${sanitizeDate(dateRange.end)}'`,
         ].join(' '),
       },
     );
@@ -462,7 +473,7 @@ export class GoogleCampaignAdapter implements AdPlatformAdapter {
           'SELECT metrics.cost_micros, metrics.impressions, metrics.clicks,',
           'metrics.conversions, metrics.ctr, metrics.average_cpc',
           'FROM campaign',
-          `WHERE campaign.id = ${campaignId}`,
+          `WHERE campaign.id = ${sanitizeGaqlParam(campaignId)}`,
           `AND segments.date = '${today}'`,
         ].join(' '),
       },
@@ -501,14 +512,14 @@ export class GoogleCampaignAdapter implements AdPlatformAdapter {
 
   async getInsights(campaignId: string, metrics: string[]): Promise<InsightData> {
     await this.rateLimiter.acquire();
-    const metricsQuery = metrics.map(m => `metrics.${m}`).join(', ');
+    const metricsQuery = metrics.map(m => `metrics.${sanitizeGaqlParam(m)}`).join(', ');
     const today = new Date().toISOString().slice(0, 10);
     const { status, body } = await googlePost(
       `/customers/${this.config.customerId}/googleAds:searchStream`,
       this.config.accessToken,
       this.config.developerToken,
       {
-        query: `SELECT ${metricsQuery} FROM campaign WHERE campaign.id = ${campaignId} AND segments.date = '${today}'`,
+        query: `SELECT ${metricsQuery} FROM campaign WHERE campaign.id = ${sanitizeGaqlParam(campaignId)} AND segments.date = '${today}'`,
       },
     );
 
