@@ -687,7 +687,8 @@ function registerJobs(scheduler: JobScheduler): void {
         const tokens = deserializeTokens(tokenData);
         if (needsRefresh(tokens)) {
           logger.log(`Refreshing token for ${platform}`);
-          // In full implementation: call adapter.refreshToken()
+          const adapter = await getAdapterForPlatform(platform as AdPlatform);
+          await adapter.refreshToken(tokens);
           platformFailures[platform] = 0;
         }
       } catch (err) {
@@ -709,11 +710,51 @@ function registerJobs(scheduler: JobScheduler): void {
     await writeCurrentState();
   });
 
-  // Campaign status — every 15 minutes: count active campaigns
-  scheduler.add('campaign-status', 900_000, async () => {
-    const campaigns = await readCampaigns();
-    const active = campaigns.filter((c: unknown) => (c as { status?: string }).status === 'active').length;
-    logger.log(`Campaign status: ${active} active of ${campaigns.length} total`);
+  // Campaign status check — every 5 minutes: poll adapter for live metrics
+  scheduler.add('campaign-status-check', 300_000, async () => {
+    const campaigns = await readCampaigns() as CampaignRecord[];
+    const activeCampaigns = campaigns.filter(c => c.status === 'active' || c.status === 'pending_approval');
+    if (activeCampaigns.length === 0) return;
+
+    let updated = 0;
+    for (const campaign of activeCampaigns) {
+      try {
+        const adapter = await getAdapterForPlatform(campaign.platform);
+        const perf = await adapter.getPerformance(campaign.externalId);
+
+        // Enrich campaign record with live metrics for Danger Room display
+        const enriched = campaign as CampaignRecord & {
+          spendCents?: number; impressions?: number; clicks?: number;
+          conversions?: number; ctr?: number; cpc?: number; roas?: number;
+        };
+        enriched.spendCents = perf.spend;
+        enriched.impressions = perf.impressions;
+        enriched.clicks = perf.clicks;
+        enriched.conversions = perf.conversions;
+        enriched.ctr = perf.ctr;
+        enriched.cpc = perf.cpc;
+        enriched.roas = perf.roas;
+        enriched.updatedAt = new Date().toISOString();
+        await writeCampaignRecord(enriched);
+        updated++;
+
+        // Reset platform failure counter on success
+        platformFailures[campaign.platform] = 0;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        platformFailures[campaign.platform] = (platformFailures[campaign.platform] || 0) + 1;
+        logger.log(`Campaign status poll failed for ${campaign.campaignId}: ${msg}`);
+
+        // Circuit breaker: after 3 consecutive failures, mark platform degraded
+        if ((platformFailures[campaign.platform] || 0) >= 3) {
+          platformHealth[campaign.platform] = { status: 'degraded', expiresAt: '' };
+          logger.log(`Platform ${campaign.platform} marked degraded after 3 failures`);
+        }
+      }
+    }
+
+    logger.log(`Campaign status check: ${updated}/${activeCampaigns.length} campaigns updated`);
+    if (updated > 0) await writeCurrentState();
   });
 
   // Reconciliation — runs at midnight UTC and 06:00 UTC
