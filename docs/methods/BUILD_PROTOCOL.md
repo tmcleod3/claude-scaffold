@@ -1,4 +1,5 @@
 # BUILD PROTOCOL — PRD to Production
+## System Protocol · Orchestrates: All Agents · Defined by: **Fury** (Marvel)
 ## The Master Sequence
 
 > *This is the playbook. Every other method doc is a tool this playbook invokes at the right moment.*
@@ -285,7 +286,9 @@ The review phases use a double-pass pattern: find → fix → re-verify. This ca
 1. Execute `/docs/methods/DEVOPS_ENGINEER.md` full sequence
 2. Complete first-deploy pre-flight checklist (see `/devops` command)
 3. **Docker smoke test (field report #147):** If the project uses Docker/docker-compose, verify the container entrypoint runs the NEW code, not a legacy file. Run `docker compose up --build` (or equivalent) and confirm the process that starts is the architecture you just built. A 39-mission campaign once shipped with the legacy entrypoint because nobody checked what `CMD` pointed to.
-4. Log to `/logs/phase-12-deploy.md`
+4. **Schema.sql sync gate:** After applying any migrations, regenerate `schema.sql` from the live database (e.g., `sqlite3 db.sqlite3 .schema > schema.sql`). Post-process the output: add `IF NOT EXISTS` to all `CREATE TABLE` and `CREATE INDEX` statements, remove `sqlite_sequence` (cannot be created manually). Commit the updated schema.sql. Stale schema.sql files cause false findings in `/assess` and mislead downstream consumers. (Field reports #232, #242)
+5. **Reference file freshness:** Before running `/assess` on an existing codebase, regenerate reference files (schema.sql, API docs, type exports) from the live system. Stale reference files generate false findings that waste triage time — the v7.0 assessment over-reported multi-tenant gaps because schema.sql showed 20 tables vs 52 actual. (Field report #232)
+6. Log to `/logs/phase-12-deploy.md`
 
 ### The Living PRD
 

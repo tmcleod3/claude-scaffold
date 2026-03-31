@@ -1,4 +1,5 @@
 # THE MUSTER — Full-Roster Agent Deployment
+## System Protocol · Orchestrates: All 9 Universes · Defined by: **Fury** (Marvel)
 ## Activation: `--muster` flag on any command
 
 > *"The beacons are lit! Gondor calls for aid!" — Gandalf*

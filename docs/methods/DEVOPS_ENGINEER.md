@@ -222,6 +222,21 @@ If health check fails after deploy:
 
 **PM2 discipline: never `pm2 delete` + `pm2 start` without `--cwd`.** Always specify the working directory explicitly: `pm2 start ecosystem.config.js --cwd /path/to/project`. Without `--cwd`, PM2 resolves paths relative to the current shell directory, which may differ from the project root — especially in deploy scripts that `cd` between operations. A `pm2 start` from the wrong directory silently starts the process with wrong paths, serving 404s on every route. (Triage fix from field report batch #149-#153.)
 
+## Multi-Environment Isolation
+
+When staging and production coexist on the same server, enforce full isolation:
+
+1. **Separate Unix users** — never share group membership with the production user. `id staging-user | grep prod-group` must return empty.
+2. **Separate credentials** — different API keys, database users, Redis passwords per environment. Verify: `grep API_KEY prod/.env staging/.env | md5sum` produces different hashes.
+3. **Separate storage** — different R2/S3 bucket names, different upload directories. Shared buckets allow staging to corrupt production data.
+4. **Redis auth** — `requirepass` mandatory. DB number separation (0 vs 1) is insufficient alone — any client can `SELECT` any DB without auth.
+5. **Git worktree model** — staging branch locked to a worktree directory. Development happens on `main` locally. Deploy to staging with `git push origin main:staging`. Never `git checkout staging` from the main work directory — worktrees prevent this by design.
+6. **Git hooks** — pre-push hook blocks direct push to production branch without staging verification. A `promote.sh` script handles staging → production promotion after health check.
+7. **Docker port audit** — Docker port bindings (`-p`) create iptables rules that bypass UFW entirely. Verify with `ss -tlnp` or `docker ps --format '{{.Ports}}'`, not `ufw status`. All ports should bind to `127.0.0.1`, not `0.0.0.0`.
+8. **Staging-first deploy flow** — `/deploy` and `/git` should detect staging branches and push there first. Production deploy requires explicit `--prod` flag or promotion from staging.
+
+Convention isn't enough — enforcement is. The pre-push hook is the single most effective protection. (Field report #241: 68-hour production outage from shared infrastructure.)
+
 ## Deploy Safety Rules
 
 **rsync exclusion mandate:** NEVER use `rsync --delete` without excluding VPS-only directories. User-uploaded files, generated avatars, and data files only exist on the VPS — `--delete` will destroy them. Mandatory exclusions:

@@ -1,4 +1,5 @@
 # PRD GENERATOR — From Idea to Production-Ready PRD
+## System Protocol · Defined by: **Sisko** (Star Trek)
 
 ## Purpose
 

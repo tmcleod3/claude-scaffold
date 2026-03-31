@@ -50,7 +50,7 @@ Adversarial UX/UI QA review. Identify usability issues, inconsistencies, broken 
 6. No new dependencies unless necessary.
 7. Spin up all seven agents. Radagast checks everyone's work.
 8. Validation is manual + automated: run the app, click through, written regression checklist. Reference `/docs/patterns/component.tsx` for state handling patterns.
-9. **Confidence scoring:** Every finding includes a confidence score (0-100). Low confidence (<60) → escalate to a second agent from a different universe. High confidence (90+) → skip re-verification in Step 7.5. See GAUNTLET.md "Agent Confidence Scoring" for ranges.
+9. **Confidence scoring:** All findings include a confidence score (0-100). High confidence (90+) skips re-verification in Step 7.5. Low confidence (<60) must be escalated to a second agent from a different universe before presenting — if the second agent disagrees, drop the finding. See GAUNTLET.md "Agent Confidence Scoring" for full ranges.
 
 ## Step 0 — Orient
 

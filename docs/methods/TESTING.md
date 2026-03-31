@@ -257,6 +257,14 @@ See `/docs/patterns/e2e-test.ts` for the complete reference implementation:
 
 **Mock signature verification:** When mocking external dependencies, verify the mocked methods exist on the real class. A mock that defines `sendMessage()` when the real SDK uses `send_message()` creates false confidence — tests pass but the integration fails. Pattern: `expect(Object.keys(mock)).toEqual(expect.arrayContaining(Object.keys(realInstance)))`.
 
+**No source-code string assertions:** Never assert on status code strings or error class names found in source code (`'403' in source`, `'HTTPException' in source`). These break on any refactor that changes error handling mechanics (e.g., `HTTPException(403)` → `Errors.forbidden()`). Test the actual HTTP response status and body instead. (Field report #227)
+
+**Error format migration checklist:** Before committing any change to error response shape (e.g., `{"detail": ...}` → `{"error": {"code", "message"}}`), grep test files for the old shape. Tests asserting `response["detail"]` will silently pass if the test never reaches the assertion (wrong status code) or will fail confusingly. Fix all test assertions to match the new shape in the same commit. (Field report #227)
+
+**Standalone test app handler registration (FastAPI/Express):** When tests create their own application instance (`FastAPI()`, `express()`) for isolated testing, register all custom error handlers from the main app (`app.add_exception_handler(ApiError, api_error_handler)` or equivalent). Without this, custom error classes propagate as unhandled exceptions instead of structured JSON — tests pass for the wrong reason. (Field report #227)
+
+**Version-agnostic assertions:** When asserting on prefixed or versioned values (encryption prefixes, API version headers, token formats), use the stable prefix, not the exact version. `startswith("enc:")` survives key rotation; `startswith("enc::")` breaks when the format becomes `enc:v1::`. Assert on the behavior ("value is encrypted") not the version ("value uses encryption v1"). (Field report #227)
+
 ## What NOT to Test Automatically
 
 - Visual appearance (manual — Arwen's domain)

@@ -55,7 +55,7 @@ Find, reproduce, and fix real bugs (not theoretical). Improve reliability, error
 8. Spin up all agents in parallel. Nightwing checks everyone's work.
 9. Automated tests catch regressions. Manual verification catches UX/integration issues. Use both.
 10. Double-pass: find → fix → re-verify. Fix-induced regressions are the #1 source of shipped bugs.
-11. **Confidence scoring:** Every finding includes a confidence score (0-100). Low confidence (<60) → escalate to a second agent from a different universe. High confidence (90+) → skip re-verification in Pass 2. See GAUNTLET.md "Agent Confidence Scoring" for ranges.
+11. **Confidence scoring:** All findings include a confidence score (0-100). High confidence (90+) skips re-verification in Pass 2. Low confidence (<60) must be escalated to a second agent from a different universe before presenting — if the second agent disagrees, drop the finding. See GAUNTLET.md "Agent Confidence Scoring" for full ranges.
 
 ## Step 0 — Orient
 

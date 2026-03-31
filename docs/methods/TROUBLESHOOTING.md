@@ -1,4 +1,5 @@
 # TROUBLESHOOTING — Error Recovery & Common Failures
+## System Protocol · Used by: All Agents
 
 > *When a build phase fails, when a migration breaks, when nothing makes sense — start here.*
 

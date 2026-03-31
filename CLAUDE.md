@@ -65,9 +65,12 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `game-entity.ts` — Entity Component System with component stores and systems
 - `sse-endpoint.ts` — Server-Sent Events: lifecycle, keepalive, timeout, React hook (+ FastAPI, Django)
 - `ad-platform-adapter.ts` — Split interface: AdPlatformSetup (interactive) + AdPlatformAdapter (runtime) + ReadOnlyAdapter (daemon)
+- `ad-billing-adapter.ts` — Ad platform billing: invoice reads, debit tracking, spend projection (+ TikTok, Google, Meta)
 - `financial-transaction.ts` — Branded Cents type, hash-chained append log, atomic writes, number formatting
+- `funding-plan.ts` — Treasury funding pipeline: state machine (APPROVED/PENDING/SETTLED), policy engine, rebalancing
 - `daemon-process.ts` — PID management, Unix socket API, job scheduler, signal handling, sleep/wake recovery
 - `revenue-source-adapter.ts` — Read-only revenue interface with Stripe + Paddle reference implementations
+- `stablecoin-adapter.ts` — Stablecoin off-ramp: Circle USDC adapter (real + sandbox), transfer lifecycle, settlement
 - `oauth-token-lifecycle.ts` — Refresh at 80% TTL, failure escalation, vault integration, session token rotation
 - `outbound-rate-limiter.ts` — Outbound rate limiting: safety margins, daily quotas, retry logic
 - `ai-orchestrator.ts` — Agent loop, tool use, retry, circuit breaker, fallback
@@ -80,6 +83,8 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `data-pipeline.ts` — ETL pipeline: typed stages, checkpoint/resume, quality checks, idempotent processing
 - `backtest-engine.ts` — Walk-forward backtesting: no-lookahead, slippage, Sharpe/drawdown/profit factor
 - `execution-safety.ts` — Trading execution: order validation, position limits, exchange precision, paper/live toggle
+- `browser-review.ts` — Browser intelligence: console errors, behavioral walkthroughs, a11y audit, visual inspection
+- `e2e-test.ts` — Playwright E2E + axe-core a11y: page objects, auth helpers, network mocks, CWV measurement
 
 ## Slash Commands
 
@@ -191,7 +196,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | **AI Intelligence** | `/docs/methods/AI_INTELLIGENCE.md` | When project uses LLM/AI features |
 | **The Muster** | `/docs/methods/MUSTER.md` | When using `--muster` flag on any command |
 | **Time Vault** | `/docs/methods/TIME_VAULT.md` | Seldon — when preserving session intelligence for transfer |
-| **Patterns** | `/docs/patterns/` | When writing code (32 reference implementations) |
+| **Patterns** | `/docs/patterns/` | When writing code (35 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team

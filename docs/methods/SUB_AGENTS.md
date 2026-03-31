@@ -1,4 +1,5 @@
 # SUB-AGENT ORCHESTRATOR
+## System Protocol · Orchestrates: All Agents
 ## The Danger Room
 
 > *"Assemble."*

@@ -1,4 +1,5 @@
 # MCP INTEGRATION GUIDE
+## System Protocol · Used by: All Agents
 ## Using Model Context Protocol Servers with the Scaffold
 
 > *External tools expand what agents can do. This guide covers when and how to use them.*

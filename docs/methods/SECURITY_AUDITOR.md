@@ -50,7 +50,7 @@ OWASP Top 10 evaluation. Find misconfigurations, missing protections, insecure d
 6. Secrets are never safe. Design for rotation.
 7. Log security events.
 8. Don't roll your own crypto.
-9. **Confidence scoring:** Every finding includes a confidence score (0-100). Low confidence (<60) → escalate to a second agent from a different universe. High confidence (90+) → skip re-verification in Phase 4. See GAUNTLET.md "Agent Confidence Scoring" for ranges.
+9. **Confidence scoring:** All findings include a confidence score (0-100). High confidence (90+) skips re-verification in Phase 4. Low confidence (<60) must be escalated to a second agent from a different universe before presenting — if the second agent disagrees, drop the finding. See GAUNTLET.md "Agent Confidence Scoring" for full ranges.
 
 ## Audit Sequence
 

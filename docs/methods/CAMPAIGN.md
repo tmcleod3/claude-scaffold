@@ -384,6 +384,7 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 5. Present final report: COMPLETE items, BLOCKED items (with reasons), deviations from PRD
 6. **Run `/debrief --submit`** — mandatory end-of-campaign post-mortem covering all missions together. Captures cross-cutting learnings that per-mission debriefs miss. This runs BEFORE the sign-off so learnings are captured while context is fresh. (Field reports #31, #53)
 7. **PRD sync check:** Before declaring victory, compare PRD numeric claims (agent counts, feature counts, route counts, component counts) against the actual codebase for this campaign's domain. Stale PRD claims erode trust and compound across campaigns. (Field report #119)
+7a. **Tenant isolation completeness (conditional):** If the campaign touched auth, multi-tenant, or user-scoped data, grep ALL tables for `org_id` (or equivalent ownership column). Every table must be classified as either "tenant-scoped" (has org_id) or "global by design" (with documented justification). Tables without org_id and without justification are IDOR risks. This catches incomplete tenant migrations that survive per-phase sweeps — the per-phase check (BUILD_PROTOCOL Phase 4) only covers tables modified in that phase. (Field reports #229, #231)
 8. **Victory Checklist** — ALL must be true before sign-off:
    - [ ] Gauntlet Council signed off (6/6 or all domains pass)
    - [ ] All BLOCKED items acknowledged by user

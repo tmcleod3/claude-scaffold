@@ -105,6 +105,10 @@ try {
 
 Any function that generates SQL WHERE fragments should accept `*, alias: str = ""` and prefix all column references with `f"{alias}."` when set. Without this, fragments work in simple queries but break in JOINs where column names are ambiguous. Retrofit the alias parameter from day 1 — adding it later requires changing every call site. (Field report #28)
 
+### HTML Sanitizer Preservation
+
+When using HTML sanitizers (DOMPurify, bleach, sanitize-html), verify they preserve client-fallback rendering scripts. If JSX uses React hooks (useState, useEffect), server-side rendering fails and the compiler falls back to client-side Babel with `<script type="text/babel">`. Sanitizers that strip ALL script tags will produce an empty shell. **Detection:** test compiled output is > 1000 bytes after sanitization. **Fix:** detect `type="text/babel"` and skip sanitization for client-fallback HTML, or allowlist the specific script type. (Field report #228)
+
 ### Per-Item Processing for Unreliable Inputs
 
 When processing user-uploaded content (PDFs, images, CSVs), process items individually with per-item timeouts and adaptive parameters — not as a batch. One item failing should not kill the entire batch. Pattern: iterate items, wrap each in try/catch with timeout, collect results + errors, report both. For media: use adaptive quality (DPI fallback: 200→150→100). (Field report #27: PDF conversion failed on 41MB files in batch mode.)

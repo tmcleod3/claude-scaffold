@@ -1,41 +1,24 @@
-# Campaign State — VoidForge Campaign 21 (v17.0 The Complete Implementation)
+# Campaign State — VoidForge Campaign 22 (v17.1 The Gauntlet Cleanup)
 
 ## Campaign Info
 
-**Version:** v17.0
-**Codename:** The Complete Implementation
+**Version:** v17.1
+**Codename:** The Gauntlet Cleanup
 **Mode:** `--blitz`
-**Source:** ROADMAP.md v17.0 + /assess findings (2026-03-24)
-**Status:** COMPLETE
+**Source:** ROADMAP.md v17.1 — Gauntlet Medium findings + type safety + test gaps
 
 ## Mission Plan
 
-| # | Mission | Track | Status | Debrief |
-|---|---------|-------|--------|---------|
-| 1 | The No Stubs Doctrine | Methodology | **DONE** | N/A (blitz) |
-| 2 | P0 Security Fixes | Security | **DONE** | N/A (blitz) |
-| 3 | P1 Stub Elimination | Security | **DONE** | N/A (blitz) |
-| 4 | Storage Hardening | Security | **DONE** | N/A (blitz) |
-| 5 | Sandbox Adapter Layer | Cultivation | **DONE** | N/A (blitz) |
-| 6 | Stripe Revenue Adapter | Cultivation | **DONE** | N/A (blitz) |
-| 7 | Danger Room Growth Tabs | Cultivation | **DONE** | N/A (blitz) |
-| 8 | Cultivation Test Coverage | Cultivation | **DONE** | N/A (blitz) |
-| 9 | Stub Cleanup | Doctrine | **DONE** | N/A (blitz) |
-| 10 | Docs + Victory Gauntlet | All | **DONE** | N/A (blitz) |
+| # | Mission | Type | Status | Debrief |
+|---|---------|------|--------|---------|
+| 1 | Security + Edge Case Fixes | Code | QUEUED | — |
+| 2 | TypeScript Strict Compliance | Code + CI | QUEUED | — |
+| 3 | Test Coverage Expansion | Tests | QUEUED | — |
+| 4 | ADRs + Reassessment | Docs + assess | QUEUED | — |
 
-Missions completed: 10/10.
-
-## Campaign Results
-
-- **No Stubs Doctrine:** Enforced across CLAUDE.md, BUILD_PROTOCOL, CAMPAIGN, GAUNTLET, ARCHITECT, ASSESS, GROWTH_STRATEGIST, LESSONS
-- **Security fixes:** XFF parsing, loopback binding, vault rate limit IP, TOCTOU race, freeze endpoint, AWS validation, audit rotation, auth backup, server/status auth, treasury backup size limit
-- **Cultivation:** Sandbox adapter (full implementation), Stripe adapter (real API), heartbeat daemon wired, Danger Room growth tabs live, 74 new tests
-- **Stub cleanup:** 8 stub files deleted (610 lines), zero `throw new Error('Implement...')` in codebase
-- **Tests:** 93 → 167 (12 test files)
+Missions completed: 0. Next checkpoint at: 4.
 
 ## Previous Campaigns
 
+- Campaign 21 (v17.0): 10 missions, COMPLETE. The Complete Implementation.
 - Campaign 20 (v16.0-v16.1): COMPLETE. Psychohistorians + Hardened Methodology.
-- Campaign 19 (v15.3): 5 missions, COMPLETE. Documentation refresh.
-- Campaign 18 (v15.2): 2 missions, COMPLETE. tower-auth split + SSH SG.
-- Campaign 17 (v15.1): 16 missions, COMPLETE. Infinity Gauntlet + testing.

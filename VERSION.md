@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 19.2.0
+**Current:** 19.3.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 19.3.0 | 2026-03-30 | The Field Surgeon — 22 field reports triaged, 13 fixes promoted into 6 method docs, 5 patterns documented (35 total), System Protocol identity headers, assessment remediation (18→6 findings). |
 | 19.2.0 | 2026-03-26 | The Wider Net — TikTok billing adapter, AdPlatform type widened to 7 platforms, adapter factory extensibility proven. 385 total tests. |
 | 19.1.0 | 2026-03-26 | The Live Wire — production intelligence: adapter factory, Mercury/billing wiring, auto-funding execution, WAL recovery, 66 new financial tests (380 total). All 9 Muster-identified gaps resolved. |
 | 19.0.0 | 2026-03-25 | The Funding Rail — Stablecoin treasury to ad billing: Circle, Mercury, Google/Meta billing adapters, 8 heartbeat jobs, 6 circuit breakers, funding policy engine, treasury planner, reconciliation, reporting. 14 new financial modules, 3 new patterns (35 total). |

@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [19.3.0] - 2026-03-30
+
+### Added
+- **Multi-Environment Isolation** — 8-point checklist in DEVOPS_ENGINEER.md: separate users, credentials, storage, Redis auth, worktree model, git hooks, Docker port audit, staging-first flow (field report #241)
+- **4 testing anti-patterns** in TESTING.md — error format migration checklist, source-code string assertions, standalone test app handler, version-agnostic assertions (field report #227)
+- **HTML Sanitizer Preservation** section in BACKEND_ENGINEER.md — DOMPurify client-fallback detection (field report #228)
+- **Schema.sql sync gate** in BUILD_PROTOCOL.md Phase 12 — IF NOT EXISTS post-processing, reference file freshness (field reports #232, #242)
+- **Tenant isolation completeness** gate in CAMPAIGN.md Victory — campaign-level org_id sweep (field report #229)
+- **Dead code discovery** in GAUNTLET.md Round 1 Kusanagi — dead API method scan (field report #233)
+- **Cross-environment contamination** check in GAUNTLET.md Round 1 — shared credentials, Docker bypass (field report #241)
+- **System Protocol identity headers** on 8 utility docs (BUILD_PROTOCOL, BUILD_JOURNAL, CONTEXT_MANAGEMENT, MCP_INTEGRATION, MUSTER, PRD_GENERATOR, SUB_AGENTS, TROUBLESHOOTING)
+- **5 undocumented patterns** now in CLAUDE.md — ad-billing-adapter.ts, browser-review.ts, e2e-test.ts, funding-plan.ts, stablecoin-adapter.ts (35 total)
+
+### Changed
+- **Confidence scoring** deduplicated — 3 agent docs (UX, QA, Security) now cross-reference GAUNTLET.md with low-confidence escalation rule intact
+- **RC-STUB** detection expanded — else/default branches flagged as most commonly missed variant (field report #230)
+- **Pattern count** in Docs Reference table corrected from 32 to 35
+
+### Fixed
+- **22 field reports triaged** on tmcleod3/voidforge — 14 informational closed, 8 actionable with 13 fixes applied, all 22 closed
+- **Assessment findings** reduced from 18 (v16.1.0) to 0 (v19.3.0) — all Critical and High resolved
+
 ## [19.2.0] - 2026-03-26
 
 ### Added

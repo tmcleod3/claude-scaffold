@@ -1,4 +1,5 @@
 # BUILD JOURNAL — Persistent Logging & Audit Trail
+## System Protocol · Used by: All Agents
 
 > *Every agent produces output. Every phase leaves a record. Every decision is recoverable.*
 

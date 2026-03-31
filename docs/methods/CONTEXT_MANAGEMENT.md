@@ -1,4 +1,5 @@
 # CONTEXT WINDOW MANAGEMENT
+## System Protocol · Used by: All Agents
 
 > *Move fast without hitting the wall. Scope sessions, load on demand, checkpoint to disk.*
 
