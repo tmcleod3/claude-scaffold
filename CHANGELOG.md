@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [19.4.0] - 2026-03-30
+
+### Added
+- **Campaign adapter directory** `wizard/lib/financial/campaign/` — new adapter category for campaign CRUD operations
+- **Sandbox campaign adapter** — full lifecycle (create → pending_review → active → paused → resumed → completed) with realistic fake metrics (CTR 1.2-3.8%, CPC $0.45-$2.10, ROAS 1.5-4.2x), idempotency keys, deleted-campaign guards
+- **Google Ads campaign adapter** — Campaign CRUD via Google Ads API v17, GAQL queries, 15k ops/day rate limiting
+- **Meta Marketing campaign adapter** — Campaign CRUD via Graph API v19.0, 200 calls/hr rate limiting
+- **TikTok Marketing campaign adapter** — Campaign CRUD via Marketing API v1.3, 10 calls/sec rate limiting
+- **Campaign adapter factory** `getCampaignAdapter()` — config-driven instantiation with cached sandbox fallback per platform
+- **5 heartbeat handlers wired** — handleCampaignLaunch, handleCampaignPause, handleCampaignResume, handleBudgetChange, handleCreativeUpdate now call real platform adapters
+- **Campaign status polling** — every 5 minutes, polls adapter.getPerformance() for live metrics (spend, CTR, CPC, ROAS), enriches campaign records for Danger Room display
+- **Circuit breaker** — 3 consecutive adapter failures marks platform degraded
+- **48 new tests** — sandbox adapter (30), platform adapters (19), heartbeat handlers (13), campaign polling (7) — minus existing, net +48 (406 → 454)
+
+### Changed
+- **Freeze handler** pauses ALL active campaigns across ALL platforms via adapter.pauseCampaign(), transitions to `suspended`
+- **Unfreeze handler** resumes ALL suspended campaigns via adapter.resumeCampaign()
+- **Freeze returns 207** on partial failure (previously always 200)
+- **Token refresh** now calls adapter.refreshToken() instead of logging
+
+### Fixed
+- **GAQL injection** (Victory Gauntlet CRITICAL) — sanitize all query parameters in Google campaign adapter
+- **Path traversal** (Victory Gauntlet CRITICAL) — validate campaignId format before file I/O
+- **Sandbox adapter ephemeral** (Victory Gauntlet CRITICAL) — cache instances per platform so campaign state persists between operations
+- **Budget validation** — reject negative, NaN, Infinity, non-integer values
+- **WAL entry** for budget changes (ADR-3 compliance)
+- **Idempotency keys** on Meta and TikTok createCampaign (previously missing)
+- **Compliance guard** on all 3 platform adapters
+- **BUDGET_EXCEEDED** error mapping on all 3 platforms
+
+### Removed
+- **5 VG-R1-006 stub handlers** returning 501 — all replaced with full implementations
+- **Stale VG-R1-006 comment** on reconciliation handler (already wired)
+
+---
+
 ## [19.3.0] - 2026-03-30
 
 ### Added

@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v19.3.0 (2026-03-30)
-**Next:** v19.4.0 — The Last Mile (campaign execution wiring)
-**Status:** v19.3 shipped (Field Surgeon — 22 field reports triaged, assessment remediation). Cultivation can plan everything. Now it executes.
-**406 tests** (385 unit + 21 E2E), 9 universes, 260+ agents, 27 slash commands, 35 code patterns.
+**Current:** v19.4.0 (2026-03-30)
+**Next:** v20.0 — CLI Distribution (`npx voidforge init`)
+**Status:** v19.4 shipped (The Last Mile — campaign execution wiring). Cultivation is fully executable. All stubs eliminated.
+**454 tests** (433 unit + 21 E2E), 9 universes, 260+ agents, 27 slash commands, 35 code patterns.
 
 ---
 
