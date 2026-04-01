@@ -418,12 +418,14 @@ async function handleCampaignLaunch(body: unknown): Promise<{ status: number; bo
     return { status: 400, body: { ok: false, error: 'dailyBudgetCents must be a positive integer' } };
   }
 
-  // Safety tier check (SEC-004): classify budget against tiers with 0 aggregate
-  const tierResult = classifyTier(config.dailyBudgetCents as Cents, 0 as Cents);
+  // Safety tier check (SEC-004): classify budget against aggregate of active campaigns
+  const activeCampaigns = await getActiveCampaignRecords();
+  const aggregateDailySpend = activeCampaigns.reduce(
+    (sum, c) => (sum + (c.dailyBudgetCents || 0)) as Cents, 0 as Cents,
+  );
+  const tierResult = classifyTier(config.dailyBudgetCents as Cents, aggregateDailySpend);
   if (tierResult.tier !== 'auto_approve') {
-    logger.log(`Campaign launch: budget $${(config.dailyBudgetCents / 100).toFixed(2)} requires ${tierResult.tier} (${tierResult.reason})`);
-    // Campaign creation always requires vault password (already checked above)
-    // But tiers above agent_approve also need TOTP
+    logger.log(`Campaign launch: budget $${(config.dailyBudgetCents / 100).toFixed(2)} + aggregate $${(aggregateDailySpend / 100).toFixed(2)}/day → ${tierResult.tier} (${tierResult.reason})`);
     if (tierResult.requiresTotp) {
       return { status: 403, body: { ok: false, error: `Budget tier: ${tierResult.tier}. ${tierResult.reason}. Requires TOTP.` } };
     }
@@ -512,8 +514,12 @@ async function handleBudgetChange(body: unknown): Promise<{ status: number; body
     return { status: 400, body: { ok: false, error: 'newBudgetCents must be a positive integer' } };
   }
 
-  // Safety tier check BEFORE WAL (SEC-004) — don't create orphaned WAL entries
-  const tierResult = classifyTier(params.newBudgetCents as Cents, 0 as Cents);
+  // Safety tier check BEFORE WAL (SEC-004) — consider aggregate of active campaigns
+  const activeBudgets = await getActiveCampaignRecords();
+  const currentAggregate = activeBudgets.reduce(
+    (sum, c) => (sum + (c.dailyBudgetCents || 0)) as Cents, 0 as Cents,
+  );
+  const tierResult = classifyTier(params.newBudgetCents as Cents, currentAggregate);
   if (tierResult.requiresTotp) {
     return { status: 403, body: { ok: false, error: `Budget tier: ${tierResult.tier}. ${tierResult.reason}. Requires TOTP.` } };
   }
