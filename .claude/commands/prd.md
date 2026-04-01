@@ -86,6 +86,25 @@ After all 5 (or 6) acts are confirmed:
 3. Verify YAML frontmatter is valid and complete
 4. Announce: "PRD written to /docs/PRD.md. Run `/build` to start building, or `/campaign` for autonomous execution."
 
+## Import Mode (`--import`)
+
+If `--import path/to/existing-PRD.md` is passed, skip the interview entirely:
+
+1. Copy the file to `docs/PRD.md`
+2. Parse and validate YAML frontmatter (same rules as `/build` Phase 0)
+3. Run Troi's structural compliance check (sections present, cross-refs valid)
+4. Present validation results (errors block, warnings don't)
+5. If `--challenge` is also passed, run Boromir's challenge on the imported PRD
+6. Announce: "PRD imported and validated. Run `/blueprint` to provision, or `/campaign` to build."
+
+This is the lightweight alternative to `/blueprint` — it validates and places the PRD but does not provision infrastructure or discover supporting documents.
+
+## Arguments
+- No arguments → full 5-act interview
+- `--challenge` → add Boromir's adversarial challenge (Act 6)
+- `--import path/to/PRD.md` → skip interview, import and validate an existing PRD
+- `--import path/to/PRD.md --challenge` → import + validate + challenge
+
 ## Rules
 - Sisko proposes smart defaults — the user should confirm, not configure from scratch
 - Each act is self-contained — the user sees and approves before moving on
