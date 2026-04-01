@@ -44,9 +44,17 @@ For each root cause, Nog proposes a fix that works within VoidForge's existing f
 
 **Constraint:** All proposals must reference existing VoidForge concepts (agents, phases, commands, patterns). No solutions that require reimagining the system.
 
-## Step 2.5 — Promotion Analysis (Wong)
+## Step 2.5 — Operational Learning Extraction (O'Brien + Nog)
 
-After Nog proposes solutions, Wong checks `docs/LESSONS.md` for lesson clusters:
+After root cause analysis (Step 1) and before writing the report (Step 3), check if any findings are project-scoped operational learnings — facts that matter in future sessions but don't belong in cross-project methodology. See FIELD_MEDIC.md Step 2.5 for full extraction criteria and entry format.
+
+For each candidate, draft a structured entry (title, category, verified date, scope, evidence, context). Present to user: *"Bashir found [N] operational learnings worth preserving. Review and approve for LEARNINGS.md?"*
+
+Approved entries written to `docs/LEARNINGS.md` (created on first use). Hard cap: 50 active entries.
+
+## Step 2.5b — Promotion Analysis (Wong)
+
+After extraction, Wong checks `docs/LESSONS.md` for lesson clusters AND checks `docs/LEARNINGS.md` for promotable entries (appeared in 2+ projects):
 - If 3+ lessons share the same category AND target the same method doc → Wong drafts a specific method doc update
 - Present for user approval: "Wong recommends promoting these lessons into [method doc] [section]: [proposed text]. Approve?"
 - If approved: apply the change, mark lessons as "Promoted to: [doc]" in LESSONS.md

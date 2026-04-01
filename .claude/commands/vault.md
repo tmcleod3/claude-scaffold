@@ -77,6 +77,19 @@ Seldon synthesizes. He includes what is **expensive to re-derive** and excludes 
 
 ---
 
+## Step 1.5 — Operational Learnings Sync
+
+Before sealing the vault, check for operational learnings from this session:
+
+1. If `/debrief` ran and produced approved learnings → they're already in `docs/LEARNINGS.md`. Skip extraction. Note count in the vault's Open Items.
+2. If no debrief ran, check the session for operational discoveries (API quirks, decision rationale, root causes that took multiple attempts). Flag candidates using the extraction criteria from FIELD_MEDIC.md Step 2.5.
+3. Before writing, count `###` headings in `docs/LEARNINGS.md` (excluding `## Archived`). If >= 50, ask user to archive or promote before adding.
+4. Before appending, grep the file for each candidate's title/description. Skip duplicates.
+5. Present candidates to user for approval. Append approved entries to `docs/LEARNINGS.md` (created on first use).
+6. Do NOT duplicate learnings content in the vault narrative — the vault references the file, not the entries.
+
+See ADR-035 and `/docs/methods/TIME_VAULT.md` Section 7 for full protocol.
+
 ## Step 2 — Seal the Vault (Jake Sisko)
 
 Jake Sisko writes the record. He produces two artifacts:

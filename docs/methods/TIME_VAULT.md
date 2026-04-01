@@ -99,6 +99,19 @@ The pickup prompt is the vault's delivery mechanism. It's printed to console, no
 - **Campaign pause** — When `/campaign` pauses between missions across sessions.
 - **Before destructive operations** — Before `git reset`, branch switches, or major refactors.
 
+### 7. Operational Learnings Sync
+
+At session end, before sealing the vault, check for approved operational learnings from this session:
+
+1. If `/debrief` ran and produced approved learnings → they're already in `docs/LEARNINGS.md`
+2. If no debrief ran but the session discovered operational facts (API quirks, decision rationale, root causes that took multiple attempts) → Seldon flags candidates using the same criteria as FIELD_MEDIC.md Step 2.5
+3. Present candidates to user for approval. Append approved entries to `docs/LEARNINGS.md`
+4. Include in the vault's "Open Items" section: *"[N] operational learnings added to LEARNINGS.md this session"*
+
+This ensures learnings are captured even in sessions that don't run a formal debrief. The vault is the last checkpoint — if a learning was discovered but not captured by debrief, the vault catches it.
+
+**Do NOT duplicate LEARNINGS.md content in the vault narrative.** The vault references the file; the file holds the structured entries. The vault says "3 learnings captured" — it doesn't repeat them. See ADR-035 for the full design rationale.
+
 ## Anti-Patterns
 
 - **Vault as transcript** — Don't dump the session log. Compress to signal.
