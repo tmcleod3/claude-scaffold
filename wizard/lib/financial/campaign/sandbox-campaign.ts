@@ -214,6 +214,7 @@ export class SandboxCampaignAdapter implements AdPlatformAdapter {
 
   async getPerformance(campaignId: string): Promise<PerformanceMetrics> {
     const campaign = this.requireCampaign(campaignId);
+    this.requireNotDeleted(campaign);
 
     // Advance metrics on each poll for active campaigns
     if (campaign.status === 'active') {
@@ -247,6 +248,7 @@ export class SandboxCampaignAdapter implements AdPlatformAdapter {
 
   async getInsights(campaignId: string, metrics: string[]): Promise<InsightData> {
     const campaign = this.requireCampaign(campaignId);
+    this.requireNotDeleted(campaign);
     const result: Record<string, number> = {};
 
     for (const metric of metrics) {

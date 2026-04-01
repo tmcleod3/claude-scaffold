@@ -418,11 +418,15 @@ async function handleCampaignLaunch(body: unknown): Promise<{ status: number; bo
     return { status: 400, body: { ok: false, error: 'dailyBudgetCents must be a positive integer' } };
   }
 
-  // Safety tier check (SEC-004)
-  const tier = classifyTier(config.dailyBudgetCents as Cents, DEFAULT_TIERS);
-  if (!isAutonomouslyAllowed(tier)) {
-    logger.log(`Campaign launch blocked: budget $${(config.dailyBudgetCents / 100).toFixed(2)} requires manual approval (tier: ${tier.name})`);
-    return { status: 403, body: { ok: false, error: `Budget exceeds autonomous tier. Tier: ${tier.name}. Requires manual approval.` } };
+  // Safety tier check (SEC-004): classify budget against tiers with 0 aggregate
+  const tierResult = classifyTier(config.dailyBudgetCents as Cents, 0 as Cents);
+  if (tierResult.tier !== 'auto_approve') {
+    logger.log(`Campaign launch: budget $${(config.dailyBudgetCents / 100).toFixed(2)} requires ${tierResult.tier} (${tierResult.reason})`);
+    // Campaign creation always requires vault password (already checked above)
+    // But tiers above agent_approve also need TOTP
+    if (tierResult.requiresTotp) {
+      return { status: 403, body: { ok: false, error: `Budget tier: ${tierResult.tier}. ${tierResult.reason}. Requires TOTP.` } };
+    }
   }
 
   try {
@@ -508,7 +512,13 @@ async function handleBudgetChange(body: unknown): Promise<{ status: number; body
     return { status: 400, body: { ok: false, error: 'newBudgetCents must be a positive integer' } };
   }
 
-  // WAL entry before platform call (ADR-3)
+  // Safety tier check BEFORE WAL (SEC-004) — don't create orphaned WAL entries
+  const tierResult = classifyTier(params.newBudgetCents as Cents, 0 as Cents);
+  if (tierResult.requiresTotp) {
+    return { status: 403, body: { ok: false, error: `Budget tier: ${tierResult.tier}. ${tierResult.reason}. Requires TOTP.` } };
+  }
+
+  // WAL entry before platform call (ADR-3) — only after tier check passes
   await writePendingOp({
     intentId: `budget_${params.campaignId}_${Date.now()}`,
     operation: 'budget_change',
@@ -517,12 +527,6 @@ async function handleBudgetChange(body: unknown): Promise<{ status: number; body
     status: 'pending',
     createdAt: new Date().toISOString(),
   });
-
-  // Safety tier check (SEC-004)
-  const tier = classifyTier(params.newBudgetCents as Cents, DEFAULT_TIERS);
-  if (!isAutonomouslyAllowed(tier)) {
-    return { status: 403, body: { ok: false, error: `Budget exceeds autonomous tier. Tier: ${tier.name}.` } };
-  }
 
   const record = await readCampaignRecord(params.campaignId);
   if (!record) {

@@ -16,8 +16,11 @@
  */
 
 import { existsSync } from 'node:fs';
-import { readdir, stat } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { readdir, lstat } from 'node:fs/promises';
+import { join } from 'node:path';
+
+const MAX_WALK_DEPTH = 10;
+const MAX_WALK_FILES = 1000;
 
 // ── Types ───────────────────────────────────────────
 
@@ -121,19 +124,30 @@ export async function discoverDocuments(projectRoot: string): Promise<Discovered
 /**
  * Recursively walk a directory and return all file paths relative to the project root.
  */
-async function walkDirectory(dirPath: string, relativeTo: string): Promise<string[]> {
+async function walkDirectory(
+  dirPath: string,
+  relativeTo: string,
+  depth: number = 0,
+  fileCount: { count: number } = { count: 0 },
+): Promise<string[]> {
+  if (depth > MAX_WALK_DEPTH || fileCount.count > MAX_WALK_FILES) return [];
+
   const entries = await readdir(dirPath);
   const files: string[] = [];
 
   for (const entry of entries) {
+    if (fileCount.count > MAX_WALK_FILES) break;
     const fullPath = join(dirPath, entry);
-    const entryStat = await stat(fullPath);
+    const entryStat = await lstat(fullPath); // lstat: don't follow symlinks
+
+    if (entryStat.isSymbolicLink()) continue; // Skip symlinks — prevent escape
 
     if (entryStat.isDirectory()) {
-      const subFiles = await walkDirectory(fullPath, `${relativeTo}/${entry}`);
+      const subFiles = await walkDirectory(fullPath, `${relativeTo}/${entry}`, depth + 1, fileCount);
       files.push(...subFiles);
     } else {
       files.push(`${relativeTo}/${entry}`);
+      fileCount.count++;
     }
   }
 

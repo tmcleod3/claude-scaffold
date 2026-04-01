@@ -1,6 +1,6 @@
 # /blueprint — The Blueprint Path
 
-> You've done the thinking. The forge does the building.
+> You brought the blueprint. The forge brings it to life.
 
 Accept a pre-written PRD and supporting documents, validate them, provision infrastructure, and prepare for campaign execution. The fourth entry path — for users who already have a complete spec from Claude chat, a consultant, a previous iteration, or another tool.
 
@@ -37,7 +37,7 @@ Read `docs/PRD.md` and validate:
 
 ## Step 2 — Wong Discovers Supporting Documents
 
-Scan the project directory for supporting materials:
+Wong opens a portal and scans the project directory for supporting materials:
 
 | File | Action |
 |------|--------|
@@ -77,7 +77,7 @@ If the `--challenge` flag is passed:
 1. Boromir reads the complete PRD
 2. Argues AGAINST it: expensive features, fragile integrations, schema gaps, deploy target mismatches
 3. User can accept challenges (edit PRD) or override (proceed as-is)
-4. This is cheaper than discovering design flaws in Phase 9
+4. A 30-second argument now saves a 3-hour refactor later
 
 ## Step 6 — Kusanagi Provisions Infrastructure (unless `--no-provision`)
 

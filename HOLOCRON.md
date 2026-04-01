@@ -46,7 +46,9 @@ npm run wizard
 
 **Best for:** Users who want the guided experience. Gandalf walks you through setup, Haku handles deployment. After creation, Avengers Tower gives you a full terminal in the browser — type `/build`, `/campaign`, SSH to production, all from one tab. The Lobby shows all your projects. The Penthouse adds team access.
 
-**The Blueprint Path:** If you already have a complete PRD (from Claude chat, a consultant, or a previous iteration), the wizard auto-detects it and offers to skip the interview. Or run `/blueprint` directly — Picard validates your spec, Wong discovers supporting documents, Kusanagi provisions infrastructure, and Sisko starts building. Same full-tier pipeline, zero interview friction. See `/docs/templates/PRD-TEMPLATE.md` for the frontmatter reference.
+**The Blueprint Path:** Already have a PRD? Drop it at `docs/PRD.md` and the wizard auto-detects it — no interview needed. Or run `/blueprint` directly: Picard validates your spec, Wong discovers supporting documents, Kusanagi provisions infrastructure, and you're ready for `/campaign`. Same full pipeline, zero friction.
+
+See `/docs/templates/PRD-TEMPLATE.md` for the frontmatter format and field reference.
 
 #### Scaffold (`scaffold` branch)
 The methodology without the tooling. CLAUDE.md, all 28 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
