@@ -10,6 +10,8 @@ The build journal is Claude Code's persistent memory across sessions. When conte
 ## Journal Directory
 
 ```
+docs/
+  LEARNINGS.md                ← Project-scoped operational learnings (created on first use)
 logs/
   build-state.md              ← Current phase, active agents, blockers, next steps
   phase-00-orient.md          ← Picard's PRD extraction, ADRs, gaps, assumptions
@@ -59,6 +61,18 @@ Every log entry follows this structure:
 **Next steps:**
 - [What the next agent or phase should do]
 ```
+
+## Operational Learnings (`docs/LEARNINGS.md`)
+
+Unlike build logs (which are session-scoped), `LEARNINGS.md` is project-scoped and accumulates across sessions. It stores operational facts that code review can't catch — API quirks, decision rationale, root causes, environment constraints.
+
+- **Created:** On first approved learning (via `/debrief` Step 2.5 or `/vault` session-end sync)
+- **Read by:** `/build` Phase 0, `/campaign` Step 1, `/architect` Step 0, `/assemble` Phase 0
+- **Written by:** `/debrief` (proposes candidates) → user approves → `/vault` (appends)
+- **Cap:** 50 active entries. Promoted learnings replaced with pointers to `LESSONS.md`
+- **Staleness:** Entries with `verified` older than 90 days flagged as potentially stale at read time
+
+See ADR-035 for the full design rationale.
 
 ## build-state.md — The Master State File
 

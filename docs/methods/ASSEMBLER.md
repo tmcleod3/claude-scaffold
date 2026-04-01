@@ -58,6 +58,7 @@ Fury calls ALL of them. That's the point.
 
 | Phase | Command | Rounds | Gate |
 |-------|---------|--------|------|
+| 0 | Load learnings | — | If `docs/LEARNINGS.md` exists, read operational learnings before Phase 1 (ADR-035) |
 | 1 | /architect | 1 | ADRs written, no critical concerns |
 | 2 | /build | 1 | All phase gates pass, tests green |
 | 2.5 | Smoke test (Hawkeye) | 1 | Endpoints return expected status, no route collisions, no render loops |

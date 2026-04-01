@@ -154,10 +154,47 @@ Bombadil (`/void`) carries messages — he syncs files. He doesn't read, think, 
 - Comments on issues are factual and professional (triage results, not opinions)
 - Closed issues can be reopened if the fix turns out to be insufficient
 
+## Operational Learning Extraction (Step 2.5 — O'Brien + Nog)
+
+After root cause analysis (Step 1) and before writing the report (Step 3), check if any findings are **project-scoped operational learnings** — facts that will matter in future sessions but don't belong in cross-project methodology:
+
+**Extraction criteria — include if the finding is:**
+- An operational fact discovered by live testing that code review couldn't catch
+- A decision rationale ("we chose X over Y because Z") that would be re-evaluated without documentation
+- An external system behavior (API quirk, rate limit, undocumented constraint) specific to this project
+- A root cause that took multiple attempts to identify
+
+**Extraction criteria — exclude if the finding is:**
+- A code pattern applicable to all projects → belongs in `docs/LESSONS.md`
+- A methodology gap → belongs in a field report
+- A configuration value → belongs in `.env` or deploy docs
+- An opinion or preference → doesn't belong anywhere persistent
+
+**When uncertain:** Default to LEARNINGS.md. If the learning is truly universal, Wong's promotion pipeline (2+ project appearances) will catch it and promote to LESSONS.md. False positives in LEARNINGS.md are cheap; missed entries are expensive.
+
+**For each candidate learning, draft an entry:**
+```markdown
+### [Short title]
+[One-line description of the operational fact]
+
+- **category:** api-behavior | decision | env-quirk | root-cause | vendor | workflow
+- **verified:** YYYY-MM-DD
+- **scope:** [component or module this affects]
+- **evidence:** [how this was discovered — session, command, or test that found it]
+- **context:** [when/why this is true — so future sessions can judge if it still applies]
+```
+
+Present candidates to the user: *"Bashir found [N] operational learnings worth preserving. Review and approve for LEARNINGS.md? [Y/n for each]"*
+
+Approved entries are written to `docs/LEARNINGS.md` (created on first use). See ADR-035 for the full design rationale.
+
+**Hard cap:** 50 active entries. Before writing, count `###` headings in `docs/LEARNINGS.md` (excluding the `## Archived` section). If count >= 50, present the oldest or lowest-confidence entries and ask the user to archive or promote one before adding new entries.
+
 ## Promotion Analysis (Wong)
 
 After writing the report (Step 3), Wong checks if the findings should promote into method docs:
 
+0. **Learnings promotion check:** If `docs/LEARNINGS.md` exists, check if any learning has appeared in 2+ projects (cross-reference against field reports and other project learnings). If so, promote to `docs/LESSONS.md` — replace the learning with a pointer: `→ Promoted to LESSONS.md: [entry name]`. Facts move forward in the pipeline; they don't duplicate.
 1. **Read `docs/LESSONS.md`** — count entries by category and target method doc
 2. **Cluster check:** If 3+ lessons share the same category AND target the same method doc, Wong auto-drafts a promotion:
    - A specific new checklist item, rule, or pattern based on the lesson cluster

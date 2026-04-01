@@ -685,6 +685,23 @@ Tests are written alongside features, not bolted on after. They're a **breaking 
 
 ## 7. The Archive
 
+### Operational Learnings
+
+Multi-session projects accumulate operational knowledge — API quirks, decision rationale, root causes, environment constraints. VoidForge stores these in `docs/LEARNINGS.md`, a curated file that persists across sessions.
+
+**How it works:**
+- `/debrief` proposes candidate learnings after a session → you approve or reject each one
+- `/vault` catches any remaining learnings at session end
+- `/build`, `/campaign`, `/architect`, and `/assemble` read the file at startup — your next session starts with the operational context from all previous sessions
+
+**What goes in:** Verified operational facts discovered by live testing that code review can't catch. Decision rationale ("we chose X over Y because Z"). External system behaviors specific to this project. Root causes that took multiple attempts to identify.
+
+**What stays out:** Code patterns (→ `docs/LESSONS.md`), methodology gaps (→ field reports), config values (→ `.env`), opinions.
+
+**Maintenance:** 50-entry hard cap. Entries older than 90 days without re-verification are flagged as stale. Learnings that appear in 2+ projects get promoted to `LESSONS.md` via Wong's pipeline — a pointer replaces the original entry.
+
+The file is created automatically when you approve your first learning. Projects that don't need it get zero overhead.
+
 ### Build Journal
 
 The build journal is VoidForge's persistent memory. When context compresses or a new session starts, agents read journal files to recover state.
