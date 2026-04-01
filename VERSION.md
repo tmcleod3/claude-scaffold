@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 19.3.0
+**Current:** 19.5.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,8 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 19.5.0 | 2026-03-31 | The Blueprint Path — Fourth entry path for pre-written specs: /blueprint command, document discovery, CLAUDE.md merge, PRD validation, wizard auto-detection, PRD template. 499 tests (454→499). Gauntlet: path traversal fix, route registration, UX dead-end fix. |
+| 19.4.0 | 2026-03-30 | The Last Mile — Campaign execution wiring: 4 campaign adapters (sandbox, Google, Meta, TikTok), 5 heartbeat stubs → real handlers, status polling, Danger Room live metrics. 454 tests (406→454). Victory Gauntlet: GAQL injection fix, path traversal fix, sandbox cache. |
 | 19.3.0 | 2026-03-30 | The Field Surgeon — 22 field reports triaged, 13 fixes promoted into 6 method docs, 5 patterns documented (35 total), System Protocol identity headers, assessment remediation (18→6 findings). |
 | 19.2.0 | 2026-03-26 | The Wider Net — TikTok billing adapter, AdPlatform type widened to 7 platforms, adapter factory extensibility proven. 385 total tests. |
 | 19.1.0 | 2026-03-26 | The Live Wire — production intelligence: adapter factory, Mercury/billing wiring, auto-funding execution, WAL recovery, 66 new financial tests (380 total). All 9 Muster-identified gaps resolved. |

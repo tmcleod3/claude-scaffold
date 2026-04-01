@@ -61,6 +61,7 @@ Transform session failures into structured, actionable field reports that improv
 | **Scope issue** | Too much in one mission, wrong grouping | Mixed code + asset requirements in one mission |
 | **Framework-specific** | React render loop, Python route collision | useEffect dependency chain not traced |
 | **External dependency** | Needs credentials, user input, design assets | OG images need design tool |
+| **Marketing drift** | Claims accurate when written but stale as the product evolved — feature counts, capability descriptions, pricing details that no longer match the codebase. Maps to CAMPAIGN.md Content Audit missions. | "11 agents" text when roster grew to 18 |
 
 ## Integration Points
 

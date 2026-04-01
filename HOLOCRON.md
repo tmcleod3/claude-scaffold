@@ -46,8 +46,12 @@ npm run wizard
 
 **Best for:** Users who want the guided experience. Gandalf walks you through setup, Haku handles deployment. After creation, Avengers Tower gives you a full terminal in the browser — type `/build`, `/campaign`, SSH to production, all from one tab. The Lobby shows all your projects. The Penthouse adds team access.
 
+**The Blueprint Path:** Already have a PRD? Drop it at `docs/PRD.md` and the wizard auto-detects it — no interview needed. Or run `/blueprint` directly: Picard validates your spec, Wong discovers supporting documents, Kusanagi provisions infrastructure, and you're ready for `/campaign`. Same full pipeline, zero friction.
+
+See `/docs/templates/PRD-TEMPLATE.md` for the frontmatter format and field reference.
+
 #### Scaffold (`scaffold` branch)
-The methodology without the tooling. CLAUDE.md, all 26 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
+The methodology without the tooling. CLAUDE.md, all 28 slash commands, all agent protocols, all code patterns, project scaffolding script. No wizard, no npm dependencies, no TypeScript compilation.
 
 ```bash
 mkdir my-app && cd my-app
@@ -60,7 +64,7 @@ git clone --branch scaffold https://github.com/tmcleod3/voidforge.git .
 **Best for:** Developers who know what they're doing and want to skip the wizard. You manage your own infrastructure. VoidForge manages your build process.
 
 #### Core (`core` branch)
-The lightest possible version. CLAUDE.md, all 26 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
+The lightest possible version. CLAUDE.md, all 28 slash commands, full agent protocols, full character registry, code patterns. Zero overhead — can be dropped into any existing project or referenced as external context.
 
 ```bash
 # Option A: Drop into an existing project
@@ -77,7 +81,7 @@ cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **26 slash commands** — `/prd`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
+- **28 slash commands** — `/prd`, `/blueprint`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/vault`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **260+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
@@ -392,12 +396,17 @@ When agents disagree (security vs. simplicity, architecture vs. implementation c
 
 ### Slash Commands
 
-Twenty-six commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
+Twenty-eight commands, each self-contained with inline execution steps. You don't need to read method docs first — the commands load what they need.
 
 #### `/prd` — Sisko's PRD Generator
 **When:** Starting a new project and you need a PRD. Or when the existing PRD needs a rewrite.
 
 Sisko conducts a 5-act structured interview: what are you building, what stack, what features, what does it look like, how does it ship. Each act drafts that PRD section, shows it for confirmation, then moves on. Output: complete `docs/PRD.md` with valid YAML frontmatter. This is the lowest-friction path from "I have an idea" to "I have a buildable PRD."
+
+#### `/blueprint` — The Blueprint Path
+**When:** You already have a complete PRD from Claude chat, a consultant, or a previous iteration.
+
+Picard validates your frontmatter, Troi checks structural compliance, Wong discovers supporting documents (OPERATIONS.md, ADRs, references), merges project directives into CLAUDE.md, and Kusanagi provisions infrastructure. Boromir challenges the PRD if you pass `--challenge`. A 30-second argument now saves a 3-hour refactor later. Output: validated project ready for `/campaign`.
 
 #### `/build` — The Full Protocol
 **When:** Starting a new project or resuming a build.

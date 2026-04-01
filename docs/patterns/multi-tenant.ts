@@ -221,6 +221,40 @@ model Project {
 }
 */
 
+// --- Composite primary keys for org-scoped tables ---
+// Tables with natural keys need UNIQUE(natural_key, org_id) to prevent
+// cross-tenant collisions. A widgetId might be unique within Org A but
+// Org B can independently create the same widgetId. Without a composite
+// constraint the second insert silently overwrites or fails.
+//
+// Prisma schema:
+/*
+model WidgetState {
+  id          String   @id @default(cuid())
+  widgetId    String                        // Natural key — unique per org, not globally
+  workspaceId String
+  state       Json
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([widgetId, workspaceId])         // Prevents cross-tenant collision
+  @@index([workspaceId])                    // Tenant-scoped queries stay fast
+}
+*/
+//
+// Django equivalent:
+//   class Meta:
+//       constraints = [
+//           models.UniqueConstraint(fields=['widget_id', 'org'], name='unique_widget_per_org')
+//       ]
+//
+// Rails equivalent:
+//   add_index :widget_states, [:widget_id, :workspace_id], unique: true
+//
+// Rule: any column that acts as a "slug", "external_id", or "name" within
+// a tenant MUST have a composite unique constraint including the tenant FK.
+
 // --- Django equivalent ---
 /*
 # middleware.py
@@ -271,3 +305,78 @@ module TenantScoped
   end
 end
 */
+
+// --- Per-tenant credential store ---
+// Encrypted API key storage — keys never leave the server in plaintext.
+// AES-256-GCM at rest, key derived from org-specific master key.
+// Write-only admin API: responses contain metadata only (provider, timestamps).
+
+interface TenantCredential {
+  orgId: string
+  provider: string           // e.g. 'stripe', 'openai', 'tiktok'
+  encryptedKey: Buffer       // AES-256-GCM ciphertext + IV + auth tag
+  verifiedAt: Date | null    // Last successful probe — null if never verified
+  revokedAt: Date | null     // Soft-delete: non-null means revoked
+}
+
+interface CredentialMetadata {
+  provider: string
+  createdAt: Date
+  verifiedAt: Date | null
+  isRevoked: boolean
+}
+
+class CredentialStore {
+  constructor(private readonly masterKeyProvider: (orgId: string) => Promise<Buffer>) {}
+
+  /** Store a new credential. Runs a verification probe before persisting. */
+  async store(orgId: string, provider: string, plainKey: string): Promise<void> {
+    await this.verifyProbe(provider, plainKey)           // Fail fast if key is invalid
+    const masterKey = await this.masterKeyProvider(orgId)
+    const encrypted = encryptAes256Gcm(plainKey, masterKey)
+    await db.tenantCredential.create({
+      data: { orgId, provider, encryptedKey: encrypted, verifiedAt: new Date() },
+    })
+  }
+
+  /** Decrypt for server-side use only — NEVER expose in an API response. */
+  async getDecrypted(orgId: string, provider: string): Promise<string> {
+    const cred = await this.findActiveCredential(orgId, provider)
+    const masterKey = await this.masterKeyProvider(orgId)
+    return decryptAes256Gcm(cred.encryptedKey, masterKey)
+  }
+
+  /** List credentials as metadata — no secrets returned. */
+  async listMetadata(orgId: string): Promise<CredentialMetadata[]> {
+    const creds = await db.tenantCredential.findMany({ where: { orgId } })
+    return creds.map(c => ({
+      provider: c.provider,
+      createdAt: c.createdAt,
+      verifiedAt: c.verifiedAt,
+      isRevoked: c.revokedAt !== null,
+    }))
+  }
+
+  /** Soft-revoke: marks revokedAt, old key ignored after grace period. */
+  async revoke(orgId: string, provider: string): Promise<void> {
+    await db.tenantCredential.updateMany({
+      where: { orgId, provider, revokedAt: null },
+      data: { revokedAt: new Date() },
+    })
+  }
+
+  private async findActiveCredential(orgId: string, provider: string) {
+    const cred = await db.tenantCredential.findFirst({
+      where: { orgId, provider, revokedAt: null },
+      orderBy: { createdAt: 'desc' },
+    })
+    if (!cred) throw new ApiError('NOT_FOUND', `No active credential for ${provider}`, 404)
+    return cred
+  }
+
+  /** Provider-specific liveness check before storing a key. */
+  private async verifyProbe(provider: string, key: string): Promise<void> {
+    // Each provider adapter exposes a lightweight health endpoint.
+    // Throws ApiError('INVALID_CREDENTIAL') if the key fails.
+  }
+}

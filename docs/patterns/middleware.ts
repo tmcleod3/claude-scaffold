@@ -196,3 +196,168 @@ export function rateLimit(
 
   return null // Allowed
 }
+
+// =============================================================================
+// Cookie Authentication
+// =============================================================================
+
+/**
+ * 1. Setting HttpOnly Cookies on Login
+ *
+ * After successful authentication, set the JWT in an HttpOnly cookie.
+ * HttpOnly prevents XSS from reading the token. Secure ensures HTTPS only.
+ * SameSite=Lax blocks cross-site POST requests while allowing top-level navigation.
+ *
+ * === Express / Next.js API Route ===
+ *
+ *   // POST /api/auth/login
+ *   const token = await createSessionToken(user.id)
+ *   res.setHeader('Set-Cookie', [
+ *     `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${7 * 24 * 60 * 60}`,
+ *   ])
+ *   // Next.js App Router: use cookies() from 'next/headers'
+ *   //   cookies().set('session', token, {
+ *   //     httpOnly: true, secure: true, sameSite: 'lax',
+ *   //     path: '/', maxAge: 7 * 24 * 60 * 60,
+ *   //   })
+ *   res.json({ user: { id: user.id, email: user.email } })
+ *
+ * === Django / FastAPI ===
+ *
+ *   # Django view
+ *   response = JsonResponse({"user": {"id": user.id}})
+ *   response.set_cookie("session", token, httponly=True, secure=True,
+ *                        samesite="Lax", max_age=7 * 24 * 60 * 60)
+ *
+ *   # FastAPI endpoint
+ *   response = JSONResponse({"user": {"id": user.id}})
+ *   response.set_cookie("session", token, httponly=True, secure=True,
+ *                        samesite="lax", max_age=7 * 24 * 60 * 60)
+ */
+
+/**
+ * 2. Reading Cookies with Bearer Fallback
+ *
+ * Check cookie first (browser clients), then Authorization header (API clients).
+ * This lets the same endpoint serve both contexts without separate auth flows.
+ */
+export async function authMiddlewareWithCookieFallback(req: NextRequest) {
+  // Cookie takes priority — browser clients send this automatically
+  let token = req.cookies.get('session')?.value
+
+  // Bearer fallback — API clients, mobile apps, server-to-server
+  if (!token) {
+    const authHeader = req.headers.get('authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.slice(7)
+    }
+  }
+
+  if (!token) {
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+      { status: 401 }
+    )
+  }
+
+  try {
+    // Fail closed — same principle as authMiddleware (Kenobi)
+    const session = await verifySessionToken(token)
+    if (!session) {
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Invalid session' } },
+        { status: 401 }
+      )
+    }
+
+    const response = NextResponse.next()
+    response.headers.set('x-user-id', session.userId)
+    response.headers.set('x-request-id', nanoid())
+    return response
+  } catch {
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+      { status: 401 }
+    )
+  }
+}
+
+/**
+ * 3. CSRF Protection via Custom Header
+ *
+ * SameSite=Lax already blocks cross-site POSTs, but defense-in-depth matters (Kenobi).
+ * Require X-Requested-With on all mutation endpoints. Browsers enforce CORS preflight
+ * on custom headers, so a cross-origin attacker cannot set this without server consent.
+ *
+ * === Django / FastAPI ===
+ *
+ *   # Django: use built-in CsrfViewMiddleware OR check custom header
+ *   class CSRFCustomHeaderMiddleware:
+ *       def __call__(self, request):
+ *           if request.method in ("POST", "PUT", "DELETE", "PATCH"):
+ *               if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+ *                   return JsonResponse({"error": "CSRF check failed"}, status=403)
+ *           return self.get_response(request)
+ *
+ *   # FastAPI: use Depends() for the same check
+ *   async def require_csrf_header(request: Request):
+ *       if request.method in ("POST", "PUT", "DELETE", "PATCH"):
+ *           if request.headers.get("x-requested-with") != "XMLHttpRequest":
+ *               raise HTTPException(403, "CSRF check failed")
+ */
+const MUTATION_METHODS = new Set(['POST', 'PUT', 'DELETE', 'PATCH'])
+
+export function csrfProtection(req: NextRequest): NextResponse | null {
+  if (!MUTATION_METHODS.has(req.method)) {
+    return null // GET/HEAD/OPTIONS — no CSRF risk
+  }
+
+  // Cookie-based auth requires the custom header; Bearer tokens are not vulnerable
+  const hasCookie = req.cookies.has('session')
+  const hasCustomHeader = req.headers.get('x-requested-with') === 'XMLHttpRequest'
+
+  if (hasCookie && !hasCustomHeader) {
+    return NextResponse.json(
+      { error: { code: 'CSRF_FAILED', message: 'Missing X-Requested-With header' } },
+      { status: 403 }
+    )
+  }
+
+  return null // Allowed
+}
+
+/**
+ * 4. Frontend Fetch Configuration
+ *
+ * When using cookie auth, every fetch() call must include credentials: 'include'.
+ * Without it, the browser won't send or accept cookies on cross-origin requests.
+ * This typed wrapper enforces that and sets the CSRF header automatically.
+ */
+type ApiResponse<T> = { data: T } | { error: { code: string; message: string } }
+
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  const response = await fetch(path, {
+    ...options,
+    credentials: 'include', // Required — sends cookies with every request
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest', // CSRF protection for cookie auth
+      ...options.headers,
+    },
+  })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    return { error: body.error ?? { code: 'UNKNOWN', message: response.statusText } }
+  }
+
+  return { data: await response.json() }
+}
+
+// Usage:
+//   const result = await apiFetch<{ user: User }>('/api/users/me')
+//   if ('error' in result) { handleError(result.error) }
+//   else { renderUser(result.data.user) }

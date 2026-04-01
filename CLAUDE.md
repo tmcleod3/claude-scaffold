@@ -91,6 +91,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | Command | What It Does | Tier |
 |---------|-------------|------|
 | `/prd` | Sisko's PRD generator — 5-act structured interview producing a complete PRD with valid YAML frontmatter | All |
+| `/blueprint` | The Blueprint Path — validate pre-written PRD, discover docs, merge directives, provision, hand off to campaign | All |
 | `/build` | Execute full build protocol — self-contained with inline steps per phase | All |
 | `/qa` | Batman's full QA pass with double-pass verification and regression checklist | All |
 | `/test` | Batman's test-writing mode — coverage analysis, test architecture, write missing tests | All |
