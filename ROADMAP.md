@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v19.4.0 (2026-03-30)
-**Next:** v19.5.0 — The Blueprint Path (pre-written spec → full pipeline)
-**Status:** v19.4 shipped (The Last Mile — campaign execution wiring). Cultivation is fully executable. All stubs eliminated.
-**454 tests** (433 unit + 21 E2E), 9 universes, 260+ agents, 28 slash commands, 35 code patterns.
+**Current:** v19.5.0 (2026-03-31)
+**Next:** v20.0 — CLI Distribution (`npx voidforge init`)
+**Status:** v19.5 shipped (The Blueprint Path — fourth entry path for pre-written specs). All entry paths complete.
+**499 tests** (478 unit + 21 E2E), 9 universes, 260+ agents, 28 slash commands, 35 code patterns.
 
 ---
 

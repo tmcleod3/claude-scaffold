@@ -1166,24 +1166,53 @@
 
   if (btnUseBlueprint) {
     btnUseBlueprint.addEventListener('click', async () => {
-      // User chose blueprint path — validate and proceed
+      // User chose blueprint path — validate and show results
       const blueprintBanner = $('#blueprint-detection');
-      if (blueprintBanner) blueprintBanner.classList.add('hidden');
 
       try {
         const res = await fetch('/api/blueprint/validate');
         const data = await res.json();
 
         if (data.valid) {
-          // Show success and suggest running /blueprint in Claude Code
-          const msg = `Blueprint validated: ${data.summary}. ` +
-            'Run /blueprint in Claude Code to provision and build.';
-          alert(msg);
+          // Show validation success in the banner itself
+          if (blueprintBanner) {
+            blueprintBanner.innerHTML = `
+              <h2 style="margin: 0 0 0.5rem 0; color: var(--success, #4ade80);">Blueprint Validated</h2>
+              <p style="margin: 0 0 0.5rem 0;">${data.summary || 'PRD is valid and ready to build.'}</p>
+              <p style="margin: 0 0 1rem 0; opacity: 0.8;">Run <code>/blueprint</code> in Claude Code to provision and start building.</p>
+              <button type="button" onclick="this.closest('#blueprint-detection').classList.add('hidden'); document.querySelector('#step-4').classList.remove('hidden');"
+                style="padding: 0.5rem 1rem; background: transparent; color: var(--text, #ccc); border: 1px solid var(--border, #333); border-radius: 6px; cursor: pointer;">
+                Continue to wizard instead
+              </button>
+            `;
+          }
         } else {
-          alert('Blueprint has validation errors: ' + data.frontmatterErrors.join(', '));
+          // Show errors but don't dead-end — let user fix or continue
+          if (blueprintBanner) {
+            const errors = data.frontmatterErrors?.join('<br>') || 'Unknown validation error';
+            blueprintBanner.innerHTML = `
+              <h2 style="margin: 0 0 0.5rem 0; color: var(--warning, #fbbf24);">Blueprint Has Issues</h2>
+              <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">${errors}</p>
+              <p style="margin: 0 0 1rem 0; opacity: 0.8;">Fix these in docs/PRD.md, or continue with the wizard interview.</p>
+              <button type="button" onclick="this.closest('#blueprint-detection').classList.add('hidden'); document.querySelector('#step-4').classList.remove('hidden');"
+                style="padding: 0.5rem 1rem; background: transparent; color: var(--text, #ccc); border: 1px solid var(--border, #333); border-radius: 6px; cursor: pointer;">
+                Continue to wizard
+              </button>
+            `;
+          }
         }
       } catch {
-        alert('Run /blueprint in Claude Code to use the blueprint path.');
+        // API unavailable — still show useful guidance, never dead-end
+        if (blueprintBanner) {
+          blueprintBanner.innerHTML = `
+            <h2 style="margin: 0 0 0.5rem 0; color: var(--accent, #5b5bf7);">Blueprint Path Available</h2>
+            <p style="margin: 0 0 1rem 0;">Run <code>/blueprint</code> in Claude Code to validate your PRD and provision infrastructure.</p>
+            <button type="button" onclick="this.closest('#blueprint-detection').classList.add('hidden'); document.querySelector('#step-4').classList.remove('hidden');"
+              style="padding: 0.5rem 1rem; background: transparent; color: var(--text, #ccc); border: 1px solid var(--border, #333); border-radius: 6px; cursor: pointer;">
+              Continue to wizard
+            </button>
+          `;
+        }
       }
     });
   }

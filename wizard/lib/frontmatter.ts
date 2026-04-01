@@ -19,6 +19,8 @@ export interface PrdFrontmatter {
   deploy?: string;
   instance_type?: string;
   hostname?: string;
+  language?: string;
+  description?: string;
   [key: string]: string | undefined;
 }
 

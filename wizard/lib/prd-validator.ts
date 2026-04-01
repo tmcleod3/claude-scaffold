@@ -150,7 +150,7 @@ export function scanConflicts(frontmatter: PrdFrontmatter): string[] {
   }
 
   // Workers + Deploy: workers need persistent hosting
-  if (frontmatter.workers && frontmatter.workers !== 'no' && frontmatter.workers !== 'false') {
+  if (frontmatter.workers && frontmatter.workers !== 'no' && frontmatter.workers !== 'none' && frontmatter.workers !== 'false') {
     if (frontmatter.deploy === 'static' || frontmatter.deploy === 'cloudflare') {
       conflicts.push(`Workers enabled but deploy target "${frontmatter.deploy}" does not support background processes`);
     }

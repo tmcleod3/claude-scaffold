@@ -19,6 +19,7 @@ try { await import('./api/terminal.js'); } catch { console.warn('Terminal module
 import './api/projects.js';
 import './api/auth.js';
 import './api/users.js';
+import './api/blueprint.js';
 import './api/danger-room.js';
 import './api/war-room.js';
 

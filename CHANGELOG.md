@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [19.5.0] - 2026-03-31
+
+### Added
+- **`/blueprint` command** (28th slash command) — fourth entry path for users with pre-written specs. Validates PRD frontmatter, discovers supporting documents, merges project directives into CLAUDE.md, runs conflict scan, hands off to campaign.
+- **Document discovery module** (`wizard/lib/document-discovery.ts`) — Wong scans for PRD, project directives, operations playbook, ADRs, and reference materials following Blueprint Path convention.
+- **CLAUDE.md merge utility** (`wizard/lib/claude-merge.ts`) — safe idempotent append of project-specific directives. Never replaces methodology. Includes unmerge for re-merging with updated directives.
+- **PRD structural validator** (`wizard/lib/prd-validator.ts`) — Troi's compliance checks (section detection, conditional rules based on frontmatter) + Picard's conflict scan (auth+database, payments+auth, workers+deploy, cache+deploy, admin+auth).
+- **Blueprint API endpoint** (`wizard/api/blueprint.ts`) — detect, validate, and merge routes registered with wizard server for auto-detection.
+- **Wizard auto-detection** — detects existing `docs/PRD.md` when transitioning from Step 3 to Step 4, offers "Use my blueprint" or "Start fresh" choice.
+- **PRD template** (`docs/templates/PRD-TEMPLATE.md`) — complete frontmatter field reference with all required and optional fields.
+- **`/prd --import`** flag — import and validate an existing PRD without running the interview.
+- **`language` and `description`** fields added to `PrdFrontmatter` interface.
+- **45 new tests** — document discovery (12), CLAUDE.md merge (11), PRD validator (22).
+
+### Fixed
+- **Path traversal** (Gauntlet CRITICAL) — blueprint merge endpoint validates `directivesPath` does not escape project root.
+- **Typo** `executeBluprintMerge` → `executeBlueprintMerge`.
+- **Blueprint API routes registered** with wizard server (were exported but never mounted).
+- **Wizard dead-end flow** — "Use my blueprint" now shows validation results inline instead of `alert()` dead-end.
+- **Blueprint banner colors** — uses theme accent (`#5b5bf7`) instead of mismatched gold (`#e2b714`).
+- **`workers` negation inconsistency** — `scanConflicts` now checks `!== 'none'` consistently with `validatePrdStructure`.
+
+---
+
 ## [19.4.0] - 2026-03-30
 
 ### Added

@@ -7,6 +7,7 @@ name: "my-project"
 # ── Stack (all optional — Sisko proposes defaults) ───
 type: "full-stack"           # full-stack | api-only | static-site | prototype
 framework: "next"            # next | express | fastapi | django | rails | etc.
+language: "typescript"       # typescript | javascript | python | go | rust
 database: "postgresql"       # postgresql | mysql | sqlite | mongodb | none
 cache: "redis"               # redis | memcached | none
 styling: "tailwind"          # tailwind | css-modules | styled-components | none
