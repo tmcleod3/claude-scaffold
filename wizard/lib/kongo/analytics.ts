@@ -175,7 +175,7 @@ function twoProportionZTest(
   const pPooled = (successA + successB) / (nA + nB);
   const se = Math.sqrt(pPooled * (1 - pPooled) * (1 / nA + 1 / nB));
 
-  if (nA === 0 || nB === 0 || se === 0) return { zScore: 0, pValue: 1 };
+  if (nA === 0 || nB === 0 || !(se > 0)) return { zScore: 0, pValue: 1 };
 
   const zScore = (pA - pB) / se;
   // One-tailed p-value: P(Z >= z) = 1 - CDF(z)

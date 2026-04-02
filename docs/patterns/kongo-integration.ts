@@ -92,7 +92,7 @@ interface ComputedGrowthSignal {
   sampleSize: { control: number; variant: number };
 }
 
-// Algorithm: Two-proportion z-test comparing best vs worst variant CVR.
+// Algorithm: Two-proportion z-test comparing best challenger vs control (first variant by creation order).
 // Minimum thresholds: 200 total views, 100 per variant.
 // Confidence mapping:
 //   ≥0.95 + positive delta → 'scale' (winner found)
