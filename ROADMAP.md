@@ -4,8 +4,41 @@
 
 **Current:** v19.5.0 (2026-03-31)
 **Next:** v20.0 — CLI Distribution (`npx voidforge init`)
+**Then:** v20.1 — Kongo Engine Integration (first-party landing page system for /cultivation + /grow)
 **Status:** v19.5 shipped (The Blueprint Path — fourth entry path for pre-written specs). All entry paths complete.
-**499 tests** (478 unit + 21 E2E), 9 universes, 260+ agents, 28 slash commands, 35 code patterns.
+**499 tests** (478 unit + 21 E2E), 9 universes, 260+ agents, 28 slash commands, 36 code patterns.
+
+---
+
+## v20.1 — Kongo Engine Integration
+
+*"Every campaign gets a landing page. Every page gets tested."*
+
+**Source: `/docs/PRD-kongo-integration.md`. Architecture: ADR-036. Campaign: 8 missions.**
+
+**What this does:** Integrates Kongo Engine (first-party, same owner) as VoidForge's landing page system for /cultivation and /grow. Every ad campaign gets a dedicated, A/B-tested Kongo landing page. Conversion tracking feeds back into seed content optimization. The heartbeat daemon manages the feedback loop autonomously.
+
+**The gap:** /grow manages ad campaigns but has zero capability to generate, vary, or track landing pages. All campaigns point at the same generic page. This is a conversion leak validated by 14-agent Muster.
+
+**8 missions:**
+1. KongoClient foundation (client, pages, types)
+2. Campaign + variant management (campaigns, variants, Wayne testLayer)
+3. Analytics + conversion tracking (analytics, webhooks, Vin attribution)
+4. /cultivation install integration (OAuth provisioning, vault, Danger Room tab)
+5. /grow Phase 3.5 — page generation (Raoden provisions per-campaign pages)
+6. Heartbeat daemon jobs (kongo-signal, kongo-seed, webhook handler)
+7. GTM Content Engine codification (3-phase activation, integration classification)
+8. Pattern + documentation (kongo-integration.ts, CLAUDE.md, HOLOCRON.md)
+
+**Also requires Kongo-side work:** 5 new API endpoints + 4 webhook events (built in separate Kongo repo using VoidForge).
+
+---
+
+## v20.0 — CLI Distribution
+
+*"One command to start the forge."*
+
+**What this does:** `npx voidforge init` — installable CLI that provisions a new project with VoidForge methodology. Replaces `git clone --branch scaffold`.
 
 ---
 
