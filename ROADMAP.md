@@ -20,17 +20,17 @@
 
 **The gap:** /grow manages ad campaigns but has zero capability to generate, vary, or track landing pages. All campaigns point at the same generic page. This is a conversion leak validated by 14-agent Muster.
 
-**8 missions:**
-1. KongoClient foundation (client, pages, types)
-2. Campaign + variant management (campaigns, variants, Wayne testLayer)
-3. Analytics + conversion tracking (analytics, webhooks, Vin attribution)
-4. /cultivation install integration (OAuth provisioning, vault, Danger Room tab)
-5. /grow Phase 3.5 — page generation (Raoden provisions per-campaign pages)
-6. Heartbeat daemon jobs (kongo-signal, kongo-seed, webhook handler)
+**8 missions (COMPLETE):**
+1. KongoClient foundation (types, HTTP client, page CRUD) — 36 tests
+2. Campaign + variant management (CRUD, AI generation, rotation) — 22 tests
+3. Analytics + webhooks (growth signal computation, HMAC verification) — 27 tests
+4. /cultivation install integration (API key provisioning, vault storage) — 13 tests
+5. /grow Phase 3.5 — seed extraction from PRD — 12 tests
+6. Heartbeat daemon jobs (kongo-signal, kongo-seed, kongo-webhook) — 8 tests
 7. GTM Content Engine codification (3-phase activation, integration classification)
 8. Pattern + documentation (kongo-integration.ts, CLAUDE.md, HOLOCRON.md)
 
-**Also requires Kongo-side work:** 5 new API endpoints + 4 webhook events (built in separate Kongo repo using VoidForge).
+**Key PRD adjustments:** No Kongo-side API work needed — existing Kongo API covers all requirements. OAuth replaced with manual API key entry (Kongo uses ke_live_ keys). Growth signal computed client-side from analytics data instead of hypothetical endpoint. Total: 8 modules, 118 tests, ~4200 lines.
 
 ---
 
