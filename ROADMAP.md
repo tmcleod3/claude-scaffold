@@ -3,9 +3,27 @@
 > The plan for the plan-maker.
 
 **Current:** v20.1.1 (2026-04-02)
-**Next:** v20.2 — Follow-up (heartbeat wiring, webhook ingress, ROADMAP items)
+**Next:** v20.2 — Graceful Tier Degradation (scaffold /grow Phases 1-3, tier gate fix, --audit-only expansion)
 **Status:** v20.1 shipped (Kongo Engine Integration — 10 modules, 119 tests, Infinity Gauntlet hardened).
 **618 tests**, 9 universes, 260+ agents, 28 slash commands, 37 code patterns.
+
+---
+
+## v20.2 — Graceful Tier Degradation
+
+*"Scaffold users deserve real value, not silent failures."*
+
+**Source: `/docs/PRD-graceful-degradation.md`. Architecture: ADR-037.**
+
+**The gap:** Full-tier commands (/cultivation, /grow) silently fail on scaffold/core. A phantom wizard/ directory bypasses the tier gate. No messaging tells users that Phases 1-3 work without wizard. --audit-only stops at Phase 1 when Phase 3 is also pure methodology.
+
+**6 requirements:**
+1. Fix tier gate sentinel: `wizard/server.ts` not `wizard/` (6 command files)
+2. /grow methodology-only fallback: clear message at Phase 3/4 boundary
+3. --audit-only expansion: Phases 1-3 (not just Phase 1)
+4. /cultivation install graceful skip: report skipped steps, don't fail
+5. Phantom directory cleanup: add wizard/ to scaffold/core .gitignore
+6. GROWTH_STRATEGIST.md scaffold section: document what works without wizard
 
 ---
 
