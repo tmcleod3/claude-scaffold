@@ -84,6 +84,27 @@ Growth infrastructure should be established at the same time as the product — 
 
 This separation means the user can install Cultivation in 5 minutes (vault + treasury + revenue + daemon) and configure ad platforms later when they're ready to spend.
 
+## Scaffold/Core Users
+
+Scaffold and core branches do not include the `wizard/` directory. This affects which parts of the growth protocol are available:
+
+**Fully functional without wizard (Phases 1-3):**
+- Phase 1 — Reconnaissance: PRD audit, analytics audit, competitive scan
+- Phase 2 — Foundation: SEO, meta tags, sitemap, analytics setup, CWV optimization
+- Phase 3 — Content: Content strategy, copy audit, blog drafts, landing page copy
+- `--audit-only` runs all three phases
+
+**Gracefully skips without wizard:**
+- Phase 3.5 — Kongo seed extraction: skips with log message if Kongo not connected
+
+**Requires wizard for execution (Phases 4-6):**
+- Phase 4 — Distribution: Campaign submission to ad platforms, budget reads from vault
+- Phase 5 — Compliance: Financial compliance audit, launch gate blocking
+- Phase 6 — Measure & Iterate: Autonomous monitoring, daemon handoff, platform metrics
+- Planning and strategy work in Phases 4-6 (campaign structures, creative variants, compliance audits) still works — only API execution requires wizard
+
+**To enable full functionality:** Pull wizard from upstream during the tier gate prompt (answer Y), or manually: `git checkout origin/main -- wizard/ && npm install --prefix wizard`. Then run `/cultivation install` to set up the heartbeat daemon and dashboard.
+
 ## Ad Platform Setup (`/grow --setup`)
 
 *"Every dollar is a bullet. Load the gun before the heist." — Wax*
