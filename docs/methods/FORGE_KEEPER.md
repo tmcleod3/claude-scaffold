@@ -157,10 +157,16 @@ docs/PRD-kongo-integration.md              ← Completed campaign PRD
 docs/Stablecoin Ads.md                     ← Wizard feature PRD
 docs/RFC-blueprint-path.md                 ← Shipped feature RFC
 .claude/settings.json                      ← User permissions — should never be tracked
-wizard/                                    ← Entire directory (on scaffold/core only)
 ```
 
-**Fingerprint before removing (could be user's own):**
+**Fingerprint before removing (could be user's own or intentionally pulled):**
+
+`wizard/` — **Do NOT auto-remove.** Scaffold/core users who ran Full-tier commands (`/cultivation`, `/dangerroom`, `/grow`, `/treasury`, `/portfolio`, `/current`) will have had `wizard/` auto-pulled by tier-gating (v12.4.2+). Removing it would break their Full-tier functionality. Detection:
+- If `wizard/` exists AND `package.json` has `dependencies` (AWS SDK, node-pty, ws, etc.) → **user is running Full-tier features. Do NOT remove.** Inform them: *"wizard/ and its dependencies are present — these support your Full-tier commands. Keeping them."*
+- If `wizard/` exists AND `package.json` is minimal (no dependencies) → likely a stale clone artifact. **Ask the user:** *"wizard/ exists but package.json has no dependencies. Was this pulled in for Full-tier commands, or left over from the old scaffold? (keep / remove)"*
+- If `wizard/` exists AND `.voidforge/` runtime directory exists on disk → user has been running wizard features. **Keep it.**
+
+```
 ```
 docs/ARCHITECTURE.md                       ← Remove ONLY if header contains "VoidForge" or "Version: 15.2.1"
 docs/SCALING.md                            ← Remove ONLY if header contains "VoidForge" or "Version: 15.2.1"

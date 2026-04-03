@@ -36,11 +36,12 @@ Check the **Migration Registry** in `/docs/methods/FORGE_KEEPER.md` for one-time
 1. Determine which migrations apply based on local version → upstream version range
 2. For each applicable migration, scan for the listed files
 3. **Fingerprint ambiguous files** before marking for removal — files like `docs/ARCHITECTURE.md` could be the user's own. Only remove if they contain VoidForge markers (e.g., "Version: 15.2.1", references to `wizard/`, "VoidForge" in header)
-4. **Always-remove files** (PRD-VOIDFORGE.md, PROPHECY.md, WORKSHOP.md, wizard/ on non-main, etc.) don't need fingerprinting — they're unambiguously VoidForge artifacts
-5. Present the cleanup plan alongside the update plan in Step 2
-6. Apply cleanup in Step 3 alongside updates — same confirmation prompt ("all / selective / skip")
-7. For tracked `logs/*` files, use `git rm --cached` (untrack but keep on disk)
-8. If `package.json` has `dependencies`/`devDependencies` on scaffold/core, replace with minimal version
+4. **Always-remove files** (PRD-VOIDFORGE.md, PROPHECY.md, WORKSHOP.md, etc.) don't need fingerprinting — they're unambiguously VoidForge artifacts
+5. **wizard/ is NOT auto-removed.** Scaffold/core users may have pulled it via Full-tier commands (/cultivation, /dangerroom, /grow, /treasury, /portfolio, /current). Check: if package.json has dependencies or .voidforge/ exists on disk → user is running Full-tier, keep wizard/. If minimal package.json and no runtime data → ask the user whether to keep or remove
+6. Present the cleanup plan alongside the update plan in Step 2
+7. Apply cleanup in Step 3 alongside updates — same confirmation prompt ("all / selective / skip")
+8. For tracked `logs/*` files, use `git rm --cached` (untrack but keep on disk)
+9. If `package.json` has `dependencies`/`devDependencies` on scaffold/core AND wizard/ is being kept → leave package.json alone. Only strip to minimal if wizard/ is being removed
 
 ## Step 2 — Walk the Forest (Treebeard)
 Compare every shared methodology file:
