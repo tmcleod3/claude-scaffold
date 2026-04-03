@@ -37,5 +37,14 @@ logs/
 # VoidForge runtime data (personal, never committed)
 .voidforge/
 
+# Wizard (not on scaffold/core — prevent phantom directories)
+wizard/
+
+# Claude Code user config (not shared per branch sync rules)
+.claude/settings.json
+
+# Lock files (scaffold has no dependencies)
+package-lock.json
+
 # nohup output
 nohup.out
