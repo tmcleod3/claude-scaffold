@@ -409,7 +409,7 @@ Wayne evaluates A/B tests at three layers. **Page variants are never tested simu
 | Flag | What It Does |
 |------|-------------|
 | `--phase N` | Resume from phase N |
-| `--audit-only` | Phases 1-2 only (reconnaissance + foundation) |
+| `--audit-only` | Phases 1-3 (reconnaissance + foundation + content) — no wizard dependency |
 | `--seo` | Phase 2 only (Navani + Raoden) |
 | `--content` | Phase 3 only (Shallan + Hoid) |
 | `--distribute` | Phase 4 only (assumes Phases 1-3 done) |
