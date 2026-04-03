@@ -5,7 +5,7 @@
 Read `/docs/methods/DEEP_CURRENT.md` for operating rules.
 
 ## Prerequisites
-If `wizard/` does not exist and the mode requires it (`--scan`, `--propose`, default):
+If `wizard/server.ts` does not exist and the mode requires it (`--scan`, `--propose`, default):
 1. Offer: "Deep Current's site scanner and daemon integration require the wizard server. Pull it from upstream? [Y/n]" (Note: `--intake` works without wizard/ — it's a Claude Code interview, not a server feature.)
 2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`
 3. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
