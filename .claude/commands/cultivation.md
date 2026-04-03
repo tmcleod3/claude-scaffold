@@ -7,9 +7,9 @@ Read PRD-VOIDFORGE.md §9.19 for the Cultivation architecture.
 
 ## Prerequisites
 If `wizard/server.ts` does not exist (scaffold/core users):
-1. Offer: "Cultivation requires the wizard server. Pull it from upstream? [Y/n]"
-2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`
-3. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
+1. Offer: "Cultivation's full install requires the wizard server for the heartbeat daemon and dashboard. Pull it from upstream? [Y/n] (Steps 1-3 work without it.)"
+2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`. Proceed with full install.
+3. On no: proceed to Steps 1-3 (Financial Foundation, Revenue Tracking, Ad Platform deferral). Steps 4-8 will display skip messages. The partial install summary at Step 7 shows what was completed vs skipped.
 
 ## What Cultivation IS
 
