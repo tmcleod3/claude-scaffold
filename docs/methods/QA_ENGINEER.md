@@ -159,6 +159,19 @@ The most fragile path in any application is the first run after a state transiti
 
 Every bug in the v7.3 Avengers Tower crisis was a first-run scenario. Steady-state worked fine; transitions broke. (Field report #30)
 
+### Stateful Service Audit
+
+For services that maintain runtime state (caches, connection pools, scheduled jobs, in-memory queues, singleton instances), verify state survives these transitions:
+
+- **Process restart:** Kill and restart the service. Does it recover its state from persistent storage, or does it silently operate with empty/default state?
+- **Deployment:** After a zero-downtime deploy (rolling restart), does the new instance pick up where the old one left off? Are in-flight jobs lost?
+- **Database migration:** After a schema change, does the service's cached state (ORM models, query plans) reflect the new schema?
+- **Dependency restart:** Restart Redis/Postgres/message broker while the service is running. Does the service reconnect, or does it hang with stale connections?
+
+**Anti-pattern:** A service that initializes state in `constructor()` but never persists it — works perfectly until the first restart, then silently operates with zero state.
+
+**Grep check:** Search for `new Map()`, `new Set()`, `private cache`, `static instance` in service files. For each, ask: "What happens to this data on restart?" (Field report #271)
+
 ### Timestamp Format Enforcement
 Grep for `strftime`, `format(`, `toISOString`, `new Date().to` calls and verify they use the project's canonical timestamp format (typically `%Y-%m-%dT%H:%M:%SZ` or ISO 8601). Flag any non-canonical format strings. Non-canonical timestamps cause: cache TTL bugs (string comparison fails), sorting issues, and cross-system timestamp mismatches.
 (Field report #21: cache used `%Y-%m-%d %H:%M:%S` while all other code used `%Y-%m-%dT%H:%M:%SZ` — cache effectively never expired.)

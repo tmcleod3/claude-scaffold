@@ -103,6 +103,8 @@ This catches what static analysis misses: IPv6 binding, native module ABI compat
 - **Bayta Darell** (Foundation) — AI evaluation completeness verification
 - Troi (Star Trek) — PRD compliance (prose-level) + **CLAUDE.md verification**: every slash command in the table has a `.claude/commands/*.md` file, every agent in the team table has a naming registry entry, every doc in the reference table exists at the stated path. (Field report #108: `/dangerroom` listed but no command file existed for 30 versions.)
 
+Troi also performs a **Marketing Copy Drift Check**: compare marketing page claims (features listed, capabilities described, performance promises) against the actual shipped feature set. Flag any claim that cannot be demonstrated in the running application. Marketing pages may describe planned features that were later descoped or changed during review fixes.
+
 **Pattern auth completeness check (Kenobi, during Rounds 2-3):** When a pattern file defines an authentication flow, verify the auth checks perform actual value verification (compare against expected, call verify functions) — not just presence checks (`!!header`, `Boolean()`). Flag `!!` or truthiness checks on auth-related headers as suspicious. (Field report #109: daemon socket auth used `!!vaultHeader` which passed for any non-empty string.)
 
 **Total: 30+ unique agent deployments across 5 rounds.**
@@ -273,6 +275,7 @@ Round 5 — Council (6+ agents, each as own sub-process):
 - **Samwise** — final a11y audit
 - **Padmé** — critical path functional verification
 - **Troi** — PRD compliance section-by-section. **Troi — Browser PRD Compliance:** When E2E infrastructure exists, Troi walks through each PRD user flow in the browser using page objects. Compares rendered content against PRD Sections 2 (routes), 4 (features), and 14 (brand voice). Screenshot evidence logged.
+  Troi also performs Marketing Copy Drift Check — verifies marketing claims match shipped features.
 
 **Pass 2 — Repeat (Rounds 6-10):** Same structure, all agents re-deployed on the fixed codebase. Pass 2 should find zero issues if Pass 1 fixes were correct.
 

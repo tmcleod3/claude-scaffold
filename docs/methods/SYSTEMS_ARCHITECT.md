@@ -61,6 +61,7 @@ Before building, scan the PRD frontmatter for structural contradictions. These a
 | `cache: redis` + `deploy: static` | Static hosting can't run Redis |
 | `admin: yes` + `auth: no` | Admin panel without auth is an open backdoor |
 | Email integration + no provider credentials | Email features will fail at runtime |
+| `access: role-based` + per-item content gating | Role checks at route level don't enforce per-item access; need row-level or attribute-level authorization |
 
 When running `/architect` or Phase 0.5 of `/build`, check every combination. Flag contradictions with specific resolution options (e.g., "Add `database: sqlite` for local auth, or switch to a stateless auth provider like Auth0").
 
@@ -146,6 +147,18 @@ When reviewing architecture, identify all endpoints/services that mutate the sam
 ## Security Tradeoff Register
 
 When architecture requires accepting a known security risk (e.g., iframe sandbox weakening for UX, storing tokens in memory for operational continuity), document it as an ADR with explicit risk acceptance. Include: the tradeoff made, what is gained, what attack surface is expanded, what mitigations are in place, and who accepted the risk. This prevents the same finding from appearing in every future audit and reduces Gauntlet noise. (Field report #102: preview iframe `allow-scripts + allow-same-origin` sandbox escape was a known tradeoff but was never documented — flagged in every security pass.)
+
+### Strategy Consolidation Check
+
+When a system implements N parallel strategies for the same goal (payment providers, notification channels, API versions, deployment targets, content pipelines), periodically verify that each strategy still justifies its maintenance cost. If usage data shows one strategy handling 95%+ of traffic or value while the others sit idle or near-zero, the idle strategies are not "options" — they are dead code with maintenance burden.
+
+**Data's checklist (add to Tech Debt analysis):**
+- List every set of parallel implementations serving the same purpose
+- Pull usage/value metrics for each (requests, revenue, active users — whatever applies)
+- If one strategy dominates and the others have near-zero activity for 90+ days, recommend decommission with an ADR documenting why
+- If a dormant strategy is kept for disaster recovery, document it explicitly as a cold standby with a test schedule — otherwise it rots silently
+
+Parallel strategies that nobody uses still consume review time, test maintenance, dependency updates, and cognitive load. Decommissioning is not giving up — it is recognizing what the data already proved. (Field report #274)
 
 ## Deliverables
 

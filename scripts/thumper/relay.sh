@@ -77,6 +77,32 @@ fi
 
 API_BASE="https://api.telegram.org/bot${BOT_TOKEN}"
 
+# ─── Transport Pre-flight ─────────────────────────────────────
+case "${INJECT_METHOD:-}" in
+    TMUX_SENDKEYS)
+        if ! command -v tmux >/dev/null 2>&1; then
+            echo "❌ TMUX_SENDKEYS configured but tmux not found. Re-run /thumper setup." >&2
+            exit 1
+        fi
+        if [[ -z "${TMUX:-}" ]] && ! tmux has-session -t "${TMUX_SESSION:-0}" 2>/dev/null; then
+            echo "❌ tmux session '${TMUX_SESSION:-0}' not found. Start tmux or re-run /thumper setup." >&2
+            exit 1
+        fi
+        ;;
+    PTY_INJECT)
+        if [[ ! -d "/proc" ]]; then
+            echo "❌ PTY_INJECT configured but /proc not found. Re-run /thumper setup." >&2
+            exit 1
+        fi
+        ;;
+    OSASCRIPT)
+        if [[ "${OSTYPE:-}" != darwin* ]]; then
+            echo "❌ OSASCRIPT configured but not on macOS. Re-run /thumper setup." >&2
+            exit 1
+        fi
+        ;;
+esac
+
 echo "$$" > "$PID_FILE.tmp" && mv "$PID_FILE.tmp" "$PID_FILE"
 
 # Rotate log if over 1MB
