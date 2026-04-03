@@ -25,6 +25,10 @@ Full character pools: `/docs/NAMING_REGISTRY.md`
 
 ---
 
+## Dispatch Model
+
+Build phases that involve code generation, testing, or review SHOULD dispatch to sub-agents per `SUB_AGENTS.md` "Parallel Agent Standard." Independent phases (e.g., Phase 4 Core Feature + Phase 5 Supporting Features if they touch different domains) can run as parallel agents. The main thread sequences phases, applies cross-phase gates, and manages the build journal. (Field report #270)
+
 ## Project Sizing — Read BEFORE Starting
 
 Not every project needs all 13 phases. Read the PRD frontmatter (the YAML block at the top of `/docs/PRD.md`) to determine which phases apply.
@@ -195,7 +199,11 @@ See `docs/patterns/database-migration.ts` for reference implementations.
 2. Password manager compatible
 3. Write auth integration tests — all paths including failures
 4. Kenobi reviews session config, password hashing, CSRF
-5. Log to `/logs/phase-03-auth.md`
+5. **Stored value rename check:** Before renaming any constant that is persisted as a stored value (DB column values, cache keys, config identifiers, raw_cache source names, vault keys), grep for ALL references including string literals in SQL queries, pipeline configs, migration files, and test fixtures. Stored values have invisible consumers — a rename that passes TypeScript compilation can break runtime lookups. (Field report #268: FETCH_CONFIGS key rename would have broken 20+ pipeline files referencing source keys in `raw_cache`.)
+6. Log to `/logs/phase-03-auth.md`
+
+**Phase 3a — Worker/Job Environment Verification (if workers exist).**
+If the project has BullMQ workers, background jobs, cron processes, or any process that runs outside the main web server: verify that the worker's environment loading matches the web server's. Check for `.env` empty-value shadowing (an empty `KEY=` in `.env` shadows a populated `KEY=value` in `.env.local`). Workers using `dotenv/config` do NOT inherit Next.js/framework env loading — they only see `.env`, not `.env.local` or `.env.production`. (Field report #266: Worker couldn't download from R2 because `.env` had empty `R2_ENDPOINT=` that shadowed the `.env.local` value.)
 
 **Phase 4 — Core Feature.**
 1. Single most important user journey, end-to-end vertical slice

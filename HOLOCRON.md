@@ -104,6 +104,7 @@ The Full tier adds:
 - **Cultivation Growth Engine** — Treasury, revenue tracking, ad platform management, heartbeat daemon, Danger Room growth tabs. Sandbox + Stripe adapters for demo and real revenue.
 - **Stablecoin Funding Rail (v19.0)** — USDC → Circle off-ramp → Mercury bank → Google/Meta billing. Treasury planner, funding policy engine, reconciliation, circuit breakers. Complete crypto-to-ad-spend pipeline.
 - **Browser Intelligence** — Agents use Playwright to see running applications: console error capture, behavioral walkthroughs, security inspection (cookies, CORS, CSP). Screenshots mandatory in all reviews.
+- **Kongo Engine Integration (v20.1)** — First-party landing page system. Every ad campaign gets a dedicated Kongo page with 6 A/B variants. Growth signal polling, webhook-driven updates, autonomous seed-to-conversion loop. Connect via `/cultivation install`. 8 modules in `wizard/lib/kongo/`.
 
 ---
 
@@ -557,7 +558,9 @@ An installable autonomous growth engine inspired by Cosmere's Cultivation Shard.
 
 Kelsier's 6-phase growth protocol: audience analysis, channel selection, creative generation, campaign launch, performance monitoring, and optimization. Runs within the Cultivation engine. Each phase burns a different Allomantic metal.
 
-Flags: `--phase <n>` (jump to phase), `--channel <name>` (specific channel), `--budget <amount>` (set spend cap).
+**Phase 3.5 — Kongo Landing Pages:** When Kongo is connected, `/grow` generates dedicated landing pages for every ad campaign. Each page gets 6 A/B-testable variants (3 headline x 2 CTA). The heartbeat daemon polls Kongo's analytics hourly and pushes winning copy back as seed for the next page generation cycle. Connect Kongo during `/cultivation install` Step 2b.
+
+Flags: `--phase <n>` (jump to phase), `--channel <name>` (specific channel), `--budget <amount>` (set spend cap), `--auto-pages` (enable Phase C fully autonomous page generation).
 
 #### `/current` — Tuvok's Deep Current
 **When:** You want autonomous campaign intelligence — scanning, analysis, proposals, cold start intake.

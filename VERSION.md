@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 19.5.0
+**Current:** 20.1.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,8 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 20.1.1 | 2026-04-02 | Parallel Agent Standard, ID Space Audit, Safety Parameter Audit, Maul mandatory gate, 7 field report triages (#264-#270). |
+| 20.1.0 | 2026-04-02 | Kongo Engine Integration — 10 modules, 119 tests, 37th pattern, Infinity Gauntlet (3 Critical + 10 High fixed), 5 field reports triaged (14 methodology fixes), Operational Learnings system activated. |
 | 19.5.0 | 2026-03-31 | The Blueprint Path — Fourth entry path for pre-written specs: /blueprint command, document discovery, CLAUDE.md merge, PRD validation, wizard auto-detection, PRD template. 499 tests (454→499). Gauntlet: path traversal fix, route registration, UX dead-end fix. |
 | 19.4.0 | 2026-03-30 | The Last Mile — Campaign execution wiring: 4 campaign adapters (sandbox, Google, Meta, TikTok), 5 heartbeat stubs → real handlers, status polling, Danger Room live metrics. 454 tests (406→454). Victory Gauntlet: GAQL injection fix, path traversal fix, sandbox cache. |
 | 19.3.0 | 2026-03-30 | The Field Surgeon — 22 field reports triaged, 13 fixes promoted into 6 method docs, 5 patterns documented (35 total), System Protocol identity headers, assessment remediation (18→6 findings). |

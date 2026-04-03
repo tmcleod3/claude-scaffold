@@ -204,6 +204,22 @@ Updated financial vault with platform credentials and billing capability state p
 **Output:** `/logs/growth-content.md` + blog drafts + copy changes committed.
 **Gate:** User confirmation before Phase 4.
 
+### Phase 3.5 — Page Generation (Raoden + Shallan) — Requires Kongo
+
+*"Before you distribute, you need somewhere to send them."*
+
+**Prerequisite:** Kongo connected via `/cultivation install` Step 2b. If not connected, this phase is skipped entirely and campaigns use the product homepage as landing page.
+
+1. **Seed extraction** (Raoden): Pull headline, value props, social proof, CTA text, brand colors from PRD and Phase 3 content output. Structure as `PrdSeedContent` (see `wizard/lib/kongo/seed.ts`).
+2. **Page generation** (Raoden): For each ad campaign planned in Phase 4, generate a dedicated Kongo landing page via `createPageFromPrd`. Each campaign gets its own page at `{slug}.kongo.io`.
+3. **Variant generation** (Shallan): For each page, generate 3 headline variants and 2 CTA variants using Kongo's AI variant generation (`POST /engine/campaigns/:id/variants/generate`). Each campaign gets 6 testable combinations.
+4. **Campaign linking**: Set each ad campaign's destination URL to its Kongo page URL with UTM parameters: `utm_source=voidforge&utm_medium=paid&utm_campaign={campaignId}&utm_content={variantId}`.
+
+**Skip behavior:** If Kongo is not connected, log: `"Kongo not connected — campaigns will use homepage as landing page. Run /cultivation install to connect."` and proceed to Phase 4.
+
+**Output:** Kongo pages in `ready` status, variants generated, campaign URLs updated.
+**Gate:** All pages must reach `ready` status before Phase 4.5. Phase 4.5 blocks with polling if any page is still generating.
+
 ### Phase 4 — Distribution (Kaladin + Lift + Adolin + Wax + Wayne + Steris + Sarene)
 
 *"Three channels. Never trust just one."*
@@ -344,6 +360,49 @@ On activation:
 | Monthly strategic review | Monthly | Kelsier + Vin | `--auto-strategy` |
 
 Tier 3 consumes API credits. Default: off. Enabled during `/cultivation install`.
+
+## Content Engine — Kongo Integration (ADR-036)
+
+The Content Engine creates a closed-loop pipeline: PRD → seed → Kongo landing page → ad campaign → conversion tracking → analytics → winning copy → next seed.
+
+### 3-Phase Activation Model
+
+| Phase | Mode | What Happens | Promotion Criteria |
+|-------|------|--------------|--------------------|
+| **Phase A: Manual** | Human-driven | User writes seed content. Kongo generates pages. User reviews and publishes. | Default starting state |
+| **Phase B: Semi-Auto** | Human-approved | Daemon suggests seed from analytics. Kongo generates pages. User approves before publish. | 10+ successful page generations |
+| **Phase C: Fully Auto** | Daemon-driven | Daemon extracts seed from winning variants. Kongo generates and publishes. Human monitors via Danger Room. | 50+ pages with positive CVR delta + explicit user opt-in (`/grow --auto-pages`) |
+
+### Integration Classification
+
+| Tool | Classification | VoidForge Surface |
+|------|---------------|-------------------|
+| **Kongo Engine** | First-party integration | `wizard/lib/kongo/` — typed client, 8 modules |
+| **Postiz** | Adapter | `wizard/lib/adapters/postiz.ts` — social scheduling |
+| **LarryLoop** | Adapter | `wizard/lib/adapters/larryloop.ts` — email sequences |
+| **Make.com** | Orchestrator | Webhook triggers only — no adapter |
+
+### Weekly Feedback Loop
+
+- **Monday:** Vin pulls analytics from all active campaigns + Kongo pages. Growth signal aggregated.
+- **Tuesday:** Kelsier reviews signals. Identifies winning copy patterns. Generates seed content brief.
+- **Wednesday:** Raoden sends seeds to Kongo. Shallan generates social variants. Hoid drafts email copy.
+- **Thursday:** Wax distributes: new pages go live, social posts scheduled, email sequences queued.
+- **Friday:** Vin monitors first 24h performance. Circuit breakers active. Underperformers flagged.
+
+This loop runs manually at Phase A, with daemon assistance at Phase B, and fully autonomously at Phase C.
+
+### Wayne testLayer Integration
+
+Wayne evaluates A/B tests at three layers. **Page variants are never tested simultaneously with ad creative variants.**
+
+| Layer | What's Tested | Evaluation Timing |
+|-------|--------------|-------------------|
+| `testLayer: 'creative'` | Ad headlines, images, copy | Standard Wayne evaluation |
+| `testLayer: 'audience'` | Targeting segments | Standard Wayne evaluation |
+| `testLayer: 'page'` | Kongo landing page variants | **After** creative winner is frozen |
+
+**Sequence:** Freeze ad creative winner → then test page variants. Running both simultaneously confounds the signal.
 
 ## Flags
 

@@ -24,6 +24,20 @@
 
 ## Lessons
 
+### Inline analysis roleplaying agent perspectives is not a Muster
+**Agent:** Bashir (Post-Mission) | **Category:** antipattern
+**Context:** VoidForge v18.0 design — `/architect --muster` was invoked but agent presented inline analysis instead of launching sub-agents. User caught it. Real 3-wave Muster found 5 blockers the inline version missed.
+**Lesson:** The agent will always prefer inline analysis (faster, less effort, stays in context). But parallel sub-processes find things sequential inline reasoning misses — 5 blockers in this case. When a flag says "launch agents," it means launch agents. Enforcement language must be explicit and unambiguous, matching the pattern already established in GAUNTLET.md and SYSTEMS_ARCHITECT.md.
+**Action:** Added "AGENT DEPLOYMENT IS MANDATORY" enforcement block to MUSTER.md. Added "ENFORCEMENT: Must launch Agent tool sub-processes" to --muster flag in all 4 command files.
+**Promoted to:** MUSTER.md (enforcement section), architect.md, campaign.md, build.md, gauntlet.md (flag descriptions)
+
+### Stubs ship as features and never get implemented
+**Agent:** Thanos (Assessment Gauntlet) | **Category:** antipattern
+**Context:** VoidForge v17.0 pre-build assessment — 77 `throw new Error('Implement...')` calls across 8 adapter files, 1 freeze endpoint returning fake success, 1 AWS validation format-only stub, hollow heartbeat daemon handlers. All shipped between v11.0–v15.3 as if functional.
+**Lesson:** When stubs are committed "to be implemented later," they almost never are. The codebase grows around them, tests don't cover them (they throw), and users or downstream systems encounter the stubs as production failures. The Cultivation Growth Engine had 13/28 files functional but was externally non-functional because every adapter was a stub. The architecture was sound; the implementation was absent.
+**Action:** The No Stubs Doctrine (v17.0): never ship stub code. If a feature can't be fully implemented, don't create the file — document it in ROADMAP.md. Sandbox adapters with realistic fake data are full implementations. Enforcement added to BUILD_PROTOCOL, CAMPAIGN, GAUNTLET, ASSESS, and ARCHITECT method docs.
+**Promoted to:** CLAUDE.md (Coding Standards), BUILD_PROTOCOL.md (Implementation Completeness Gate), CAMPAIGN.md (Rule 5.1), GAUNTLET.md (RC-STUB), SYSTEMS_ARCHITECT.md (ADR Implementation Scope), GROWTH_STRATEGIST.md (Rule 1.1), assess.md (detection target)
+
 ### Agents verify files in isolation — must follow the data across modules
 **Agent:** Spock, Seven, Data (all three) | **Category:** antipattern
 **Context:** Kongo.io Sprint 4 — 3 bugs escaped 4+ rounds of /review across parallel agents
@@ -121,3 +135,108 @@
 **Lesson:** Iframes with `allow-same-origin` create impenetrable stacking contexts. z-index has no effect across stacking context boundaries — a `z-index: 9999` overlay inside the main document cannot appear above an iframe's stacking context.
 **Action:** Use `createPortal(element, document.body)` for any overlay that coexists with iframes. See `docs/patterns/component.tsx` Portal Pattern.
 **Promoted to:** docs/patterns/component.tsx (Portal Pattern)
+
+### Slug generation must handle special characters
+**Agent:** Bashir (Star Trek) | **Category:** gotcha
+**Context:** Kongo v4.2.0 — apostrophes in names (T'Pol, O'Brien) broke filename-based lookups
+**Lesson:** Centralize slug generation. Test with names containing apostrophes, dots, spaces, unicode.
+**Action:** Always use a shared slugify function, never ad-hoc string replacement. Test edge cases.
+**Promoted to:** Not yet
+
+### HMAC key derivation from password prevents key-type confusion
+**Agent:** Kenobi (Star Wars) | **Category:** pattern
+**Context:** Kongo Campaign 18 — vault HMAC key derived separately from encryption key
+**Lesson:** Derive HMAC authentication keys using HKDF with a distinct context string, never reuse the encryption key.
+**Action:** Use separate HKDF derivations for encryption vs authentication.
+**Promoted to:** Not yet
+
+### Fail-open defaults in privacy gates
+**Agent:** Bashir (Star Trek) | **Category:** antipattern
+**Context:** Field report triage — content filter defaulted to allow on unknown case
+**Lesson:** The unknown/default case in a privacy-sensitive gate (content filter, scope permission, visibility rule) allowed access instead of blocking it. Fail-open is a security bug in any gate that controls who sees what.
+**Action:** Default case in privacy gates MUST deny access. Added to BUILD_PROTOCOL Phase 4 as "Fail-closed defaults."
+**Promoted to:** BUILD_PROTOCOL.md (Phase 4 — Fail-closed defaults)
+
+### Date objects from Prisma raw queries
+**Agent:** Batman (DC) | **Category:** gotcha
+**Context:** Field report triage — date formatting broke when using String() on Prisma Date objects
+**Lesson:** Prisma raw queries return JavaScript Date objects. Using `String()` on a Date produces a locale-dependent, non-standard string. Use `.toISOString().slice(0,10)` for YYYY-MM-DD format, not `String()`.
+**Action:** When extracting date strings from Prisma query results, always use `.toISOString().slice(0,10)`.
+**Promoted to:** Not yet
+
+### CSS percentage heights in flex items
+**Agent:** Galadriel (Tolkien) | **Category:** gotcha
+**Context:** Field report triage — percentage heights inside flex containers resolved to zero
+**Lesson:** CSS percentage heights on flex items don't resolve to the flex container's height — they resolve to the parent's explicit height, which in a flex layout is often undefined. This produces 0px or collapsed elements. Use explicit px values, `min-height`, or flex-based sizing (`flex: 1`) instead of percentage heights inside flex containers.
+**Action:** Avoid percentage heights in flex children. Use px, vh, or flex-grow instead.
+**Promoted to:** Not yet
+
+### Dynamic counts eliminate hardcoded staleness
+**Agent:** Troi (Star Trek) | **Category:** pattern
+**Context:** Field report triage — marketing page claimed "170+ agents" but actual count was 260+
+**Lesson:** Hardcoded numeric claims ("170+ agents", "13 phases", "30 patterns") go stale immediately. Import counts dynamically from the data source (array length, directory listing, config object keys) so the displayed number always matches reality.
+**Action:** Replace hardcoded counts with computed values derived from the authoritative data source.
+**Promoted to:** Not yet
+
+### Every SaaS has an API
+**Agent:** Odo (Star Trek) | **Category:** antipattern
+**Context:** Field report triage — missions declared BLOCKED for "needs dashboard access" when APIs existed
+**Lesson:** Before declaring a mission BLOCKED because it "needs dashboard access" or "needs developer account," check if the service has a public API. Most SaaS platforms expose everything via API that their dashboard does. If credentials exist in .env or vault, attempt the API call before blocking.
+**Action:** Added BLOCKED Validation Rule to CAMPAIGN.md Step 2 (Odo's prerequisite check).
+**Promoted to:** CAMPAIGN.md (Step 2 — BLOCKED Validation Rule)
+
+### Append-only lists need caps in long-running processes
+**Agent:** La Forge (Star Trek) | **Category:** gotcha
+**Context:** Field report triage — memory leak from unbounded array growth in daemon process
+**Lesson:** Append-only arrays (event logs, metrics buffers, history lists) in long-running processes (daemons, servers, workers) grow without bound and eventually exhaust memory. Every append-only collection needs a cap: ring buffer, LRU eviction, periodic flush-to-disk, or max-length with oldest-first truncation.
+**Action:** When creating arrays that grow over time in long-running processes, always set a maximum size and eviction strategy.
+**Promoted to:** Not yet
+
+### Mock tests hide interface mismatches
+**Agent:** Batman (DC) | **Category:** antipattern
+**Context:** Decorative execution shipped 3x — mock tests passed but real SDK method names differed
+**Lesson:** Mocking a method that doesn't exist on the real class creates false confidence. Tests pass, production fails.
+**Action:** Verify mock method signatures match real class. Use type-safe mocks when possible.
+**Promoted to:** TESTING.md (Mock signature verification), QA_ENGINEER.md (Assertion audit)
+
+### State files drift across multi-campaign sessions
+**Agent:** Kira (Star Trek) | **Category:** antipattern
+**Context:** build-state.md showed v4.0 after 10 campaigns reached v6.0 — Danger Room displayed stale data
+**Lesson:** State files not updated at Victory cause cascading staleness in dashboards and assessments.
+**Action:** Update build-state.md at every Victory (now in CAMPAIGN.md Step 6).
+**Promoted to:** CAMPAIGN.md (Step 6 — state file update at Victory)
+
+### Config boot with multiple sources needs merge, not single-winner
+**Agent:** Stark (Marvel) | **Category:** antipattern
+**Context:** Kongo v6.1 — boot sequence loaded config from DB or JSON file but not both. DB had 0 rows on first deploy → app booted with empty config → all integrations silently disabled.
+**Lesson:** All-or-nothing config loading (single source wins) is an antipattern. Boot sequences should merge from multiple sources with a priority chain (env vars > DB > file defaults). A boot that succeeds with 0 loaded items is a critical operational risk — fail-closed or log at CRITICAL.
+**Action:** Implement config merge with fallback chain. Assert minimum loaded count before declaring boot healthy.
+**Promoted to:** Not yet
+
+### Migration dry-runs must validate against live state
+**Agent:** Spock (Star Trek) | **Category:** gotcha
+**Context:** Kongo v6.1 — migration dry-run validated against static mapping table but missed dynamically-provisioned OAuth entries (multi-account connections added at runtime).
+**Lesson:** Dry-run scripts that check static config maps miss runtime-created data. Dry-runs must compare against actual live state (DB rows, active connections, vault entries) not just the mapping table that was authored at development time.
+**Action:** Dry-run validation should query the live data source and diff against the migration plan.
+**Promoted to:** Not yet
+
+### CronCreate and RemoteTrigger limitations for persistent agent operations
+**Agent:** Kusanagi (DevOps) + Bashir (Field Medic) | **Category:** gotcha
+**Context:** Attempting to use Claude Code built-in scheduling for persistent daemon operations
+**Lesson:** CronCreate's `durable` flag silently fails — the cron appears created but doesn't survive session end. RemoteTrigger runs in Anthropic's cloud (no local filesystem access, 1-hour minimum interval). Neither is suitable for persistent local agent operations that need filesystem access, sub-minute intervals, or survival across reboots. For persistent agent operations, use OS-level crons (launchd on macOS, systemd timers on Linux) calling the `claude` CLI directly.
+**Action:** Use OS-level scheduling for any persistent operation. Reserve CronCreate for session-scoped recurring tasks. Reserve RemoteTrigger for cloud-safe operations that don't need local filesystem.
+**Promoted to:** Not yet
+
+### Sync-to-async signature change cascades to all callers and tests
+**Agent:** Torres (Star Trek) | **Category:** gotcha
+**Context:** Kongo v6.1 — changing a credential helper from sync to async changed its return type from `T` to `Promise<T>`, breaking every caller and every test that used it.
+**Lesson:** Changing a function from sync to async is a breaking API change that cascades to every call site. Grep all callers before making the change; expect test file updates proportional to call-site count.
+**Action:** Before converting sync → async: grep for all call sites, count the blast radius, and budget the test updates into the mission scope.
+**Promoted to:** Not yet
+
+### Muster agents find what you ask them to find — brief for semantic checks, not just structural
+**Agent:** Picard (Architecture Muster) | **Category:** antipattern
+**Context:** VoidForge marketing site v7 — 8-agent muster after void sync. All agents checked structural presence (slug counts, file existence) but none checked semantic accuracy (do descriptions match current method doc steps). 9 commands had outdated descriptions — the biggest feature in the sync was invisible on the site.
+**Lesson:** Briefing muster agents to "compare data files against upstream" produces structural comparison only. It does NOT produce semantic comparison. After a void sync that adds capabilities to existing commands, you must explicitly brief agents to compare description text against upstream method doc steps.
+**Action:** When briefing architect muster agents after a void sync, include BOTH structural checks ("does the data entry exist?") AND semantic checks ("compare description arrays against upstream method doc steps and flag discrepancies"). (Field report #267)
+**Promoted to:** Not yet

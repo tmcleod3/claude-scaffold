@@ -141,6 +141,20 @@ When stablecoin treasury is configured, Heartbeat adds these scheduled jobs:
 | Reconciliation close | Midnight + 06:00 UTC | Two-pass daily close. Read platform spend, bank settlements, and provider transfers. Write reconciliation record. Fire alerts only on the 06:00 authoritative pass. |
 | Stale funding plan detector | Hourly | Scan `pending-ops.jsonl` for funding plans stuck in `DRAFT` or `APPROVED` beyond SLA. Escalate stale plans to `fundingDegraded` state. |
 
+### Kongo Landing Page Jobs (ADR-036)
+
+When Kongo is connected (API key in financial vault), Heartbeat registers these additional jobs:
+
+| Job | Schedule | What It Does |
+|-----|----------|-------------|
+| `kongo-signal` | Hourly | Poll growth signal for all published Kongo campaigns. Compute winner confidence from analytics data (two-proportion z-test). Log signal to heartbeat state. Flag `scale`/`kill` recommendations for daemon action. |
+| `kongo-seed` | On A/B winner | Triggered when Wayne declares a page variant winner (or when analytics cross 95% confidence). Extract winning variant's slot values. Available as seed for next page generation cycle. |
+| `kongo-webhook` | Event-driven | Receive Kongo webhook events (`page.completed`, `page.failed`) on daemon's HTTP callback port. Verify HMAC-SHA256 signature with timing-safe comparison. Route to appropriate handler. |
+
+**Conditional registration:** Jobs are only registered when `kongo-api-key` exists in the financial vault. On daemon startup, check vault before registering. If Kongo is disconnected later, jobs skip silently.
+
+**Implementation:** `wizard/lib/kongo/jobs.ts` — `createKongoJobs()` returns handlers, `registerKongoJobs()` wires to scheduler.
+
 ### Funding Planner Integration
 
 Heartbeat uses the treasury planner to generate and execute funding plans:

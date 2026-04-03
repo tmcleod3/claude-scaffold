@@ -90,6 +90,8 @@ Blitz is fully autonomous campaign execution. Sisko does not pause between missi
 
 Blitz is about removing human wait time, not reducing review quality.
 
+**Blitz ≠ skip validation.** Blitz removes *wait time between steps*, not the steps themselves. Before writing new DB queries, verify the schema. Before renaming stored values (cache keys, DB column values, config identifiers), grep for all consumers including string literals in SQL, pipeline configs, and test fixtures. Before committing auth/crypto code, run the security gate. Speed comes from not pausing for human approval — not from skipping verification. (Field report #268)
+
 ## The Sequence
 
 ### Step 0 — Kira's Operational Reconnaissance
@@ -157,6 +159,7 @@ Dax reads the Prophets' plan:
    - **Content Audit** — verify marketing claims, feature descriptions, and documentation against the actual codebase. Run after major version changes when copy may have drifted from implementation. Maps to FIELD_MEDIC.md "Marketing drift" root cause. (Field report #243)
 7. Diff: PRD requirements vs. implemented features (structural AND semantic — not just "does the route exist?" but "does the component render what the PRD describes?")
 8. Produce: **The Prophecy Board** — ordered list of missions with scope, plus a separate list of BLOCKED items (assets, credentials, user decisions)
+8a. **Cross-mission data handoff check (Odo):** For any system that forms a closed loop (e.g., generate → track → analyze → feed back), identify every data handoff point between missions. Each handoff must be explicitly scoped in at least one mission: "Mission N produces X, Mission M consumes X via [mechanism]." If the loop spans 3+ missions, draw the handoff map. Unscoped handoffs become no-ops — the code on each side compiles and tests independently, but the data never flows between them. (Field report #265: seedPush extracted winning variant data but discarded it — the feedback loop was documented but not wired because the two ends were in separate missions with no explicit handoff.)
 9. **Acceptance criteria gate:** Every mission on the Prophecy Board MUST have at least one acceptance criterion before Dax finalizes the board. Acceptance criteria are concrete, verifiable conditions — "endpoint returns 200 with correct schema," "UI renders empty/loading/error/success states," "test covers the happy path." Missions without acceptance criteria are stubs that escape quality gates later. If a mission's scope is too vague to produce criteria, it's too vague to build — split or clarify first. This applies to `--plan` mode too, not just build mode. (Field report #129: Phases 3-6 written as stubs without criteria, caught late by blitz compliance check.)
 
 ### Deep Codebase Scan for PRD Diff
@@ -228,11 +231,15 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 ### Step 4 — Deploy Fury
 
 1. Construct the `/assemble` prompt with the mission scope
-2. Fury runs the full pipeline (or `--fast` if user prefers). **Note:** `--fast` skips Crossfire + Council but NEVER skips `/security` if the mission adds new endpoints, WebSocket handlers, or credential-handling code.
-3. Only checkpoint if `/context` shows actual usage above 85%. Do not preemptively suggest checkpoints.
-4. On completion → Step 5
+2. **Scope-based review scaling:** Classify the mission as S (small, <100 lines changed), M (medium, 100-300 lines), or L (large, 300+ lines or 5+ files). S/M missions get the standard reduced pipeline (build + 1 review round). **L missions get 2 review rounds minimum**, even in blitz mode — large cross-file changes introduce regressions that a single reviewer misses. (Field report #268: L-scope mission changed 10 files, introduced 3 regressions that survived through 2 subsequent missions.)
+3. Fury runs the full pipeline (or `--fast` if user prefers). **Note:** `--fast` skips Crossfire + Council but NEVER skips `/security` if the mission adds new endpoints, WebSocket handlers, or credential-handling code.
+3a. **Per-mission Kenobi quick-scan:** If the mission creates or modifies auth, crypto, HMAC, credential handling, or webhook verification code, run a focused Kenobi security scan within the mission — do not defer to the Victory Gauntlet. The reduced pipeline's single review round is calibrated for business logic, not security-sensitive code. Quick-scan scope: credential leakage, timing attacks, input validation, error message exposure. (Field report #265: webhook HMAC bypass, credential leakage in errors, and auth header override all shipped through the reduced pipeline and were only caught by the Victory Gauntlet.)
+4. Only checkpoint if `/context` shows actual usage above 85%. Do not preemptively suggest checkpoints.
+5. On completion → Step 5
 
 **Post-infrastructure enforcement gate:** For infrastructure campaigns (deploy targets, CI/CD, monitoring, staging environments): after the infrastructure is provisioned, run `/architect --plan` to verify workflow enforcement gates exist — not just infrastructure existence. Infrastructure without process gates is incomplete.
+
+**Dispatch model:** Per-mission `/assemble` runs SHOULD dispatch phases to sub-agents per `SUB_AGENTS.md` "Parallel Agent Standard." The campaign orchestrator (main thread) manages the mission sequence, inter-mission gates, and campaign state — it does NOT perform inline code analysis. Pass findings summaries between missions, not raw code. (Field report #270)
 
 ### Campaign-Mode Pipeline
 
@@ -371,6 +378,8 @@ The Gauntlet is never reduced. Checkpoints are never lightweight. Debriefs are n
    - **Yes** → Step 6 (victory)
 
 ### Step 6 — Victory (Gauntlet + Troi's Compliance Check)
+
+**HARD GATE: The campaign is NOT complete until the Victory Gauntlet runs.** Do not declare victory, present a completion summary, or ask the user whether to run the Gauntlet. Step 5 flows directly into Step 6. In blitz mode, this is automatic — the Gauntlet launches immediately after the final mission's commit. In normal mode, announce "All missions complete — running Victory Gauntlet" and proceed. The Gauntlet is as mandatory as the commits themselves. A campaign that skips the Gauntlet is a campaign that ships unreviewed code. (Field report #265: Victory Gauntlet was skipped during blitz, would have shipped 3 Critical statistical bugs + a webhook security bypass.)
 
 All PRD requirements are COMPLETE or explicitly BLOCKED:
 

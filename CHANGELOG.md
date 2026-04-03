@@ -6,6 +6,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [20.1.1] - 2026-04-02
+
+### Changed
+- **Parallel Agent Standard** added to `SUB_AGENTS.md` — standard brief format, structured deliverables, 3-agent concurrency cap, orchestration loop. Main thread orchestrates, sub-agents do the work. Dispatch directives added to ASSEMBLER.md (Rule 11), GAUNTLET.md, BUILD_PROTOCOL.md, CAMPAIGN.md, QA_ENGINEER.md, SECURITY_AUDITOR.md, CONTEXT_MANAGEMENT.md.
+- **ID Space Audit** added to `QA_ENGINEER.md` — verify identifier comparisons use the same ID type.
+- **Safety Parameter Audit** added to `SECURITY_AUDITOR.md` — verify safety-critical params can't be overridden to unsafe values.
+- **Maul re-probe** formalized as mandatory gate in `ASSEMBLER.md` — review fixes can introduce new failure modes.
+
+---
+
+## [20.1.0] - 2026-04-02
+
+### Added
+- **Kongo Engine integration** (10 modules, 119 tests) — first-party landing page system for `/cultivation` and `/grow`. Typed HTTP client, page CRUD, campaign/variant management, AI variant generation, growth signal computation (two-proportion z-test), webhook HMAC verification, API key provisioning, PRD-to-seed extraction, heartbeat daemon jobs. Architecture: ADR-036.
+- **`docs/patterns/kongo-integration.ts`** (37th pattern) — client, from-PRD generation, growth signal, webhook handling, daemon jobs.
+- **`docs/LEARNINGS.md`** — first use of the Operational Learnings system (ADR-035). 3 initial entries from the Kongo build.
+- **GROWTH_STRATEGIST.md Phase 3.5** — Kongo page generation between Content and Distribution phases. Content Engine section with 3-phase activation model, integration classification, weekly feedback loop, Wayne testLayer: 'page'.
+- **HEARTBEAT.md Kongo jobs** — kongo-signal (hourly), kongo-seed (on winner), kongo-webhook (event-driven).
+- **GAUNTLET.md** — Vin (Analytics) statistical review agent in Round 2 First Strike.
+- **CAMPAIGN.md** — hard Gauntlet gate in Step 6, L-scope review scaling in Step 4, Kenobi quick-scan for auth/crypto missions, cross-mission data handoff check, blitz validation clarification.
+- **PRD_GENERATOR.md** — external API doc reading requirement before writing data models.
+- **BUILD_PROTOCOL.md** — stored value rename check, worker env verification checkpoint.
+- **BACKEND_ENGINEER.md** — optimized path fallback rule.
+- **AI_INTELLIGENCE.md** — token limit headroom rule, prohibition placement guidance.
+- **FORGE_KEEPER.md** — Radagast description accuracy check in Step 4.
+- **LESSONS.md** — muster semantic briefing lesson.
+
+### Fixed
+- **Growth signal control selection** (Gauntlet CRITICAL) — was using worst variant as baseline, now uses first variant by creation order (order=0) with deterministic tiebreaker.
+- **Z-test confidence computation** (Gauntlet CRITICAL) — was using normalCdf as confidence; now computes proper one-tailed p-value (confidence = 1 - pValue).
+- **Poll timeout** (Gauntlet CRITICAL) — was 120s for 2-10 min generation; now 660s.
+- **Webhook future timestamp bypass** (Gauntlet HIGH) — rejects timestamps >60s in future.
+- **Response body credential leak** (Gauntlet HIGH) — raw response body removed from error messages.
+- **Response body DoS** (Gauntlet HIGH) — 10 MB size limit on HTTP responses.
+- **Pagination infinite loop** (Gauntlet HIGH) — bounded to 20 pages max in batch campaign status.
+- **Authorization header override** (Gauntlet HIGH) — case-insensitive sanitization prevents extraHeaders from overriding auth.
+- **seedPush no-op** (Gauntlet HIGH) — now returns winning slot values instead of discarding.
+- **Frontmatter delimiter guard** (Gauntlet HIGH) — missing closing delimiter treated as no frontmatter.
+- **Z-test NaN guard** (Gauntlet HIGH) — catches views=0, se=NaN via `!(se > 0)`.
+- **ADR-036 stale endpoints** — implementation status table replaces hypothetical endpoint list.
+
+### Security
+- Webhook HMAC: future timestamp bypass closed, body size limit (1 MB) added.
+- HTTP client: response body size limit (10 MB), credential leak removed from errors, auth header override prevention, double-reject settled flag.
+
+---
+
 ## [19.5.0] - 2026-03-31
 
 ### Added

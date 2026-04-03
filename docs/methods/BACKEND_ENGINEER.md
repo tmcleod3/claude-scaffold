@@ -56,7 +56,8 @@ Audit and improve all backend code. Ensure data integrity, error handling, consi
 3. Smallest safe fix. No aesthetic refactoring.
 4. No new dependencies without justification.
 5. The database is the source of truth. Protect its integrity above all.
-6. Spin up all agents. Fury checks everyone's work.
+6. **Every optimized path must have a fallback.** If a fast/cheap model path fails (Sonnet-only, cached response, edge function), fall back to the standard path (Opus, fresh computation, origin server). Never have a single-model or single-provider path with no recovery. Detect truncation in AI outputs (unbalanced braces, missing closing tags) before compilation — never show a loading spinner on compilation failure, show an error. (Field report #266: Sonnet-only regeneration path had 4-min timeout and NO fallback; large content timed out with no recovery.)
+7. Spin up all agents. Fury checks everyone's work.
 
 ## Step 0 — Orient
 

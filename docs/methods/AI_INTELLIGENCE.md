@@ -51,6 +51,8 @@ The metaphor is precise. Psychohistory predicts outcomes from patterns, adapts w
 8. **Context windows are finite.** Design for it. Don't assume infinite context.
 9. **Model updates break things.** Pin model versions. Test after updates.
 10. **Confidence scoring is mandatory on all findings.**
+11. **Output token limits must have headroom.** Set `max_tokens` to at least 2x expected output size. Detect truncation before rendering: check for unbalanced braces, missing closing tags, or incomplete JSON. Never show a loading spinner on compilation failure — show an explicit error with the truncation point. Token exhaustion produces syntactically broken output that fails silently downstream. (Field report #266: 64K output token limit hit mid-JSX string, client Babel failed silently, loader never removed.)
+12. **Critical prohibitions belong in code requirements, not separate sections.** When instructing a model NOT to do something (don't use inline styles, don't hardcode values), place the prohibition adjacent to the positive instruction it relates to, not in a separate "Don'ts" section. Models weight instructions by proximity to the task description. Isolated prohibition sections are weaker than inline constraints. (Field report #266: assembly prompt prohibitions in a separate section were ignored by the model.)
 
 ## The AI Review Sequence
 

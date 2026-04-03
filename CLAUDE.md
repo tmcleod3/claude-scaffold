@@ -86,6 +86,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 - `browser-review.ts` — Browser intelligence: console errors, behavioral walkthroughs, a11y audit, visual inspection
 - `e2e-test.ts` — Playwright E2E + axe-core a11y: page objects, auth helpers, network mocks, CWV measurement
 - `combobox.tsx` — Accessible combobox with value source management, keyboard nav, async search (+ HTMX)
+- `kongo-integration.ts` — Landing page engine: client, from-PRD generation, growth signal, webhook handlers
 
 ## Slash Commands
 

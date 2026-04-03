@@ -9,10 +9,11 @@ Claude Code has a finite context window. Long sessions accumulate tool results, 
 
 ## Core Strategy
 
-1. **Pre-load active domain** — load the active agent's method docs at session start (~4% of 1M context)
-2. **Application code on demand** — read source files when you need them, not all upfront
-3. **Write to disk, not memory** — decisions, state, and findings go in `/logs/` immediately
-4. **Checkpoint only above 85%** — the 1M window supports full campaigns. Write build-state.md only when `/context` shows >85%.
+1. **Dispatch heavy work to sub-agents** — the primary context management technique. Sub-agents read source files and return synthesized findings; the main thread never fills with raw code. A full `/assemble --muster` stays at 15-25% context when dispatched vs 80%+ inline. See `SUB_AGENTS.md` "Parallel Agent Standard." (Field report #270)
+2. **Pre-load active domain** — load the active agent's method docs at session start (~4% of 1M context)
+3. **Application code on demand** — read source files when you need them, not all upfront
+4. **Write to disk, not memory** — decisions, state, and findings go in `/logs/` immediately
+5. **Checkpoint only above 85%** — the 1M window supports full campaigns. Write build-state.md only when `/context` shows >85%.
 5. **New sessions read from disk** — build journal is the bridge between sessions
 
 ## Pre-Loading Budget (1M Context)

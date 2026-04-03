@@ -246,6 +246,83 @@ Without this lock, ~30% of cross-agent MUST FIX findings are convention conflict
 
 When an AI system has modal behavior (e.g., different output types, deck modes, project types), each mode's instructions must COMPLETELY REPLACE the default instructions — not append a footnote. A one-line override ("no scrolling") gets ignored when the default 11-section architecture contradicts it. Each mode needs its own complete specification. (Field report #27: one-line mode instructions were ignored because they contradicted the default architecture.)
 
+## Parallel Agent Standard (ADR-036)
+
+**All heavy work MUST be dispatched to sub-agents. The main thread is an orchestrator, not a worker.**
+
+Proven in production: a full `/assemble --muster` (11 phases, 15+ agents) ran entirely through background sub-agents. Context stayed at 15-25% (vs 80%+ inline). 3x faster review phases. Better findings from parallel perspectives. (Field report #270)
+
+### Main Thread Responsibilities
+
+| Does | Does NOT |
+|---|---|
+| Plan agent dispatch | Read source files |
+| Launch agents with structured briefs | Analyze code inline |
+| Triage agent results | Write/edit source files directly |
+| Make decisions at gates | Generate findings from raw code |
+| Track status, report to user | Do work an agent could do |
+| Git operations (commit, push) | Launch agent-to-agent dispatch |
+
+### Standard Agent Brief
+
+Every agent launch MUST include a structured brief:
+
+```
+AGENT: [Name] ([Universe])
+ROLE: [One sentence]
+MISSION: [One sentence]
+SCOPE:
+  READ: [files/directories]
+  WRITE: [files] or NONE (read-only)
+CONTEXT: [2-5 sentences from prior phases — NOT raw file contents]
+DELIVERABLE FORMAT: [findings-table | change-report | position-statement | build-report]
+CONSTRAINTS: [list]
+```
+
+### Structured Deliverables (mandatory)
+
+| Agent Type | Deliverable |
+|---|---|
+| Review / QA / Security | Findings Table: severity, file:line, finding, fix recommendation |
+| Fix agents | Change Report: finding ref, file, what changed, verified |
+| Architecture / Council | Position Statement: assessment, concerns, sign-off |
+| Build agents | Build Report: files created/modified, tests added, decisions made |
+
+### Concurrency Rules
+
+- **Max 3 concurrent agents** (hard cap — prevents context thrashing)
+- Batch into waves when >3 agents needed
+- **No two concurrent agents may write to the same file** — partition by domain or concern
+- Read-only agents can run in parallel without restriction
+- Partition strategies: by domain (frontend/backend), by concern (security/UX), or read-only
+
+### Context Passing Between Phases
+
+- Pass **findings summaries** between phases, not raw file contents
+- The orchestrator distills what matters for the next phase
+- Each agent gets only the context it needs, not the full conversation history
+
+### Orchestration Loop
+
+```
+PLAN → LAUNCH → WAIT → TRIAGE → DECIDE → REPORT → NEXT
+```
+
+### Command-Level Dispatch Specs
+
+| Command | Main Thread | Agents | Parallelism |
+|---|---|---|---|
+| `/review` | Partition files, triage findings | 2-3 review agents per round, fix agents | Domain-parallel reads, sequential fixes |
+| `/security` | Route findings, manage fixes | Kenobi (full audit), Maul (re-probe) | Sequential (Maul needs Kenobi's fixes) |
+| `/qa` | Triage bugs, prioritize | Batman QA + Batman Test | Parallel (different focus) |
+| `/assemble` | Full pipeline orchestration | ALL phases dispatched | Wave-batched per phase |
+| `/gauntlet` | Round management | 5-8 agents per round | Waves of 3 |
+| `/build` | Phase sequencing | Build agents per mission | 2-3 parallel when independent |
+
+### Exception: Trivial Operations
+
+Do NOT dispatch for: <3 files, <10 lines of analysis, single-file edits, git operations, user-facing questions. The 10-second agent launch overhead exceeds the value for trivial ops.
+
 ## Anti-Patterns
 
 1. Don't run all agents at once on fresh codebase. Start Picard + Stark, layer others.
@@ -254,3 +331,5 @@ When an AI system has modal behavior (e.g., different output types, deck modes, 
 4. Don't ignore conflicts between agents on same file.
 5. Don't forget Batman. Every significant change gets QA.
 6. Don't use parallel agents for work that touches the same files — merge conflicts waste more time than sequential work.
+7. **Don't do inline analysis when an agent could do it.** Reading 50 files fills context with raw code instead of synthesized findings. Dispatch to an agent, get back a findings table. (Field report #270)
+8. **Don't let agents dispatch other agents.** The main thread is the hub. Agent-to-agent dispatch creates coordination chaos.

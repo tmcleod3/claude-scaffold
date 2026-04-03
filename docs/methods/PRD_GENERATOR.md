@@ -50,6 +50,7 @@ deploy: "vps"       # vps | vercel | railway | cloudflare | static | docker
 - High-level architecture diagram (ASCII)
 - Route structure (every URL)
 - Service boundaries
+- **External API integration research (REQUIRED):** If the product integrates with any external API (payment, analytics, landing pages, social, email, etc.), you MUST read the actual API documentation before writing data models, endpoint specifications, or integration types. If WebFetch fails (Cloudflare, auth-gated docs), ask the user for a local copy of the API docs. Never design against assumed API shapes — real APIs diverge from assumptions in naming conventions, endpoint structure, auth methods, and available features. The PRD's data models and API routes must reflect the real API surface, not a hypothetical one. (Field report #265: 6 hypothetical Kongo API endpoints were designed without reading the docs; none existed — the real API handled everything differently.)
 
 ## 3. Tech Stack
 - Framework, styling, database, cache, auth, payments, email, storage, hosting

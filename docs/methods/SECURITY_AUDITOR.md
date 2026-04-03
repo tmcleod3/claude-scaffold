@@ -52,6 +52,8 @@ OWASP Top 10 evaluation. Find misconfigurations, missing protections, insecure d
 4. Defense in depth. Multiple layers.
 5. Least privilege everywhere.
 6. Secrets are never safe. Design for rotation.
+7. **Dispatch-first security:** For codebases with >10 files, dispatch Kenobi's team as sub-agents per `SUB_AGENTS.md` "Parallel Agent Standard." Leia + Chewie + Rex in parallel (Phase 1), then Yoda → Windu → Ahsoka sequential (Phase 2). Main thread triages and manages fixes. (Field report #270)
+8. **Safety parameter audit.** For safety-critical parameters (max positions, price floors, rate limits, timeout ceilings), verify they cannot be overridden to unsafe values at constructor or call sites. A `max_positions=0` meaning "unlimited" or a `min_price=0.01` overriding a $0.92 safety floor are the bugs that cost money. Constants should have runtime validation, not just defaults. (Field report #269: 2 of 7 money bugs from overridable safety parameters.)
 7. Log security events.
 8. Don't roll your own crypto.
 9. **Confidence scoring:** All findings include a confidence score (0-100). High confidence (90+) skips re-verification in Phase 4. Low confidence (<60) must be escalated to a second agent from a different universe before presenting — if the second agent disagrees, drop the finding. See GAUNTLET.md "Agent Confidence Scoring" for full ranges.

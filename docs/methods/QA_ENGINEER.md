@@ -55,7 +55,8 @@ Find, reproduce, and fix real bugs (not theoretical). Improve reliability, error
 8. Spin up all agents in parallel. Nightwing checks everyone's work.
 9. Automated tests catch regressions. Manual verification catches UX/integration issues. Use both.
 10. Double-pass: find → fix → re-verify. Fix-induced regressions are the #1 source of shipped bugs.
-11. **Confidence scoring:** All findings include a confidence score (0-100). High confidence (90+) skips re-verification in Pass 2. Low confidence (<60) must be escalated to a second agent from a different universe before presenting — if the second agent disagrees, drop the finding. See GAUNTLET.md "Agent Confidence Scoring" for full ranges.
+11. **Dispatch-first QA:** For codebases with >10 files to review, dispatch Batman's team as sub-agents per `SUB_AGENTS.md` "Parallel Agent Standard." Oracle + Red Hood in one agent, Alfred + Lucius in another. Main thread triages findings. (Field report #270)
+12. **Confidence scoring:** All findings include a confidence score (0-100). High confidence (90+) skips re-verification in Pass 2. Low confidence (<60) must be escalated to a second agent from a different universe before presenting — if the second agent disagrees, drop the finding. See GAUNTLET.md "Agent Confidence Scoring" for full ranges.
 
 ## Step 0 — Orient
 
@@ -277,6 +278,18 @@ After all fixes are applied, run a verification pass to catch fix-induced regres
 - **Deathstroke** re-tests authorization boundaries and business logic exploits that were remediated
 
 If Pass 2 finds new issues, fix them and re-verify. Do not proceed to regression checklist until Pass 2 is clean.
+
+### ID Space Audit (Oracle)
+
+When code compares, stores, or passes identifiers, verify both sides use the same ID space. Systems with multiple ID types (game_id, order_id, market_id, user_id, session_id) are prone to cross-space comparison bugs that compile cleanly and pass naive tests.
+
+**Checklist:**
+- Map all identifier types in the codebase — what prefixes or naming conventions distinguish them?
+- For every comparison (`===`, `.includes()`, Set lookups, Map keys, Redis keys), verify both operands are the same ID type
+- For every storage operation (DB write, cache set, state update), verify the key matches the value's ID space
+- Recommend `NewType` wrappers or branded types for safety-critical systems (trading, billing, auth)
+
+(Field report #269: 3 of 7 money-critical bugs in a trading system were caused by comparing wrong ID spaces — Redis key used game_id but deletion used game_id:condition_id.)
 
 ## Step 7 — Regression Checklist (Nightwing maintains)
 

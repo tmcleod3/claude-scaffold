@@ -53,6 +53,7 @@ Fury calls ALL of them. That's the point.
 8. `--skip-arch` and `--skip-build` allow re-running reviews on existing code.
 9. `--resume` picks up from the last completed phase.
 10. Only suggest a fresh session if `/context` shows actual usage above 85%. Do not preemptively checkpoint or reduce quality for context reasons.
+11. **All phases dispatch to sub-agents per ADR-036.** The main thread orchestrates — it plans, launches, triages, and decides. It does NOT read source files, analyze code inline, or generate findings from raw code. See `SUB_AGENTS.md` "Parallel Agent Standard" for brief format, deliverables, and concurrency rules. (Field report #270: full 11-phase /assemble ran through 15+ sub-agents with context at 15-25%, vs 80%+ inline.)
 
 ## The Pipeline
 
@@ -95,7 +96,7 @@ Four adversarial agents from four universes attack each other's work:
 - **Loki** (Marvel) — chaos-tests what /qa cleared
 - **Constantine** (DC) — hunts cursed code in fixed areas
 
-They run in parallel. Findings are fixed. Fixed areas are re-probed.
+They run in parallel. Findings are fixed. **Maul's re-probe of fixed areas is a mandatory gate** — review fixes can introduce new failure modes (e.g., 404-as-success for circuit breaker creates a path where cross-entity 404s mask real failures). The Crossfire is not complete until Maul has re-probed every fix from the review phase. (Field report #269: review fix created a new failure mode caught only by Maul's adversarial re-probe.)
 
 ## The Council
 
