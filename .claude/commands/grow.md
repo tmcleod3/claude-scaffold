@@ -3,10 +3,13 @@
 Read `/docs/methods/GROWTH_STRATEGIST.md` for operating rules.
 
 ## Prerequisites
-If `wizard/server.ts` does not exist (scaffold/core users):
-1. Offer: "The growth engine requires the wizard server. Pull it from upstream? [Y/n]"
-2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`
-3. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
+If `wizard/server.ts` does not exist and the mode requires it (default 6-phase, `--setup`, `--distribute`):
+1. Offer: "Phases 4-6 require the wizard server for ad platform APIs, treasury, and autonomous monitoring. Pull it from upstream? [Y/n] (Phases 1-3 work without it.)"
+2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`. Proceed with all 6 phases.
+3. On no: proceed to Phases 1-3. The Phase 3/4 boundary check below will display a clear stop message after Phase 3 completes.
+
+If `wizard/server.ts` does not exist and the mode does NOT require it (`--audit-only`, `--seo`, `--content`):
+- Skip the wizard gate entirely. These modes run Phases 1-3 only — no wizard dependency.
 
 ## Arguments
 - No arguments → run/resume the 6-phase growth protocol
