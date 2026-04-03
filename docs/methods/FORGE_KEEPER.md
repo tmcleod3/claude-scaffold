@@ -113,6 +113,75 @@ Fetch the latest from the source:
    - **Unchanged** — identical
    - **Locally modified** — local version differs from BOTH the old upstream and new upstream (user made custom changes)
 
+### Step 1.5 — Spring Cleaning (Treebeard)
+
+When upgrading across versions, check the **Migration Registry** for one-time cleanup actions that apply to the version range being crossed. Migrations only run once — they clean up artifacts from older VoidForge versions that should never have been on scaffold/core.
+
+**Important:** Some cleanup targets (like `docs/ARCHITECTURE.md`) could be the user's own project files, not leaked VoidForge artifacts. Before removing any file, **fingerprint it** — check if it contains VoidForge-specific markers (e.g., header says "VoidForge", references `wizard/`, or matches a known stale version like "15.2.1"). If the file looks like the user's own work, skip it and note why.
+
+**Process:**
+1. Determine which migrations apply based on the local version → upstream version range
+2. For each applicable migration, scan for the listed files
+3. Fingerprint ambiguous files before marking for removal
+4. Present the cleanup plan alongside the update plan (Step 2):
+   ```
+   Spring Cleaning (one-time, vX.Y.Z → vA.B.C):
+     - PRD-VOIDFORGE.md (VoidForge product PRD — not your project's PRD)
+     - PROPHECY.md (historical roadmap, superseded by ROADMAP.md)
+     - docs/ARCHITECTURE.md (fingerprint: "Version: 15.2.1" — stale VoidForge doc, not yours)
+     ...
+   ```
+5. Cleanup requires user confirmation — same prompt as Step 2 ("all / selective / skip")
+
+#### Migration Registry
+
+##### Migration: pre-20.2 → 20.2+
+
+Prior to v20.2, the scaffold and core branches contained files that should only exist on main. These were cleaned from upstream scaffold/core but may persist in projects that cloned earlier versions.
+
+**Always remove (unambiguous VoidForge artifacts):**
+```
+PRD-VOIDFORGE.md                           ← VoidForge's own product PRD
+PROPHECY.md                                ← Historical roadmap, all items shipped
+WORKSHOP.md                                ← Workshop guide requiring wizard/
+package-lock.json                          ← Scaffold/core have no dependencies
+playwright.config.ts                       ← References wizard/e2e
+vitest.config.ts                           ← References wizard/__tests__
+tsconfig.json                              ← References wizard/**/*.ts
+scripts/voidforge.ts                       ← CLI entry point, imports wizard/
+scripts/vault-read.ts                      ← Imports wizard/lib/vault
+scripts/danger-room-feed.sh                ← Feeds wizard dashboard
+docs/qa-prompt.md                          ← Describes wizard stack ("npm run wizard")
+docs/marketing/v19-release-copy.md         ← Marketing copy for wizard features
+docs/PRD-kongo-integration.md              ← Completed campaign PRD
+docs/Stablecoin Ads.md                     ← Wizard feature PRD
+docs/RFC-blueprint-path.md                 ← Shipped feature RFC
+.claude/settings.json                      ← User permissions — should never be tracked
+wizard/                                    ← Entire directory (on scaffold/core only)
+```
+
+**Fingerprint before removing (could be user's own):**
+```
+docs/ARCHITECTURE.md                       ← Remove ONLY if header contains "VoidForge" or "Version: 15.2.1"
+docs/SCALING.md                            ← Remove ONLY if header contains "VoidForge" or "Version: 15.2.1"
+docs/FAILURE_MODES.md                      ← Remove ONLY if header contains "VoidForge" or "Version: 15.2.1"
+docs/COMPATIBILITY.md                      ← Remove ONLY if header contains "VoidForge" or "Version: 15.2.1"
+docs/TECH_DEBT.md                          ← Remove ONLY if header contains "VoidForge" or "Version: 15.2.1"
+docs/SECURITY_CHECKLIST.md                 ← Remove ONLY if it references wizard/ or scripts/
+```
+
+**ADR cleanup (fingerprint each):**
+Remove ADRs that reference wizard-specific concepts (provisioner, deploy targets, AWS, tower, lobby, Sentry, codegen, RBAC). Keep ADRs that are methodology decisions (no-stubs doctrine, scaffold-as-update-source, raw-https, learnings system). Check the title and first paragraph — wizard ADRs reference `wizard/lib/`, provisioners, or specific infrastructure.
+
+**Untrack (keep on disk, remove from git):**
+```
+logs/*                                     ← Session artifacts — git rm --cached, not delete
+```
+
+**Also fix (if stale):**
+- `package.json` — if it contains `dependencies` or `devDependencies` on scaffold/core, replace with minimal version (name + version + description only)
+- `.gitignore` — the upstream version will be synced via normal Step 2/3, which now includes the hardened patterns
+
 ### Step 2 — Walk the Forest (Treebeard)
 
 Compare every changed file. Treebeard is slow and deliberate — he doesn't rush:

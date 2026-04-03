@@ -31,6 +31,17 @@ Fetch the latest from upstream:
    - If current version matches or is ahead → announce "The forge burns bright! You're on the latest." → Stop
    - If behind → continue
 
+## Step 1.5 — Spring Cleaning (Treebeard)
+Check the **Migration Registry** in `/docs/methods/FORGE_KEEPER.md` for one-time cleanup actions:
+1. Determine which migrations apply based on local version → upstream version range
+2. For each applicable migration, scan for the listed files
+3. **Fingerprint ambiguous files** before marking for removal — files like `docs/ARCHITECTURE.md` could be the user's own. Only remove if they contain VoidForge markers (e.g., "Version: 15.2.1", references to `wizard/`, "VoidForge" in header)
+4. **Always-remove files** (PRD-VOIDFORGE.md, PROPHECY.md, WORKSHOP.md, wizard/ on non-main, etc.) don't need fingerprinting — they're unambiguously VoidForge artifacts
+5. Present the cleanup plan alongside the update plan in Step 2
+6. Apply cleanup in Step 3 alongside updates — same confirmation prompt ("all / selective / skip")
+7. For tracked `logs/*` files, use `git rm --cached` (untrack but keep on disk)
+8. If `package.json` has `dependencies`/`devDependencies` on scaffold/core, replace with minimal version
+
 ## Step 2 — Walk the Forest (Treebeard)
 Compare every shared methodology file:
 1. For each shared file, compare local vs upstream using `git diff HEAD <remote>/scaffold -- <path>`
