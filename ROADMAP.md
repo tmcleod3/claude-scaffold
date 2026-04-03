@@ -2,11 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v19.5.0 (2026-03-31)
-**Next:** v20.0 — CLI Distribution (`npx voidforge init`)
-**Then:** v20.1 — Kongo Engine Integration (first-party landing page system for /cultivation + /grow)
-**Status:** v19.5 shipped (The Blueprint Path — fourth entry path for pre-written specs). All entry paths complete.
-**499 tests** (478 unit + 21 E2E), 9 universes, 260+ agents, 28 slash commands, 36 code patterns.
+**Current:** v20.1.1 (2026-04-02)
+**Next:** v20.2 — Follow-up (heartbeat wiring, webhook ingress, ROADMAP items)
+**Status:** v20.1 shipped (Kongo Engine Integration — 10 modules, 119 tests, Infinity Gauntlet hardened).
+**618 tests**, 9 universes, 260+ agents, 28 slash commands, 37 code patterns.
 
 ---
 
