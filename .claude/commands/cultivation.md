@@ -63,21 +63,35 @@ Growth infrastructure from the first commit, not the first customer. (Field repo
 - Flag: "Ad platforms can be configured later with `/grow --setup`. Continuing installation."
 
 **Step 4 — Install heartbeat daemon:**
+If `wizard/server.ts` exists:
 - Create launchd plist (macOS) or systemd unit (Linux): `com.voidforge.heartbeat`
 - Prompt for vault password to start daemon
 - Daemon begins monitoring (token refresh, health checks, reconciliation)
 
+If `wizard/server.ts` does NOT exist:
+- Display: "Step 4 (Heartbeat daemon): Skipped — requires wizard server. To enable: answer Y to the wizard pull prompt at startup, or run: `git checkout origin/main -- wizard/ && npm install --prefix wizard`"
+
 **Step 5 — Install wizard server service** (for persistent dashboard):
+If `wizard/server.ts` exists:
 - Create launchd plist: `com.voidforge.server`
 - Wizard server runs persistently (serves Danger Room with growth tabs)
 
+If `wizard/server.ts` does NOT exist:
+- Display: "Step 5 (Wizard server): Skipped — requires wizard server."
+
 **Step 6 — Enable growth tabs in Danger Room:**
+If `wizard/server.ts` exists:
 - Growth tab: shows connected treasury + revenue data from Step 1-2
 - Treasury tab: shows vault status, circuit breakers, budget allocation
 - Campaigns tab: empty state with guidance ("Run `/grow --setup` to configure ad platforms")
 - Heartbeat tab: daemon status, last refresh timestamp
 
+If `wizard/server.ts` does NOT exist:
+- Display: "Step 6 (Danger Room tabs): Skipped — requires wizard server."
+
 **Step 7 — Confirm success:**
+
+If wizard is present (full install):
 ```
 ═══════════════════════════════════════════
   CULTIVATION INSTALLED — Day 0
@@ -96,9 +110,38 @@ Growth infrastructure from the first commit, not the first customer. (Field repo
 ═══════════════════════════════════════════
 ```
 
+If wizard is NOT present (partial install):
+```
+═══════════════════════════════════════════
+  CULTIVATION INSTALLED — Day 0 (Partial)
+═══════════════════════════════════════════
+  Financial vault:   ✓ Created
+  TOTP 2FA:          ✓ Configured
+  Treasury:          ✓ Connected (Mercury | Manual: $X/mo)
+  Revenue:           ✓ Connected (Stripe) | ○ Not yet
+  Heartbeat daemon:  — Skipped (requires wizard)
+  Wizard server:     — Skipped (requires wizard)
+  Danger Room:       — Skipped (requires wizard)
+═══════════════════════════════════════════
+  Steps 1-3 complete. Steps 4-6 require the wizard server.
+  To enable full Cultivation:
+    git checkout origin/main -- wizard/
+    npm install --prefix wizard
+  Then re-run /cultivation install to complete Steps 4-6.
+
+  What works now:
+    /grow             Phases 1-3 (SEO, analytics, content)
+    /grow --audit-only  Full methodology audit
+═══════════════════════════════════════════
+```
+
 **Step 8 — Offer Tier 3 opt-in:**
+If `wizard/server.ts` exists:
 - "Enable scheduled AI agents? These run weekly creative refresh and monthly strategy reviews. They consume Claude API credits. [Y/n]"
 - If yes: configure `--auto-creative` and `--auto-strategy` flags
+
+If `wizard/server.ts` does NOT exist:
+- Display: "Step 8 (Scheduled AI agents): Skipped — requires heartbeat daemon."
 
 ## /cultivation status
 
