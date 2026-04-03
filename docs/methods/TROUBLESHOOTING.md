@@ -11,6 +11,31 @@
 4. Don't stack fixes. Fix one thing, verify, then move to the next.
 5. If you're going in circles, stop and re-read the error message literally.
 
+## Step 0 — What Changed?
+
+Before forming any hypothesis, establish what actually changed since the last known-good state:
+
+1. `git diff HEAD~3` — scan the last 3 commits for the change that correlates with the symptom
+2. `git log --oneline -10` — read recent commit messages for anything related to the failing area
+3. Check environment: were env vars, dependencies, or infrastructure changed? (`git diff package-lock.json`, check deploy logs)
+4. Check external factors: did a third-party API change? Did a DNS record expire? Did a certificate rotate?
+
+**Rule:** If the answer to "what changed?" is "nothing" — something changed that you don't know about. Widen the search: OS updates, CI runner version, provider outage, certificate expiry.
+
+Only after establishing what changed should you form a hypothesis about WHY it broke.
+
+## Hypothesis Invalidation
+
+When you have a theory about the root cause, try to DISPROVE it before acting on it:
+
+1. **State your hypothesis explicitly:** "I think X is broken because Y."
+2. **Find evidence that would contradict it:** If X were NOT the cause, what would you expect to see? Check for that.
+3. **Only act when you cannot disprove:** If you can't find contradicting evidence after a genuine attempt, proceed with the fix.
+
+**Anti-pattern:** "The database might be slow" → immediately add indexes. **Correct:** "The database might be slow" → check query execution times → if queries are fast, the database is not the problem → look elsewhere.
+
+This prevents fix-stacking: applying multiple speculative fixes where only one (or none) was needed. (Field reports #271, #275)
+
 ---
 
 ## Build Phase Failures
@@ -111,6 +136,21 @@
 6. Check logs: `pm2 logs` or `journalctl -u your-app`
 7. Memory: is the server running out? Check `free -h`
 8. Rollback: use `/scripts/rollback.sh` and diagnose from a working state
+
+### Post-Deploy Debugging Protocol
+
+When the app is deployed and running but producing incorrect behavior, check causes in this order — simplest first:
+
+1. **Wrong environment:** Are you hitting the right server? Check the URL, DNS, and load balancer target.
+2. **Stale deploy:** Is the running code actually the latest? Check build timestamp, version endpoint, or deployment log.
+3. **Missing/wrong env vars:** Compare expected env vars against what's actually set on the server. One missing var can cascade.
+4. **Database state:** Is the migration current? Is there stale data from a previous deploy? Check schema version.
+5. **Dependency mismatch:** Does the server have the same dependency versions as local? Check lock file deployment.
+6. **Cache poisoning:** Is a CDN, Redis, or browser cache serving stale content? Clear and retest.
+7. **External service change:** Did a third-party API change behavior, rate limit you, or rotate credentials?
+8. **Actual code bug:** Only after eliminating 1-7 should you assume the code itself is wrong.
+
+**Rule:** Items 1-7 account for ~80% of post-deploy issues. Starting at item 8 wastes hours. (Field reports #271, #275)
 
 ### Phase Rollback — A batch broke something
 

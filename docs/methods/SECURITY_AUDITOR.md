@@ -146,6 +146,18 @@ Grep for all `fetch(`, `axios(`, `http.get(`, `https.get(`, and `new URL(` calls
 
 **Rule:** All external API calls must use HTTPS. No exceptions. If a service only offers HTTP, proxy it through your own HTTPS endpoint. (Field report #52: GeoIP service called over HTTP, leaking user IP addresses to network observers.)
 
+### Verify Before Transact (Financial / Irreversible Operations)
+
+For any operation that transfers funds, executes a trade, or writes an irreversible transaction exceeding $100 in value:
+
+1. **Read-back verification:** After constructing the transaction, query the current state (balance, position, contract state) and verify preconditions still hold. State can change between computation and execution.
+2. **Amount sanity check:** Compare the transaction amount against a configured ceiling. Flag any single transaction >10x the expected amount as a potential calculation error.
+3. **Recipient verification:** For on-chain transfers, verify the recipient address is in an allowlist. Never send to an address derived solely from user input without confirmation.
+4. **Simulation first:** If the platform supports it (Ethereum `eth_call`, Solana `simulateTransaction`), simulate before submitting. A simulated revert is free; an on-chain revert costs gas.
+5. **Idempotency key:** Every financial transaction must carry a unique idempotency key. Duplicate submission must be a no-op, not a double-spend.
+
+**Rule:** The cost of a verification read is negligible compared to the cost of an incorrect irreversible transaction. When in doubt, read before you write. (Field report #271)
+
 ### IP Range Validation
 
 Never use string prefix matching for IP ranges. `ip.startsWith('172.2')` matches public IPs like `172.200.x.x` — the RFC 1918 private range is `172.16.0.0 - 172.31.255.255`, which requires integer comparison, not string operations.

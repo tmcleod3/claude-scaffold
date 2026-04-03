@@ -142,6 +142,20 @@ Diagnostic, preview, or test-routing endpoints must call production code paths â
 
 When implementing usage tiers with cost caps, verify the cap exceeds the maximum single-operation cost. A $2.00 cap with $2.09 single-generation cost blocks the user after one operation.
 
+### Stateless by Default
+
+Services deployed in ephemeral environments (containers, serverless, spot instances, worker processes) must not rely on in-memory state surviving beyond the current request or cycle. All runtime state must be reconstructable from persistent storage (database, object store) and live API calls within one startup cycle.
+
+**Diagnostic test:** Kill the process at any point. On restart, does it recover to a correct operating state without manual intervention? If the answer is "no" for any state, that state needs to move to persistent storage.
+
+**Common violations:**
+- In-memory caches treated as source of truth (use Redis/Memcached or accept cache miss)
+- Background job progress tracked only in process memory (use database job status)
+- Configuration fetched once at startup and never refreshed (use config service or env reload)
+- WebSocket connection state without reconnection recovery
+
+Step 2 (Strange's Service Layer) already mandates "stateless composable services." This subsection makes the requirement concrete: stateless means *reconstructable from durable storage within one cycle*. (Field report #274)
+
 ## Step 5 â€” Deliverables
 
 1. BACKEND_AUDIT.md

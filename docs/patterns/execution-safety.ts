@@ -560,3 +560,42 @@ export {
 //   trade = ib.placeOrder(contract, order)
 //
 //   # IBKR supports paper trading on port 7497 — same code, different port
+
+// ── Anti-Patterns ──────────────────────────────────────
+//
+// === Never raw transfer() to smart contracts ===
+//
+// ERC20 `transfer(address, amount)` to a smart contract deposits funds with
+// no guarantee of recovery. Smart contracts may lack withdrawal functions,
+// absorb tokens into settlement pools, or have no rescue mechanism.
+//
+// Before any on-chain transfer:
+// 1. Read the contract's ABI — verify the correct deposit/funding function
+// 2. Check if the contract has a withdrawal or recovery function
+// 3. Use the contract's own deposit method, not raw transfer()
+// 4. For amounts >$100, simulate the transaction first (eth_call)
+//
+// This applies to any on-chain execution — Ethereum, L2s, Solana (via CPI).
+//
+// === Derive Don't Accumulate ===
+//
+// Never maintain a running balance by incrementing/decrementing on each event.
+// Running totals drift due to: missed events, duplicate processing, rounding
+// errors, and partial fills that update one side but not the other.
+//
+// Instead, derive the current state from the source of truth:
+//
+//   // WRONG: running accumulator
+//   this.totalPnl += trade.pnl;
+//   this.positionSize += trade.filledSize;
+//
+//   // RIGHT: derive from complete history
+//   const fills = await backend.getFills(since);
+//   const totalPnl = fills.reduce((sum, f) => sum + f.pnl, 0);
+//   const positionSize = fills.reduce(
+//     (sum, f) => sum + f.filledSize * (f.side === 'buy' ? 1 : -1), 0
+//   );
+//
+// For reconciliation, the derived value IS the value. If the derived value
+// disagrees with an accumulator, the accumulator is wrong — always.
+// (Field reports #271, #274, #275)
