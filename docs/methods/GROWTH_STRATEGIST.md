@@ -413,6 +413,23 @@ The Content Engine creates a closed-loop pipeline: PRD → seed → Kongo landin
 
 This loop runs manually at Phase A, with daemon assistance at Phase B, and fully autonomously at Phase C.
 
+### Iframe Sandbox Constraint
+
+Kongo published sites serve in sandboxed iframes without `allow-same-origin`. This breaks GA4 cookie tracking, UTM relay, and CTA navigation for self-marketing use cases (dogfooding — marketing a product on the same domain as Kongo).
+
+**Resolution:** When the product being marketed runs on the same domain as Kongo (self-marketing mode), the growth daemon must:
+1. Create pages via Engine API as normal
+2. Serve them at `/lp/[slug]` (direct HTML render, no iframe) instead of relying solely on subdomain URLs
+3. Point Google Ads destination URLs to `kongo.io/lp/{slug}`, not `{slug}.kongo.io`
+
+The subdomain URL still works for the published site (DNS provisioned), but the `/lp/` path is required for GA4 attribution on the marketing domain.
+
+**Detection:** Self-marketing mode activates when the product domain matches the Kongo domain, or when `SELF_MARKETING=true` is set in the project config. The seed extraction logic (`wizard/lib/kongo/seed.ts`) uses the `/lp/` path for destination URLs in self-marketing mode.
+
+**Analytics in self-marketing mode:** The `kongo-signal` daemon job must check analytics from both paths:
+- Subdomain analytics: `GET /engine/pages/:id/analytics` (Kongo's built-in analytics)
+- Marketing page analytics: GA4 Data API or PostHog (for `/lp/` direct-render pages where Kongo's built-in tracking cannot reach)
+
 ### Wayne testLayer Integration
 
 Wayne evaluates A/B tests at three layers. **Page variants are never tested simultaneously with ad creative variants.**
