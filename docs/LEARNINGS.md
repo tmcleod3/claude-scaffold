@@ -1,7 +1,7 @@
 # Project Operational Learnings
 
 Persistent knowledge from live operations. Things code reviews can't catch.
-Updated: 2026-04-01 | Entries: 3/50
+Updated: 2026-04-04 | Entries: 4/50
 
 ---
 
@@ -37,6 +37,15 @@ The growth signal z-test shipped with 3 Critical bugs: (1) control = worst varia
 - **context:** Statistical code needs review by an agent that understands the math, not just code quality. Tests are necessary but insufficient — a test that asserts `expect(brokenResult).toBe(brokenResult)` passes perfectly.
 
 ---
+
+### Destructive git operations on multi-branch repos require branch verification
+The v20.2 scaffold cleanup was correct in analysis (274 files should not be on scaffold) but wrong in execution — `git rm -r wizard/` ran on main instead of scaffold. No step verified `git branch --show-current` before deleting. The error went undetected for 10+ commits because subsequent work (/void, /debrief --inbox, /review) is methodology-only and never imports wizard modules. Caught only when the user asked to modify wizard/lib/kongo/seed.ts. Required full 272-file restoration from origin/main.
+
+- **category:** root-cause
+- **verified:** 2026-04-03
+- **scope:** Multi-branch repos (main/scaffold/core) where branch-specific cleanup is needed
+- **evidence:** Commit 33109f6 (scaffold cleanup on main), commit c88d532 (restoration). 10 commits between error and detection.
+- **context:** Always run `git branch --show-current` before any destructive git operation. In multi-branch workflows, the working branch may not be the intended target. This is the git equivalent of "Verify Before Transact" for financial operations.
 
 ## Decisions
 
