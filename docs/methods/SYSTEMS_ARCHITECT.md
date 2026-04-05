@@ -46,6 +46,7 @@ Ensure architecture matches product needs. Identify structural risks and scaling
 5. Assume failure.
 6. Document decisions, not just outcomes.
 7. PRD decides *what*. Picard decides *how*.
+8. Branch before destroying. Before any destructive git operation (`git rm`, `git revert`, `git reset`, `git checkout --`), verify the current branch with `git branch --show-current`. Never run destructive ops on `main` without explicit intent. (Field report #281)
 
 ## Conflict Checklist
 

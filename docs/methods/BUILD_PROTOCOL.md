@@ -105,6 +105,8 @@ When `type: "quantitative"` is set in frontmatter:
 
 **Phase 12 (Deploy):** If `live_execution: yes`, deploy checklist includes: paper trading period completed, position limits configured, circuit breaker thresholds set, reconciliation verified.
 
+**Strategy Whitelist Gate (if `live_execution: yes`):** Every strategy defaults to OFF. Strategy config must include an `enabled: boolean` field defaulting to `false`. To go live, the operator explicitly sets `enabled: true` per strategy. Verify: (1) grep for strategy registration — each must read an `enabled` flag, (2) no strategy bypasses the check via constructor defaults or env var fallbacks that default to `true`, (3) the strategy list shows enabled/disabled state. A strategy that runs because nobody turned it off is the quantitative equivalent of an open firewall. (Field report #277)
+
 ### Conditional Skip Rules
 
 | PRD Frontmatter | Phase to Skip | Reason |
@@ -289,6 +291,8 @@ The review phases use a double-pass pattern: find → fix → re-verify. This ca
 **Build artifact verification (conditional — if project has a separate build step for workers/scripts):**
 After running any build command (`build:workers`, `tsc --build`, webpack, etc.), verify the compiled output contains the expected code. Grep the output directory for key exports, function names, or registrations that were added since the last build. Tests run against source files — a stale `dist/` that's missing your new code will pass all tests but fail in production. (Field report #263: `dist/workers/index.js` was stale, missing 4 new worker registrations — cron jobs never fired despite source being correct.)
 
+**Process reload gate (if project uses a process manager):** After any build step (`npm run build`, `next build`, `tsc`), the running process MUST be reloaded via its process manager (`pm2 reload`, `systemctl restart`, `docker compose restart`) before verification. A build that completes but is never loaded into the running process is invisible to users — health checks pass against the old process while serving stale code. Verify the health endpoint reports the new build hash after reload. (Field reports #278, #279)
+
 *Pass 2 — Re-Verify (parallel):*
 6. Batman: Nightwing re-runs test suite + Red Hood re-probes fixed areas + Deathstroke re-tests authorization boundaries.
 7. Galadriel: Samwise re-audits a11y on modified components + Radagast re-checks edge cases.
@@ -376,6 +380,7 @@ Tests are written alongside features, not bolted on later. This is the authorita
 
 When a batch or phase introduces a regression:
 
+0. **Verify branch:** `git branch --show-current` — confirm you're on the expected branch before reverting. Rolling back on `main` when you meant a feature branch corrupts shared history. (Field report #281)
 1. **Identify:** Which batch/commit introduced the regression?
 2. **Revert:** `git revert <commit>` or `git stash` the batch changes
 3. **Verify:** Confirm the regression is gone — run tests, walk through affected flow

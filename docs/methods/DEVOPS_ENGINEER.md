@@ -86,7 +86,20 @@ Deployable, observable, recoverable, maintainable. Automate everything done more
 
 **PM2 Config:** Web in cluster mode (≥2 instances). Workers in fork mode. Memory limits. Auto-start on reboot (`pm2 startup` + `pm2 save`). Log rotation.
 
+**Docker Service Checklist (when docker-compose is the process manager):**
+For each service in `docker-compose.yml`, verify:
+1. **Logging driver** — `json-file` with `max-size` and `max-file` limits. Default Docker logging has no rotation — logs grow until disk fills.
+2. **Volume mounts** — every persistent directory (uploads, data, logs) has an explicit volume. Container-only data is lost on `docker compose down`.
+3. **Healthcheck** — `HEALTHCHECK` in Dockerfile or `healthcheck` in compose. Without it, Docker reports "running" even when the app has crashed.
+4. **Resource limits** — `deploy.resources.limits` for memory and CPU. Start with `mem_limit: 512m` for web, `256m` for workers.
+5. **Restart policy** — `restart: unless-stopped` for production. `restart: no` for one-off containers.
+6. **Environment variables** — use `env_file`, never inline secrets. Verify `.env` is in `.dockerignore`.
+7. **Dependency health** — `depends_on` with `condition: service_healthy` (compose v2.1+). Without it, the app starts before its database is ready.
+(Field report #280)
+
 **L — Monitoring:** Health endpoint (/api/health checking DB, Redis, disk). External uptime monitor. Request logging (method, path, status, duration). Error tracking. Slow query logging (>1s). Worker job logging. Alerts: CPU >80%, Memory >85%, Disk >80%.
+
+**Build Staleness Detection (health endpoint):** The health endpoint MUST include a build fingerprint check. At startup, capture a build fingerprint (git commit hash, `BUILD_HASH` env var, or entry bundle mtime). Include it in `/api/health` responses. After any deploy, compare the health endpoint's fingerprint against the expected value. A mismatch means the process serves stale code — the build completed but was never reloaded. Automate: if health fingerprint != deployed commit, trigger process reload. This is the #1 cause of "I deployed but nothing changed" incidents. (Field reports #278, #279)
 
 **Bulma — Backup:** `/scripts/backup-db.sh` — Daily cron, compressed, off-site (R2/S3), 30-day retention. **Restore tested at least once.** RPO/RTO defined.
 
