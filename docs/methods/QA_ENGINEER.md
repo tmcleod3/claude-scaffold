@@ -140,6 +140,9 @@ For any feature that accepts file uploads, verify the parser handles: PDF, DOCX,
 ### Service Call-Site Verification
 For each new service built in a mission, grep for actual call sites in business logic (not just imports or observation loops). If no business logic calls the service's methods, the service is decorative. Flag as HIGH. (Field report #151)
 
+### Import Deletion Safety
+After removing any import statement, verify the symbol is not consumed indirectly by other modules through re-exports or barrel files (`index.ts`, `__init__.py`). Steps: (1) grep for the symbol name across the codebase, (2) if found in other files, trace whether they imported it directly or via the file you modified, (3) if the symbol was re-exported, add direct imports in every consumer. Barrel file removals are especially dangerous — removing one line from `index.ts` can break 10 downstream consumers. (Field report #277)
+
 ### Degraded Dependency Testing
 For each external data source (APIs, databases, message queues), test what happens when it returns empty, broken, or partial data. Monitoring and reconciliation systems should degrade gracefully (skip check + warn) not catastrophically (halt all operations). A reconciler that sees "0 local positions" when the parser is broken should not declare MAJOR DIVERGENCE and halt trading. (Field report #152)
 
