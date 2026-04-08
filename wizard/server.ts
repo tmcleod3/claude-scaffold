@@ -136,8 +136,9 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  // SEC-R2-003: HSTS in remote mode — prevent downgrade attacks before Caddy redirect
-  if (isRemoteMode()) {
+  // SEC-R2-003: HSTS only when actually serving HTTPS — not on plain HTTP
+  // (browsers should ignore HSTS over HTTP, but sending it is misleading)
+  if (req.headers['x-forwarded-proto'] === 'https' || (req.socket as import('node:tls').TLSSocket).encrypted) {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
   // LAN mode: allow WebSocket from any private IP (Gauntlet Kenobi DR-10)

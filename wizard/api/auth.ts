@@ -117,9 +117,12 @@ addRoute('POST', '/api/auth/login', async (req: IncomingMessage, res: ServerResp
   const role = await getUserRole(username.slice(0, 64));
   await audit('login_success', ip, username.slice(0, 64), { role: role ?? 'unknown' });
 
-  // In remote mode, always set Secure flag (Caddy provides HTTPS).
-  // Don't rely on X-Forwarded-Proto which could be omitted if proxy is bypassed.
-  const secure = isRemoteMode() || req.headers['x-forwarded-proto'] === 'https';
+  // Set Secure flag only when actually serving over HTTPS (proxy or direct TLS).
+  // Do NOT force Secure in remote mode — user may access via ZeroTier/Tailscale
+  // over plain HTTP without a reverse proxy. Browsers silently drop Secure cookies
+  // on HTTP, causing session loss after login. (Field report: April 2026)
+  const secure = req.headers['x-forwarded-proto'] === 'https'
+    || (req.socket as import('node:tls').TLSSocket).encrypted === true;
   res.setHeader('Set-Cookie', buildSessionCookie(result.token, secure));
   sendJson(res, 200, { success: true, data: { username: username.slice(0, 64), role } }, true);
 });
