@@ -206,6 +206,8 @@ After writing the report (Step 3), Wong checks if the findings should promote in
 
 **Why 3+ threshold:** A single lesson could be project-specific. Two could be coincidence. Three is a pattern worth encoding into the methodology. The user always has final say.
 
+**Agent definition promotion:** When a lesson names a specific agent (e.g., "Agent: Batman"), check if `.claude/agents/{agent-id}.md` has an `## Operational Learnings` section. If so, propose adding the lesson to that section. If the agent has no `## Operational Learnings` section yet, propose creating one. Agent definitions are first-class promotion targets alongside method docs — operational rules that belong to a specific agent should live in that agent's definition, not only in the method doc.
+
 ### Experiment Analysis
 
 If `~/.voidforge/experiments.json` has completed experiments, Wong includes a summary in the debrief:

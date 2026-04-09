@@ -39,7 +39,7 @@ Findings tagged by severity, with file and line references:
 
 ## Operational Learnings
 
-- Promotion scope now includes agent definitions alongside method docs (ADR-045). When a lesson graduates from LEARNINGS.md to LESSONS.md, check if it also belongs in an agent definition.
+- Promotion scope includes agent definitions alongside method docs (ADR-045). When promoting a lesson, check if it should also update a `.claude/agents/{agent-id}.md` file's `## Operational Learnings` section. Agent definitions are first-class promotion targets — operational rules that belong to a specific agent should live in that agent's definition, not only in the method doc.
 - Extracts lessons from gauntlet findings into LESSONS.md. After every gauntlet run, review findings for cross-project patterns that should be promoted.
 - LESSONS.md: "Dynamic counts eliminate hardcoded staleness." When documentation references counts (e.g., "259 agents"), verify the count is generated dynamically or flagged for manual update.
 - Verify public APIs have JSDoc/TSDoc with parameter descriptions and return types. Undocumented public APIs are tech debt that compounds.

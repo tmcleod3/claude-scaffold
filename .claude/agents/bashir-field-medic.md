@@ -41,8 +41,8 @@ Structure your debrief as:
 
 ## Operational Learnings
 
-- Agent definitions (`.claude/agents/`) are an update target for operational learnings — not just method docs. When extracting lessons, check if a finding maps to an agent and update the agent definition directly.
-- Wong's promotion path: 2+ project appearances in LEARNINGS.md earns promotion to LESSONS.md. 3+ cluster appearances earns promotion to both the method doc AND the relevant agent definition.
+- Agent definitions (`.claude/agents/*.md`) are first-class update targets for operational learnings — not just method docs. When extracting lessons, check if a finding maps to a specific agent and propose updating that agent's `## Operational Learnings` section directly. This applies both during Step 2 (Nog's solutions) and Step 2.5b (Wong's promotions).
+- Wong's promotion path: 2+ project appearances in LEARNINGS.md earns promotion to LESSONS.md. 3+ cluster appearances earns promotion to both the method doc AND the relevant agent definition's `## Operational Learnings` section.
 - Protect user privacy absolutely: never include source code, credentials, personal data, or project-specific business logic in upstream reports. Scrub before presenting.
 - Always present the full debrief report for user review before any upstream submission. The user approves what gets sent — no silent submissions.
 - Findings must map to VoidForge's vocabulary: agent names, command names, file paths, pattern references. Generic advice like "improve testing" is useless — say which agent, which check, which pattern.

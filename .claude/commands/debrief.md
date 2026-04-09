@@ -42,7 +42,9 @@ Map each root cause to the VoidForge component responsible (which command, which
 - New pattern? → write it with code examples
 - Method doc update? → specify the file and section
 
-**Constraint:** All proposals must reference existing VoidForge concepts (agents, phases, commands, patterns). No solutions that require reimagining the system.
+**Agent definition check:** For each finding, if it references a specific agent by name or domain, check if the corresponding `.claude/agents/{agent-id}.md` should be updated. Propose adding the finding to the agent's `## Operational Learnings` section if it's a reusable operational rule (not a one-off fix). Agent definitions are update targets alongside method docs, commands, and patterns.
+
+**Constraint:** All proposals must reference existing VoidForge concepts (agents, phases, commands, patterns, agent definitions). No solutions that require reimagining the system.
 
 ## Step 2.5 — Operational Learning Extraction
 
