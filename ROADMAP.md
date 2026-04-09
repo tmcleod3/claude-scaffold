@@ -2,9 +2,9 @@
 
 > The plan for the plan-maker.
 
-**Current:** v22.0.0 (2026-04-09)
-**Next:** v22.1 — The Migration (treasury CLI, summary file, per-project vault)
-**Status:** v22.0 Campaign 28 complete (7 missions). Post-build Muster (17 agents, 3 waves) found 4 CRITICAL, 4 HIGH. Core architecture production-ready; hardening patches needed before npm publish.
+**Current:** v22.2.0 (2026-04-09)
+**Next:** v23.0 — The Materialization (259 subagent definitions, dynamic dispatch, model routing)
+**Status:** v22.1 + v22.2 complete (Campaigns 30-31). Gauntlet passed. v23.0 planned (ADR-044).
 **741 tests**, 9 universes, 259 agents, 28 slash commands, 37 code patterns.
 
 ---
@@ -282,6 +282,77 @@
 - No runtime code changes — purely methodology
 
 **Execution order:** M1 → M2 → M3 → M4 → M5 → M6 → M7 (M4+M5 parallel, M6+M7 parallel)
+
+---
+
+## v23.0 — The Materialization
+
+*"Make it so." — Picard*
+
+**Depends on: v22.2 complete. Architecture: ADR-044. Campaign 32.**
+
+**The problem:** VoidForge's 259 named agents exist only as text in methodology docs. Every invocation recreates character prompts inline. No model routing (everything runs on Opus). No tool restrictions (every agent can edit files). No dynamic dispatch (static tables in command files). Claude Code's native subagent system (`.claude/agents/*.md`) solves all of this — but the agents need to be materialized as subagent definitions.
+
+**Missions (8):**
+
+### Mission 1: Agent Classification
+- Parse `docs/NAMING_REGISTRY.md` — extract all 259 agents with name, universe, role, lens
+- Classify each into tier: Lead (~18, Opus), Specialist (~200, Sonnet), Scout (~40, Haiku)
+- Classify each by tool access: Builder (full), Reviewer (read+bash), Scout (read-only), Adversarial (read+bash)
+- Produce classification manifest: `docs/AGENT_CLASSIFICATION.md`
+- Review with Riker: are tier assignments correct? Challenge edge cases.
+
+### Mission 2: Lead Agent Definitions (18 agents)
+- Generate `.claude/agents/{name}.md` for all 18 lead agents
+- Model: `inherit` (Opus from main session)
+- Tools: Full (leads need to write fixes, ADRs, logs)
+- System prompts: character identity, domain expertise, behavioral lens, output format
+- Agents: Picard, Batman, Galadriel, Kenobi, Kusanagi, Stark, Sisko, Thanos, Fury, Coulson, Kelsier, Dockson, Tuvok, Seldon, Chani, Bombadil, Celebrimbor, Bashir
+
+### Mission 3: Star Trek Specialist Definitions (~40 agents)
+- Generate `.claude/agents/` files for all Star Trek universe specialists
+- Model: `sonnet` — focused prompt compensates, faster in parallel
+- Tools: Read, Grep, Glob, Bash (reviewer access)
+- Agents: Spock, Uhura, Worf, Scotty, Kim, Torres, La Forge, Data, Crusher, Archer, Riker, Troi, Janeway, Seven, O'Brien, Pike, Sulu, Chapel, Neelix, Odo, Kira, Dax, Bashir (specialist mode), Tuvok (specialist mode), etc.
+
+### Mission 4: Marvel + DC Specialist Definitions (~60 agents)
+- Generate `.claude/agents/` files for Marvel and DC universe specialists
+- Marvel: Stark (specialist), Romanoff, Banner, Rogers, Barton, Fury (specialist), Wong, Strange, etc.
+- DC: Oracle, Red Hood, Alfred, Deathstroke, Constantine, Nightwing, Lucius, Batgirl, Cyborg, Raven, Flash, etc.
+- Same Sonnet + reviewer tools pattern
+
+### Mission 5: Remaining Universe Definitions (~140 agents)
+- Star Wars: Leia, Chewie, Rex, Ahsoka, Maul, Yoda, Windu, Padme, Qui-Gon, etc.
+- Tolkien: Elrond, Arwen, Samwise, Bilbo, Legolas, Gimli, Radagast, Eowyn, Faramir, etc.
+- Dune: Chani (specialist), Stilgar, Thufir, Duncan, Jessica, etc.
+- Anime: Senku, Levi, Spike, L, Bulma, Holo, Valkyrie, etc.
+- Cosmere: Steris, Vin, Szeth, Breeze, Wax, Ham, etc.
+- Foundation: Gaal, Salvor, Demerzel, Eto, etc.
+- Scout-tier agents (Haiku): file finders, classifiers, quick lookups
+
+### Mission 6: Command File Migration (28 commands)
+- Replace inline "You are Picard..." prompts with `subagent_type: picard-architecture`
+- Replace ADR-042 static tables with "Dynamic Dispatch" sections
+- Add `--light` / `--solo` dispatch control documentation
+- Update all 28 command files to reference subagent types
+- Remove now-redundant "Cross-Domain Triggers" sections from method docs
+
+### Mission 7: Methodology Doc Updates
+- Update `SUB_AGENTS.md` — new dispatch model, model tiering, tool restrictions
+- Update `MUSTER.md` — Muster now launches named subagent types, not inline prompts
+- Update `GAUNTLET.md` — Gauntlet agents reference subagent types
+- Update `CAMPAIGN.md` — dynamic dispatch section
+- Update `CLAUDE.md` — document `.claude/agents/` in Distribution section
+- Remove ADR-042 "Cross-Domain Triggers" sections from 3 method docs (replaced by descriptions)
+
+### Mission 8: Package + Distribution
+- Update `packages/methodology/` prepack script to include `.claude/agents/`
+- Verify `npx voidforge init` installs agent definitions into new projects
+- Verify `npx voidforge update` syncs agent definition changes
+- Test: run `/review` on a real codebase, verify Opus dispatches specialists via descriptions
+- Test: run `/gauntlet --light` vs default, verify agent count differs
+
+**Execution order:** M1 → M2 → M3+M4+M5 (parallel) → M6 → M7 → M8
 
 ---
 
