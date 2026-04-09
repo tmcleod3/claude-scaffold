@@ -2,44 +2,73 @@
 
 > The plan for the plan-maker.
 
-**Current:** v20.2.0 (2026-04-03)
-**Next:** v21.0 — The Extraction (wizard becomes standalone npm package, projects get methodology only)
-**Status:** v20.2 shipped (Graceful Tier Degradation). Preparing for the biggest architectural shift since VoidForge's creation.
-**618 tests**, 9 universes, 260+ agents, 28 slash commands, 37 code patterns.
+**Current:** v21.0.0 (2026-04-08)
+**Next:** v21.1 — The Shipyard (build pipeline, npm publish, branch cleanup)
+**Status:** v21.0 shipped (The Extraction). Monorepo complete, 675 tests. Blocked on npm account + build pipeline for publishing.
+**675 tests**, 9 universes, 260+ agents, 28 slash commands, 38 code patterns.
 
 ---
 
-## v21.0 — The Extraction (BREAKING)
+## v21.1 — The Shipyard
+
+*"A ship in harbor is safe, but that's not what ships are built for."*
+
+**Architecture: ADR-039. Depends on: v21.0 complete.**
+
+**The problem:** v21.0 built the monorepo structure and all features, but can't ship to npm. The CLI uses tsx (dev-only runtime), no build pipeline exists, pattern imports cross package boundaries, scaffold/core branches still exist, and 4 heartbeat hash chain calls are broken.
+
+**The fix:** Build pipeline (tsc → dist/), CI/CD for npm publish, branch deprecation, and type error fixes. After this version, `npx voidforge init` works from npm.
+
+**Missions (5):**
+
+### Mission 1: Build Pipeline (tsc → dist/)
+- Fix `packages/voidforge/tsconfig.json`: rootDir → ".", remove external pattern includes
+- Add `build` script to package.json: `tsc`
+- Add `prepack` script: build before publish
+- Change bin entry: `./dist/scripts/voidforge.js`
+- Change files field: `["dist/"]`
+- Decouple wizard from docs/patterns/ imports (copy pattern types locally or use methodology package)
+- Verify: `npm run build && npx . version` works from compiled dist/
+
+### Mission 2: Heartbeat Hash Chain Fix
+- Add `getLastLogHash()` helper to read prevHash from last log entry
+- Fix 4 `appendToLog` calls in heartbeat.ts (lines 368, 393, 475, 551) — add prevHash
+- Fix adapter-factory.ts 'snap' AdPlatform error (if still present)
+- Tests for hash chain integrity
+
+### Mission 3: CI/CD Pipeline
+- Create `.github/workflows/publish.yml` — npm publish on git tag
+- Requires: npm account with `NPM_TOKEN` secret in GitHub
+- Publish both packages: `voidforge` and `@voidforge/methodology`
+- Run tests + typecheck before publish
+
+### Mission 4: Branch Deprecation
+- On scaffold: add DEPRECATION.md, update README/CLAUDE.md/CHANGELOG with deprecation notices
+- On core: same deprecation notices
+- On main: remove scaffold/core references from 6+ files (CLAUDE.md Release Tiers, README install, FORGE_KEEPER.md sync, void.md fetch target)
+- 30-day timer: delete scaffold/core on 2026-05-08
+- Create archive/scaffold and archive/core before deletion
+
+### Mission 5: Integration Verification
+- Test `npx voidforge init` from npm install (clean env)
+- Test `npx voidforge migrate` on mock v20.x project
+- Test daemon socket communication (integration tests)
+- Test job import path in heartbeat daemon context
+- Victory Gauntlet on complete v21.1
+
+**BLOCKED:**
+- npm account creation (infrastructure — user must do)
+- NPM_TOKEN secret in GitHub repo settings
+
+---
+
+## v21.0 — The Extraction (COMPLETE)
 
 *"The wizard is an application for launching and managing projects. It is not part of a project."*
 
-**Source: `/docs/PRD-wizard-extraction.md`. Architecture: ADR-038. Muster: 9-universe.**
+**Source: `/docs/PRD-wizard-extraction.md`. Architecture: ADR-038. Campaign 26: 8 missions, --blitz --muster.**
 
-**The problem:** The wizard (214 files, 7 npm deps including AWS SDK) is embedded inside every project. No update mechanism. Dependency pollution. Three-branch sync burden. Identity crisis — a multi-project manager living inside one of its projects.
-
-**The fix:** Extract the wizard into a standalone npm package (`voidforge`). Projects contain methodology only (`@voidforge/methodology`). Extensions (Danger Room, Cultivation) are optional per-project addons. Kill scaffold/core branches — npm packages replace them.
-
-**Architecture decisions:**
-- Monorepo: `packages/voidforge/` (wizard) + `packages/@voidforge/methodology/` (scaffold)
-- Global vault with namespaced keys (per-project vaults deferred to v21.1)
-- Per-project heartbeat daemons (not one global daemon)
-- npm distribution replaces git-clone distribution
-- `/void` switches from git-fetch to npm-fetch (same UX, different transport)
-- Daemon aggregator in wizard connects to all per-project daemons for Danger Room
-
-**Missions (estimated 8-12):**
-1. Monorepo structure — create packages/, move files, workspace config
-2. CLI entry point — `bin/voidforge.js`, command router, project detection
-3. Project creation — init flow, methodology copy, marker file, git init
-4. Extension system — install/uninstall/update, thin-wrapper architecture
-5. Per-project heartbeat — configurable paths, per-project service files
-6. Daemon aggregator — multi-project socket connections, Danger Room integration
-7. Update mechanisms — `npx voidforge update` (methodology), `--self` (wizard), `--extensions`
-8. Migration — detect old model, automated extraction, rollback
-9. npm publishing — CI workflow, workspace publish, version sync
-10. Branch cleanup — deprecate scaffold/core, update all docs
-11. CLAUDE.md + methodology — rewrite tier system, update all references
-12. Victory Gauntlet — full system test of new model
+**Shipped 2026-04-08.** Monorepo conversion, CLI router (12 commands), .voidforge marker, project creation, extension system, update mechanisms, daemon aggregator, v20.x migration. 618→675 tests. 10 commits including Gauntlet checkpoint + Victory Gauntlet fix. Debriefs: #283-#291.
 
 ---
 
