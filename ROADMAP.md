@@ -3,9 +3,9 @@
 > The plan for the plan-maker.
 
 **Current:** v22.2.0 (2026-04-09)
-**Next:** v23.0 — The Materialization (259 subagent definitions, dynamic dispatch, model routing)
+**Next:** v23.0 — The Materialization (263 subagent definitions, dynamic dispatch, model routing)
 **Status:** v22.1 + v22.2 complete (Campaigns 30-31). Gauntlet passed. v23.0 planned (ADR-044).
-**741 tests**, 9 universes, 259 agents, 28 slash commands, 37 code patterns.
+**741 tests**, 9 universes, 263 agents, 28 slash commands, 37 code patterns.
 
 ---
 
@@ -258,7 +258,7 @@
 ### Mission 5: Website Accuracy Pass
 - Pattern pages: financial-transaction and daemon-process get v22.0 additions (prompt already written)
 - Forge Labs: clarify Danger Room is a wizard feature, not standalone
-- Agent count: update to "259 named agents" (accurate) or keep "260+" (rounded)
+- Agent count: update to "263 named agents" (accurate) or keep "260+" (rounded)
 - Add test count (696) to stats where appropriate
 - Verify all tutorials reflect npm install path (no scaffold refs)
 
@@ -291,12 +291,12 @@
 
 **Depends on: v22.2 complete. Architecture: ADR-044. Campaign 32.**
 
-**The problem:** VoidForge's 259 named agents exist only as text in methodology docs. Every invocation recreates character prompts inline. No model routing (everything runs on Opus). No tool restrictions (every agent can edit files). No dynamic dispatch (static tables in command files). Claude Code's native subagent system (`.claude/agents/*.md`) solves all of this — but the agents need to be materialized as subagent definitions.
+**The problem:** VoidForge's 263 named agents exist only as text in methodology docs. Every invocation recreates character prompts inline. No model routing (everything runs on Opus). No tool restrictions (every agent can edit files). No dynamic dispatch (static tables in command files). Claude Code's native subagent system (`.claude/agents/*.md`) solves all of this — but the agents need to be materialized as subagent definitions.
 
 **Missions (8):**
 
 ### Mission 1: Agent Classification
-- Parse `docs/NAMING_REGISTRY.md` — extract all 259 agents with name, universe, role, lens
+- Parse `docs/NAMING_REGISTRY.md` — extract all 263 agents with name, universe, role, lens
 - Classify each into tier: Lead (~18, Opus), Specialist (~200, Sonnet), Scout (~40, Haiku)
 - Classify each by tool access: Builder (full), Reviewer (read+bash), Scout (read-only), Adversarial (read+bash)
 - Produce classification manifest: `docs/AGENT_CLASSIFICATION.md`

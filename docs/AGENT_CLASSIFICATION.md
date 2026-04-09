@@ -13,7 +13,7 @@
 | Scouts (Haiku, Scout/Reviewer) | 38 |
 | Adversarial (Sonnet, Adversarial) | 15 |
 
-**Note:** Previous references state "259 agents." The authoritative count from NAMING_REGISTRY.md is 263. Update all references in M7.
+**Note:** The authoritative count from NAMING_REGISTRY.md is 263. All methodology docs updated in M7. ADR-044 and ADR-042 retain their original "259" count as historical records.
 
 ## Tiers (Model Assignment)
 

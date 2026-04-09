@@ -141,6 +141,10 @@ Synthesize all findings:
 --infinity    Every agent as own sub-process, 10 rounds (Gauntlet only)
 ```
 
+## Subagent Definitions (ADR-044)
+
+Muster agents are now launched as named subagent types defined in `.claude/agents/`. Instead of inline prompts, each agent invocation uses `subagent_type: {agent-id}` to reference a materialized definition with model tiering (Opus leads, Sonnet specialists, Haiku scouts) and tool restrictions. See `docs/AGENT_CLASSIFICATION.md` for the full 263-agent classification manifest.
+
 ## Cost Awareness
 
 The Muster launches 30-50 agent sub-processes. This consumes significant context. Use it when the decision justifies the investment — architecture choices, security-critical features, financial system design, launch preparation.

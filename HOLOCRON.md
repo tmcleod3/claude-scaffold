@@ -24,7 +24,7 @@
 
 ### What VoidForge Is
 
-VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 259 AI agents across 9 fictional universes builds your application through a 13-phase protocol.
+VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 263 AI agents across 9 fictional universes builds your application through a 13-phase protocol.
 
 **From nothing, everything.**
 
@@ -82,7 +82,7 @@ Every tier includes:
 - **28 slash commands** — `/prd`, `/blueprint`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/vault`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
-- **259 named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
+- **263 named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation — each materialized as a subagent definition in `.claude/agents/`
 - **35 code patterns** — Reference implementations with framework adaptations (including E2E testing)
 - **No Stubs Doctrine** — Zero placeholder code. Every file does what it claims. Enforced across all method docs.
 - **E2E browser testing** — Playwright + axe-core. Agents take screenshots, capture console errors, and interact with running applications.
@@ -366,7 +366,7 @@ Each lead has a deep bench. Here are some standouts:
 - **Idaho** keeps the connection alive — the eternal ghola who always returns
 - **Thufir** parses every signal — Mentat precision, a million calculations per second
 
-The full roster of 259 characters lives in `docs/NAMING_REGISTRY.md`.
+The full roster of 263 characters lives in `docs/NAMING_REGISTRY.md`. Each agent is materialized as a subagent definition in `.claude/agents/` with model tiering (Opus leads, Sonnet specialists, Haiku scouts) and tool restrictions (Builder, Reviewer, Scout, Adversarial). See `docs/AGENT_CLASSIFICATION.md` for the full manifest.
 
 ### How Handoffs Work
 

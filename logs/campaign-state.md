@@ -14,16 +14,16 @@
 
 | # | Mission | Scope | Status |
 |---|---------|-------|--------|
-| M1 | Agent Classification | Parse registry, classify tiers + tools, produce manifest | **IN PROGRESS** |
-| M2 | Lead Agent Definitions (20) | `.claude/agents/` for all leads, Opus + Builder | PENDING |
-| M3 | Star Trek Specialist Definitions | Star Trek universe specialists + scouts | PENDING |
-| M4 | Marvel + DC Specialist Definitions | Marvel + DC universe specialists + scouts | PENDING |
-| M5 | Remaining Universe Definitions | Star Wars, Tolkien, Anime, Dune, Cosmere, Foundation | PENDING |
-| M6 | Command File Migration (28) | Replace inline prompts with subagent_type references | PENDING |
+| M1 | Agent Classification | Parse registry, classify tiers + tools, produce manifest | **COMPLETE** |
+| M2 | Lead Agent Definitions (20) | `.claude/agents/` for all leads, Opus + Builder | **COMPLETE** |
+| M3 | Star Trek Specialist Definitions | Star Trek universe specialists + scouts | **COMPLETE** |
+| M4 | Marvel + DC Specialist Definitions | Marvel + DC universe specialists + scouts | **COMPLETE** |
+| M5 | Remaining Universe Definitions | Star Wars, Tolkien, Anime, Dune, Cosmere, Foundation | **COMPLETE** |
+| M6 | Command File Migration (28) | Replace inline prompts with subagent_type references | IN PROGRESS |
 | M7 | Methodology Doc Updates | SUB_AGENTS, MUSTER, GAUNTLET, CAMPAIGN, CLAUDE.md | PENDING |
 | M8 | Package + Distribution | Prepack script, init/update verification, dispatch test | PENDING |
 
-Missions completed: 0/8. Next checkpoint at: M4.
+Missions completed: 5/8. Next checkpoint at: M8.
 
 ## Execution Order
 

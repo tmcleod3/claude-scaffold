@@ -231,7 +231,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | Treasury | **Dockson** (Cosmere) | Revenue ingest, budget allocation, spend execution, reconciliation |
 | AI Intelligence | **Hari Seldon** (Foundation) | Model selection, prompts, tool-use, orchestration, safety, evals |
 
-259 sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
+263 sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions. All agents materialized as subagent definitions in `.claude/agents/` (ADR-044).
 
 ## Distribution
 
@@ -240,7 +240,7 @@ VoidForge distributes via npm (v21.0+). The monorepo produces two packages:
 | Package | npm Name | Contains |
 |---------|----------|----------|
 | Wizard + CLI | `voidforge` | Server, API, UI, lib, CLI, templates, tests |
-| Methodology | `@voidforge/methodology` | CLAUDE.md, commands, methods, patterns, Holocron |
+| Methodology | `@voidforge/methodology` | CLAUDE.md, commands, methods, patterns, agents, Holocron |
 
 **Install path:** `npx voidforge init` creates a new project with methodology. `npx voidforge` launches the wizard UI.
 

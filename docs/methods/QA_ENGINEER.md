@@ -25,18 +25,11 @@
 
 **Need more?** Pull from DC pool: Flash, Superman, Cyborg, Wonder Woman, Zatanna, Raven. See NAMING_REGISTRY.md.
 
-## Cross-Domain Triggers (ADR-042)
+## Dynamic Dispatch (ADR-044)
 
-When QA finds code crossing into another domain, auto-deploy a spot-check agent:
+Agent dispatch is now description-driven. When Opus processes a command, it scans `git diff --stat` and matches changed files against the `description` fields of all 263 agents in `.claude/agents/`. Matching specialists launch automatically alongside core agents. No static dispatch tables needed.
 
-| Detected Pattern | Auto-Deploy | Spot-Check Scope |
-|-----------------|-------------|-----------------|
-| API endpoint edge cases | **Kim** (API design) | Are error codes, validation, rate limits correct? |
-| Financial calculations | **Vin** (statistical review) | Rounding, currency, ROAS math correct? |
-| Auth/session handling in tests | **Kenobi** (security) | Are auth edge cases covered? |
-| Database queries in test paths | **Torres** (performance) | N+1 queries, missing indexes? |
-
-**Content-driven additions:** Scan `git diff --stat` at QA start. If diff contains CSS/ARIA → add **Samwise**. If financial code → add **Dockson**. If AI/LLM calls → add **Hari Seldon**.
+See `docs/AGENT_CLASSIFICATION.md` for the full classification and `docs/adrs/ADR-044-subagent-materialization.md` for the architecture.
 
 **Promoted agent:** **Constantine** runs on every `/qa` final pass — finds code that works by accident.
 

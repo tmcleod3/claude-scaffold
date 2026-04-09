@@ -23,18 +23,11 @@
 
 **Need more?** Pull from Star Trek pool: Riker, Worf, Sisko, Janeway, Seven, O'Brien, Pike. See NAMING_REGISTRY.md.
 
-## Cross-Domain Triggers (ADR-042)
+## Dynamic Dispatch (ADR-044)
 
-When the architecture review touches code in another domain, auto-deploy a spot-check agent:
+Agent dispatch is now description-driven. When Opus processes a command, it scans `git diff --stat` and matches changed files against the `description` fields of all 263 agents in `.claude/agents/`. Matching specialists launch automatically alongside core agents. No static dispatch tables needed.
 
-| Detected Pattern | Auto-Deploy | Spot-Check Scope |
-|-----------------|-------------|-----------------|
-| Implementation feasibility concerns | **Stark** (backend) | Can this design be built with current stack? |
-| Security implications in design | **Kenobi** (security) | Does this architecture expose attack surface? |
-| Performance-critical paths | **Torres** (performance) | Will this scale under load? |
-| Statistical/ML model architecture | **Vin** (statistical review) | Are the math assumptions sound? |
-
-**Content-driven additions:** Scan `git diff --stat` at review start. If diff contains database schema/migrations → add **Spock**. If API routes → add **Kim**. If auth/encryption → add **Tuvok**.
+See `docs/AGENT_CLASSIFICATION.md` for the full classification and `docs/adrs/ADR-044-subagent-materialization.md` for the architecture.
 
 **Promoted agent:** **Riker** runs on every ADR written in any command — challenges trade-offs, prevents rubber-stamped decisions.
 

@@ -26,18 +26,11 @@
 
 **Need more?** Pull from Star Wars pool: Luke, Han, Qui-Gon, Din Djarin, Cassian, Sabine. See NAMING_REGISTRY.md.
 
-## Cross-Domain Triggers (ADR-042)
+## Dynamic Dispatch (ADR-044)
 
-When the security audit encounters patterns in another domain, auto-deploy a spot-check agent:
+Agent dispatch is now description-driven. When Opus processes a command, it scans `git diff --stat` and matches changed files against the `description` fields of all 263 agents in `.claude/agents/`. Matching specialists launch automatically alongside core agents. No static dispatch tables needed.
 
-| Detected Pattern | Auto-Deploy | Spot-Check Scope |
-|-----------------|-------------|-----------------|
-| Architecture implications | **Picard** (architecture) | Does the security model fit the system design? |
-| Database access patterns | **Spock** (schema) | Are queries parameterized? IDOR risks? |
-| Frontend auth flows | **Samwise** (a11y) | Accessible error states? Keyboard-navigable auth? |
-| Financial/payment code | **Dockson** (treasury) | PCI compliance patterns, credential handling? |
-
-**Content-driven additions:** Scan `git diff --stat` at audit start. If diff contains deploy scripts → add **Kusanagi**. If WebSocket/SSE → add **Scotty**. If AI/LLM code → add **Hari Seldon**.
+See `docs/AGENT_CLASSIFICATION.md` for the full classification and `docs/adrs/ADR-044-subagent-materialization.md` for the architecture.
 
 **Promoted agent:** **Worf** runs on every `/review` that touches auth code — security-by-design, not security-after-build.
 

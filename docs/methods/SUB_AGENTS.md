@@ -10,7 +10,7 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 
 **All orchestration uses the build journal.** Every delegation, handoff, and resolution is logged to `/logs/handoffs.md`. Agents read journal files to recover context. See `/docs/methods/BUILD_JOURNAL.md`.
 
-**Full character roster: `/docs/NAMING_REGISTRY.md`** — 260+ named characters across 9 universes. No duplicates allowed.
+**Full character roster: `/docs/NAMING_REGISTRY.md`** — 263 named characters across 9 universes. No duplicates allowed. All agents materialized as subagent definitions in `.claude/agents/`.
 
 ---
 
@@ -173,6 +173,45 @@ Users can create project-specific sub-agents that carry domain knowledge. Define
 - They participate in the review rounds of their lead's domain (e.g., a Galadriel custom agent runs during UX reviews)
 
 **When to create a custom agent:** When a project has a domain-specific pattern that the built-in agents miss repeatedly. If the same lesson appears 3+ times in LESSONS.md about the same technology, that's a signal for a custom agent rather than more method doc checklist items.
+
+## Subagent Definitions (ADR-044)
+
+All 263 agents are materialized as `.claude/agents/{name}.md` files. Commands now use `subagent_type: {agent-id}` instead of inline prompts. Each definition contains the agent's identity, behavioral directives, domain expertise, and output format.
+
+### The `.claude/agents/` Directory
+
+Each file is a standalone subagent definition that Claude Code's native subagent system can invoke. File naming convention: `{lowercase-name}.md` (e.g., `picard.md`, `batman.md`, `red-hood.md`).
+
+### Model Tiering
+
+| Tier | Model | Count | When |
+|------|-------|-------|------|
+| Lead | `inherit` (Opus) | ~20 | Domain leads who orchestrate, write fixes, make decisions |
+| Specialist | `sonnet` | ~200 | Domain experts who analyze, review, report findings |
+| Scout | `haiku` | ~43 | Lightweight reconnaissance, grep patterns, quick checks |
+
+Leads inherit the main session's model (Opus). Specialists run on Sonnet for cost efficiency without sacrificing analysis quality. Scouts run on Haiku for fast, cheap reconnaissance.
+
+### Tool Restrictions
+
+| Profile | Tools | Agents |
+|---------|-------|--------|
+| Builder | Full (Read, Edit, Write, Bash, Grep, Glob) | Leads who write code, fixes, ADRs, logs |
+| Reviewer | Read, Bash, Grep, Glob | Specialists who analyze and report but don't write |
+| Scout | Read, Grep, Glob | Lightweight agents that only read |
+| Adversarial | Read, Bash, Grep, Glob | Red-team agents who probe and test |
+
+### Description-Driven Dispatch
+
+Commands no longer use static dispatch tables (the old ADR-042 Cross-Domain Triggers). Instead, when Opus processes a command, it:
+
+1. Scans `git diff --stat` to identify changed files
+2. Matches changed file paths against the `description` fields of all 263 agents
+3. Launches matching specialists automatically alongside core agents
+
+This means a security audit that touches database migrations automatically picks up Spock (schema) without a hardcoded trigger table. The descriptions in `.claude/agents/*.md` ARE the dispatch rules.
+
+See `docs/AGENT_CLASSIFICATION.md` for the full classification manifest and `docs/adrs/ADR-044-subagent-materialization.md` for the architecture.
 
 ## Naming Rule
 
