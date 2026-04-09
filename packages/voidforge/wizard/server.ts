@@ -339,6 +339,7 @@ export function startServer(port: number, options?: { remote?: boolean; lan?: bo
         handleTerminalUpgrade(req, socket, head, wsSession);
       } else if (url.pathname === '/ws/danger-room') {
         // Danger Room: any authenticated user in remote/LAN mode (read-only dashboard)
+        // v22.0.x: Extract ?project=<id> for subscription room filtering
         if (isRemoteMode() || isLanMode()) {
           const token = parseSessionCookie(req.headers.cookie);
           const ip = getClientIp(req);
@@ -349,7 +350,8 @@ export function startServer(port: number, options?: { remote?: boolean; lan?: bo
             return;
           }
         }
-        handleDangerRoomUpgrade(req, socket, head);
+        const drProjectId = url.searchParams.get('project') || undefined;
+        handleDangerRoomUpgrade(req, socket, head, drProjectId);
       } else if (url.pathname === '/ws/war-room') {
         // War Room: same auth rules as Danger Room
         if (isRemoteMode() || isLanMode()) {
@@ -362,7 +364,8 @@ export function startServer(port: number, options?: { remote?: boolean; lan?: bo
             return;
           }
         }
-        handleWarRoomUpgrade(req, socket, head);
+        const wrProjectId = url.searchParams.get('project') || undefined;
+        handleWarRoomUpgrade(req, socket, head, wrProjectId);
       } else {
         socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
         socket.destroy();

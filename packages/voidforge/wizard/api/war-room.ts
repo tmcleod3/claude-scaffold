@@ -29,8 +29,8 @@ const ws = createDashboardWs('War Room');
 
 export const broadcastWarRoom = ws.broadcast;
 export const closeWarRoom = ws.close;
-export const handleWarRoomUpgrade = (req: IncomingMessage, socket: Duplex, head: Buffer) =>
-  ws.handleUpgrade(req, socket, head);
+export const handleWarRoomUpgrade = (req: IncomingMessage, socket: Duplex, head: Buffer, projectId?: string) =>
+  ws.handleUpgrade(req, socket, head, projectId);
 
 // ── Project-scoped REST endpoints ──────────────
 

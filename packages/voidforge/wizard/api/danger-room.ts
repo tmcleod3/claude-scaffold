@@ -47,9 +47,9 @@ export function closeDangerRoom(): void {
   if (activityDebounce) clearTimeout(activityDebounce);
 }
 
-/** Handle WebSocket upgrade for /ws/danger-room. */
-export const handleDangerRoomUpgrade = (req: IncomingMessage, socket: Duplex, head: Buffer) =>
-  ws.handleUpgrade(req, socket, head);
+/** Handle WebSocket upgrade for /ws/danger-room. Accepts optional projectId for subscription filtering. */
+export const handleDangerRoomUpgrade = (req: IncomingMessage, socket: Duplex, head: Buffer, projectId?: string) =>
+  ws.handleUpgrade(req, socket, head, projectId);
 
 // ── Agent Activity Watcher (global — wizard operational logs) ──
 // This watches the wizard's own agent-activity.jsonl, not a user project's.
