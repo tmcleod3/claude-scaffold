@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env node
 /**
  * VoidForge CLI — v21.0 The Extraction
  *
