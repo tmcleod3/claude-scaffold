@@ -25,8 +25,8 @@ Fetch the latest from upstream:
    - Run `git remote add voidforge https://github.com/tmcleod3/voidforge.git`
    - Use `voidforge` as the remote name
 3. If a matching remote exists, use that name (could be `origin` or `voidforge`)
-4. Run `git fetch <remote> scaffold` — get the latest scaffold branch
-5. Read remote VERSION.md: `git show <remote>/scaffold:VERSION.md`
+4. Run `git fetch <remote> main` — get the latest main branch
+5. Read remote VERSION.md: `git show <remote>/main:VERSION.md`
 6. Compare versions numerically (parse major.minor.patch as integers, not strings — "3.10.0" is newer than "3.9.0"):
    - If current version matches or is ahead → announce "The forge burns bright! You're on the latest." → Stop
    - If behind → continue
@@ -45,8 +45,8 @@ Check the **Migration Registry** in `/docs/methods/FORGE_KEEPER.md` for one-time
 
 ## Step 2 — Walk the Forest (Treebeard)
 Compare every shared methodology file:
-1. For each shared file, compare local vs upstream using `git diff HEAD <remote>/scaffold -- <path>`
-2. Also check for new files on upstream that don't exist locally: `git diff --name-status HEAD <remote>/scaffold -- <shared paths>`
+1. For each shared file, compare local vs upstream using `git diff HEAD <remote>/main -- <path>`
+2. Also check for new files on upstream that don't exist locally: `git diff --name-status HEAD <remote>/main -- <shared paths>`
 3. Categorize each file:
    - **New** — exists upstream, not locally
    - **Updated** — content differs between local and upstream
@@ -67,8 +67,8 @@ Apply updates based on user's choice:
 3. For **"skip"** — stop gracefully
 
 For each file being updated:
-- **New files:** `git show <remote>/scaffold:<path>` and write to local path
-- **Updated files (no local mods):** Replace with upstream version via `git show <remote>/scaffold:<path>`
+- **New files:** `git show <remote>/main:<path>` and write to local path
+- **Updated files (no local mods):** Replace with upstream version via `git show <remote>/main:<path>`
 - **Updated files (with local mods):**
   - For `CLAUDE.md`: Preserve the `## Project` section (name, one-liner, domain, repo) and any user-added `## Coding Standards` entries. Update all methodology sections (Slash Commands, Team, Docs Reference, Release Tiers, etc.)
   - For other files: Show both versions, let user choose, or attempt to merge non-overlapping changes

@@ -7,6 +7,8 @@
 - **Domain:** [DOMAIN]
 - **Repo:** [REPO_URL]
 
+> **DEPRECATED:** This branch is deprecated and will be deleted on 2026-05-08. Run `/void` to sync from `main`, then switch to `npm`-based updates: `npx voidforge update`. See `DEPRECATION.md` for full migration guide.
+
 ## Personality
 
 - **Never agree just because the user implied a conclusion.** If you identified a real problem, say it's a real problem — don't downplay severity to match the user's tone. Present the honest assessment and let the user decide what to prioritize.

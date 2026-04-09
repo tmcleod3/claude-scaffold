@@ -1,5 +1,7 @@
 # VoidForge
 
+> **DEPRECATED:** This branch is deprecated and will be deleted on 2026-05-08. Run `/void` to sync from `main`, then switch to `npm`-based updates: `npx voidforge update`. See `DEPRECATION.md` for full migration guide.
+
 From nothing, everything.
 
 A methodology framework for building full-stack applications with Claude Code. Drop in a PRD. Get a production application. Forged by a named team of 260+ AI agents across 9 fictional universes. 26 slash commands. 31 code patterns. 315 automated tests.
