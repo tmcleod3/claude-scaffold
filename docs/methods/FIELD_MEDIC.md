@@ -228,6 +228,8 @@ This is the long-game feedback loop: patterns evolve from data, not guesses.
 
 ### Cross-Project Memory
 
+**Status: DESIGNED, NOT YET IMPLEMENTED (v23.1).** The schema and read/write paths below describe the intended behavior. No runtime code currently creates or reads `lessons-global.json`. Claude Code's auto-memory system provides partial coverage for cross-project knowledge. Full implementation deferred — will require wizard code changes to `project-init.ts` (Phase 0 query) and `debrief` command (Wong write path).
+
 After each debrief, Wong writes a lesson summary to `~/.voidforge/lessons-global.json` (global, not project-specific). The summary includes: project framework, the lesson category, and a one-line takeaway. No source code — only patterns.
 
 When Phase 0 Orient runs on a NEW project, Wong queries the global lessons file for entries matching the new project's framework and domain. "You've built 3 Next.js apps with Stripe. Here's what broke every time." This gives every new project the benefit of all prior experience.

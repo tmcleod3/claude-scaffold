@@ -90,6 +90,15 @@ Before sealing the vault, check for operational learnings from this session:
 
 See ADR-035 and `/docs/methods/TIME_VAULT.md` Section 7 for full protocol.
 
+## Step 1.6 — Agent Definition Recommendations (ADR-045)
+
+If the session produced findings that suggest agent behavioral changes:
+
+1. Check if any session discovery maps to a specific agent (e.g., "Kenobi should check for X" → `kenobi-security.md`)
+2. For each match, check if the agent's `## Operational Learnings` section already covers it
+3. If not covered, add to the vault's **Open Items** as: "Agent update: `{agent-id}.md` — add `{learning}` to Operational Learnings"
+4. These recommendations carry forward to the next session's /debrief or manual update
+
 ## Step 2 — Seal the Vault (Jake Sisko)
 
 Jake Sisko writes the record. He produces two artifacts:
