@@ -19,6 +19,7 @@ import {
   createSocketServer, startSocketServer,
   writeState, setupSignalHandlers,
   JobScheduler, createLogger,
+  checkGlobalDaemon,
   STATE_FILE, SOCKET_PATH,
 } from './daemon-core.js';
 
@@ -915,10 +916,19 @@ async function reconcilePendingOps(): Promise<void> {
 export async function startHeartbeat(vaultPassword: string): Promise<void> {
   logger.log('Heartbeat daemon starting');
 
-  // Step 1-2: Check for existing daemon
+  // Step 1-2: Check for existing daemon (same path)
   const anotherRunning = await checkStalePid();
   if (anotherRunning) {
     throw new Error('Another heartbeat daemon is already running');
+  }
+
+  // Step 1b: Dual-daemon guard (ADR-041 La Forge CRITICAL — prevent split-brain)
+  // If this is a per-project daemon, check that no global daemon is still running.
+  if (daemonProjectDir) {
+    const globalRunning = await checkGlobalDaemon();
+    if (globalRunning) {
+      throw new Error('A global heartbeat daemon is running at ~/.voidforge/run/. Stop it before starting a per-project daemon.');
+    }
   }
 
   // Step 3: Check for dirty shutdown
