@@ -9,7 +9,7 @@
     "outDir": "dist",
     "rootDir": ".",
     "declaration": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
@@ -18,5 +18,5 @@
     "wizard/**/*.ts",
     "scripts/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist", "wizard/e2e"]
+  "exclude": ["node_modules", "dist", "wizard/e2e", "wizard/__tests__"]
 }

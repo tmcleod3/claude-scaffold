@@ -22,7 +22,11 @@
     "test:e2e:local": "playwright test --project=chromium"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "!dist/wizard/__tests__/",
+    "!dist/wizard/e2e/",
+    "!dist/**/*.js.map",
+    "!dist/**/*.d.ts.map"
   ],
   "publishConfig": {
     "access": "public"
