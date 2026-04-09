@@ -2,10 +2,44 @@
 
 > The plan for the plan-maker.
 
-**Current:** v20.1.1 (2026-04-02)
-**Next:** v20.2 — Graceful Tier Degradation (scaffold /grow Phases 1-3, tier gate fix, --audit-only expansion)
-**Status:** v20.1 shipped (Kongo Engine Integration — 10 modules, 119 tests, Infinity Gauntlet hardened).
+**Current:** v20.2.0 (2026-04-03)
+**Next:** v21.0 — The Extraction (wizard becomes standalone npm package, projects get methodology only)
+**Status:** v20.2 shipped (Graceful Tier Degradation). Preparing for the biggest architectural shift since VoidForge's creation.
 **618 tests**, 9 universes, 260+ agents, 28 slash commands, 37 code patterns.
+
+---
+
+## v21.0 — The Extraction (BREAKING)
+
+*"The wizard is an application for launching and managing projects. It is not part of a project."*
+
+**Source: `/docs/PRD-wizard-extraction.md`. Architecture: ADR-038. Muster: 9-universe.**
+
+**The problem:** The wizard (214 files, 7 npm deps including AWS SDK) is embedded inside every project. No update mechanism. Dependency pollution. Three-branch sync burden. Identity crisis — a multi-project manager living inside one of its projects.
+
+**The fix:** Extract the wizard into a standalone npm package (`voidforge`). Projects contain methodology only (`@voidforge/methodology`). Extensions (Danger Room, Cultivation) are optional per-project addons. Kill scaffold/core branches — npm packages replace them.
+
+**Architecture decisions:**
+- Monorepo: `packages/voidforge/` (wizard) + `packages/@voidforge/methodology/` (scaffold)
+- Global vault with namespaced keys (per-project vaults deferred to v21.1)
+- Per-project heartbeat daemons (not one global daemon)
+- npm distribution replaces git-clone distribution
+- `/void` switches from git-fetch to npm-fetch (same UX, different transport)
+- Daemon aggregator in wizard connects to all per-project daemons for Danger Room
+
+**Missions (estimated 8-12):**
+1. Monorepo structure — create packages/, move files, workspace config
+2. CLI entry point — `bin/voidforge.js`, command router, project detection
+3. Project creation — init flow, methodology copy, marker file, git init
+4. Extension system — install/uninstall/update, thin-wrapper architecture
+5. Per-project heartbeat — configurable paths, per-project service files
+6. Daemon aggregator — multi-project socket connections, Danger Room integration
+7. Update mechanisms — `npx voidforge update` (methodology), `--self` (wizard), `--extensions`
+8. Migration — detect old model, automated extraction, rollback
+9. npm publishing — CI workflow, workspace publish, version sync
+10. Branch cleanup — deprecate scaffold/core, update all docs
+11. CLAUDE.md + methodology — rewrite tier system, update all references
+12. Victory Gauntlet — full system test of new model
 
 ---
 
