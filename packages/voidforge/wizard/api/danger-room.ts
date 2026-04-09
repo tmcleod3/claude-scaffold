@@ -218,14 +218,9 @@ addRoute('POST', '/api/projects/:id/danger-room/freeze', async (req: IncomingMes
     try {
       authToken = (await fsReadFile(ctx.tokenFile, 'utf-8')).trim();
     } catch {
-      // Fallback to global token (pre-v22.0 daemons)
-      try {
-        const { TOKEN_FILE } = await import('../lib/daemon-core.js');
-        authToken = (await fsReadFile(TOKEN_FILE, 'utf-8')).trim();
-      } catch {
-        sendJson(res, 503, { ok: false, error: 'Cannot read daemon auth token — heartbeat may not be running' });
-        return;
-      }
+      // No fallback to global token (v22.0.x P1-C — fragile trust model removed)
+      sendJson(res, 503, { ok: false, error: 'Cannot read daemon auth token — heartbeat may not be configured for this project' });
+      return;
     }
 
     const response = await new Promise<string>((resolve, reject) => {
