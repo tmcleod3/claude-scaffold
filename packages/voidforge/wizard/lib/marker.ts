@@ -97,41 +97,6 @@ export function getGlobalDir(): string {
   return join(home, '.voidforge');
 }
 
-export function getProjectsRegistryPath(): string {
-  return join(getGlobalDir(), 'projects.json');
-}
-
 export function getVaultPath(): string {
   return join(getGlobalDir(), 'vault.enc');
-}
-
-// ── Project Registry ─────────────────────────────────────
-
-interface ProjectEntry {
-  id: string;
-  name: string;
-  path: string;
-  created: string;
-}
-
-export async function readProjectsRegistry(): Promise<ProjectEntry[]> {
-  const registryPath = getProjectsRegistryPath();
-  if (!existsSync(registryPath)) return [];
-  try {
-    const raw = await readFile(registryPath, 'utf-8');
-    return JSON.parse(raw) as ProjectEntry[];
-  } catch {
-    return [];
-  }
-}
-
-export async function registerProject(entry: ProjectEntry): Promise<void> {
-  const registry = await readProjectsRegistry();
-  const existing = registry.findIndex(p => p.id === entry.id);
-  if (existing >= 0) {
-    registry[existing] = entry;
-  } else {
-    registry.push(entry);
-  }
-  await writeFile(getProjectsRegistryPath(), JSON.stringify(registry, null, 2) + '\n', 'utf-8');
 }

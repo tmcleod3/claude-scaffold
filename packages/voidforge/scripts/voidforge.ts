@@ -52,8 +52,9 @@ async function cmdDoctor(): Promise<void> {
   const ver = await getPackageVersion();
   const nodeVer = process.version;
   const nodeMajor = parseInt(nodeVer.slice(1), 10);
-  const { findProjectRoot, getGlobalDir, getVaultPath, readProjectsRegistry, readMarker } =
+  const { findProjectRoot, getGlobalDir, getVaultPath, readMarker } =
     await import('../wizard/lib/marker.js');
+  const { readRegistry } = await import('../wizard/lib/project-registry.js');
 
   console.log('\nVoidForge Doctor\n');
 
@@ -73,7 +74,7 @@ async function cmdDoctor(): Promise<void> {
     const vaultExists = existsSync(getVaultPath());
     console.log(`  - Vault: ${vaultExists ? '✓ (encrypted)' : '✗ not found'}`);
 
-    const projects = await readProjectsRegistry();
+    const projects = await readRegistry();
     console.log(`  - Projects: ${projects.length} registered`);
   }
 

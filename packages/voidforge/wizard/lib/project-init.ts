@@ -10,10 +10,10 @@ import { existsSync } from 'node:fs';
 import { join, resolve, basename } from 'node:path';
 import { execSync } from 'node:child_process';
 import {
-  createMarker, writeMarker, registerProject,
-  getGlobalDir,
+  createMarker, writeMarker,
   type VoidForgeMarker,
 } from './marker.js';
+import { addProject } from './project-registry.js';
 
 // ── Types ────────────────────────────────────────────────
 
@@ -214,15 +214,25 @@ export async function createProject(config: ProjectConfig): Promise<ProjectResul
   );
   await writeMarker(projectDir, marker);
 
-  // 5. Register in projects.json
-  const globalDir = getGlobalDir();
-  await mkdir(globalDir, { recursive: true });
-  await registerProject({
-    id: marker.id,
-    name: config.name,
-    path: projectDir,
-    created: marker.created,
-  });
+  // 5. Register in project registry
+  try {
+    await addProject({
+      name: config.name,
+      directory: projectDir,
+      deployTarget: '',
+      deployUrl: '',
+      sshHost: '',
+      framework: 'unknown',
+      database: 'none',
+      createdAt: marker.created,
+      lastBuildPhase: 0,
+      lastDeployAt: '',
+      healthCheckUrl: '',
+      monthlyCost: 0,
+    });
+  } catch {
+    // Registry write is best-effort — don't fail project creation
+  }
 
   // 6. Validate critical files were copied
   if (!existsSync(join(projectDir, 'CLAUDE.md'))) {

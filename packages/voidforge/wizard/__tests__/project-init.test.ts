@@ -109,19 +109,18 @@ describe('project-init', () => {
   });
 
   it('registers project in global projects.json', async () => {
-    const { readProjectsRegistry } = await import('../lib/marker.js');
+    const { readRegistry } = await import('../lib/project-registry.js');
 
-    const result = await createProject({
+    await createProject({
       name: 'Registered Project',
       directory: projectDir,
       skipGit: true,
     });
 
-    const projects = await readProjectsRegistry();
-    const found = projects.find(p => p.id === result.markerId);
+    const projects = await readRegistry();
+    const found = projects.find(p => p.directory === projectDir);
     expect(found).toBeDefined();
     expect(found!.name).toBe('Registered Project');
-    expect(found!.path).toBe(projectDir);
   });
 
   it('handles extensions in marker', async () => {

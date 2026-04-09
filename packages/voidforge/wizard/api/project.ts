@@ -228,6 +228,15 @@ ${deployLine}${hostnameLine}
       // Registry write is best-effort — don't fail project creation
     }
 
+    // Write .voidforge marker file for CLI compatibility
+    try {
+      const { createMarker, writeMarker } = await import('../lib/marker.js');
+      const marker = createMarker('21.0.0', 'full');
+      await writeMarker(projectDir, marker);
+    } catch {
+      // Marker write is best-effort — don't fail project creation
+    }
+
     sendJson(res, 200, {
       created: true,
       directory: projectDir,
