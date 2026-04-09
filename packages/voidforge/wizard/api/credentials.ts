@@ -211,11 +211,15 @@ addRoute('POST', '/api/credentials/unlock', async (req: IncomingMessage, res: Se
   sessionPassword = body.password;
   touchVaultAccess(); // SEC-R2-004: Start auto-lock timer
 
-  // Check what's already stored
+  // Check what's already stored + load API key into process.env for PTY sessions
   let hasAnthropic = false;
   try {
     const keys = await vaultKeys(sessionPassword);
     hasAnthropic = keys.includes('anthropic-api-key');
+    if (hasAnthropic) {
+      const storedKey = await vaultGet(sessionPassword, 'anthropic-api-key');
+      if (storedKey) process.env['ANTHROPIC_API_KEY'] = storedKey;
+    }
   } catch {
     // Fresh vault
   }
@@ -256,6 +260,8 @@ addRoute('POST', '/api/credentials/anthropic', async (req: IncomingMessage, res:
   }
 
   await vaultSet(sessionPassword, 'anthropic-api-key', apiKey);
+  // Make the key available to PTY sessions spawned by this server process
+  process.env['ANTHROPIC_API_KEY'] = apiKey;
   clearModelCache();
   sendJson(res, 200, { stored: true });
 });
