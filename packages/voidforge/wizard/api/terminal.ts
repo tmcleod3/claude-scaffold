@@ -28,7 +28,8 @@ import {
   createSession, writeToSession, onSessionData, resizeSession,
   killSession, listSessions, killAllSessions, sessionCount,
 } from '../lib/pty-manager.js';
-import { validateSession, parseSessionCookie, getClientIp, isRemoteMode } from '../lib/tower-auth.js';
+import { validateSession, parseSessionCookie, getClientIp, isRemoteMode, isLanMode } from '../lib/tower-auth.js';
+import { isPrivateOrigin } from '../lib/network.js';
 import { hasProjectAccess, type SessionInfo } from '../lib/user-manager.js';
 import { findByDirectory } from '../lib/project-registry.js';
 import { sendJson } from '../lib/http-helpers.js';
@@ -208,7 +209,11 @@ export function handleTerminalUpgrade(req: IncomingMessage, socket: Duplex, head
   if (remoteHost) {
     allowedOrigins.push(`https://${remoteHost}`);
   }
-  if (!origin || !allowedOrigins.includes(origin)) {
+  // LAN mode: accept any private IP origin (matches CORS handler in server.ts)
+  const isAllowed = allowedOrigins.includes(origin)
+    || (isLanMode() && isPrivateOrigin(origin));
+  if (!origin || !isAllowed) {
+    console.log(`  PTY WS rejected: origin=${origin} allowed=${JSON.stringify(allowedOrigins)} lan=${isLanMode()}`);
     socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
     socket.destroy();
     return;
