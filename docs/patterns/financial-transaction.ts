@@ -300,11 +300,34 @@ async function idempotentAppend<T>(
 // └── reports/
 //     └── 2026-03.json          # monthly summary
 
+// Global treasury paths — used by vault, totp, and backup (which stay user-scoped).
+// Per-project code should use getTreasuryDir(projectDir) and derived path functions.
 const TREASURY_DIR = join(homedir(), '.voidforge', 'treasury');
 const SPEND_LOG = join(TREASURY_DIR, 'spend-log.jsonl');
 const REVENUE_LOG = join(TREASURY_DIR, 'revenue-log.jsonl');
 const PENDING_OPS = join(TREASURY_DIR, 'pending-ops.jsonl');
 const BUDGETS_FILE = join(TREASURY_DIR, 'budgets.json');
+
+/**
+ * Get treasury directory for a project, or the global default.
+ * Per-project: {projectDir}/cultivation/treasury/
+ * Global (no arg): ~/.voidforge/treasury/
+ */
+function getTreasuryDir(projectDir?: string): string {
+  return projectDir ? join(projectDir, 'cultivation', 'treasury') : TREASURY_DIR;
+}
+function getSpendLog(projectDir?: string): string {
+  return join(getTreasuryDir(projectDir), 'spend-log.jsonl');
+}
+function getRevenueLog(projectDir?: string): string {
+  return join(getTreasuryDir(projectDir), 'revenue-log.jsonl');
+}
+function getPendingOps(projectDir?: string): string {
+  return join(getTreasuryDir(projectDir), 'pending-ops.jsonl');
+}
+function getBudgetsFile(projectDir?: string): string {
+  return join(getTreasuryDir(projectDir), 'budgets.json');
+}
 
 // ── Number Formatting (§9.15.4) ───────────────────────
 
@@ -339,4 +362,5 @@ export {
   atomicWrite, appendToLog, idempotentAppend,
   formatCurrency, formatRoas, formatPercentage,
   TREASURY_DIR, SPEND_LOG, REVENUE_LOG, PENDING_OPS, BUDGETS_FILE,
+  getTreasuryDir, getSpendLog, getRevenueLog, getPendingOps, getBudgetsFile,
 };
