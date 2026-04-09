@@ -13,65 +13,88 @@
 
 *"A captain doesn't monitor the fleet from inside one ship."*
 
-**Architecture: ADR-040. Campaign 28. Depends on: v21.0 complete.**
+**Architecture: ADR-040 + ADR-041 (Muster amendments). Campaign 28. Depends on: v21.0 complete.**
 
-**The problem:** The Danger Room, War Room, and Cultivation financial system assume the wizard lives inside the project. Dashboard reads from the npm package directory (broken). Financial logs write to `~/.voidforge/treasury/` globally (multi-project collision). The UI has Danger Room in the global nav instead of per-project.
+**The problem:** The Danger Room, War Room, and Cultivation financial system assume the wizard lives inside the project. Dashboard reads from the npm package directory (broken). Financial logs write to `~/.voidforge/treasury/` globally (multi-project collision). WebSocket broadcasts globally (cross-project data leakage). The UI has Danger Room in the global nav instead of per-project. 19 dashboard endpoints have zero project access control.
 
-**The fix:** Everything becomes project-scoped. API routes gain project ID (`/api/projects/:id/danger-room/...`). Financial paths move from global to `project/cultivation/treasury/`. Lobby shows aggregated KPIs, drill-down enters project dashboard with Danger Room, War Room, Tower, Deploy.
+**The fix:** Everything becomes project-scoped. Router upgraded to support URL params. API routes gain project ID (`/api/projects/:id/danger-room/...`). Financial paths move from global to `project/cultivation/treasury/`. WebSocket scoped via subscription rooms. Lobby shows aggregated KPIs, drill-down enters project dashboard with Danger Room, War Room, Tower, Deploy.
 
-**Missions (6):**
+**Muster review (2026-04-08/09):** 17 agents across 3 waves. 6 CRITICAL, 8 HIGH findings. Plan revised from 6→7 missions. Key changes: M0 added for infrastructure prerequisites, M2↔M3 reordered (writes before reads), router upgrade moved to M0, financial migration changed to clean break (no copy), `ProjectContext` type replaces individual `projectDir` params. See ADR-041 for full findings.
 
-### Mission 1: Dashboard Data — Add projectDir Parameter [UNBLOCK]
-- Refactor all 10 functions in `dashboard-data.ts` to accept `projectDir: string`
-- Remove `PROJECT_ROOT` constant (resolves to npm package — broken)
-- 13 API routes in `danger-room.ts` gain `?project=<id>` query param
-- Each route: parse project ID → `getProject(id)` from registry → pass `project.directory` to functions
-- Wire `checkProjectAccess()` into every route (exists in project-registry.ts, just needs calling)
-- Read logs, git status, build state from the actual project directory
+**Missions (7):**
 
-### Mission 2: Financial Path Isolation (parallel with M3)
-- `TREASURY_DIR`, `SPEND_LOG`, `REVENUE_LOG` become functions of `projectDir`
-- Paths move from `~/.voidforge/treasury/` to `project/cultivation/treasury/`
-- Update 4 files: financial-transaction.ts (patterns), financial-core.ts, heartbeat.ts, treasury-heartbeat.ts
-- Update reconciliation.ts — reads per-project spend/revenue logs
-- Daemon sets 0700 permissions on `cultivation/treasury/` at startup (Worf security finding)
-- Treasury migration CLI: `voidforge migrate treasury --project=<id>` — copies global data to per-project, leaves backup
+### Mission 0: Infrastructure Prerequisites [NEW — UNBLOCK ALL]
+- **Router upgrade**: Add `:id` param matching to `router.ts` (~30 lines). One URL migration, not two. (Riker: "Two URL migrations is more work and risk than one router change.")
+- **TREASURY_DIR consolidation**: 4 separate definitions (financial-transaction.ts, financial-vault.ts, totp.ts, treasury-backup.ts) → single `getTreasuryDir(projectDir?)` function. Keep vault path global (decouple from treasury dir).
+- **Extract inline treasury reader**: danger-room.ts lines 167-348 (180 lines) duplicates financial-core.ts → extract shared `readTreasurySummary(treasuryDir)` function.
+- **Add `projectId` to JSONL writes**: All `appendToLog` calls in heartbeat.ts must include `projectId`. Without this, per-project migration is impossible and future aggregation breaks. (Spock/Dockson CRITICAL finding.)
+- **Fix LAN WebSocket auth**: `server.ts` WebSocket upgrade only checks auth in `isRemoteMode()`. Must be `isRemoteMode() || isLanMode()`. (Kenobi/Maul CRITICAL finding.)
+- **Define `ProjectContext` type**: New `wizard/lib/project-scope.ts` with `ProjectContext` interface (id, name, directory, derived paths for logsDir, treasuryDir, spendLog, revenueLog, etc.) and `resolveProject()` middleware. (Spock/Tuvok design.)
+- **Fix Deep Current routes**: danger-room.ts lines 400,408 use broken `PROJECT_ROOT` for Deep Current API endpoints. (Constantine finding.)
 
-### Mission 3: Daemon State Per-Project (parallel with M2)
-- PID, socket, state, log files move from `~/.voidforge/run/` to `project/cultivation/`
-- daemon-process.ts constants become functions of `projectDir`
-- heartbeat.ts receives `projectDir` at startup and passes to all financial operations
-- daemon-aggregator.ts already correct (connects per-project sockets)
+### Mission 1: Dashboard Data + Access Control
+- Refactor all 10 functions in `dashboard-data.ts` to accept `ProjectContext` (replaces individual `projectDir` param)
+- Remove `PROJECT_ROOT` constant and `LOGS_DIR` module-level constant (resolves to npm package — broken)
+- All 13 danger-room + 7 war-room routes call `resolveProject()` from project-scope.ts
+- Each route: parse `:id` from URL → resolve to `ProjectContext` → pass to data functions
+- `checkProjectAccess()` wired into every route via `resolveProject()` (404 for invalid/unauthorized)
+- `readContextStats()` stays global (user-scoped Claude session stats)
+- Write unit tests for all 10 dashboard-data.ts functions (currently zero coverage — Constantine/Batman finding)
+
+### Mission 2: Daemon State Per-Project [was M3 — WRITES BEFORE READS]
+- Add `configurePaths(projectDir)` to daemon-process.ts — overrides module-level constants before daemon starts
+- heartbeat.ts receives `projectDir` at startup via CLI arg (`voidforge heartbeat start --project-dir=/path`)
+- **Dual-daemon guard**: New daemon checks global PID at `~/.voidforge/run/heartbeat.pid` AND refuses to start if a global daemon is alive for the same project. (La Forge CRITICAL finding.)
+- daemon-core.ts re-exports become functions of `projectDir`
+- daemon-aggregator.ts already correct (connects per-project sockets at `project/cultivation/heartbeat.sock`)
 - Update 4 files importing from daemon-core.ts: heartbeat.ts, extensions.ts, treasury-heartbeat.ts, danger-room.ts
 
+### Mission 3: Financial Path Isolation [was M2 — AFTER daemon writes]
+- `TREASURY_DIR`, `SPEND_LOG`, `REVENUE_LOG` become functions of `projectDir` (consolidated in M0)
+- Paths move from `~/.voidforge/treasury/` to `project/cultivation/treasury/`
+- **Treasury summary file**: Daemon maintains `treasury-summary.json` with running totals (spend, revenue, net, ROAS, budget). Dashboard reads this O(1) file instead of scanning O(n) JSONL. (Torres P0 bottleneck.)
+- Update reconciliation.ts — reads per-project spend/revenue logs
+- Daemon sets 0700 permissions on `cultivation/treasury/` at startup (Kenobi M2 finding)
+- **Migration CLI**: `voidforge migrate treasury --project=<id>` — archive global `~/.voidforge/treasury/` → `~/.voidforge/treasury-pre-v22/`. Per-project logs start fresh with genesis hash ('0'). No copy — clean break. (Spock/Riker: "Copying creates false provenance. Archive the global log. Start per-project logs clean.")
+- **No fallback to global paths** — if per-project treasury doesn't exist, return zeroes. (Deathstroke: "Any fallback-to-global defeats financial isolation.")
+- Update safety-tiers.ts to read budget from per-project path
+
 ### Mission 4: UI — Project-Scoped Navigation
-- **Lobby**: fetch `DaemonAggregator.getStatus()`, render project cards with online/offline badge, spend/revenue badges
-- **Project Dashboard**: new container at `/projects/:id/` with tabbed navigation
+- **Lobby**: Enhance with DaemonAggregator KPIs (online/offline count, combined ROAS) filtered by `getProjectsForUser()`. Strip `projectPath` from non-admin responses. (Kenobi/Deathstroke finding.)
+- **"Resume last project"**: Store last-visited project ID in `localStorage`, show quick-access link in Lobby header. (Galadriel: "Users with a single active project should not re-select every time.")
+- **Project Dashboard**: Single `project.html` with client-side tab switching (not separate HTML files):
   - Overview tab: build state, git status, version (from M1 dashboard functions)
-  - Tower tab: terminal (already project-scoped)
+  - Tower tab: terminal (already project-scoped, preserves all 5 query params)
   - Danger Room tab: health, campaigns, heartbeat (from M1 routes)
   - War Room tab: campaign proposals
   - Deploy tab: deploy target, health check, drift detection
+- **Breadcrumb**: `Lobby > ProjectName > [active tab]`. Logo click returns to Lobby. (Galadriel design.)
+- **Keyboard nav**: `role="tablist"`, `aria-selected`, ArrowLeft/ArrowRight between tabs, `aria-controls`/`aria-labelledby`. (Galadriel: reuse existing Danger Room tab keyboard pattern.)
+- **Empty states**: Each tab gets an actionable empty state (e.g., "No campaign data. Run `/campaign --blitz` to begin." with Engage button).
 - Danger Room button moves from Lobby top-nav into project dashboard tabs
-- Lobby keeps aggregated KPI row (total spend, revenue, ROAS) from daemon-aggregator
 
-### Mission 5: WebSocket Isolation + API Routing
-- **WebSocket**: scope to `/ws/projects/:id/danger-room` — per-project broadcast (Worf HIGH finding: global broadcast leaks cross-project data)
-- **Route middleware**: parse `:id` from URL, resolve via `getProject(id)`, validate `.voidforge` marker, validate `checkProjectAccess()`, pass `projectDir` down
-- Refactor: `/api/danger-room/*` → `/api/projects/:id/danger-room/*` (13 routes)
-- Refactor: `/api/war-room/*` → `/api/projects/:id/war-room/*`
-- Refactor: `/api/deploy/*` → `/api/projects/:id/deploy/*`
-- Error handling: 404 for invalid project ID, 403 for access denied (return 404 to prevent enumeration)
+### Mission 5: WebSocket Isolation + Route Finalization
+- **WebSocket subscription rooms** (Kusanagi Option B): Single WSS, client sends `{ type: 'subscribe', projectId }` after connect. Server tags WebSocket with `projectId`. `broadcast(data, projectId?)` only sends to matching subscribers.
+- **WebSocket auth**: Project access validated on upgrade via URL query param (`/ws/danger-room?project=<id>`) or path (`/ws/projects/:id/danger-room`). `resolveProject()` before `handleUpgrade()`.
+- **Remove old global paths**: Delete `/ws/danger-room` and `/ws/war-room` handlers. Add test that old paths return 404. (Deathstroke/Maul HIGH finding: "Global path must be removed, not supplemented.")
+- **Agent activity scoping**: Per-project file watchers (lazy-init on subscribe, teardown on last unsubscribe). Activity broadcast includes `projectId`. (Maul M4 finding.)
+- Routes already at `/api/projects/:id/danger-room/*` from M0+M1 router upgrade — no re-migration needed
+- Freeze endpoint: Read daemon token from `project/cultivation/heartbeat.token`. `checkProjectAccess()` before contacting daemon socket. (Deathstroke: cross-project freeze bypass.)
 
 ### Mission 6: Victory Gauntlet
 - Integration test: create project → install cultivation → start daemon → view Danger Room → verify per-project data
-- Cross-project isolation test: 2 projects, verify no data leakage via API or WebSocket
-- Treasury migration test: global → per-project with validation
+- **Cross-project isolation test**: 2 projects, verify no data leakage via API or WebSocket (Deathstroke attack scenarios)
+- **WebSocket isolation test**: 2 projects, verify no cross-talk; verify old global paths return 404
+- **Dual-daemon guard test**: Attempt to start per-project daemon while global daemon runs → must refuse
+- **Treasury clean break test**: Archive global → per-project starts fresh → verify genesis hash chain
+- **DaemonAggregator filtering test**: Viewer of Project A cannot see Project B's data, paths, or spend
 - Full Victory Gauntlet on complete v22.0
 
-**Execution order:** M1 → (M2 ‖ M3) → M4 → M5 → M6
+**Execution order:** M0 → M1 → M2 → M3 → M4 → M5 → M6 (strictly sequential — writes before reads, no parallelism between M2/M3)
 
 **Global vault stays global** — credentials are user-scoped (one Stripe account across projects). Per-project vault encryption deferred to v22.1 (Kenobi's HKDF proposal).
+
+**Dissent preserved (Stark):** Financial data staying global (user's ad spend spans projects) was a viable alternative. If multi-project users report data confusion post-v22.0, revisit with project-as-filter-view on global data rather than per-project files.
 
 ---
 
