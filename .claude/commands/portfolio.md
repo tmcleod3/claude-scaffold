@@ -12,9 +12,10 @@ If `packages/voidforge/wizard/server.ts` does not exist (methodology-only instal
 
 ## Context Setup
 1. Read `~/.voidforge/projects.json` for registered projects
-2. For each project: read treasury data from `~/.voidforge/treasury/`
-3. If no projects registered: "No projects registered. Run `/treasury setup` in a project directory."
-4. If single project: show treasury view with note about portfolio comparisons
+2. For each project: read treasury data from `{project}/cultivation/treasury/` (per-project paths, v22.0+)
+3. Use `readTreasurySummary()` which reads the O(1) `treasury-summary.json` cache (v22.1+)
+4. If no projects registered: "No projects registered. Run `/treasury setup` in a project directory."
+5. If single project: show treasury view with note about portfolio comparisons
 
 ## Portfolio Dashboard
 

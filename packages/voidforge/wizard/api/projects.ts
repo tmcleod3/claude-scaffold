@@ -27,6 +27,8 @@ import {
 } from '../lib/project-registry.js';
 import { getDeployPlan } from '../lib/deploy-coordinator.js';
 import { getAggregateCosts } from '../lib/cost-tracker.js';
+import { readTreasurySummary, type TreasurySummary } from '../lib/treasury-reader.js';
+import { createProjectContext } from '../lib/project-scope.js';
 import { addLesson, getLessons, getLessonCount, type LessonInput } from '../lib/agent-memory.js';
 import { audit } from '../lib/audit-log.js';
 import { validateSession, parseSessionCookie, getClientIp, isRemoteMode } from '../lib/tower-auth.js';
@@ -651,6 +653,52 @@ addRoute('GET', '/api/projects/costs', async (req: IncomingMessage, res: ServerR
 
   const costs = await getAggregateCosts(session.username, session.role);
   sendJson(res, 200, { success: true, data: costs });
+});
+
+// GET /api/projects/portfolio — per-project financial breakdown (v22.2 M2)
+addRoute('GET', '/api/projects/portfolio', async (req: IncomingMessage, res: ServerResponse) => {
+  const session = getSession(req);
+  if (!session) {
+    sendJson(res, 401, { success: false, error: 'Authentication required' });
+    return;
+  }
+
+  const projects = await getProjectsForUser(session.username, session.role);
+  const portfolio: Array<{
+    projectId: string;
+    projectName: string;
+    treasury: TreasurySummary;
+  }> = [];
+
+  let totalSpend = 0;
+  let totalRevenue = 0;
+
+  for (const project of projects) {
+    const ctx = createProjectContext(project);
+    const treasury = await readTreasurySummary(ctx.treasuryDir);
+    portfolio.push({
+      projectId: project.id,
+      projectName: project.name,
+      treasury,
+    });
+    totalSpend += treasury.spend;
+    totalRevenue += treasury.revenue;
+  }
+
+  const combinedRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+
+  sendJson(res, 200, {
+    success: true,
+    data: {
+      projects: portfolio,
+      totals: {
+        totalSpendCents: totalSpend,
+        totalRevenueCents: totalRevenue,
+        combinedRoas,
+        projectCount: portfolio.length,
+      },
+    },
+  });
 });
 
 // GET /api/projects/lessons — get lessons (optionally filtered by framework)

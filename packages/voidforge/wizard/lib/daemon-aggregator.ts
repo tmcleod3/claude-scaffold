@@ -10,6 +10,7 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { readMarker } from './marker.js';
+import { getProjectsForUser } from './project-registry.js';
 
 // ── Types ────────────────────────────────────────────────
 
@@ -234,6 +235,46 @@ export class DaemonAggregator {
 
   getProjectStatus(projectId: string): DaemonStatus | undefined {
     return this.statuses.get(projectId);
+  }
+
+  /**
+   * Get aggregated status filtered by user access (v22.2 M2).
+   * Admins see all projects. Others see owned + explicitly shared.
+   */
+  async getStatusForUser(username: string, globalRole: string): Promise<AggregatedStatus> {
+    const accessibleProjects = await getProjectsForUser(username, globalRole);
+    const accessibleIds = new Set(accessibleProjects.map(p => p.id));
+
+    const projects = Array.from(this.statuses.values())
+      .filter(p => accessibleIds.has(p.projectId));
+
+    let totalSpendCents = 0;
+    let totalRevenueCents = 0;
+    let onlineCount = 0;
+    let offlineCount = 0;
+
+    for (const p of projects) {
+      totalSpendCents += p.spend.monthCents;
+      totalRevenueCents += p.spend.revenueCents;
+      if (p.online) onlineCount++;
+      else offlineCount++;
+    }
+
+    const combinedRoas = totalSpendCents > 0
+      ? totalRevenueCents / totalSpendCents
+      : 0;
+
+    return {
+      projects,
+      totals: {
+        totalSpendCents,
+        totalRevenueCents,
+        combinedRoas,
+        onlineCount,
+        offlineCount,
+      },
+      lastPoll: new Date().toISOString(),
+    };
   }
 
   /** Freeze all daemons or a specific project's daemon. */
