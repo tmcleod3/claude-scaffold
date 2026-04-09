@@ -10,9 +10,14 @@ import { join } from 'node:path';
 const tempDir = await createTempHome();
 const deepCurrentDir = join(tempDir, 'deep-current');
 
-// Mock deep-current to redirect DEEP_CURRENT_DIR to temp
+// Mock deep-current to redirect deepCurrentDir to temp
 vi.mock('../lib/deep-current.js', () => ({
-  DEEP_CURRENT_DIR: deepCurrentDir,
+  deepCurrentDir: () => deepCurrentDir,
+}));
+
+// Mock marker to return temp as project root
+vi.mock('../lib/marker.js', () => ({
+  findProjectRoot: () => tempDir,
 }));
 
 const autonomy = await import('../lib/autonomy-controller.js');

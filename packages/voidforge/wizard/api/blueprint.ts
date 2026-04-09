@@ -145,47 +145,15 @@ export async function executeBlueprintMerge(
  * GET  /api/blueprint/validate?dir=<path> — Full validation
  * POST /api/blueprint/merge — Execute CLAUDE.md merge
  */
-export async function handleBlueprintRequest(
-  method: string,
-  path: string,
-  body: unknown,
-): Promise<{ status: number; body: unknown } | null> {
-  if (method === 'GET' && path === '/api/blueprint/detect') {
-    // Quick check: does docs/PRD.md exist in the current project?
-    const projectRoot = process.cwd();
-    const prdPath = join(projectRoot, 'docs/PRD.md');
-    const exists = existsSync(prdPath);
+// Resolve project root from request query param, falling back to marker discovery.
+// The wizard is standalone (v21.0) — CWD is NOT a project directory.
+import { findProjectRoot } from '../lib/marker.js';
 
-    if (exists) {
-      const content = await readFile(prdPath, 'utf-8');
-      const { frontmatter } = parseFrontmatter(content);
-      return {
-        status: 200,
-        body: {
-          detected: true,
-          name: frontmatter.name ?? 'Unnamed',
-          description: frontmatter.type ?? 'Unknown type',
-        },
-      };
-    }
-
-    return { status: 200, body: { detected: false } };
-  }
-
-  if (method === 'GET' && path === '/api/blueprint/validate') {
-    const projectRoot = process.cwd();
-    const result = await validateBlueprint(projectRoot);
-    return { status: 200, body: result };
-  }
-
-  if (method === 'POST' && path === '/api/blueprint/merge') {
-    const projectRoot = process.cwd();
-    const params = body as { directivesPath?: string } | undefined;
-    const result = await executeBlueprintMerge(projectRoot, params?.directivesPath ?? null);
-    return { status: 200, body: result };
-  }
-
-  return null; // Not a blueprint route
+function resolveProjectRoot(req: IncomingMessage): string {
+  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+  const dirParam = url.searchParams.get('dir');
+  if (dirParam && dirParam !== 'undefined') return dirParam;
+  return findProjectRoot() ?? process.cwd();
 }
 
 // ── JSON Response Helper ────────────────────────────
@@ -198,9 +166,7 @@ function sendJson(res: ServerResponse, status: number, data: unknown): void {
 // ── Route Registration ──────────────────────────────
 
 addRoute('GET', '/api/blueprint/detect', async (req: IncomingMessage, res: ServerResponse) => {
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-  const dirParam = url.searchParams.get('dir');
-  const projectRoot = dirParam && dirParam !== 'undefined' ? dirParam : process.cwd();
+  const projectRoot = resolveProjectRoot(req);
   const prdPath = join(projectRoot, 'docs/PRD.md');
 
   if (existsSync(prdPath)) {
@@ -216,8 +182,8 @@ addRoute('GET', '/api/blueprint/detect', async (req: IncomingMessage, res: Serve
   }
 });
 
-addRoute('GET', '/api/blueprint/validate', async (_req: IncomingMessage, res: ServerResponse) => {
-  const projectRoot = process.cwd();
+addRoute('GET', '/api/blueprint/validate', async (req: IncomingMessage, res: ServerResponse) => {
+  const projectRoot = resolveProjectRoot(req);
   const result = await validateBlueprint(projectRoot);
   sendJson(res, 200, result);
 });
@@ -231,7 +197,7 @@ addRoute('POST', '/api/blueprint/merge', async (req: IncomingMessage, res: Serve
     params = JSON.parse(body) as { directivesPath?: string };
   } catch { /* empty body is fine — directivesPath defaults to null */ }
 
-  const projectRoot = process.cwd();
+  const projectRoot = resolveProjectRoot(req);
   const result = await executeBlueprintMerge(projectRoot, params.directivesPath ?? null);
   sendJson(res, 200, result);
 });

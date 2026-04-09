@@ -13,7 +13,8 @@ import { join } from 'node:path';
 
 import type { CampaignProposal } from './campaign-proposer.js';
 import type { SituationModel } from './deep-current.js';
-import { DEEP_CURRENT_DIR } from './deep-current.js';
+import { deepCurrentDir } from './deep-current.js';
+import { findProjectRoot } from './marker.js';
 
 // ── Autonomy State ────────────────────────────────────
 
@@ -40,7 +41,7 @@ interface AutonomyState {
   deployFreezeWindows: Array<{ dayOfWeek: number; startHour: number; endHour: number }>; // UTC
 }
 
-const AUTONOMY_STATE_PATH = join(DEEP_CURRENT_DIR, 'autonomy-state.json');
+function getAutonomyStatePath(): string { return join(deepCurrentDir(findProjectRoot() ?? process.cwd()), 'autonomy-state.json'); }
 
 const DEFAULT_STATE: AutonomyState = {
   tier: 1,
@@ -62,9 +63,9 @@ const DEFAULT_STATE: AutonomyState = {
 // ── State Persistence ─────────────────────────────────
 
 export async function loadAutonomyState(): Promise<AutonomyState> {
-  if (!existsSync(AUTONOMY_STATE_PATH)) return { ...DEFAULT_STATE };
+  if (!existsSync(getAutonomyStatePath())) return { ...DEFAULT_STATE };
   try {
-    const content = await readFile(AUTONOMY_STATE_PATH, 'utf-8');
+    const content = await readFile(getAutonomyStatePath(), 'utf-8');
     return JSON.parse(content) as AutonomyState;
   } catch { return { ...DEFAULT_STATE }; }
 }
@@ -79,15 +80,15 @@ function serialized<T>(fn: () => Promise<T>): Promise<T> {
 
 export function saveAutonomyState(state: AutonomyState): Promise<void> {
   return serialized(async () => {
-    await mkdir(DEEP_CURRENT_DIR, { recursive: true });
+    await mkdir(deepCurrentDir(findProjectRoot() ?? process.cwd()), { recursive: true });
     // IG-R4 LOKI-001: Atomic write — temp+fsync+rename prevents kill switch reset on crash
-    const tmpPath = AUTONOMY_STATE_PATH + '.tmp';
+    const tmpPath = getAutonomyStatePath() + '.tmp';
     const fh = await open(tmpPath, 'w', 0o600);
     try {
       await fh.writeFile(JSON.stringify(state, null, 2));
       await fh.sync();
     } finally { await fh.close(); }
-    await rename(tmpPath, AUTONOMY_STATE_PATH);
+    await rename(tmpPath, getAutonomyStatePath());
   });
 }
 
@@ -252,4 +253,4 @@ const DEFAULT_SOFT_LIMITS: SoftLimits = {
 };
 
 export type { AutonomyState, CircuitBreakerResult, SoftLimits };
-export { DEFAULT_STATE, DEFAULT_SOFT_LIMITS, AUTONOMY_STATE_PATH };
+export { DEFAULT_STATE, DEFAULT_SOFT_LIMITS, getAutonomyStatePath };

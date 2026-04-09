@@ -16,11 +16,23 @@ import { homedir } from 'node:os';
 import { scanSite, scoreScan } from './site-scanner.js';
 import type { SiteScanResult } from './site-scanner.js';
 
-const DEEP_CURRENT_DIR = join(process.cwd(), 'logs', 'deep-current');
-const SITUATION_PATH = join(DEEP_CURRENT_DIR, 'situation.json');
-const PROPOSALS_DIR = join(DEEP_CURRENT_DIR, 'proposals');
-const PREDICTIONS_PATH = join(DEEP_CURRENT_DIR, 'predictions.jsonl');
-const CORRELATIONS_PATH = join(DEEP_CURRENT_DIR, 'correlations.jsonl');
+// Lazy path resolution — project dir is passed by callers, not assumed from CWD.
+// The wizard is standalone (v21.0) — CWD is NOT a project directory.
+function deepCurrentDir(projectDir: string): string {
+  return join(projectDir, 'logs', 'deep-current');
+}
+function situationPath(projectDir: string): string {
+  return join(deepCurrentDir(projectDir), 'situation.json');
+}
+function proposalsDir(projectDir: string): string {
+  return join(deepCurrentDir(projectDir), 'proposals');
+}
+function predictionsPath(projectDir: string): string {
+  return join(deepCurrentDir(projectDir), 'predictions.jsonl');
+}
+function correlationsPath(projectDir: string): string {
+  return join(deepCurrentDir(projectDir), 'correlations.jsonl');
+}
 
 // ── Project State Classification ──────────────────────
 
@@ -145,17 +157,18 @@ function createEmptyModel(projectName: string, state: ProjectState): SituationMo
 
 // ── Persistence ───────────────────────────────────────
 
-export async function loadSituation(): Promise<SituationModel | null> {
-  if (!existsSync(SITUATION_PATH)) return null;
+export async function loadSituation(projectDir: string): Promise<SituationModel | null> {
+  const path = situationPath(projectDir);
+  if (!existsSync(path)) return null;
   try {
-    const content = await readFile(SITUATION_PATH, 'utf-8');
+    const content = await readFile(path, 'utf-8');
     return JSON.parse(content) as SituationModel;
   } catch { return null; }
 }
 
-export async function saveSituation(model: SituationModel): Promise<void> {
-  await mkdir(DEEP_CURRENT_DIR, { recursive: true });
-  await writeFileAsync(SITUATION_PATH, JSON.stringify(model, null, 2));
+export async function saveSituation(projectDir: string, model: SituationModel): Promise<void> {
+  await mkdir(deepCurrentDir(projectDir), { recursive: true });
+  await writeFileAsync(situationPath(projectDir), JSON.stringify(model, null, 2));
 }
 
 // ── SENSE Step — Update situation model from scans ────
@@ -233,7 +246,7 @@ interface IntakeResult {
  * Cold start intake: classify the project, scan if deployed, create situation model.
  * Returns the initial situation and a recommended first action.
  */
-export async function intake(projectName: string): Promise<IntakeResult> {
+export async function intake(projectName: string, projectDir: string = process.cwd()): Promise<IntakeResult> {
   const classification = await classifyProject();
   const model = createEmptyModel(projectName, classification.state);
 
@@ -279,7 +292,7 @@ export async function intake(projectName: string): Promise<IntakeResult> {
   }
 
   // Save the model
-  await saveSituation(model);
+  await saveSituation(projectDir, model);
 
   return { classification, situation: model, siteScan, recommendedFirstAction };
 }
@@ -308,4 +321,4 @@ function findLowestDimension(model: SituationModel): string {
 }
 
 export type { ProjectState, ProjectClassification, SituationModel, DimensionScore, CampaignRecord, IntakeResult };
-export { DEEP_CURRENT_DIR, SITUATION_PATH, PROPOSALS_DIR, PREDICTIONS_PATH, CORRELATIONS_PATH };
+export { deepCurrentDir, situationPath, proposalsDir, predictionsPath, correlationsPath };

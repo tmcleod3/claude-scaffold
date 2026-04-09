@@ -57,8 +57,9 @@ addRoute('POST', '/api/project/validate', async (req: IncomingMessage, res: Serv
     }
   }
 
+  const homeDir = process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp';
   const suggestedDir = body.name
-    ? resolve(process.cwd(), '..', sanitizeDirName(body.name))
+    ? resolve(homeDir, 'Projects', sanitizeDirName(body.name))
     : undefined;
 
   sendJson(res, 200, { valid: errors.length === 0, errors, suggestedDir });

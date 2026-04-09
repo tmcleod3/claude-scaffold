@@ -10,7 +10,8 @@
 
 import { appendFile, readFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { CORRELATIONS_PATH, PREDICTIONS_PATH, DEEP_CURRENT_DIR } from './deep-current.js';
+import { correlationsPath, predictionsPath, deepCurrentDir } from './deep-current.js';
+import { findProjectRoot } from './marker.js';
 import type { CampaignProposal } from './campaign-proposer.js';
 
 // ── Event Types ───────────────────────────────────────
@@ -49,8 +50,8 @@ type EventLogEntry = ChangeEvent | MetricObservation | Correlation;
 // ── Event Logging ─────────────────────────────────────
 
 async function appendEvent(entry: EventLogEntry): Promise<void> {
-  await mkdir(DEEP_CURRENT_DIR, { recursive: true });
-  await appendFile(CORRELATIONS_PATH, JSON.stringify(entry) + '\n', 'utf-8');
+  await mkdir(deepCurrentDir(findProjectRoot() ?? process.cwd()), { recursive: true });
+  await appendFile(correlationsPath(findProjectRoot() ?? process.cwd()), JSON.stringify(entry) + '\n', 'utf-8');
 }
 
 export async function logCampaignComplete(name: string, missions: number, dimension: string): Promise<void> {
@@ -81,9 +82,9 @@ export async function logMetric(metric: string, value: number, source: string): 
  * Uses before/after comparison with configurable lag windows.
  */
 export async function detectCorrelations(lagDays: number = 7): Promise<Correlation[]> {
-  if (!existsSync(CORRELATIONS_PATH)) return [];
+  if (!existsSync(correlationsPath(findProjectRoot() ?? process.cwd()))) return [];
 
-  const content = await readFile(CORRELATIONS_PATH, 'utf-8');
+  const content = await readFile(correlationsPath(findProjectRoot() ?? process.cwd()), 'utf-8');
   const lines = content.trim().split('\n').filter(Boolean);
   const events: EventLogEntry[] = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean) as EventLogEntry[];
 
@@ -155,14 +156,14 @@ interface PredictionRecord {
 }
 
 export async function recordPrediction(proposal: CampaignProposal): Promise<void> {
-  await mkdir(DEEP_CURRENT_DIR, { recursive: true });
+  await mkdir(deepCurrentDir(findProjectRoot() ?? process.cwd()), { recursive: true });
   const record: PredictionRecord = {
     proposalId: proposal.id,
     proposalName: proposal.name,
     predictedImpact: proposal.expectedImpact,
     recordedAt: new Date().toISOString(),
   };
-  await appendFile(PREDICTIONS_PATH, JSON.stringify(record) + '\n', 'utf-8');
+  await appendFile(predictionsPath(findProjectRoot() ?? process.cwd()), JSON.stringify(record) + '\n', 'utf-8');
 }
 
 export async function evaluatePrediction(
@@ -171,8 +172,8 @@ export async function evaluatePrediction(
   accuracy: number
 ): Promise<void> {
   // Read existing predictions, find the matching one, update it
-  if (!existsSync(PREDICTIONS_PATH)) return;
-  const content = await readFile(PREDICTIONS_PATH, 'utf-8');
+  if (!existsSync(predictionsPath(findProjectRoot() ?? process.cwd()))) return;
+  const content = await readFile(predictionsPath(findProjectRoot() ?? process.cwd()), 'utf-8');
   const lines = content.trim().split('\n').filter(Boolean);
   const updated = lines.map(line => {
     try {
@@ -186,15 +187,15 @@ export async function evaluatePrediction(
     } catch { return line; }
   });
   const { writeFile: wf } = await import('node:fs/promises');
-  await wf(PREDICTIONS_PATH, updated.join('\n') + '\n');
+  await wf(predictionsPath(findProjectRoot() ?? process.cwd()), updated.join('\n') + '\n');
 }
 
 /**
  * Calculate average prediction accuracy across all evaluated predictions.
  */
 export async function getAveragePredictionAccuracy(): Promise<number> {
-  if (!existsSync(PREDICTIONS_PATH)) return 0;
-  const content = await readFile(PREDICTIONS_PATH, 'utf-8');
+  if (!existsSync(predictionsPath(findProjectRoot() ?? process.cwd()))) return 0;
+  const content = await readFile(predictionsPath(findProjectRoot() ?? process.cwd()), 'utf-8');
   const records: PredictionRecord[] = content.trim().split('\n').filter(Boolean)
     .map(l => { try { return JSON.parse(l); } catch { return null; } })
     .filter(Boolean) as PredictionRecord[];
