@@ -19,38 +19,57 @@
 
 **The fix:** Everything becomes project-scoped. API routes gain project ID (`/api/projects/:id/danger-room/...`). Financial paths move from global to `project/cultivation/treasury/`. Lobby shows aggregated KPIs, drill-down enters project dashboard with Danger Room, War Room, Tower, Deploy.
 
-**Missions (5):**
+**Missions (6):**
 
-### Mission 1: Dashboard Data — Add projectDir Parameter
-- Refactor all 10+ functions in `dashboard-data.ts` to accept `projectDir`
+### Mission 1: Dashboard Data — Add projectDir Parameter [UNBLOCK]
+- Refactor all 10 functions in `dashboard-data.ts` to accept `projectDir: string`
 - Remove `PROJECT_ROOT` constant (resolves to npm package — broken)
-- API routes in `danger-room.ts` gain `?project=<id>` query param
+- 13 API routes in `danger-room.ts` gain `?project=<id>` query param
+- Each route: parse project ID → `getProject(id)` from registry → pass `project.directory` to functions
+- Wire `checkProjectAccess()` into every route (exists in project-registry.ts, just needs calling)
 - Read logs, git status, build state from the actual project directory
 
-### Mission 2: Financial Path Isolation
+### Mission 2: Financial Path Isolation (parallel with M3)
 - `TREASURY_DIR`, `SPEND_LOG`, `REVENUE_LOG` become functions of `projectDir`
 - Paths move from `~/.voidforge/treasury/` to `project/cultivation/treasury/`
-- Update: financial-transaction.ts, financial-core.ts, heartbeat.ts, treasury-heartbeat.ts, reconciliation.ts
-- Migration script for existing global data → per-project
+- Update 4 files: financial-transaction.ts (patterns), financial-core.ts, heartbeat.ts, treasury-heartbeat.ts
+- Update reconciliation.ts — reads per-project spend/revenue logs
+- Daemon sets 0700 permissions on `cultivation/treasury/` at startup (Worf security finding)
+- Treasury migration CLI: `voidforge migrate treasury --project=<id>` — copies global data to per-project, leaves backup
 
-### Mission 3: Daemon State Per-Project
-- PID, socket, state files move from `~/.voidforge/run/` to `project/cultivation/`
-- daemon-process.ts constants become functions of projectDir
-- heartbeat.ts passes projectDir to all financial operations
+### Mission 3: Daemon State Per-Project (parallel with M2)
+- PID, socket, state, log files move from `~/.voidforge/run/` to `project/cultivation/`
+- daemon-process.ts constants become functions of `projectDir`
+- heartbeat.ts receives `projectDir` at startup and passes to all financial operations
 - daemon-aggregator.ts already correct (connects per-project sockets)
+- Update 4 files importing from daemon-core.ts: heartbeat.ts, extensions.ts, treasury-heartbeat.ts, danger-room.ts
 
 ### Mission 4: UI — Project-Scoped Navigation
-- Lobby: project cards with health badges (from daemon-aggregator)
-- Project Dashboard: new view with Overview, Tower, Danger Room, War Room, Deploy tabs
-- Danger Room button moves from Lobby top-nav to project dashboard
-- Aggregated "All Projects" Danger Room view in Lobby (optional)
+- **Lobby**: fetch `DaemonAggregator.getStatus()`, render project cards with online/offline badge, spend/revenue badges
+- **Project Dashboard**: new container at `/projects/:id/` with tabbed navigation
+  - Overview tab: build state, git status, version (from M1 dashboard functions)
+  - Tower tab: terminal (already project-scoped)
+  - Danger Room tab: health, campaigns, heartbeat (from M1 routes)
+  - War Room tab: campaign proposals
+  - Deploy tab: deploy target, health check, drift detection
+- Danger Room button moves from Lobby top-nav into project dashboard tabs
+- Lobby keeps aggregated KPI row (total spend, revenue, ROAS) from daemon-aggregator
 
-### Mission 5: API Routing + Victory Gauntlet
-- `/api/projects/:id/danger-room/*` routes
-- `/api/projects/:id/war-room/*` routes
-- `/api/projects/:id/deploy/*` routes
-- Server resolves projectDir from ID via registry
-- Victory Gauntlet on complete v22.0
+### Mission 5: WebSocket Isolation + API Routing
+- **WebSocket**: scope to `/ws/projects/:id/danger-room` — per-project broadcast (Worf HIGH finding: global broadcast leaks cross-project data)
+- **Route middleware**: parse `:id` from URL, resolve via `getProject(id)`, validate `.voidforge` marker, validate `checkProjectAccess()`, pass `projectDir` down
+- Refactor: `/api/danger-room/*` → `/api/projects/:id/danger-room/*` (13 routes)
+- Refactor: `/api/war-room/*` → `/api/projects/:id/war-room/*`
+- Refactor: `/api/deploy/*` → `/api/projects/:id/deploy/*`
+- Error handling: 404 for invalid project ID, 403 for access denied (return 404 to prevent enumeration)
+
+### Mission 6: Victory Gauntlet
+- Integration test: create project → install cultivation → start daemon → view Danger Room → verify per-project data
+- Cross-project isolation test: 2 projects, verify no data leakage via API or WebSocket
+- Treasury migration test: global → per-project with validation
+- Full Victory Gauntlet on complete v22.0
+
+**Execution order:** M1 → (M2 ‖ M3) → M4 → M5 → M6
 
 **Global vault stays global** — credentials are user-scoped (one Stripe account across projects). Per-project vault encryption deferred to v22.1 (Kenobi's HKDF proposal).
 
