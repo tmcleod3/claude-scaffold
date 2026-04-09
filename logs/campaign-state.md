@@ -1,42 +1,34 @@
-# Campaign State — VoidForge Campaign 30 (v22.1 The Migration)
+# Campaign State — VoidForge Campaign 32 (v23.0 The Materialization)
 
 ## Campaign Info
 
-**Version:** v22.1
-**Codename:** The Migration
-**Mode:** `--blitz --muster`
-**Source:** `ROADMAP.md` v22.1 section
-**Architecture:** ADR-040 (project scoping), ADR-041 (Muster amendments)
+**Version:** v23.0
+**Codename:** The Materialization
+**Mode:** default (autonomous + full roster, ADR-043)
+**Source:** `ROADMAP.md` v23.0 section
+**Architecture:** ADR-044 (Full Subagent Materialization)
 **Started:** 2026-04-09
-**Status:** COMPLETE
+**Status:** IN PROGRESS
 
 ## Mission Plan
 
-| # | Mission | Scope | Status | Debrief |
-|---|---------|-------|--------|---------|
-| M1 | Treasury Migration CLI | `voidforge migrate treasury --project=<id>` — pre-flight, archive, genesis, manifest, permissions, hash validation | **COMPLETE** | 10 tests |
-| M2 | Treasury Summary File | Daemon writes treasury-summary.json (O(1) reads). Reader checks cache first, JSONL fallback. | **COMPLETE** | 10 tests |
-| M3 | Per-Project Vault HKDF | HKDF-SHA256 key derivation per project. Project isolation, session cache, atomic writes. | **COMPLETE** | 25 tests |
+| # | Mission | Scope | Status |
+|---|---------|-------|--------|
+| M1 | Agent Classification | Parse registry, classify tiers + tools, produce manifest | **IN PROGRESS** |
+| M2 | Lead Agent Definitions (20) | `.claude/agents/` for all leads, Opus + Builder | PENDING |
+| M3 | Star Trek Specialist Definitions | Star Trek universe specialists + scouts | PENDING |
+| M4 | Marvel + DC Specialist Definitions | Marvel + DC universe specialists + scouts | PENDING |
+| M5 | Remaining Universe Definitions | Star Wars, Tolkien, Anime, Dune, Cosmere, Foundation | PENDING |
+| M6 | Command File Migration (28) | Replace inline prompts with subagent_type references | PENDING |
+| M7 | Methodology Doc Updates | SUB_AGENTS, MUSTER, GAUNTLET, CAMPAIGN, CLAUDE.md | PENDING |
+| M8 | Package + Distribution | Prepack script, init/update verification, dispatch test | PENDING |
 
-Missions completed: 3/3.
+Missions completed: 0/8. Next checkpoint at: M4.
 
-## Results
+## Execution Order
 
-- 3/3 missions: COMPLETE
-- 741/741 tests passing (45 new tests)
-- 0 TypeScript errors
-- 4 Playwright E2E collection errors (pre-existing cosmetic noise)
+M1 → M2 → M3+M4+M5 (parallel) → M6 → M7 → M8
 
-## Files Created
+## BLOCKED Items
 
-- `packages/voidforge/wizard/lib/treasury-migrator.ts` — Migration CLI logic (pre-flight, archive, genesis, manifest)
-- `packages/voidforge/wizard/lib/project-vault.ts` — Per-project HKDF vault (derive, encrypt, decrypt, cache)
-- `packages/voidforge/wizard/__tests__/treasury-migrator.test.ts` — 10 tests
-- `packages/voidforge/wizard/__tests__/treasury-summary-cache.test.ts` — 10 tests
-- `packages/voidforge/wizard/__tests__/project-vault.test.ts` — 25 tests
-
-## Files Modified
-
-- `packages/voidforge/scripts/voidforge.ts` — Added `migrate treasury` subcommand routing + cmdMigrateTreasury()
-- `packages/voidforge/wizard/lib/treasury-reader.ts` — O(1) summary cache read with O(n) JSONL fallback
-- `packages/voidforge/wizard/lib/heartbeat.ts` — writeTreasurySummaryFile() called from writeCurrentState()
+None.
