@@ -170,6 +170,48 @@ async function launchWizard(mode: 'init' | 'deploy' = 'init'): Promise<void> {
   if (!isRemote && !isLan) await openBrowser(url);
 }
 
+async function cmdInitHeadless(): Promise<void> {
+  const nameFlag = args.find((a, i) => args[i - 1] === '--name');
+  const dirFlag = args.find((a, i) => args[i - 1] === '--dir');
+  const onelinerFlag = args.find((a, i) => args[i - 1] === '--oneliner');
+  const domainFlag = args.find((a, i) => args[i - 1] === '--domain');
+  const repoFlag = args.find((a, i) => args[i - 1] === '--repo');
+  const isCore = args.includes('--core');
+
+  if (!nameFlag) {
+    console.error('Error: --name is required for headless init.');
+    console.error('Usage: npx voidforge init --headless --name "My Project" [--dir path] [--oneliner "..."]');
+    process.exit(1);
+  }
+
+  const defaultDir = join(
+    process.env['HOME'] ?? process.env['USERPROFILE'] ?? '.',
+    'Projects',
+    nameFlag.replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/\s+/g, '-').toLowerCase(),
+  );
+  const directory = dirFlag ?? defaultDir;
+
+  const { createProject } = await import('../wizard/lib/project-init.js');
+  const result = await createProject({
+    name: nameFlag,
+    directory,
+    oneliner: onelinerFlag,
+    domain: domainFlag,
+    repoUrl: repoFlag,
+    core: isCore,
+  });
+
+  console.log('');
+  console.log(`  VoidForge — Project Created`);
+  console.log(`  Name:      ${nameFlag}`);
+  console.log(`  Directory: ${result.projectDir}`);
+  console.log(`  Files:     ${result.filesCreated} methodology files`);
+  console.log(`  Marker:    ${result.markerId}`);
+  console.log('');
+  console.log('  Next: cd into the project and start building with Claude Code.');
+  console.log('');
+}
+
 function showHelp(): void {
   console.log('VoidForge — From nothing, everything.\n');
   console.log('Usage: npx voidforge <command> [options]\n');
@@ -214,7 +256,11 @@ async function main(): Promise<void> {
         break;
 
       case 'init':
-        await launchWizard('init');
+        if (args.includes('--headless')) {
+          await cmdInitHeadless();
+        } else {
+          await launchWizard('init');
+        }
         break;
 
       case '--help':
