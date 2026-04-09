@@ -2,6 +2,9 @@
  * Dashboard WebSocket infrastructure factory.
  * Creates WebSocket server instances for dashboards (Danger Room, War Room)
  * with heartbeat, connection management, origin validation, and broadcast.
+ *
+ * v22.0 (ADR-041 M5): Subscription rooms — clients subscribe to a project ID,
+ * broadcasts are filtered by project. Global broadcasts (no projectId) reach all clients.
  */
 
 import type { IncomingMessage } from 'node:http';
@@ -14,11 +17,15 @@ import { isPrivateOrigin } from './network.js';
 const HEARTBEAT_INTERVAL_MS = 30000;
 const MAX_CLIENTS = 50;
 
+// Symbol keys for WebSocket metadata
+const PROJECT_ID_KEY = Symbol.for('voidforge.ws.projectId');
+const IS_ALIVE_KEY = Symbol.for('voidforge.ws.isAlive');
+
 export interface DashboardWs {
-  /** Broadcast a message to all connected clients. */
-  broadcast: (data: { type: string; [key: string]: unknown }) => void;
+  /** Broadcast a message to all clients, or only to clients subscribed to a specific project. */
+  broadcast: (data: { type: string; [key: string]: unknown }, projectId?: string) => void;
   /** Handle WebSocket upgrade for this dashboard's path. */
-  handleUpgrade: (req: IncomingMessage, socket: Duplex, head: Buffer) => void;
+  handleUpgrade: (req: IncomingMessage, socket: Duplex, head: Buffer, projectId?: string) => void;
   /** Close all connections and shut down. */
   close: () => void;
   /** Current number of connected clients. */
@@ -35,35 +42,40 @@ export function createDashboardWs(name: string): DashboardWs {
 
   const heartbeat = setInterval(() => {
     for (const client of clients) {
-      const ext = client as unknown as Record<string, boolean>;
-      if (!ext.isAlive) {
+      const ext = client as unknown as Record<symbol, unknown>;
+      if (!ext[IS_ALIVE_KEY]) {
         clients.delete(client);
         client.terminate();
         continue;
       }
-      ext.isAlive = false;
+      ext[IS_ALIVE_KEY] = false;
       try { client.ping(); } catch { clients.delete(client); }
     }
   }, HEARTBEAT_INTERVAL_MS);
 
   return {
-    broadcast(data) {
+    broadcast(data, projectId?) {
       const message = JSON.stringify(data);
       for (const client of clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          try { client.send(message); } catch { /* client gone */ }
+        if (client.readyState !== WebSocket.OPEN) continue;
+
+        // If projectId is specified, only send to clients subscribed to that project
+        if (projectId) {
+          const clientProject = (client as unknown as Record<symbol, unknown>)[PROJECT_ID_KEY];
+          if (clientProject !== projectId) continue;
         }
+
+        try { client.send(message); } catch { /* client gone */ }
       }
     },
 
-    handleUpgrade(req, socket, head) {
+    handleUpgrade(req, socket, head, projectId?) {
       const origin = req.headers.origin || '';
       const port = getServerPort();
       const allowed = [`http://127.0.0.1:${port}`, `http://localhost:${port}`];
       const remoteHost = getServerHost();
       if (remoteHost) allowed.push(`https://${remoteHost}`);
 
-      // In LAN mode, accept connections from any private IP origin
       const originAllowed = allowed.includes(origin)
         || (isLanMode() && isPrivateOrigin(origin));
 
@@ -81,9 +93,25 @@ export function createDashboardWs(name: string): DashboardWs {
 
       wss.handleUpgrade(req, socket, head, (ws) => {
         clients.add(ws);
-        (ws as unknown as Record<string, boolean>).isAlive = true;
+        const ext = ws as unknown as Record<symbol, unknown>;
+        ext[IS_ALIVE_KEY] = true;
 
-        ws.on('pong', () => { (ws as unknown as Record<string, boolean>).isAlive = true; });
+        // Tag with project ID if provided at upgrade time
+        if (projectId) {
+          ext[PROJECT_ID_KEY] = projectId;
+        }
+
+        // Handle subscription messages from the client
+        ws.on('message', (raw) => {
+          try {
+            const msg = JSON.parse(String(raw)) as { type?: string; projectId?: string };
+            if (msg.type === 'subscribe' && typeof msg.projectId === 'string') {
+              ext[PROJECT_ID_KEY] = msg.projectId;
+            }
+          } catch { /* ignore non-JSON or malformed messages */ }
+        });
+
+        ws.on('pong', () => { ext[IS_ALIVE_KEY] = true; });
         ws.on('close', () => clients.delete(ws));
         ws.on('error', () => clients.delete(ws));
       });
