@@ -103,7 +103,7 @@ Scaffold and core branches do not include the `wizard/` directory. This affects 
 - Phase 6 — Measure & Iterate: Autonomous monitoring, daemon handoff, platform metrics
 - Planning and strategy work in Phases 4-6 (campaign structures, creative variants, compliance audits) still works — only API execution requires wizard
 
-**To enable full functionality:** Pull wizard from upstream during the tier gate prompt (answer Y), or manually: `git checkout origin/main -- wizard/ && npm install --prefix wizard`. Then run `/cultivation install` to set up the heartbeat daemon and dashboard.
+**To enable full functionality:** Pull wizard from upstream during the tier gate prompt (answer Y), or manually: `git checkout origin/main -- packages/voidforge/ && npm install`. Then run `/cultivation install` to set up the heartbeat daemon and dashboard.
 
 ## Ad Platform Setup (`/grow --setup`)
 
@@ -139,7 +139,7 @@ If test connection fails: show the error, suggest common fixes (wrong API scope,
 
 ### Adapter Verification
 
-Verify existing adapters (`wizard/lib/adapters/`) support both modes:
+Verify existing adapters (`packages/voidforge/wizard/lib/adapters/`) support both modes:
 - **Credential collection mode:** Interactive setup, test connection, store in vault
 - **Runtime mode:** Read campaigns, submit spend, evaluate performance
 
@@ -231,7 +231,7 @@ Updated financial vault with platform credentials and billing capability state p
 
 **Prerequisite:** Kongo connected via `/cultivation install` Step 2b. If not connected, this phase is skipped entirely and campaigns use the product homepage as landing page.
 
-1. **Seed extraction** (Raoden): Pull headline, value props, social proof, CTA text, brand colors from PRD and Phase 3 content output. Structure as `PrdSeedContent` (see `wizard/lib/kongo/seed.ts`).
+1. **Seed extraction** (Raoden): Pull headline, value props, social proof, CTA text, brand colors from PRD and Phase 3 content output. Structure as `PrdSeedContent` (see `packages/voidforge/wizard/lib/kongo/seed.ts`).
 2. **Page generation** (Raoden): For each ad campaign planned in Phase 4, generate a dedicated Kongo landing page via `createPageFromPrd`. Each campaign gets its own page at `{slug}.kongo.io`.
 3. **Variant generation** (Shallan): For each page, generate 3 headline variants and 2 CTA variants using Kongo's AI variant generation (`POST /engine/campaigns/:id/variants/generate`). Each campaign gets 6 testable combinations.
 4. **Campaign linking**: Set each ad campaign's destination URL to its Kongo page URL with UTM parameters: `utm_source=voidforge&utm_medium=paid&utm_campaign={campaignId}&utm_content={variantId}`.
@@ -398,9 +398,9 @@ The Content Engine creates a closed-loop pipeline: PRD → seed → Kongo landin
 
 | Tool | Classification | VoidForge Surface |
 |------|---------------|-------------------|
-| **Kongo Engine** | First-party integration | `wizard/lib/kongo/` — typed client, 8 modules |
-| **Postiz** | Adapter | `wizard/lib/adapters/postiz.ts` — social scheduling |
-| **LarryLoop** | Adapter | `wizard/lib/adapters/larryloop.ts` — email sequences |
+| **Kongo Engine** | First-party integration | `packages/voidforge/wizard/lib/kongo/` — typed client, 8 modules |
+| **Postiz** | Adapter | `packages/voidforge/wizard/lib/adapters/postiz.ts` — social scheduling |
+| **LarryLoop** | Adapter | `packages/voidforge/wizard/lib/adapters/larryloop.ts` — email sequences |
 | **Make.com** | Orchestrator | Webhook triggers only — no adapter |
 
 ### Weekly Feedback Loop
@@ -424,7 +424,7 @@ Kongo published sites serve in sandboxed iframes without `allow-same-origin`. Th
 
 The subdomain URL still works for the published site (DNS provisioned), but the `/lp/` path is required for GA4 attribution on the marketing domain.
 
-**Detection:** Self-marketing mode activates when the product domain matches the Kongo domain, or when `SELF_MARKETING=true` is set in the project config. The seed extraction logic (`wizard/lib/kongo/seed.ts`) uses the `/lp/` path for destination URLs in self-marketing mode.
+**Detection:** Self-marketing mode activates when the product domain matches the Kongo domain, or when `SELF_MARKETING=true` is set in the project config. The seed extraction logic (`packages/voidforge/wizard/lib/kongo/seed.ts`) uses the `/lp/` path for destination URLs in self-marketing mode.
 
 **Analytics in self-marketing mode:** The `kongo-signal` daemon job must check analytics from both paths:
 - Subdomain analytics: `GET /engine/pages/:id/analytics` (Kongo's built-in analytics)

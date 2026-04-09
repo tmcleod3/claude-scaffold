@@ -153,7 +153,7 @@ When Kongo is connected (API key in financial vault), Heartbeat registers these 
 
 **Conditional registration:** Jobs are only registered when `kongo-api-key` exists in the financial vault. On daemon startup, check vault before registering. If Kongo is disconnected later, jobs skip silently.
 
-**Implementation:** `wizard/lib/kongo/jobs.ts` — `createKongoJobs()` returns handlers, `registerKongoJobs()` wires to scheduler.
+**Implementation:** `packages/voidforge/wizard/lib/kongo/jobs.ts` — `createKongoJobs()` returns handlers, `registerKongoJobs()` wires to scheduler.
 
 ### Funding Planner Integration
 

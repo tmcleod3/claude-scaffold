@@ -8,5 +8,5 @@ export type {
   SpendReport, PerformanceMetrics, InsightData,
   OAuthTokens, ConnectionStatus, PlatformError,
   Cents, Percentage, Ratio, AdPlatform,
-} from '../../docs/patterns/ad-platform-adapter.js';
-export { toCents, toDollars } from '../../docs/patterns/ad-platform-adapter.js';
+} from '../../../../docs/patterns/ad-platform-adapter.js';
+export { toCents, toDollars } from '../../../../docs/patterns/ad-platform-adapter.js';

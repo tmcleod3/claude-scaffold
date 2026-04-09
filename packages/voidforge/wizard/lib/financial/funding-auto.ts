@@ -11,7 +11,7 @@
  * Agents: Dockson (treasury), Heartbeat daemon
  */
 
-import type { Cents, FundingPlan, StablecoinFundingSource, OperatingBankAccount } from '../../../docs/patterns/funding-plan.js';
+import type { Cents, FundingPlan, StablecoinFundingSource, OperatingBankAccount } from '../../../../../docs/patterns/funding-plan.js';
 
 import { shouldTriggerOfframp, generateFundingPlan } from './treasury-planner.js';
 import type { FundingPlanConfig, ObligationInput } from './treasury-planner.js';

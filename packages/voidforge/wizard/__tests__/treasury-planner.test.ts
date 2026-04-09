@@ -18,8 +18,8 @@ import type {
   FundingPlanConfig,
   ObligationInput,
 } from '../lib/financial/treasury-planner.js';
-import type { Cents, StablecoinFundingSource, OperatingBankAccount } from '../../docs/patterns/funding-plan.js';
-import { toCents } from '../../docs/patterns/funding-plan.js';
+import type { Cents, StablecoinFundingSource, OperatingBankAccount } from '../../../../docs/patterns/funding-plan.js';
+import { toCents } from '../../../../docs/patterns/funding-plan.js';
 
 // ── calculateRunway ──────────────────────────────────
 

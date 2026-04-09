@@ -148,8 +148,8 @@ package-lock.json                          ← Scaffold/core have no dependencie
 playwright.config.ts                       ← References wizard/e2e
 vitest.config.ts                           ← References wizard/__tests__
 tsconfig.json                              ← References wizard/**/*.ts
-scripts/voidforge.ts                       ← CLI entry point, imports wizard/
-scripts/vault-read.ts                      ← Imports wizard/lib/vault
+packages/voidforge/scripts/voidforge.ts                       ← CLI entry point, imports wizard/
+scripts/vault-read.ts                      ← Imports packages/voidforge/wizard/lib/vault
 scripts/danger-room-feed.sh                ← Feeds wizard dashboard
 docs/qa-prompt.md                          ← Describes wizard stack ("npm run wizard")
 docs/marketing/v19-release-copy.md         ← Marketing copy for wizard features
@@ -177,7 +177,7 @@ docs/SECURITY_CHECKLIST.md                 ← Remove ONLY if it references wiza
 ```
 
 **ADR cleanup (fingerprint each):**
-Remove ADRs that reference wizard-specific concepts (provisioner, deploy targets, AWS, tower, lobby, Sentry, codegen, RBAC). Keep ADRs that are methodology decisions (no-stubs doctrine, scaffold-as-update-source, raw-https, learnings system). Check the title and first paragraph — wizard ADRs reference `wizard/lib/`, provisioners, or specific infrastructure.
+Remove ADRs that reference wizard-specific concepts (provisioner, deploy targets, AWS, tower, lobby, Sentry, codegen, RBAC). Keep ADRs that are methodology decisions (no-stubs doctrine, scaffold-as-update-source, raw-https, learnings system). Check the title and first paragraph — wizard ADRs reference `packages/voidforge/wizard/lib/`, provisioners, or specific infrastructure.
 
 **Untrack (keep on disk, remove from git):**
 ```

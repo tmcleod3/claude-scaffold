@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "rootDir": "../..",
+    "declaration": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
+  },
+  "include": [
+    "wizard/**/*.ts",
+    "scripts/**/*.ts",
+    "../../docs/patterns/daemon-process.ts",
+    "../../docs/patterns/financial-transaction.ts",
+    "../../docs/patterns/funding-plan.ts",
+    "../../docs/patterns/outbound-rate-limiter.ts",
+    "../../docs/patterns/revenue-source-adapter.ts",
+    "../../docs/patterns/oauth-token-lifecycle.ts",
+    "../../docs/patterns/ad-platform-adapter.ts",
+    "../../docs/patterns/ad-billing-adapter.ts",
+    "../../docs/patterns/stablecoin-adapter.ts"
+  ],
+  "exclude": ["node_modules", "dist", "wizard/e2e"]
+}

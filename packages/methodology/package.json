@@ -1,0 +1,20 @@
+{
+  "name": "@voidforge/methodology",
+  "version": "21.0.0",
+  "description": "VoidForge methodology — agents, commands, methods, patterns.",
+  "license": "MIT",
+  "files": [
+    "CLAUDE.md",
+    ".claude/",
+    "docs/methods/",
+    "docs/patterns/",
+    "docs/NAMING_REGISTRY.md",
+    "HOLOCRON.md",
+    "VERSION.md",
+    "CHANGELOG.md",
+    "scripts/thumper/"
+  ],
+  "scripts": {
+    "prepack": "bash scripts/prepack.sh"
+  }
+}

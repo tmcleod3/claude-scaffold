@@ -1,0 +1,8 @@
+# Prepack copies — source of truth is monorepo root
+CLAUDE.md
+HOLOCRON.md
+VERSION.md
+CHANGELOG.md
+.claude/
+docs/
+scripts/thumper/

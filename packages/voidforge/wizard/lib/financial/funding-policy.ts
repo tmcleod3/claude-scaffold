@@ -9,7 +9,7 @@
  * Agents: Dockson (treasury), Heartbeat daemon
  */
 
-import type { Cents, CapabilityState } from '../../../docs/patterns/funding-plan.js';
+import type { Cents, CapabilityState } from '../../../../../docs/patterns/funding-plan.js';
 
 // ── Treasury State (input to policy evaluation) ──────
 

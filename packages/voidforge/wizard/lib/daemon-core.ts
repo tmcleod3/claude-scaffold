@@ -9,5 +9,5 @@ export {
   writeState, setupSignalHandlers,
   JobScheduler, createLogger,
   STATE_FILE, SOCKET_PATH, TOKEN_FILE,
-} from '../../docs/patterns/daemon-process.js';
-export type { HeartbeatState, DaemonState } from '../../docs/patterns/daemon-process.js';
+} from '../../../../docs/patterns/daemon-process.js';
+export type { HeartbeatState, DaemonState } from '../../../../docs/patterns/daemon-process.js';

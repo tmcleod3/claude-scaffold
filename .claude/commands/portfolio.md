@@ -5,10 +5,10 @@
 Read `/docs/methods/TREASURY.md` for financial operating rules.
 
 ## Prerequisites
-If `wizard/server.ts` does not exist (scaffold/core users):
+If `packages/voidforge/wizard/server.ts` does not exist (scaffold/core users):
 1. Offer: "Portfolio requires the wizard server. Pull it from upstream? [Y/n]"
-2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`
-3. On no: stop with "Run manually: `git checkout voidforge/main -- wizard/`"
+2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- packages/voidforge/` then `npm install`
+3. On no: stop with "Run manually: `git checkout voidforge/main -- packages/voidforge/`"
 
 ## Context Setup
 1. Read `~/.voidforge/projects.json` for registered projects

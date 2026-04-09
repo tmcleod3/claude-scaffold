@@ -3,12 +3,12 @@
 Read `/docs/methods/GROWTH_STRATEGIST.md` for operating rules.
 
 ## Prerequisites
-If `wizard/server.ts` does not exist and the mode requires it (default 6-phase, `--setup`, `--distribute`):
+If `packages/voidforge/wizard/server.ts` does not exist and the mode requires it (default 6-phase, `--setup`, `--distribute`):
 1. Offer: "Phases 4-6 require the wizard server for ad platform APIs, treasury, and autonomous monitoring. Pull it from upstream? [Y/n] (Phases 1-3 work without it.)"
-2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- wizard/` then `cd wizard && npm install`. Proceed with all 6 phases.
+2. On yes: `git fetch voidforge main 2>/dev/null || git remote add voidforge https://github.com/tmcleod3/voidforge.git && git fetch voidforge main` then `git checkout voidforge/main -- packages/voidforge/` then `npm install`. Proceed with all 6 phases.
 3. On no: proceed to Phases 1-3. The Phase 3/4 boundary check below will display a clear stop message after Phase 3 completes.
 
-If `wizard/server.ts` does not exist and the mode does NOT require it (`--audit-only`, `--seo`, `--content`):
+If `packages/voidforge/wizard/server.ts` does not exist and the mode does NOT require it (`--audit-only`, `--seo`, `--content`):
 - Skip the wizard gate entirely. These modes run Phases 1-3 only — no wizard dependency.
 
 ## Arguments
@@ -73,7 +73,7 @@ If no `growth-brief.md` exists (first time running /grow):
 
 ### Phase 3/4 Boundary — Wizard Check
 
-Before entering Phase 4, check if `wizard/server.ts` exists:
+Before entering Phase 4, check if `packages/voidforge/wizard/server.ts` exists:
 - **If present:** Continue to Phase 4 as normal.
 - **If absent:** Display the following and stop gracefully:
 ```

@@ -9,7 +9,7 @@
  * Agents: Dockson (treasury), Heartbeat daemon
  */
 
-import type { Cents } from '../../../docs/patterns/funding-plan.js';
+import type { Cents } from '../../../../../docs/patterns/funding-plan.js';
 
 // ── Input Types ──────────────────────────────────────
 

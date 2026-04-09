@@ -9,6 +9,6 @@ export type {
   SettlementInstruction, PlatformBillingProfile,
   BillingConfiguration, NormalizedFundingState, DateRange,
   Cents,
-} from '../../../../docs/patterns/ad-billing-adapter.js';
+} from '../../../../../../docs/patterns/ad-billing-adapter.js';
 
-export { toCents } from '../../../../docs/patterns/ad-billing-adapter.js';
+export { toCents } from '../../../../../../docs/patterns/ad-billing-adapter.js';
