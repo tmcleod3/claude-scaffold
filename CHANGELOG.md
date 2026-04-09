@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [21.0.0] - 2026-04-08
+
+### Breaking Changes — The Extraction (ADR-038)
+
+The wizard is now a standalone npm package. Projects contain methodology only.
+
+- **Monorepo structure:** `packages/voidforge/` (wizard+CLI) and `packages/methodology/` (@voidforge/methodology)
+- **CLI router:** `npx voidforge` with 12 commands (init, update, install, uninstall, deploy, doctor, migrate, version, templates, help)
+- **.voidforge marker file:** JSON identity file at project root for CLI detection
+- **Project creation:** `npx voidforge init --headless` creates projects with methodology copy, identity injection, marker, git init
+- **Extension system:** `npx voidforge install <ext>` for danger-room (config) and cultivation (heartbeat, 12 jobs, treasury)
+- **Update mechanisms:** `npx voidforge update` replaces `/void` git-fetch with methodology diff/apply preserving CLAUDE.md identity
+- **Daemon aggregator:** Multi-project heartbeat connection, aggregated KPIs, freeze/unfreeze
+- **v20.x migration:** `npx voidforge migrate` with backup, rollback, dry-run
+- **Tests:** 675 (618 original + 57 new across 7 modules)
+
+### Post-Campaign Tasks
+
+- [ ] npm account creation for publishing
+- [ ] Deprecation commits on scaffold/core branches
+- [ ] CI/CD pipeline for npm publish on git tag
+- [ ] Build pipeline (tsc compile to dist/) for production distribution
+
+---
+
 ## [20.2.0] - 2026-04-03
 
 ### Added

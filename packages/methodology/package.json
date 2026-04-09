@@ -14,6 +14,15 @@
     "CHANGELOG.md",
     "scripts/thumper/"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": ["voidforge", "claude-code", "methodology", "ai", "agents"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tmcleod3/voidforge.git",
+    "directory": "packages/methodology"
+  },
   "scripts": {
     "prepack": "bash scripts/prepack.sh"
   }
