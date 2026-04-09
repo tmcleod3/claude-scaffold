@@ -5,7 +5,7 @@
 **Current:** v22.0.0 (2026-04-09)
 **Next:** v22.1 — The Migration (treasury CLI, summary file, per-project vault)
 **Status:** v22.0 Campaign 28 complete (7 missions). Post-build Muster (17 agents, 3 waves) found 4 CRITICAL, 4 HIGH. Core architecture production-ready; hardening patches needed before npm publish.
-**696 tests**, 9 universes, 260+ agents, 28 slash commands, 37 code patterns.
+**741 tests**, 9 universes, 259 agents, 28 slash commands, 37 code patterns.
 
 ---
 

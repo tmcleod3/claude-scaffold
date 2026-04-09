@@ -24,7 +24,7 @@
 
 ### What VoidForge Is
 
-VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 260+ AI agents across 9 fictional universes builds your application through a 13-phase protocol.
+VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 259 AI agents across 9 fictional universes builds your application through a 13-phase protocol.
 
 **From nothing, everything.**
 
@@ -82,7 +82,7 @@ Every tier includes:
 - **28 slash commands** — `/prd`, `/blueprint`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/vault`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
-- **260+ named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
+- **259 named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation
 - **35 code patterns** — Reference implementations with framework adaptations (including E2E testing)
 - **No Stubs Doctrine** — Zero placeholder code. Every file does what it claims. Enforced across all method docs.
 - **E2E browser testing** — Playwright + axe-core. Agents take screenshots, capture console errors, and interact with running applications.
@@ -197,9 +197,9 @@ docker-compose up -d
 
 Your app is live. The deploy script ran a health check. SSL is auto-provisioned by Caddy (VPS) or the platform (Vercel/Railway/Cloudflare). Check your monitoring, run through the critical user journey, and you're launched.
 
-### Scaffold/Core Users
+### Methodology-Only Users
 
-Skip Steps 1 and 3. Write your PRD manually in `docs/PRD.md`, run `/build`, and handle your own infrastructure. The methodology is the same — only the automation layer differs.
+If you're using the methodology package (`@voidforge/methodology`) without the wizard, skip Steps 1 and 3. Write your PRD manually in `docs/PRD.md`, run `/build`, and handle your own infrastructure. The methodology is the same — only the automation layer differs.
 
 ---
 
@@ -366,7 +366,7 @@ Each lead has a deep bench. Here are some standouts:
 - **Idaho** keeps the connection alive — the eternal ghola who always returns
 - **Thufir** parses every signal — Mentat precision, a million calculations per second
 
-The full roster of 260+ characters lives in `docs/NAMING_REGISTRY.md`.
+The full roster of 259 characters lives in `docs/NAMING_REGISTRY.md`.
 
 ### How Handoffs Work
 
