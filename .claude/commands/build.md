@@ -1,5 +1,9 @@
 # /build — Execute the Build Protocol
 
+## Promoted Agents (ADR-042)
+- **Troi** (PRD compliance) runs after every build mission completion — catches PRD drift before it compounds.
+- **Riker** (trade-off challenges) runs whenever an ADR is written during the build — prevents rubber-stamped decisions.
+
 ## Context Setup
 1. Read `/logs/build-state.md` — if it exists, resume from current phase
 2. If no build state exists, this is a fresh build — start from Phase 0

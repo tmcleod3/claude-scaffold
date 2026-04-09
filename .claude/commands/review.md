@@ -2,6 +2,19 @@
 
 > Pattern compliance, code quality, and maintainability review. Picard-affiliated (Star Trek).
 
+## Content-Driven Agent Selection (ADR-042)
+Before starting the review, scan `git diff --stat` and add agents based on what's in the code:
+- Database schema/migrations/SQL → add **Spock** (schema spot-check)
+- Auth, sessions, tokens, encryption → add **Kenobi** (security spot-check) + **Worf** (security implications)
+- CSS, ARIA, a11y attributes → add **Samwise** (accessibility spot-check)
+- Statistical code, confidence intervals → add **Vin** (statistical review)
+- Financial transactions, currency → add **Dockson** (treasury spot-check)
+- API routes, HTTP handlers → add **Kim** (API design spot-check)
+- Performance-critical paths, DB queries → add **Torres** (performance spot-check)
+- AI/LLM prompts, model calls → add **Hari Seldon** (AI intelligence spot-check)
+
+Deploy spot-check agents as sub-processes alongside the core review agents. Each spot-check reads only the relevant files, not the full codebase.
+
 ## Context Setup
 1. Read `/logs/build-state.md` — understand current project state
 2. Read the relevant pattern files from `/docs/patterns/` for the code being reviewed

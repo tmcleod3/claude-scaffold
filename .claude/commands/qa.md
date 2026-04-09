@@ -2,6 +2,16 @@
 
 **AGENT DEPLOYMENT IS MANDATORY.** Step 3 specifies parallel agent launches via the Agent tool. You MUST launch Oracle, Red Hood, Alfred, Deathstroke, Constantine, Cyborg, Raven, Wonder Woman, Batgirl, and Aquaman as separate sub-processes — do NOT shortcut to inline analysis. (Field report #68)
 
+## Content-Driven Agent Selection (ADR-042)
+Before starting QA, scan `git diff --stat` and add spot-check agents based on code content:
+- API endpoints/routes → add **Kim** (API design validation)
+- Financial calculations/currency → add **Vin** (statistical accuracy)
+- Auth/session code → add **Kenobi** (security edge cases)
+- DB queries/ORM → add **Torres** (performance, N+1 queries)
+- AI/LLM integration → add **Hari Seldon** (AI safety checks)
+
+**Promoted agent:** **Constantine** runs on every `/qa` final pass — finds code that works by accident.
+
 ## Context Setup
 1. Read `/logs/build-state.md` — understand current project state
 2. Read `/docs/methods/QA_ENGINEER.md`

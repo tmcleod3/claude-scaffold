@@ -2,6 +2,16 @@
 
 **AGENT DEPLOYMENT IS MANDATORY.** Steps 1 and 4 specify parallel agent launches via the Agent tool. You MUST actually launch these agents as separate sub-processes — do NOT shortcut to inline analysis, even if you think you can answer faster by reading files directly. The agents exist because parallel analysis catches things sequential reading misses. Skipping agent deployment is a protocol violation. (Field report #68)
 
+## Content-Driven Agent Selection (ADR-042)
+Before starting the review, scan `git diff --stat` and add agents based on code content:
+- Implementation feasibility concerns → add **Stark** (can this be built?)
+- Security implications in design → add **Kenobi** (attack surface review)
+- Performance-critical paths → add **Torres** (scaling analysis)
+- Statistical/ML architecture → add **Vin** (math assumptions review)
+- Financial transactions → add **Dockson** + **Steris** (treasury architecture)
+
+**Promoted agent:** **Riker** runs on every ADR written — challenges trade-offs.
+
 ## Context Setup
 1. Read `/logs/build-state.md` — understand current project state
 2. Read `/docs/methods/SYSTEMS_ARCHITECT.md`

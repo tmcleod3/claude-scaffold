@@ -26,6 +26,21 @@
 
 **Need more?** Pull from Star Wars pool: Luke, Han, Qui-Gon, Din Djarin, Cassian, Sabine. See NAMING_REGISTRY.md.
 
+## Cross-Domain Triggers (ADR-042)
+
+When the security audit encounters patterns in another domain, auto-deploy a spot-check agent:
+
+| Detected Pattern | Auto-Deploy | Spot-Check Scope |
+|-----------------|-------------|-----------------|
+| Architecture implications | **Picard** (architecture) | Does the security model fit the system design? |
+| Database access patterns | **Spock** (schema) | Are queries parameterized? IDOR risks? |
+| Frontend auth flows | **Samwise** (a11y) | Accessible error states? Keyboard-navigable auth? |
+| Financial/payment code | **Dockson** (treasury) | PCI compliance patterns, credential handling? |
+
+**Content-driven additions:** Scan `git diff --stat` at audit start. If diff contains deploy scripts → add **Kusanagi**. If WebSocket/SSE → add **Scotty**. If AI/LLM code → add **Hari Seldon**.
+
+**Promoted agent:** **Worf** runs on every `/review` that touches auth code — security-by-design, not security-after-build.
+
 ## Pre-Audit: Load Operational Learnings (optional)
 
 If `docs/LEARNINGS.md` exists, check for entries in the `security`, `vendor`, or `api-behavior` categories that may affect the audit scope — known auth quirks, credential constraints, or API behaviors that impact the security posture. (ADR-035)

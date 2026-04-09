@@ -23,6 +23,21 @@
 
 **Need more?** Pull from Star Trek pool: Riker, Worf, Sisko, Janeway, Seven, O'Brien, Pike. See NAMING_REGISTRY.md.
 
+## Cross-Domain Triggers (ADR-042)
+
+When the architecture review touches code in another domain, auto-deploy a spot-check agent:
+
+| Detected Pattern | Auto-Deploy | Spot-Check Scope |
+|-----------------|-------------|-----------------|
+| Implementation feasibility concerns | **Stark** (backend) | Can this design be built with current stack? |
+| Security implications in design | **Kenobi** (security) | Does this architecture expose attack surface? |
+| Performance-critical paths | **Torres** (performance) | Will this scale under load? |
+| Statistical/ML model architecture | **Vin** (statistical review) | Are the math assumptions sound? |
+
+**Content-driven additions:** Scan `git diff --stat` at review start. If diff contains database schema/migrations → add **Spock**. If API routes → add **Kim**. If auth/encryption → add **Tuvok**.
+
+**Promoted agent:** **Riker** runs on every ADR written in any command — challenges trade-offs, prevents rubber-stamped decisions.
+
 ## Goal
 
 Ensure architecture matches product needs. Identify structural risks and scaling cliffs before they're expensive. Decide, don't defer — one clear path, not a menu.

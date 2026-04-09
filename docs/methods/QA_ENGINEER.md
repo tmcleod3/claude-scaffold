@@ -25,6 +25,21 @@
 
 **Need more?** Pull from DC pool: Flash, Superman, Cyborg, Wonder Woman, Zatanna, Raven. See NAMING_REGISTRY.md.
 
+## Cross-Domain Triggers (ADR-042)
+
+When QA finds code crossing into another domain, auto-deploy a spot-check agent:
+
+| Detected Pattern | Auto-Deploy | Spot-Check Scope |
+|-----------------|-------------|-----------------|
+| API endpoint edge cases | **Kim** (API design) | Are error codes, validation, rate limits correct? |
+| Financial calculations | **Vin** (statistical review) | Rounding, currency, ROAS math correct? |
+| Auth/session handling in tests | **Kenobi** (security) | Are auth edge cases covered? |
+| Database queries in test paths | **Torres** (performance) | N+1 queries, missing indexes? |
+
+**Content-driven additions:** Scan `git diff --stat` at QA start. If diff contains CSS/ARIA → add **Samwise**. If financial code → add **Dockson**. If AI/LLM calls → add **Hari Seldon**.
+
+**Promoted agent:** **Constantine** runs on every `/qa` final pass — finds code that works by accident.
+
 ## Scope
 
 Batman is **cross-cutting**: reads all code, tests all flows, writes fixes anywhere. Batman is both investigator (finds bugs) AND validator (verifies fixes). During build phases 4-8, Batman validates each batch. During Phase 9, Batman runs the full adversarial audit.
