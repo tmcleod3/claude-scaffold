@@ -38,8 +38,8 @@ import {
 
 import type { SessionTokenState } from './oauth-core.js';
 
-import { appendToLog, atomicWrite, getTreasuryDir, getSpendLog, getRevenueLog, getBudgetsFile } from './financial-core.js';
-import { TREASURY_SUMMARY_FILE } from './treasury-reader.js';
+import { appendToLog, atomicWrite, getTreasuryDir, getSpendLog, getRevenueLog } from './financial-core.js';
+import { TREASURY_SUMMARY_FILE, readTreasurySummaryFromLogs } from './treasury-reader.js';
 
 import {
   registerTreasuryJobs, handleTreasuryRequest, executeTreasuryFreeze,
@@ -687,56 +687,39 @@ async function writeCurrentState(): Promise<void> {
 }
 
 /**
- * Write the treasury-summary.json cache file (v22.1 M2).
- * Computed from the same O(n) JSONL scan the daemon already does, then
- * persisted so external readers (Danger Room, portfolio) get O(1) reads.
+ * Write the treasury-summary.json cache file (v22.1 M2, CURSED-007 fix).
+ *
+ * Uses the same readTreasurySummaryFromLogs() function that the JSONL fallback
+ * uses, ensuring the cached summary is an exact snapshot of the authoritative
+ * computation. The daemon passes its in-memory heartbeat state as heartbeatData
+ * so stablecoin/funding fields are populated identically to the reader fallback.
  */
 async function writeTreasurySummaryFile(): Promise<void> {
   try {
-    const summary = await readTreasurySummary();
     const treasuryDir = activeTreasuryDir();
     await mkdir(treasuryDir, { recursive: true });
 
-    // Read budget data for budgetRemaining (CODE-003 fix: safe type access)
-    const summaryObj = summary as { spend?: number; revenue?: number; net?: number; roas?: number };
-    let budgetRemaining = 0;
-    const budgetsPath = getBudgetsFile(daemonProjectDir);
-    if (existsSync(budgetsPath)) {
-      try {
-        const budgetData = JSON.parse(await readFile(budgetsPath, 'utf-8')) as { totalBudgetCents?: number };
-        budgetRemaining = (budgetData.totalBudgetCents ?? 0) - (summaryObj.spend ?? 0);
-      } catch { /* malformed budgets file */ }
-    }
-
-    // Include treasury heartbeat state if available
+    // Build heartbeatData from the daemon's in-memory state — same shape the
+    // reader expects (treasury-reader.ts lines 198-207 read these fields)
     const treasurySnapshot = isStablecoinConfigured() ? getTreasuryStateSnapshot() : null;
-    // CODE-004 fix: only derive fundingState when runwayDays has been calculated (> 0)
-    const runway = treasurySnapshot?.runwayDays ?? null;
-    let fundingState: string | null = null;
-    if (treasurySnapshot) {
-      if (treasurySnapshot.fundingFrozen) fundingState = 'frozen';
-      else if (runway !== null && runway > 0 && runway < 7) fundingState = 'degraded';
-      else if (runway !== null && runway > 0) fundingState = 'healthy';
-    }
+    const heartbeatData = treasurySnapshot ? {
+      stablecoinBalanceCents: treasurySnapshot.stablecoinBalanceCents,
+      bankAvailableCents: treasurySnapshot.bankBalanceCents,
+      bankReservedCents: 0,
+      runwayDays: treasurySnapshot.runwayDays,
+      fundingState: treasurySnapshot.fundingFrozen ? 'frozen'
+        : treasurySnapshot.runwayDays > 0 && treasurySnapshot.runwayDays < 7 ? 'degraded'
+        : treasurySnapshot.runwayDays > 0 ? 'healthy' : null,
+      nextTreasuryEvent: null,
+    } : undefined;
 
-    const summaryData = {
-      spend: summaryObj.spend ?? 0,
-      revenue: summaryObj.revenue ?? 0,
-      net: summaryObj.net ?? 0,
-      roas: summaryObj.roas ?? 0,
-      budgetRemaining,
-      stablecoinBalance: treasurySnapshot?.stablecoinBalanceCents ?? null,
-      pendingOfframps: treasurySnapshot?.pendingTransferCount ?? 0,
-      bankAvailable: treasurySnapshot?.bankBalanceCents ?? null,
-      bankReserved: null as number | null,
-      runwayDays: runway,
-      fundingState,
-      unsettledInvoices: 0,
-      reconciliationStatus: treasurySnapshot?.lastReconciliationAt ? 'matched' : null,
-      timestamp: new Date().toISOString(),
-    };
+    // Use the authoritative JSONL reader — same function the fallback path uses
+    const summary = await readTreasurySummaryFromLogs(treasuryDir, heartbeatData);
 
-    await atomicWrite(join(treasuryDir, TREASURY_SUMMARY_FILE), JSON.stringify(summaryData));
+    await atomicWrite(
+      join(treasuryDir, TREASURY_SUMMARY_FILE),
+      JSON.stringify({ ...summary, timestamp: new Date().toISOString() }),
+    );
   } catch {
     // Non-fatal — summary is a cache, JSONL remains authoritative
   }

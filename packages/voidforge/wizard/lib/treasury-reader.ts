@@ -142,7 +142,7 @@ export async function readTreasurySummary(
  * O(n) JSONL log scan — the original read path before v22.1.
  * Used as fallback when treasury-summary.json is unavailable.
  */
-async function readTreasurySummaryFromLogs(
+export async function readTreasurySummaryFromLogs(
   treasuryDir: string,
   heartbeatData?: unknown,
 ): Promise<TreasurySummary> {
