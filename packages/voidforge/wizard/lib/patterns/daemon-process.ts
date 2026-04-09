@@ -24,12 +24,16 @@ import { join } from 'node:path';
 import { homedir, platform } from 'node:os';
 
 const VOIDFORGE_DIR = join(homedir(), '.voidforge');
-const RUN_DIR = join(VOIDFORGE_DIR, 'run');
-const PID_FILE = join(RUN_DIR, 'heartbeat.pid');
-const SOCKET_PATH = join(RUN_DIR, 'heartbeat.sock');
-const TOKEN_FILE = join(VOIDFORGE_DIR, 'heartbeat.token');
-const STATE_FILE = join(VOIDFORGE_DIR, 'heartbeat.json');
-const LOG_FILE = join(VOIDFORGE_DIR, 'heartbeat.log');
+const GLOBAL_RUN_DIR = join(VOIDFORGE_DIR, 'run');
+const GLOBAL_PID_FILE = join(GLOBAL_RUN_DIR, 'heartbeat.pid');
+
+// Mutable paths — overridden by configurePaths() for per-project daemons (v22.0 M2)
+let RUN_DIR = GLOBAL_RUN_DIR;
+let PID_FILE = GLOBAL_PID_FILE;
+let SOCKET_PATH = join(RUN_DIR, 'heartbeat.sock');
+let TOKEN_FILE = join(VOIDFORGE_DIR, 'heartbeat.token');
+let STATE_FILE = join(VOIDFORGE_DIR, 'heartbeat.json');
+let LOG_FILE = join(VOIDFORGE_DIR, 'heartbeat.log');
 
 type DaemonState = 'starting' | 'healthy' | 'degraded' | 'recovering' | 'recovery_failed' | 'shutting_down' | 'stopped';
 
@@ -325,6 +329,38 @@ function createLogger(logPath: string): { log: (msg: string) => void; close: () 
   };
 }
 
+/**
+ * Configure daemon paths for a per-project daemon (v22.0 ADR-041 M2).
+ * Must be called BEFORE writePidFile(), generateSessionToken(), etc.
+ *
+ * @param projectDir — Absolute path to the project root
+ */
+function configurePaths(projectDir: string): void {
+  const cultivationDir = join(projectDir, 'cultivation');
+  RUN_DIR = cultivationDir;
+  PID_FILE = join(cultivationDir, 'heartbeat.pid');
+  SOCKET_PATH = join(cultivationDir, 'heartbeat.sock');
+  TOKEN_FILE = join(cultivationDir, 'heartbeat.token');
+  STATE_FILE = join(cultivationDir, 'heartbeat.json');
+  LOG_FILE = join(cultivationDir, 'heartbeat.log');
+}
+
+/**
+ * Dual-daemon guard (ADR-041 La Forge CRITICAL finding).
+ * Checks if a global daemon is running at ~/.voidforge/run/heartbeat.pid.
+ * Returns true if a global daemon is alive — the per-project daemon should refuse to start.
+ */
+async function checkGlobalDaemon(): Promise<boolean> {
+  if (!existsSync(GLOBAL_PID_FILE)) return false;
+  try {
+    const pid = parseInt(await readFile(GLOBAL_PID_FILE, 'utf-8'));
+    process.kill(pid, 0);
+    return true; // Global daemon is alive
+  } catch {
+    return false; // Not running or stale
+  }
+}
+
 export {
   writePidFile, checkStalePid, removePidFile,
   generateSessionToken, validateToken,
@@ -333,6 +369,8 @@ export {
   setupSignalHandlers,
   JobScheduler,
   createLogger,
+  configurePaths,
+  checkGlobalDaemon,
   PID_FILE, SOCKET_PATH, TOKEN_FILE, STATE_FILE, LOG_FILE,
 };
 export type { DaemonState, HeartbeatState, ScheduledJob };

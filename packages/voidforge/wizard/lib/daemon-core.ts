@@ -8,6 +8,7 @@ export {
   createSocketServer, startSocketServer,
   writeState, setupSignalHandlers,
   JobScheduler, createLogger,
+  configurePaths, checkGlobalDaemon,
   STATE_FILE, SOCKET_PATH, TOKEN_FILE,
 } from './patterns/daemon-process.js';
 export type { HeartbeatState, DaemonState } from './patterns/daemon-process.js';
