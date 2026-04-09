@@ -37,7 +37,7 @@ import {
 
 import type { SessionTokenState } from './oauth-core.js';
 
-import { appendToLog, atomicWrite, SPEND_LOG, REVENUE_LOG, TREASURY_DIR } from './financial-core.js';
+import { appendToLog, atomicWrite, getTreasuryDir, getSpendLog, getRevenueLog } from './financial-core.js';
 
 import {
   registerTreasuryJobs, handleTreasuryRequest, executeTreasuryFreeze,
@@ -49,8 +49,8 @@ import { transition } from './campaign-state-machine.js';
 import type { CampaignStatus } from './campaign-state-machine.js';
 import type { AdPlatformAdapter, CampaignConfig, AdPlatform } from './financial/campaign/base.js';
 
-const PENDING_OPS = join(TREASURY_DIR, 'pending-ops.jsonl');
-const CAMPAIGNS_DIR = join(TREASURY_DIR, 'campaigns');
+function activePendingOps(): string { return join(activeTreasuryDir(), 'pending-ops.jsonl'); }
+function activeCampaignsDir(): string { return join(activeTreasuryDir(), 'campaigns'); }
 const VOIDFORGE_DIR = join(homedir(), '.voidforge');
 
 // ── Hash Chain Helper ────────────────────────────────────
@@ -79,9 +79,15 @@ let eventId = 0;
 const logger = createLogger(join(VOIDFORGE_DIR, 'heartbeat.log'));
 const daemonStartedAt = new Date().toISOString(); // Store once at module level (VG-R1-001)
 
-// Project ID for JSONL log entries (ADR-041 M0.4).
-// Set to 'global' until M2 wires in --project-dir CLI arg.
+// Project ID and directory for per-project operations (ADR-041 M0.4 + M3).
+// Set to defaults until M2 wires in --project-dir CLI arg via setDaemonProjectDir().
 let daemonProjectId = 'global';
+let daemonProjectDir: string | undefined;
+
+/** Get the active treasury dir — per-project if configured, else global. */
+function activeTreasuryDir(): string { return getTreasuryDir(daemonProjectDir); }
+function activeSpendLog(): string { return getSpendLog(daemonProjectDir); }
+function activeRevenueLog(): string { return getRevenueLog(daemonProjectDir); }
 
 // Platform state tracking
 const platformFailures: Record<string, number> = {};
@@ -245,14 +251,14 @@ async function writeCampaignRecord(record: CampaignRecord): Promise<void> {
   if (!validateCampaignId(record.campaignId)) {
     throw new Error(`Invalid campaign ID format: ${record.campaignId.slice(0, 20)}`);
   }
-  await mkdir(CAMPAIGNS_DIR, { recursive: true });
-  const filePath = join(CAMPAIGNS_DIR, `${record.campaignId}.json`);
+  await mkdir(activeCampaignsDir(), { recursive: true });
+  const filePath = join(activeCampaignsDir(), `${record.campaignId}.json`);
   await atomicWrite(filePath, JSON.stringify(record, null, 2));
 }
 
 async function readCampaignRecord(campaignId: string): Promise<CampaignRecord | null> {
   if (!validateCampaignId(campaignId)) return null;
-  const filePath = join(CAMPAIGNS_DIR, `${campaignId}.json`);
+  const filePath = join(activeCampaignsDir(), `${campaignId}.json`);
   try {
     const content = await readFile(filePath, 'utf-8');
     return JSON.parse(content) as CampaignRecord;
@@ -386,7 +392,7 @@ async function handleCampaignPause(id: string): Promise<{ status: number; body: 
     record.updatedAt = new Date().toISOString();
     await writeCampaignRecord(record);
     eventId++;
-    await appendToLog(SPEND_LOG, { type: 'campaign_pause', campaignId: id, projectId: daemonProjectId, timestamp: record.updatedAt }, await getLastLogHash(SPEND_LOG));
+    await appendToLog(activeSpendLog(), { type: 'campaign_pause', campaignId: id, projectId: daemonProjectId, timestamp: record.updatedAt }, await getLastLogHash(activeSpendLog()));
     logger.log(`Campaign ${id} paused on ${record.platform}`);
     return { status: 200, body: { ok: true, campaignId: id, status: 'paused' } };
   } catch (err: unknown) {
@@ -411,7 +417,7 @@ async function handleCampaignResume(id: string): Promise<{ status: number; body:
     record.updatedAt = new Date().toISOString();
     await writeCampaignRecord(record);
     eventId++;
-    await appendToLog(SPEND_LOG, { type: 'campaign_resume', campaignId: id, projectId: daemonProjectId, timestamp: record.updatedAt }, await getLastLogHash(SPEND_LOG));
+    await appendToLog(activeSpendLog(), { type: 'campaign_resume', campaignId: id, projectId: daemonProjectId, timestamp: record.updatedAt }, await getLastLogHash(activeSpendLog()));
     logger.log(`Campaign ${id} resumed on ${record.platform}`);
     return { status: 200, body: { ok: true, campaignId: id, status: 'active' } };
   } catch (err: unknown) {
@@ -493,7 +499,7 @@ async function handleCampaignLaunch(body: unknown): Promise<{ status: number; bo
     await writeCampaignRecord(record);
 
     // Log spend event
-    await appendToLog(SPEND_LOG, {
+    await appendToLog(activeSpendLog(), {
       type: 'campaign_launch',
       campaignId,
       projectId: daemonProjectId,
@@ -501,7 +507,7 @@ async function handleCampaignLaunch(body: unknown): Promise<{ status: number; bo
       platform: config.platform,
       dailyBudgetCents: config.dailyBudgetCents,
       timestamp: now,
-    }, await getLastLogHash(SPEND_LOG));
+    }, await getLastLogHash(activeSpendLog()));
 
     eventId++;
     logger.log(`Campaign launched: ${campaignId} → ${result.externalId} on ${config.platform} (status: ${record.status})`);
@@ -570,14 +576,14 @@ async function handleBudgetChange(body: unknown): Promise<{ status: number; body
     record.updatedAt = new Date().toISOString();
     await writeCampaignRecord(record);
 
-    await appendToLog(SPEND_LOG, {
+    await appendToLog(activeSpendLog(), {
       type: 'budget_change',
       campaignId: params.campaignId,
       projectId: daemonProjectId,
       oldBudgetCents: oldBudget,
       newBudgetCents: params.newBudgetCents,
       timestamp: record.updatedAt,
-    }, await getLastLogHash(SPEND_LOG));
+    }, await getLastLogHash(activeSpendLog()));
 
     eventId++;
     logger.log(`Budget changed: ${params.campaignId} $${(oldBudget / 100).toFixed(2)} → $${(params.newBudgetCents / 100).toFixed(2)}`);
@@ -678,7 +684,7 @@ async function writeCurrentState(): Promise<void> {
 
 async function readCampaigns(): Promise<unknown[]> {
   // v17.0: Read campaign state from treasury directory
-  const campaignsDir = join(TREASURY_DIR, 'campaigns');
+  const campaignsDir = activeCampaignsDir();
   try {
     const { readdir } = await import('node:fs/promises');
     if (!existsSync(campaignsDir)) return [];
@@ -701,8 +707,8 @@ async function readTreasurySummary(): Promise<unknown> {
     let totalSpendCents = 0;
     let totalRevenueCents = 0;
 
-    if (existsSync(SPEND_LOG)) {
-      const lines = (await readFile(SPEND_LOG, 'utf-8')).trim().split('\n').filter(Boolean);
+    if (existsSync(activeSpendLog())) {
+      const lines = (await readFile(activeSpendLog(), 'utf-8')).trim().split('\n').filter(Boolean);
       for (const line of lines) {
         try {
           const entry = JSON.parse(line) as { amountCents?: number };
@@ -712,8 +718,8 @@ async function readTreasurySummary(): Promise<unknown> {
       }
     }
 
-    if (existsSync(REVENUE_LOG)) {
-      const lines = (await readFile(REVENUE_LOG, 'utf-8')).trim().split('\n').filter(Boolean);
+    if (existsSync(activeRevenueLog())) {
+      const lines = (await readFile(activeRevenueLog(), 'utf-8')).trim().split('\n').filter(Boolean);
       for (const line of lines) {
         try {
           const entry = JSON.parse(line) as { amountCents?: number };
@@ -877,13 +883,13 @@ interface PendingOp {
 }
 
 async function writePendingOp(op: PendingOp): Promise<void> {
-  await mkdir(TREASURY_DIR, { recursive: true });
-  await appendFile(PENDING_OPS, JSON.stringify(op) + '\n', 'utf-8');
+  await mkdir(activeTreasuryDir(), { recursive: true, mode: 0o700 });
+  await appendFile(activePendingOps(), JSON.stringify(op) + '\n', 'utf-8');
 }
 
 async function reconcilePendingOps(): Promise<void> {
-  if (!existsSync(PENDING_OPS)) return;
-  const content = await readFile(PENDING_OPS, 'utf-8');
+  if (!existsSync(activePendingOps())) return;
+  const content = await readFile(activePendingOps(), 'utf-8');
   const lines = content.trim().split('\n').filter(Boolean);
 
   for (const line of lines) {
@@ -980,9 +986,14 @@ export async function startHeartbeat(vaultPassword: string): Promise<void> {
 
 // SEC-007: vaultKey is NOT exported — vault password must not be accessible outside the daemon
 // readCampaigns + readTreasurySummary exported for unit testing (read-only, no security risk)
-/** Set the project ID for JSONL log entries (called by M2 daemon startup with --project-dir). */
+/** Set the project ID for JSONL log entries (called by daemon startup with --project-dir). */
 function setDaemonProjectId(id: string): void {
   daemonProjectId = id;
 }
 
-export { daemonState, readCampaigns, readTreasurySummary, setDaemonProjectId };
+/** Set the project directory for per-project financial paths (called by daemon startup with --project-dir). */
+function setDaemonProjectDir(dir: string): void {
+  daemonProjectDir = dir;
+}
+
+export { daemonState, readCampaigns, readTreasurySummary, setDaemonProjectId, setDaemonProjectDir };
