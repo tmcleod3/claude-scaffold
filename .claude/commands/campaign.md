@@ -187,15 +187,21 @@ All PRD requirements are COMPLETE or explicitly BLOCKED:
 
 **Victory ≠ "everything built." Victory = "everything buildable was built correctly, survived the Gauntlet, and everything unbuildable is explicitly acknowledged."**
 
-## Arguments
+## Arguments (ADR-043: Max by Default)
+
+Default is autonomous + full agent roster. Flags opt OUT of quality, not into it.
+
+- No arguments → autonomous + full roster + all review passes (was: `--blitz --muster`)
 - `--plan [description]` → planning mode: update PRD and/or ROADMAP.md with new ideas, don't build
 - `--resume` → resume from campaign-state's active mission
 - `--fast` → pass --fast to every /assemble call (skip Crossfire + Council per-mission). Minimum: 1 review round per mission even in --fast mode. Never 0.
-- `--blitz` → full autonomous mode: skips mission confirmation prompts, auto-continues between missions, auto-debriefs after each mission. Does NOT imply `--fast` — full review quality is preserved. Combine with `--fast` explicitly if you want reduced reviews. Use when you want to walk away and come back to a built project.
-- `--autonomous` → supervised autonomy: same as blitz PLUS `git tag` before each mission, critical-finding rollback, 5-mission human checkpoints. Safer for 10+ mission campaigns. See CAMPAIGN.md "Autonomous Mode" for full guardrails.
+- `--light` → standard agents only, skip cross-domain spot-checks and muster roster
+- `--interactive` → pause for human confirmation between missions (old default behavior)
+- `--solo` → lead agent only, no sub-agents (quick checks)
+- `--autonomous` → supervised autonomy: same as default PLUS `git tag` before each mission, critical-finding rollback, 5-mission human checkpoints. Safer for 10+ mission campaigns. See CAMPAIGN.md "Autonomous Mode" for full guardrails.
 - `--continuous` → after Victory, auto-start the next roadmap version within the same major (v9.3→v9.4, stops before v10.0). Add `--major` to cross major boundaries and never stop cooking.
 - `--mission "Name"` → jump to a specific PRD section
-- `--muster` → Per-mission full-roster deployment. Every viable agent across all 9 universes reviews each mission in 3 waves. Expensive — use for critical missions. See `docs/methods/MUSTER.md`. **ENFORCEMENT: Must launch Agent tool sub-processes per MUSTER.md. Inline analysis is not a Muster.**
-- No arguments → start fresh or auto-detect state
+- `--blitz` → **Retired (no-op).** Accepted silently for backward compat — default is now autonomous.
+- `--muster` → **Retired (no-op).** Accepted silently for backward compat — default is now full roster.
 
 **VICTORY GAUNTLET IS NEVER SKIPPED.** Not for methodology-only campaigns. Not for "no code changes." The Gauntlet checks methodology consistency (cross-references, command↔doc sync, agent assignments, version drift) in addition to code. Five campaigns (v8.1-v9.2) shipped without Gauntlets — this is a protocol violation.

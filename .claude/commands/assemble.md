@@ -194,7 +194,10 @@ After the summary, Wong extracts learnings for future builds:
 - Fixes happen BETWEEN rounds, not batched at the end
 - The Crossfire (Phase 12) and Council (Phase 13) can be skipped with `/assemble --fast`
 - `/assemble --resume` picks up from the last completed phase in assemble-state.md
-- `--blitz` — Autonomous execution: no pause between phases, auto-continue. Does NOT imply --fast.
+- `--interactive` — Pause for human confirmation between phases (default is now autonomous per ADR-043).
+- `--light` — Standard agents only, skip cross-domain spot-checks.
+- `--solo` — Lead agent only per phase, no sub-agents.
+- `--blitz` — **Retired (no-op).** Default is now autonomous.
 
 ## Handoffs
 - If any phase is blocked by an issue outside its domain, log to `/logs/handoffs.md` and continue to the next phase

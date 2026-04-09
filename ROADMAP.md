@@ -218,11 +218,11 @@
 
 ---
 
-## v22.2 — The Polish
+## v22.2 — The Polish ✓
 
 *"It's not enough that we do our best; sometimes we must do what is required." — Picard*
 
-**Depends on: v22.1 complete. Campaign 31.**
+**Status: COMPLETE (Campaign 31 — 7/7 missions)**
 
 **The problem:** v22.0 shipped the architecture, v22.0.x fixed the bugs, v22.1 handles migration. v22.2 closes the experience gaps — what a new user encounters on day 1, what legacy code should be deprecated, and what the /portfolio command needs to work with per-project data.
 

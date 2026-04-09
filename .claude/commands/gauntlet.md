@@ -111,17 +111,22 @@ Present the final summary:
 **If findings remain:**
 Present them with severity and recommendation. The user decides whether to ship or iterate.
 
-## Arguments
-- No arguments → full 5-round gauntlet
+## Arguments (ADR-043: Max by Default)
+
+Default is now maximum intensity (was `--infinity`). Flags opt out.
+
+- No arguments → 10-round Infinity Gauntlet with full roster (~60-80 agent launches). **ENFORCEMENT: Must launch Agent tool sub-processes. Inline analysis is not a Gauntlet.**
 - `--fast` → 3 rounds only (skip Round 4 Crossfire + Round 5 Council). (formerly `--quick` — renamed v17.3 for cross-command consistency)
+- `--light` → 5-round standard gauntlet with core agents only (pre-ADR-043 default behavior)
 - `--security-only` → 4 rounds of security only (Kenobi marathon)
 - `--ux-only` → 4 rounds of UX only (Galadriel marathon)
 - `--qa-only` → 4 rounds of QA only (Batman marathon)
 - `--resume` → resume from last completed round (reads gauntlet state from logs)
 - `--ux-extra` → Extra Éowyn enchantment emphasis across all rounds. Galadriel's team proposes micro-animations, copy improvements, and delight moments beyond standard usability/a11y.
-- `--assess` → **Pre-build assessment.** Rounds 1-2 only (Discovery + First Strike), no fix batches. Produces assessment report grouped by root cause. For evaluating existing codebases before a rebuild or migration — not for post-build hardening. See also `/assess` command which chains this with architecture review and PRD gap analysis.
-- `--infinity` → **The Infinity Gauntlet.** 10 rounds (2x full pass). Every active agent deployed as its own dedicated sub-process — not combined, not summarized. ~60-80 agent launches across all 9 universes. The full ~110 active roster called off the bench. See GAUNTLET.md "The Infinity Gauntlet" section for the complete wave structure. Use after completing a major version or before first production ship.
-- `--muster` → Synonym for `--infinity`. The Gauntlet already deploys the full roster at maximum intensity — `--muster` is the universal flag name for the same concept. **ENFORCEMENT: Must launch Agent tool sub-processes. Inline analysis is not a Muster.**
+- `--assess` → **Pre-build assessment.** Rounds 1-2 only (Discovery + First Strike), no fix batches. Produces assessment report grouped by root cause.
+- `--solo` → Lead agent per domain only, no sub-agents (quick spot-check).
+- `--infinity` → **Retired (no-op).** Default is now maximum intensity.
+- `--muster` → **Retired (no-op).** Default is now full roster.
 
 ## Operating Rules
 - Update `/logs/gauntlet-state.md` after EVERY round
