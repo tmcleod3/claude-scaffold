@@ -46,6 +46,22 @@ Structure all findings as:
 4. **Data Model Review** — Schema gaps, missing indices, relationship issues
 5. **Integration Points** — External service handling, retry logic, circuit breakers
 
+## Operational Learnings
+
+- **Node.js Single-Process Mutex:** The check-and-set MUST be synchronous (same event loop tick). Never put `await` between the check and the set. Two requests arriving in the same tick can both see `lock === false` if async work separates check from set. Pattern: `if (lock) return 429; lock = true; try { await work(); } finally { lock = false; }` (Field report #20: 100+ lines of async work between check and set.)
+- **Every optimized path must have a fallback:** If a fast/cheap model path fails (Sonnet-only, cached response, edge function), fall back to the standard path (Opus, fresh computation, origin server). Detect truncation in AI outputs (unbalanced braces, missing closing tags) before compilation. Never have a single-model path with no recovery.
+- **IP extraction priority:** `cf-connecting-ip` (Cloudflare) > `x-real-ip` (nginx) > `x-forwarded-for` (first entry) > `req.socket.remoteAddress`. Never trust `x-forwarded-for` alone -- it is client-spoofable.
+- **Synchronous lock acquisition before async work prevents TOCTOU:** In Node.js, for single-process mutex patterns, always check-and-set in the same synchronous block. Never put async work between check and set.
+- **Clamp values BEFORE constructing the object that consumes them:** JavaScript objects capture values by-value at construction time. Reassigning the variable AFTER object creation does NOT update the object's field. (Field report: PTY spawned with unclamped values.)
+- **Config boot needs merge, not single-winner:** All-or-nothing config loading (single source wins) is an antipattern. Boot sequences should merge from multiple sources with a priority chain (env vars > DB > file defaults). A boot that succeeds with 0 loaded items is a critical operational risk -- fail-closed or log at CRITICAL.
+- **Sync-to-async signature change cascades to all callers:** Changing a function from sync to async is a breaking API change. Grep all callers before making the change; expect test file updates proportional to call-site count.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/BACKEND_ENGINEER.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Method doc: `/docs/methods/BACKEND_ENGINEER.md`

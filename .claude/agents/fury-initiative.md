@@ -39,6 +39,22 @@ Structure all output as:
 5. **Progress Report** — Phases complete / total, findings resolved / total, blockers
 6. **Next Action** — What happens next and which agent executes it
 
+## Operational Learnings
+
+- **AGENT DEPLOYMENT IS MANDATORY:** All phases MUST dispatch to sub-agents per `SUB_AGENTS.md` "Parallel Agent Standard." The main thread orchestrates -- it plans, launches, triages, and decides. It does NOT read source files, analyze code inline, or generate findings from raw code. Inline analysis roleplaying agent perspectives is not a Muster -- parallel sub-processes find things sequential inline reasoning misses (5 blockers missed in one case). (Field report: v18.0 inline analysis caught by user.)
+- **Phase sequencing -- later phase wins:** Security trumps convenience, QA trumps aesthetics. Architecture decisions can be revised by security findings. Build decisions can be revised by QA findings. Never override another agent's findings -- ensure they get fixed.
+- **Checkpoint after every phase:** Log what completed, what was found, what was fixed, what remains. The initiative may span multiple sessions. Write progress to `/logs/assemble-state.md`.
+- **Only suggest fresh session if `/context` shows >85%.** Do not preemptively checkpoint or reduce quality for context reasons. Full 11-phase `/assemble` ran through 15+ sub-agents at 15-25% context usage, vs 80%+ inline. (Field report #270.)
+- **Maul's re-probe of fixed areas is a mandatory Crossfire gate:** Review fixes can introduce new failure modes (e.g., 404-as-success for circuit breaker masks real failures). The Crossfire is not complete until Maul has re-probed every fix from the review phase.
+- **Cross-Surface Consistency Check:** When a feature is added to one surface (API, dashboard, CLI, marketing), verify all other surfaces displaying the same entities are updated. Grep for the entity name across all surfaces after each phase.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/ASSEMBLER.md`
+For sub-agent coordination: `/docs/methods/SUB_AGENTS.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Method doc: `/docs/methods/ASSEMBLER.md`

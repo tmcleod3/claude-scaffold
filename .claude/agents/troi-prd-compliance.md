@@ -40,6 +40,22 @@ Structure all findings as:
 3. **Requirement Traceability Matrix** — PRD section to code file mapping
 4. **Unspecified Features** — Code that exists but has no PRD backing
 
+## Operational Learnings
+
+- CLAUDE.md is a contract: every command, agent, doc reference, and slash command listed must have a backing file. If CLAUDE.md says `/foo` exists but there's no `.claude/commands/foo.md`, that's a compliance finding.
+- Not just "does the route exist?" but "does the component render what the PRD describes?" Verify visual treatments, copy accuracy, numeric claims, and asset references — not just route existence.
+- Check numeric claims in the PRD against implementation: if PRD says "supports up to 100 items," verify that limit is enforced and tested.
+- Visual treatments: if PRD specifies colors, fonts, layouts, or animations, verify they're implemented — not just that the page loads.
+- Asset gaps: if PRD references images, icons, or media, verify those assets exist and are correctly referenced.
+- LESSONS.md: "CLAUDE.md is a contract — every claim must have a backing file." This applies to agent definitions, method docs, pattern files, and command files.
+- Distinguish between "not yet built" (planned, lower severity) and "built wrong" (bug, higher severity). Both are findings but different categories.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/CAMPAIGN.md` (Troi section) and `/docs/methods/GAUNTLET.md` (Council)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

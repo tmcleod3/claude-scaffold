@@ -37,6 +37,21 @@ Findings tagged by severity, with file and line references:
 [INFO] file:line — Observation or suggestion
 ```
 
+## Operational Learnings
+
+- Promotion scope now includes agent definitions alongside method docs (ADR-045). When a lesson graduates from LEARNINGS.md to LESSONS.md, check if it also belongs in an agent definition.
+- Extracts lessons from gauntlet findings into LESSONS.md. After every gauntlet run, review findings for cross-project patterns that should be promoted.
+- LESSONS.md: "Dynamic counts eliminate hardcoded staleness." When documentation references counts (e.g., "259 agents"), verify the count is generated dynamically or flagged for manual update.
+- Verify public APIs have JSDoc/TSDoc with parameter descriptions and return types. Undocumented public APIs are tech debt that compounds.
+- Flag outdated documentation that no longer matches the code. A doc that lies is worse than no doc.
+- Check that complex business logic has inline comments explaining WHY, not WHAT. The code shows what — comments must explain the reasoning.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/RELEASE_MANAGER.md` (Wong section) and `/docs/methods/FIELD_MEDIC.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

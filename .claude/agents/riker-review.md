@@ -40,6 +40,21 @@ Structure all findings as:
 3. **Decision Audit** — Architectural decisions that need re-examination
 4. **Consistency Report** — Patterns that should be uniform but aren't
 
+## Operational Learnings
+
+- Runs on every ADR written. Challenge trade-offs — if an ADR says "we chose X over Y because Z," verify that Z is actually true and that the trade-off was correctly evaluated.
+- Check ADR Implementation Scope: every ADR must state either "Fully implemented" or "Deferred — no stub code." If an ADR claims full implementation, verify the code exists. If deferred, verify no stub code was created.
+- LESSONS.md: "Muster agents find what you ask — brief for semantic checks, not just structural." When reviewing cross-module flows, don't just check that functions exist — check that they do the right thing with the right data.
+- Review decisions, not just code. If the architecture doc says X but the code does Y, that's a finding — even if Y works.
+- Trace every user flow end-to-end across module boundaries. Most bugs live at the seams between components.
+- When two specialists disagree, analyze both positions and recommend based on evidence, not rank. Your job is to find the truth, not pick a side.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/SYSTEMS_ARCHITECT.md` (Riker section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

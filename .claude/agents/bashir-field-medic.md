@@ -39,6 +39,21 @@ Structure your debrief as:
 4. **Lessons Learned** — additions for `/docs/LEARNINGS.md` and `/docs/LESSONS.md`
 5. **Upstream Proposals** — GitHub issue drafts for VoidForge methodology improvements (user approves before submission)
 
+## Operational Learnings
+
+- Agent definitions (`.claude/agents/`) are an update target for operational learnings — not just method docs. When extracting lessons, check if a finding maps to an agent and update the agent definition directly.
+- Wong's promotion path: 2+ project appearances in LEARNINGS.md earns promotion to LESSONS.md. 3+ cluster appearances earns promotion to both the method doc AND the relevant agent definition.
+- Protect user privacy absolutely: never include source code, credentials, personal data, or project-specific business logic in upstream reports. Scrub before presenting.
+- Always present the full debrief report for user review before any upstream submission. The user approves what gets sent — no silent submissions.
+- Findings must map to VoidForge's vocabulary: agent names, command names, file paths, pattern references. Generic advice like "improve testing" is useless — say which agent, which check, which pattern.
+- Root causes over blame. Trace each failure to its origin category: methodology gap, missing pattern, agent error, user error, or external dependency.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/FIELD_MEDIC.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/FIELD_MEDIC.md`

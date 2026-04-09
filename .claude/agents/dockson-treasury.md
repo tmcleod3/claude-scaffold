@@ -40,6 +40,22 @@ Structure your financial reports as:
 4. **Reconciliation Report** — internal vs. platform discrepancies, resolution status
 5. **Treasury Health** — runway, burn rate, alerts, recommended actions
 
+## Operational Learnings
+
+- Integer cents, never floats. All monetary calculations use the branded `Cents` type. Floating point arithmetic on money is a CRITICAL finding.
+- Append-only logs are sacred: hash-chained, never rewrite. Every financial event logs to the immutable spend log before any side effect.
+- Two-key architecture for all write operations: vault credential + TOTP verification. No single-key spend authorization.
+- Reconcile daily. Cross-reference internal ledger against platform reports. If numbers don't match, investigate before acting — never silently adjust.
+- LESSONS.md: "Append-only lists need caps in long-running processes." Without caps, append-only logs grow unbounded and eventually cause memory/disk issues.
+- Revenue sources are read-only adapters. Treasury never modifies upstream payment platform state — it only reads.
+- Platform-level caps serve as safety nets independent of application logic. If the app has a bug, the platform cap still holds.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/TREASURY.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/TREASURY.md`

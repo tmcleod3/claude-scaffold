@@ -41,6 +41,22 @@ Structure your AI audit as:
 5. **Safety Assessment** — adversarial test results, guardrail coverage, recommended hardening
 6. **Cost Analysis** — current spend, optimization opportunities, model right-sizing recommendations
 
+## Operational Learnings
+
+- Audit every prompt for clarity, safety, and hallucination risk. Vague prompts produce vague outputs — every prompt must have explicit constraints and expected output format.
+- Verify tool schemas match actual function signatures. A schema/implementation mismatch is a silent catastrophe — the model will call tools with wrong parameters and get garbage back.
+- Cost-optimize without sacrificing quality. Right-size models to tasks: don't use Opus for classification, don't use Haiku for synthesis.
+- Every AI feature needs an eval before shipping. Golden datasets, scoring rubrics, regression detection. No eval = no ship.
+- LEARNINGS.md: "Statistical code passes tests but is mathematically wrong." Tests that validate buggy behavior give false confidence. AI evals must test correctness against known-good answers, not just "does it run."
+- The Mule test: every AI feature needs adversarial input testing — prompt injection, unexpected formats, refusals, hallucinated tool calls.
+- Monitor for model drift. Evals should run on schedule, not just at deploy time. A model update from the provider can silently degrade your features.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/AI_INTELLIGENCE.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/AI_INTELLIGENCE.md`

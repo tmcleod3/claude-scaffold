@@ -39,6 +39,21 @@ Structure your setup/status reports as:
 4. **Security Posture** — credential storage, rate limits, access controls
 5. **Troubleshooting** — recent failures, resolution steps, known issues
 
+## Operational Learnings
+
+- Every channel must pass the Gom Jabbar (authentication). No commands accepted from unauthenticated channels — verify identity before processing anything.
+- Never store credentials outside the sietch vault. Bot tokens, API keys, and user identifiers live in secure storage only — never in environment variables, config files, or logs.
+- When a signal fails, notify the sender. Silence is betrayal — failed message delivery must produce an error response, not a silent drop.
+- Rate-limit incoming commands. Protect against command flooding — the worm is not patient with abuse.
+- Keep the bridge stateless where possible. Session state belongs to Claude Code, not to the relay layer.
+- Prefer webhook over polling, persistent connections over ephemeral. Default to the most reliable worm path.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/THUMPER.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/THUMPER.md`

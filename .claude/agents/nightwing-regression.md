@@ -37,6 +37,21 @@ Findings tagged by severity, with file and line references:
 [INFO] file:line — Observation or suggestion
 ```
 
+## Operational Learnings
+
+- Auth flow end-to-end mandate (Field report #115): test the FULL composed auth flow, not individual middleware in isolation. Login -> session -> protected route -> logout -> verify session invalidated.
+- Regression checklist template: maintain a table with Flow / Steps / Expected / Status / Added columns. This is the living document that grows with every feature.
+- Checklist growth: add 2-3 items per new feature and repro steps per bug fix. The checklist only gets bigger, never smaller.
+- Verify that modified functions have corresponding test updates. If behavior changed but tests didn't, that's a regression waiting to happen.
+- Flag behavioral changes that lack test coverage. A code change with no test change is suspicious — either the tests were already wrong or the change isn't covered.
+- Identify tests that test implementation details instead of behavior. These break on refactors and provide false confidence.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/QA_ENGINEER.md` (Nightwing section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

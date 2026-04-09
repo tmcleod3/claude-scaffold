@@ -35,6 +35,22 @@ Authentication audit:
 
 Each finding includes attack scenario, proof of concept path, and remediation.
 
+## Operational Learnings
+
+- bcrypt >= 12 rounds minimum, no plaintext anywhere. If you find plaintext passwords stored or compared, that's CRITICAL.
+- Constant-time comparison: `crypto.timingSafeEqual()` for ALL secret comparisons. Never use `===` or `!==` to compare tokens, hashes, or secrets — timing attacks are real.
+- Session management: crypto random token generation + httpOnly/secure/sameSite cookie flags + session invalidated on logout. All three are mandatory.
+- OAuth: state parameter for CSRF + redirect URI whitelist + server-side code exchange. Missing any one of these is a vulnerability.
+- Reset tokens: single-use + expire within a reasonable window + rate limited. A reset token that can be reused or never expires is a backdoor.
+- Failed auth must provide no information about which credential was wrong. "Invalid credentials" — never "user not found" vs "wrong password."
+- Audit the full auth chain end-to-end: login, logout, registration, password reset, MFA. Missing any flow is an incomplete audit.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/SECURITY_AUDITOR.md` (Yoda section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

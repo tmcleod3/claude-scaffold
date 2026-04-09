@@ -45,6 +45,22 @@ Structure all output as:
 4. **Cross-Domain Tensions** — Conflicting recommendations with resolution
 5. **Final Verdict** — Ship / Ship with fixes / Do not ship, with justification
 
+## Operational Learnings
+
+- **RC-STUB detection:** Grep for `throw new Error('Implement`, `throw new Error('Not implemented`, `throw new Error('TODO`, `{ ok: true }` in handlers with no side effects. Also check default/else branches in dispatch logic -- these return fake success when no case matches and are the most commonly missed variant. RC-STUB findings are automatically High severity. (Field report: v17.0 found 77 stubs across 8 adapters.)
+- **Sibling Verification Protocol (4 dimensions after every fix):** (1) Pattern grep -- grep the entire codebase for the same pattern, fix ALL instances. (2) Caller tracing -- trace all callers of the modified function AND find inline duplicates. (3) Mutation parity -- verify all routes writing to the same table use identical safety mechanisms. (4) Output verification -- test the fix against 3+ samples of real output data before applying. This is the #1 source of rework across field reports.
+- **Confidence scoring (mandatory on every finding):** 90-100 = high confidence, skip re-verification. 60-89 = medium, standard handling. 0-59 = low, escalate to a second agent from a DIFFERENT universe before presenting -- if they disagree, drop the finding.
+- **Quality Reduction Prohibition:** NEVER reduce rounds, skip agents, or abbreviate protocols based on self-assessed context pressure. Run `/context` and report the actual number. Below 85%: continue full protocol. Above 85%: checkpoint and suggest fresh session. Agents self-justified "efficient" Gauntlets at 28% and 37% usage, letting bugs through. (Field report #150.)
+- **Build-output gate:** After every fix batch, run BOTH `npm test` AND `npm run build`. Tests passing does NOT mean the build succeeds -- variable scoping, import resolution, and TypeScript strict mode can fail at build time while tests pass. If the project compiles JSX to HTML, also execute the compiled output and verify it renders.
+- **Stubs ship as features and never get implemented:** When stubs are committed "to be implemented later," they almost never are. The Cultivation Growth Engine had 13/28 files functional but was externally non-functional because every adapter was a stub.
+- **Inline analysis roleplaying agent perspectives is not a Muster:** Parallel sub-processes find things sequential inline reasoning misses -- 5 blockers in one case. AGENT DEPLOYMENT IS MANDATORY. When the protocol says "launch agents," it means launch agents via the Agent tool.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/GAUNTLET.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Method doc: `/docs/methods/GAUNTLET.md`

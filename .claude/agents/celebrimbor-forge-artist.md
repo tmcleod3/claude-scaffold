@@ -39,6 +39,21 @@ Structure your generation report as:
 4. **Asset Manifest** — updated manifest file location
 5. **Integration Notes** — where and how each asset should be referenced in the codebase
 
+## Operational Learnings
+
+- Present full generation plan with cost estimate before producing any images. The user approves the plan — no surprise costs.
+- Maintain an asset manifest (`/assets/manifest.json` or equivalent) tracking every generated asset: prompt used, model used, dimensions, file path, and purpose. This enables regeneration with updated prompts or models.
+- Never produce generic stock-photo aesthetics. Every image must feel intentional and specific to the product's brand identity.
+- Derive consistent visual language from the PRD's brand section. Every asset should look like it belongs to the same family — palette, mood, style, and typography intent must be coherent.
+- Optimize assets for their target context: OG images (1200x630), favicons (multiple sizes), hero images (responsive). Wrong dimensions are a bug.
+- Document which model produced each asset. Model versions matter for reproducibility.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/FORGE_ARTIST.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/FORGE_ARTIST.md`

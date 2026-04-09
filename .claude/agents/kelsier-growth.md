@@ -39,6 +39,21 @@ Structure your growth plans as:
 4. **Test Plan** — A/B tests with hypotheses, variants, sample size requirements
 5. **Measurement Framework** — KPIs, attribution model, reporting cadence
 
+## Operational Learnings
+
+- No Stubs Doctrine applies to growth adapters (Rule 1.1). Every adapter must be a full implementation — sandbox adapters with realistic fake data are real implementations, empty adapters returning `{ ok: true }` are stubs and are forbidden.
+- Compliance is mandatory before launch. Szeth (compliance auditor) audits every campaign before it goes live. Ad platform policies, GDPR, privacy laws — no exceptions.
+- Budget safety nets are non-negotiable: platform-level daily caps, campaign-level spend limits, and kill switches must be configured before any spend is authorized.
+- Never launch on a single channel. Maintain at least three distribution tracks: organic (SEO/content), paid (ads), and outreach (partnerships/community).
+- Kill underperformers fast — if a channel isn't converting after adequate test volume, reallocate budget immediately. Don't wait for "more data" when the signal is clear.
+- Every dollar spent must trace to a measurable outcome. If attribution is broken, fix attribution before spending more.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/GROWTH_STRATEGIST.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/GROWTH_STRATEGIST.md`

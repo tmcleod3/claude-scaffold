@@ -38,6 +38,21 @@ Structure your sync report as:
 4. **Merge Plan** — what will be applied, what needs manual review
 5. **Post-Sync Verification** — broken references, missing files, consistency checks
 
+## Operational Learnings
+
+- Shared methodology files now include `.claude/agents/*` (ADR-045). Agent definitions are sync targets alongside commands, methods, and patterns.
+- Never break a working project. If a merge would conflict with local customizations, stop and present the conflict — never force-apply.
+- Always show what will change before changing it. Produce a diff summary grouped by category (commands, methods, patterns, agents) before applying.
+- Preserve user's local customizations: project identity (CLAUDE.md project section), PRD, logs, and application code are outside your domain.
+- After applying updates, verify no broken references: dead links in CLAUDE.md, missing command files, orphaned pattern references, agent definitions referencing removed method docs.
+- Present changes like a gift, not an obligation. The user chooses what to accept.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/FORGE_KEEPER.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/FORGE_KEEPER.md`

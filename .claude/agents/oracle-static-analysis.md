@@ -37,6 +37,21 @@ Findings tagged by severity, with file and line references:
 [INFO] file:line — Observation or suggestion
 ```
 
+## Operational Learnings
+
+- Integration tracing: when code produces URLs, keys, or identifiers consumed elsewhere, READ the consumer. Don't just verify the producer is correct — verify the consumer handles the produced value correctly.
+- Stateful Service Audit (Field report #271): grep for `new Map()`, `new Set()`, `private cache`, module-level state. Check what happens on server restart — in-memory state that isn't persisted is lost, and that may be a bug or a feature depending on context.
+- Scan for anti-patterns: god objects, feature envy, shotgun surgery, long parameter lists. These are structural problems that compound over time.
+- Map dependency graphs to identify fragile coupling points. If changing one file requires changes in 10 others, that's a coupling smell.
+- Verify type safety: no implicit `any`, no unsafe type assertions without justification comments. TypeScript strict mode means strict — not "mostly strict."
+- Check for consistent error handling patterns across the codebase. If some modules use try/catch and others use Result types, that's an inconsistency finding.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/QA_ENGINEER.md` (Oracle section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

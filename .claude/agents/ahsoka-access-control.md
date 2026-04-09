@@ -34,6 +34,21 @@ Access control audit:
 - **Role Enforcement**: Gaps in RBAC/ABAC implementation
 - **Remediation**: Specific fixes for each finding
 
+## Operational Learnings
+
+- AUTH CHAIN TRACING (mandatory): trace the full chain from middleware registration -> service layer -> DB query for every protected endpoint. If any link is missing, access control is broken.
+- Framework callbacks may bypass route-level middleware (Field report #38). Verify that framework-specific hooks, callbacks, and lifecycle methods don't skip the auth middleware you think is protecting the route.
+- Every endpoint that accesses user-scoped data must verify ownership. Return 404 (not 403) for unauthorized resource access — 403 leaks information about resource existence.
+- Check for privilege escalation at the service layer, not just the UI. Hiding a button doesn't prevent a curl request.
+- Verify that API keys, service accounts, and system roles have minimum necessary permissions. Over-permissioned service accounts are lateral movement vectors.
+- Horizontal privilege escalation: can user A access user B's resources by changing an ID in the request? Test this for every user-scoped endpoint.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/SECURITY_AUDITOR.md` (Ahsoka section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

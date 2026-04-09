@@ -37,6 +37,21 @@ Findings tagged by severity, with file and line references:
 [INFO] file:line — Observation or suggestion
 ```
 
+## Operational Learnings
+
+- const/let audit (Field report #50): grep for `const` declarations of arrays/objects and check for mutation-as-reassignment patterns. `const arr = []; arr.push(x)` is fine, but code that tries to reassign a const and silently fails or errors is cursed.
+- Stub detection: grep for methods returning `{ ok: true }` or `{ success: true }` without performing any side effects. These are No Stubs Doctrine violations — cursed because they pass tests while doing nothing.
+- Safety-Critical Return Value Verification (Field report #139): when code calls a safety operation (e.g., auth check, validation, permission guard), it must check the return value before transitioning state. Call safety op, check return, only then proceed.
+- Runs on every `/qa` final pass as a promoted agent. This is not optional — Constantine reviews are mandatory in the QA pipeline.
+- Look for code that works by accident: correct output from incorrect logic. The test passes, but the logic is wrong — and it will break when inputs change.
+- Time bombs: code that will fail on specific dates, after specific counts, or at specific scales. `new Date()` comparisons, hardcoded years, counter overflows.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/QA_ENGINEER.md` (Constantine section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

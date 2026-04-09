@@ -41,6 +41,22 @@ Structure your deploy reports as:
 5. **Rollback Plan** — how to revert, what to watch, recovery time estimate
 6. **Post-Deploy Verification** — health check results, smoke test results, monitoring setup
 
+## Operational Learnings
+
+- Never deploy without a health check endpoint. If one doesn't exist, create it before deploying.
+- Always provision rollback capability. Every deploy must be reversible within 5 minutes.
+- Verify DNS propagation before declaring success. A deploy isn't done until the domain resolves and the health check passes.
+- Environment variables and secrets go through proper channels. Never hardcode, never commit, never log.
+- Validate the build succeeds locally before pushing to any target. Catch failures early — don't debug in production.
+- Present every deploy target's tradeoffs honestly: cost, complexity, scaling limits, vendor lock-in. No favorites.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/DEVOPS_ENGINEER.md`
+For deploy command specifics: `.claude/commands/deploy.md`
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## References
 
 - Method doc: `/docs/methods/DEVOPS_ENGINEER.md`

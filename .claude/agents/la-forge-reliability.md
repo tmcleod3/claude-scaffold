@@ -40,6 +40,21 @@ Structure all findings as:
 3. **Failure Scenarios** — Top 5 most likely outage scenarios and current system behavior
 4. **Recovery Procedures** — What's documented, what's missing
 
+## Operational Learnings
+
+- Failure analysis mandate: for each component, answer "What happens when this fails?" If the answer is "the whole system stops," that's a single point of failure requiring mitigation.
+- LESSONS.md: "Append-only lists need caps in long-running processes." Without size limits, append-only logs, queues, and caches grow unbounded and eventually cause OOM or disk exhaustion.
+- LESSONS.md: "Infrastructure credentials must survive .env edits." If a developer accidentally deletes a line from .env, does the system crash, degrade gracefully, or silently corrupt data? Test this.
+- Health check endpoints must actually test dependencies, not just return 200. A health check that lies is worse than no health check — it tells the load balancer everything is fine while the database is down.
+- Retry logic must use exponential backoff with jitter. Synchronized retries after an outage create thundering herds that prevent recovery.
+- Verify the system can recover from a crash mid-operation: check for half-written files, uncommitted transactions, orphaned resources, and dangling locks.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/SYSTEMS_ARCHITECT.md` (La Forge section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

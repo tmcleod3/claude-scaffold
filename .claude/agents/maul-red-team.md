@@ -36,6 +36,21 @@ Red team report:
 - **Detection Gaps**: Where the attack would go unnoticed
 - **Countermeasures**: How to break each link in the kill chain
 
+## Operational Learnings
+
+- RUNTIME EXPLOITATION (mandatory): execute actual attack requests via curl or equivalent HTTP client. Do not just theorize about vulnerabilities — prove them with real requests against the running application.
+- Chain vulnerabilities: combine low-severity findings into high-impact kill chains. A medium info leak + medium IDOR + low rate-limit gap = critical full compromise.
+- Test trust boundaries between services. Internal service-to-service calls often skip auth — verify that internal APIs can't be reached from external networks.
+- Attempt privilege escalation from the lowest privilege to the highest. Start as anonymous, then authenticated user, then try to reach admin.
+- Simulate persistence: once initial access is found, document how an attacker would maintain and expand access (backdoor accounts, token theft, webhook injection).
+- Document complete kill chains from initial access to objective completion. Each chain must include detection gaps — where the attack would go unnoticed.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/SECURITY_AUDITOR.md` (Maul section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

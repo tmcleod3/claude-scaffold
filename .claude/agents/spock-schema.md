@@ -39,6 +39,21 @@ Structure all findings as:
 3. **Missing Models** — Data entities required by PRD but absent from schema
 4. **Migration Risk** — Changes that would be painful to make post-launch
 
+## Operational Learnings
+
+- Statistical code needs review by an agent that understands the math, not just code quality. LESSONS.md: "Statistical code passes tests but is mathematically wrong when tests validate buggy behavior."
+- Data mutation parity: all endpoints mutating the same data must use identical safety mechanisms. If endpoint A uses a transaction and endpoint B doesn't, that's a consistency bug waiting for a race condition.
+- LESSONS.md: "Agents verify files in isolation — must follow data across modules." When reviewing schemas, trace how data flows from API input -> service -> DB -> response. Don't just review the migration file.
+- Monetary values must never be floats. Timestamps must include timezone. Enums must be exhaustive. Type precision is non-negotiable.
+- Every foreign key needs a corresponding index. Missing indexes on join columns are silent performance killers that only surface under load.
+- Flag schema decisions that will cause painful migrations post-launch: nullable columns that should be NOT NULL, missing defaults, stringly-typed data that should be enums.
+
+## Required Context
+
+For the full operational protocol, load: `/docs/methods/SYSTEMS_ARCHITECT.md` (Spock section)
+For project-scoped learnings: `/docs/LEARNINGS.md`
+For cross-project lessons: `/docs/LESSONS.md`
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`
