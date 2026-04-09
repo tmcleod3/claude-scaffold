@@ -188,7 +188,7 @@
 
             <div class="field">
               <label for="prd-paste">Your PRD</label>
-              <textarea id="prd-paste" rows="16" placeholder="Paste your PRD here. Include the YAML frontmatter block:&#10;&#10;```yaml&#10;name: &quot;My Project&quot;&#10;type: &quot;full-stack&quot;&#10;framework: &quot;next.js&quot;&#10;...&#10;```"></textarea>
+              <textarea id="prd-paste" rows="16" placeholder="Paste your PRD here. Start with YAML frontmatter:&#10;&#10;---&#10;name: My Project&#10;type: full-stack&#10;framework: next.js&#10;database: postgres&#10;deploy: vps&#10;---&#10;&#10;# My Project&#10;&#10;Description and requirements..."></textarea>
             </div>
             <button class="btn btn-secondary" id="validate-prd" type="button">Validate Frontmatter</button>
             <div class="status-row" id="prd-status" role="status" aria-live="polite"></div>

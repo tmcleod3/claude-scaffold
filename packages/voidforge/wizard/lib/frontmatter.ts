@@ -25,14 +25,17 @@ export interface PrdFrontmatter {
 }
 
 export function parseFrontmatter(content: string): { frontmatter: PrdFrontmatter; body: string } {
-  // Look for ```yaml ... ``` block in the frontmatter section
+  // Try ```yaml ... ``` block first (markdown code fence)
   const yamlBlockMatch = content.match(/```yaml\s*\n([\s\S]*?)```/);
+  // Then try --- ... --- block (standard YAML frontmatter)
+  const dashBlockMatch = !yamlBlockMatch ? content.match(/^---\s*\n([\s\S]*?)\n---/) : null;
 
-  if (!yamlBlockMatch) {
+  const match = yamlBlockMatch ?? dashBlockMatch;
+  if (!match) {
     return { frontmatter: {}, body: content };
   }
 
-  const yamlStr = yamlBlockMatch[1];
+  const yamlStr = match[1];
   const frontmatter: PrdFrontmatter = {};
 
   for (const line of yamlStr.split('\n')) {
