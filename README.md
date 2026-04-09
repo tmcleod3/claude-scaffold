@@ -10,21 +10,15 @@ A methodology framework for building full-stack applications with Claude Code. D
 
 ## Install
 
-VoidForge ships in three tiers. Pick the one that fits.
-
 ```bash
-# Full — wizards, provisioners, everything
-git clone https://github.com/tmcleod3/voidforge.git && cd voidforge && npm install
-npx voidforge init
+# Create a new project with VoidForge methodology
+npx voidforge init my-app
 
-# Scaffold — methodology only, no wizard, no npm deps
-git clone --branch scaffold https://github.com/tmcleod3/voidforge.git my-app
-cd my-app && /build
-
-# Core — ultra-light, drop into any existing project
-git clone --branch core https://github.com/tmcleod3/voidforge.git /tmp/vf
-cp -r /tmp/vf/.claude /tmp/vf/CLAUDE.md /tmp/vf/docs your-project/
+# Or launch the wizard UI
+npx voidforge
 ```
+
+VoidForge distributes via npm as two packages: `voidforge` (wizard + CLI) and `@voidforge/methodology` (agents, commands, methods, patterns). Projects contain methodology only — zero VoidForge runtime dependencies.
 
 ---
 
@@ -146,23 +140,21 @@ voidforge/
 │   └── build-state.md            ← Master state file
 │
 ├── scripts/
-│   ├── new-project.sh            ← Manual project initialization
-│   ├── voidforge.ts              ← CLI entry point
 │   └── thumper/                  ← /thumper — Chani's worm rider (Dune)
-│       ├── thumper.sh            ← Main entrypoint (router)
-│       ├── scan.sh               ← Setup wizard (reading the sand)
-│       ├── relay.sh              ← Sandworm daemon
-│       ├── gom-jabbar.sh         ← Authentication protocol
-│       └── water-rings.sh        ← Stop hook (task notifications)
 │
-└── wizard/                       ← Full tier only
-    ├── server.ts                 ← Local HTTP server (127.0.0.1)
-    ├── router.ts                 ← API route registry
-    ├── api/                      ← API handlers
-    ├── ui/                       ← Gandalf, Haku, Lobby, Tower, Danger Room, War Room, Login
-    ├── __tests__/                ← 91 vitest tests (vault, auth, parser, network, etc.)
-    └── lib/                      ← Vault, auth, provisioners, dashboards, growth, financial
-        └── provisioners/         ← Docker, AWS VPS, Vercel, Railway, Cloudflare, S3
+└── packages/
+    ├── voidforge/                ← npm: "voidforge" (wizard + CLI)
+    │   ├── scripts/voidforge.ts  ← CLI entry point (12 commands)
+    │   └── wizard/               ← Server, API, UI, lib, tests
+    │       ├── server.ts         ← Local HTTP server (127.0.0.1)
+    │       ├── api/              ← API handlers
+    │       ├── ui/               ← Gandalf, Haku, Lobby, Tower, Danger Room, War Room
+    │       ├── __tests__/        ← 675 vitest tests
+    │       └── lib/              ← Vault, auth, provisioners, dashboards, growth, financial
+    │
+    └── methodology/              ← npm: "@voidforge/methodology"
+        ├── package.json          ← Metadata + prepack script
+        └── scripts/prepack.sh    ← Copies methodology from root at publish time
 ```
 
 ### Agent Leads

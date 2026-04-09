@@ -19,17 +19,22 @@ Orient to the current state:
 4. Announce the current version and that you're checking for updates
 
 ## Step 1 — Listen to the River (Goldberry)
-Fetch the latest from upstream:
+Fetch the latest from upstream. Two transports supported:
+
+**Transport A (npm — v21.0+):** If `npx voidforge` is available:
+1. Run `npx voidforge update` — uses the methodology diff/apply system
+2. This handles version comparison, diffing, and applying automatically
+3. If no changes → "The forge burns bright! You're on the latest." → Stop
+4. If changes applied → skip to Step 4 (npm transport handles Steps 2-3)
+
+**Transport B (git — legacy):** If `npx voidforge` is not installed:
 1. Run `git remote -v` — look for a remote pointing to `tmcleod3/voidforge`
-2. If no VoidForge remote exists:
-   - Run `git remote add voidforge https://github.com/tmcleod3/voidforge.git`
-   - Use `voidforge` as the remote name
-3. If a matching remote exists, use that name (could be `origin` or `voidforge`)
-4. Run `git fetch <remote> scaffold` — get the latest scaffold branch
-5. Read remote VERSION.md: `git show <remote>/scaffold:VERSION.md`
-6. Compare versions numerically (parse major.minor.patch as integers, not strings — "3.10.0" is newer than "3.9.0"):
-   - If current version matches or is ahead → announce "The forge burns bright! You're on the latest." → Stop
-   - If behind → continue
+2. If no VoidForge remote exists → add: `git remote add voidforge https://github.com/tmcleod3/voidforge.git`
+3. Run `git fetch <remote> main` — get the latest main branch
+4. Read remote VERSION.md: `git show <remote>/main:VERSION.md`
+5. Compare versions numerically (parse major.minor.patch as integers, not strings)
+   - If current version matches or is ahead → "The forge burns bright!" → Stop
+   - If behind → continue to Step 2
 
 ## Step 1.5 — Spring Cleaning (Treebeard)
 Check the **Migration Registry** in `/docs/methods/FORGE_KEEPER.md` for one-time cleanup actions:
@@ -41,12 +46,12 @@ Check the **Migration Registry** in `/docs/methods/FORGE_KEEPER.md` for one-time
 6. Present the cleanup plan alongside the update plan in Step 2
 7. Apply cleanup in Step 3 alongside updates — same confirmation prompt ("all / selective / skip")
 8. For tracked `logs/*` files, use `git rm --cached` (untrack but keep on disk)
-9. If `package.json` has `dependencies`/`devDependencies` on scaffold/core AND wizard/ is being kept → leave package.json alone. Only strip to minimal if wizard/ is being removed
+9. If `package.json` has `dependencies`/`devDependencies` AND wizard/ is being kept → leave package.json alone. Only strip to minimal if wizard/ is being removed
 
 ## Step 2 — Walk the Forest (Treebeard)
 Compare every shared methodology file:
-1. For each shared file, compare local vs upstream using `git diff HEAD <remote>/scaffold -- <path>`
-2. Also check for new files on upstream that don't exist locally: `git diff --name-status HEAD <remote>/scaffold -- <shared paths>`
+1. For each shared file, compare local vs upstream using `git diff HEAD <remote>/main -- <path>`
+2. Also check for new files on upstream that don't exist locally: `git diff --name-status HEAD <remote>/main -- <shared paths>`
 3. Categorize each file:
    - **New** — exists upstream, not locally
    - **Updated** — content differs between local and upstream
@@ -67,8 +72,8 @@ Apply updates based on user's choice:
 3. For **"skip"** — stop gracefully
 
 For each file being updated:
-- **New files:** `git show <remote>/scaffold:<path>` and write to local path
-- **Updated files (no local mods):** Replace with upstream version via `git show <remote>/scaffold:<path>`
+- **New files:** `git show <remote>/main:<path>` and write to local path
+- **Updated files (no local mods):** Replace with upstream version via `git show <remote>/main:<path>`
 - **Updated files (with local mods):**
   - For `CLAUDE.md`: Preserve the `## Project` section (name, one-liner, domain, repo) and any user-added `## Coding Standards` entries. Update all methodology sections (Slash Commands, Team, Docs Reference, Release Tiers, etc.)
   - For other files: Show both versions, let user choose, or attempt to merge non-overlapping changes

@@ -121,7 +121,7 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/ai` | Seldon's AI Intelligence Audit — model selection, prompts, tool-use, orchestration, safety, evals | All |
 | `/vault` | Seldon's Time Vault — distill session intelligence into portable briefing for session handoff | All |
 
-**Tier key:** `All` = works on main, scaffold, and core. `Full` = requires `wizard/` directory (main branch only). Full-tier commands will warn scaffold/core users to switch branches.
+**Tier key:** `All` = works everywhere. `Full` = requires the wizard server (`packages/voidforge/wizard/server.ts`). Full-tier commands offer to install the wizard if not present.
 
 ## Flag Taxonomy
 
@@ -228,27 +228,22 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 
 260+ sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions.
 
-## Release Tiers
+## Distribution
 
-VoidForge ships on three branches. Shared methodology files exist on all three.
+VoidForge distributes via npm (v21.0+). The monorepo produces two packages:
 
-| Branch | What's Included | Use Case |
-|--------|----------------|----------|
-| `main` | Full — wizards, provisioners, AWS SDK, everything | `npx voidforge init` / `npx voidforge deploy` |
-| `scaffold` | Methodology only — CLAUDE.md, commands, methods, patterns, Holocron | `git clone --branch scaffold`, add PRD, `/build` |
-| `core` | Ultra-light — CLAUDE.md, commands, methods, patterns, naming registry | Point Claude Code at branch to absorb methodology |
+| Package | npm Name | Contains |
+|---------|----------|----------|
+| Wizard + CLI | `voidforge` | Server, API, UI, lib, CLI, templates, tests |
+| Methodology | `@voidforge/methodology` | CLAUDE.md, commands, methods, patterns, Holocron |
 
-**Branch sync rule:** Changes to any shared file must propagate to all branches. Shared files:
-- `CLAUDE.md`, `.claude/commands/*`
-- `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
-- `HOLOCRON.md`, `VERSION.md`, `CHANGELOG.md`
-- `scripts/thumper/*`
+**Install path:** `npx voidforge init` creates a new project with methodology. `npx voidforge` launches the wizard UI.
 
-**NOT shared** (main-only): `package.json` (wizard dependencies differ per tier), `package-lock.json`, `.claude/settings.json` (user permissions/hooks), `wizard/*`, `scripts/*`, `logs/*`, `.env`
+**Monorepo structure:** `packages/voidforge/` (wizard+CLI) and `packages/methodology/` (npm package config). Methodology source files live at the repo root (CLAUDE.md, .claude/, docs/, etc.) and are copied into the methodology package at publish time via prepack script.
 
-Scaffold and core have their own minimal `package.json` (name + version + description only — no dependencies). When syncing version bumps, update `VERSION.md` and `CHANGELOG.md` on all branches but leave each branch's `package.json` version field to be updated independently.
+**Update path:** `npx voidforge update` replaces the old `/void` git-fetch. Same Bombadil UX, npm transport instead of git.
 
-The agents, characters, and personality are VoidForge's identity — never strip them from any tier.
+The agents, characters, and personality are VoidForge's identity — they ship in every package.
 
 ## How to Build
 
