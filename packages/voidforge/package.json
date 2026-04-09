@@ -7,11 +7,13 @@
     "node": ">=20.11.0 <25.0.0"
   },
   "bin": {
-    "voidforge": "./scripts/voidforge.ts"
+    "voidforge": "./dist/scripts/voidforge.js"
   },
   "scripts": {
     "wizard": "npx tsx scripts/voidforge.ts init",
     "deploy": "npx tsx scripts/voidforge.ts deploy",
+    "build": "tsc",
+    "prepack": "bash scripts/prepack-patterns.sh && npm run build",
     "typecheck": "npx tsc --noEmit",
     "test": "vitest run --pool forks",
     "test:watch": "vitest --pool forks",
@@ -20,10 +22,7 @@
     "test:e2e:local": "playwright test --project=chromium"
   },
   "files": [
-    "wizard/",
-    "scripts/",
-    "!wizard/__tests__/",
-    "!wizard/e2e/"
+    "dist/"
   ],
   "publishConfig": {
     "access": "public"

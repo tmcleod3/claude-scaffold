@@ -229,6 +229,9 @@ export async function createProject(config: ProjectConfig): Promise<ProjectResul
       lastDeployAt: '',
       healthCheckUrl: '',
       monthlyCost: 0,
+      owner: '',
+      access: [],
+      linkedProjects: [],
     });
   } catch {
     // Registry write is best-effort — don't fail project creation

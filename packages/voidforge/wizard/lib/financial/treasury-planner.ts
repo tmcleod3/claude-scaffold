@@ -12,10 +12,10 @@ import type {
   Cents, FundingPlan, FundingPlanReason, TargetPlatform,
   OperatingBankAccount, StablecoinFundingSource,
   PendingObligation,
-} from '../../../../../docs/patterns/funding-plan.js';
+} from '../patterns/funding-plan.js';
 import {
   toCents, createFundingPlan, prioritizeObligations,
-} from '../../../../../docs/patterns/funding-plan.js';
+} from '../patterns/funding-plan.js';
 
 // ── Campaign Spend Projection ────────────────────────
 

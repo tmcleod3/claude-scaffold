@@ -53,6 +53,23 @@ const PENDING_OPS = join(TREASURY_DIR, 'pending-ops.jsonl');
 const CAMPAIGNS_DIR = join(TREASURY_DIR, 'campaigns');
 const VOIDFORGE_DIR = join(homedir(), '.voidforge');
 
+// ── Hash Chain Helper ────────────────────────────────────
+// Reads the last line of a JSONL log file and extracts the hash field.
+// Returns '0' (genesis hash) if the file is empty or does not exist.
+
+async function getLastLogHash(logPath: string): Promise<string> {
+  try {
+    const content = await readFile(logPath, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+    if (lines.length === 0) return '0';
+    const lastEntry = JSON.parse(lines[lines.length - 1]) as { hash?: string };
+    return lastEntry.hash ?? '0';
+  } catch {
+    // File does not exist or is unreadable — genesis hash
+    return '0';
+  }
+}
+
 // ── Daemon State ──────────────────────────────────────
 
 let daemonState: DaemonState = 'starting';
@@ -365,7 +382,7 @@ async function handleCampaignPause(id: string): Promise<{ status: number; body: 
     record.updatedAt = new Date().toISOString();
     await writeCampaignRecord(record);
     eventId++;
-    await appendToLog(SPEND_LOG, { type: 'campaign_pause', campaignId: id, timestamp: record.updatedAt });
+    await appendToLog(SPEND_LOG, { type: 'campaign_pause', campaignId: id, timestamp: record.updatedAt }, await getLastLogHash(SPEND_LOG));
     logger.log(`Campaign ${id} paused on ${record.platform}`);
     return { status: 200, body: { ok: true, campaignId: id, status: 'paused' } };
   } catch (err: unknown) {
@@ -390,7 +407,7 @@ async function handleCampaignResume(id: string): Promise<{ status: number; body:
     record.updatedAt = new Date().toISOString();
     await writeCampaignRecord(record);
     eventId++;
-    await appendToLog(SPEND_LOG, { type: 'campaign_resume', campaignId: id, timestamp: record.updatedAt });
+    await appendToLog(SPEND_LOG, { type: 'campaign_resume', campaignId: id, timestamp: record.updatedAt }, await getLastLogHash(SPEND_LOG));
     logger.log(`Campaign ${id} resumed on ${record.platform}`);
     return { status: 200, body: { ok: true, campaignId: id, status: 'active' } };
   } catch (err: unknown) {
@@ -479,7 +496,7 @@ async function handleCampaignLaunch(body: unknown): Promise<{ status: number; bo
       platform: config.platform,
       dailyBudgetCents: config.dailyBudgetCents,
       timestamp: now,
-    });
+    }, await getLastLogHash(SPEND_LOG));
 
     eventId++;
     logger.log(`Campaign launched: ${campaignId} → ${result.externalId} on ${config.platform} (status: ${record.status})`);
@@ -554,7 +571,7 @@ async function handleBudgetChange(body: unknown): Promise<{ status: number; body
       oldBudgetCents: oldBudget,
       newBudgetCents: params.newBudgetCents,
       timestamp: record.updatedAt,
-    });
+    }, await getLastLogHash(SPEND_LOG));
 
     eventId++;
     logger.log(`Budget changed: ${params.campaignId} $${(oldBudget / 100).toFixed(2)} → $${(params.newBudgetCents / 100).toFixed(2)}`);

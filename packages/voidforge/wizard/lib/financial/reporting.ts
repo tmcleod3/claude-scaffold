@@ -9,7 +9,7 @@
  * Agents: Dockson (treasury), Heartbeat daemon
  */
 
-import type { Cents } from '../../../../../docs/patterns/funding-plan.js';
+import type { Cents } from '../patterns/funding-plan.js';
 import type { ReconciliationReport } from './reconciliation-engine.js';
 import type { CampaignSpendProjection, FundingPlanConfig } from './treasury-planner.js';
 import { forecastSpend, calculateRunway } from './treasury-planner.js';

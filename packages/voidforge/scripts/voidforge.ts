@@ -29,13 +29,18 @@ const command = args[0];
 
 async function getPackageVersion(): Promise<string> {
   const dir = import.meta.dirname ?? new URL('.', import.meta.url).pathname;
-  const pkgPath = resolve(dir, '..', 'package.json');
-  try {
-    const raw = await readFile(pkgPath, 'utf-8');
-    return (JSON.parse(raw) as { version: string }).version;
-  } catch {
-    return 'unknown';
+  // Try ../package.json (dev: scripts/) then ../../package.json (dist: dist/scripts/)
+  for (const rel of ['..', '../..']) {
+    const pkgPath = resolve(dir, rel, 'package.json');
+    try {
+      const raw = await readFile(pkgPath, 'utf-8');
+      const pkg = JSON.parse(raw) as { version?: string; name?: string };
+      if (pkg.name === 'voidforge' && pkg.version) return pkg.version;
+    } catch {
+      continue;
+    }
   }
+  return 'unknown';
 }
 
 // ── Commands ─────────────────────────────────────────────

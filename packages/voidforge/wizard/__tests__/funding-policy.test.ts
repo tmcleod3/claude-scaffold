@@ -12,8 +12,8 @@ import type {
   TreasuryState,
   PolicyDecision,
 } from '../lib/financial/funding-policy.js';
-import type { Cents, CapabilityState } from '../../../../docs/patterns/funding-plan.js';
-import { toCents } from '../../../../docs/patterns/funding-plan.js';
+import type { Cents, CapabilityState } from '../lib/patterns/funding-plan.js';
+import { toCents } from '../lib/patterns/funding-plan.js';
 
 // ── Helper: build a default TreasuryState with sensible defaults ──
 

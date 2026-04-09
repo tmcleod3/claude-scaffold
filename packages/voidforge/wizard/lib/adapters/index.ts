@@ -39,6 +39,7 @@ export const PLATFORM_REGISTRY: Record<AdPlatform | 'sandbox', PlatformInfo> = {
   linkedin: { name: 'LinkedIn', minBudgetCents: 1000, implemented: false },
   twitter:  { name: 'Twitter/X', minBudgetCents: 100, implemented: false },
   reddit:   { name: 'Reddit', minBudgetCents: 500, implemented: false },
+  snap:     { name: 'Snapchat', minBudgetCents: 500, implemented: false },
 };
 
 /** Revenue adapters — only those with real implementations. */

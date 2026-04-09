@@ -8,9 +8,9 @@ import {
   SandboxStablecoinSetup,
   SandboxStablecoinAdapter,
 } from '../lib/financial/stablecoin/sandbox-stablecoin.js';
-import { toCents } from '../../../../docs/patterns/stablecoin-adapter.js';
-import type { FundingPlanRef } from '../../../../docs/patterns/stablecoin-adapter.js';
-import type { Cents } from '../../../../docs/patterns/funding-plan.js';
+import { toCents } from '../lib/patterns/stablecoin-adapter.js';
+import type { FundingPlanRef } from '../lib/patterns/stablecoin-adapter.js';
+import type { Cents } from '../lib/patterns/funding-plan.js';
 
 // ── SandboxStablecoinSetup ───────────────────────────
 
