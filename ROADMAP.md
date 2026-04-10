@@ -339,7 +339,8 @@
 - On scaffold branch: update `void.md` to replace all 7 "scaffold" references with "main"
 - On scaffold branch: update `DEPRECATION.md` with complete migration instructions including `.voidforge` marker
 - On scaffold branch: update `README.md`, `CLAUDE.md`, `CHANGELOG.md` with deprecation banners
-- Create `archive/scaffold` and `archive/core` branches before 2026-05-08 deletion
+- Archive branches created: `archive/scaffold`, `archive/core`
+- **Scaffold branch kept alive as tombstone** — void.md points to main, serves as redirect for users who haven't updated. Do NOT delete. Remove only when npm stats show zero scaffold fetches for 90 days.
 - Verify: scaffold user running `/void` successfully pulls from main
 
 ### Mission 6: Vault + Global Lessons (Break 5 + Break 6)
@@ -452,8 +453,8 @@ No code dependencies — ships immediately. Independent of build pipeline.
 - On scaffold: add DEPRECATION.md, update README/CLAUDE.md/CHANGELOG with deprecation notices
 - On core: same deprecation notices
 - On main: remove scaffold/core references from README, CLAUDE.md Release Tiers, FORGE_KEEPER.md sync, void.md fetch target
-- 30-day timer: delete scaffold/core on 2026-05-08
-- Create archive/scaffold and archive/core before deletion
+- ~~30-day timer: delete scaffold/core on 2026-05-08~~ **REVISED:** Scaffold branch kept alive as tombstone redirect (void.md → main). Delete only when npm stats show zero scaffold fetches for 90 days. Archive branches created.
+- Core branch: delete after archive/core is confirmed
 
 ### Mission 2: Build Pipeline + Type Fixes
 The core unblock — make `tsc` compile clean and produce a publishable dist/.
