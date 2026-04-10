@@ -32,17 +32,32 @@ import {
   detectDeployDrift,
 } from '../lib/dashboard-data.js';
 import { createDashboardWs } from '../lib/dashboard-ws.js';
+import { DaemonAggregator } from '../lib/daemon-aggregator.js';
 
 // ── WebSocket ───────────────────────────────────
 
 const ws = createDashboardWs('Danger Room');
 
+/** Aggregates daemon status across all projects for the dashboard. */
+const aggregator = new DaemonAggregator(30_000);
+
 /** Broadcast a message to all connected Danger Room clients. */
 export const broadcastDangerRoom = ws.broadcast;
+
+/** Start the daemon aggregator (call during dashboard setup). */
+export function startDaemonAggregator(): void {
+  aggregator.start();
+}
+
+/** Get aggregated daemon status for all projects. */
+export function getDaemonStatus(): ReturnType<DaemonAggregator['getStatus']> {
+  return aggregator.getStatus();
+}
 
 /** Close all Danger Room WebSocket connections, activity watcher, and shut down. */
 export function closeDangerRoom(): void {
   ws.close();
+  aggregator.stop();
   if (activityPollInterval) clearInterval(activityPollInterval);
   if (activityWatcher) { try { activityWatcher.close(); } catch { /* ignore */ } activityWatcher = null; }
   if (activityDebounce) clearTimeout(activityDebounce);

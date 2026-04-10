@@ -39,6 +39,14 @@ import type {
   ReconciliationReport as ThreeWayReport,
 } from './financial/reconciliation-engine.js';
 
+import { createDailyBackup } from './treasury-backup.js';
+import {
+  planGoogleInvoiceSettlement,
+  planMetaDebitProtection,
+  generatePortfolioRebalancing,
+} from './financial/platform-planner.js';
+import type { GoogleInvoice, ExpectedDebit, ProjectTreasury } from './financial/platform-planner.js';
+
 import type { JobScheduler } from './daemon-core.js';
 
 // ── Types ────────────────────────────────────────────
@@ -792,6 +800,21 @@ export function registerTreasuryJobs(
         `due soon: ${dueSoon}`,
       );
 
+      // Settlement planning: prioritize overdue invoices, then nearest due date
+      if (pendingInvoices.length > 0) {
+        const plans = planGoogleInvoiceSettlement(
+          pendingInvoices.map(i => ({
+            invoiceId: i.id,
+            amountCents: i.amountCents as Cents,
+            dueDate: i.dueDate,
+            status: i.status as 'pending' | 'overdue',
+          })),
+          treasuryState.bankBalanceCents as Cents,
+          50_000 as Cents, // $500 buffer
+        );
+        logger.log(`Settlement plans: ${plans.length} invoices prioritized for payment`);
+      }
+
       // CB-4: Evaluate billing breakers with invoice data
       const cbResult = evaluateBillingBreakers({
         googleInvoiceDueSoon: dueSoon,
@@ -867,6 +890,21 @@ export function registerTreasuryJobs(
         `($${(totalDebitCents / 100).toFixed(2)} next 7 days), ` +
         `failed: ${hasFailedDebit}, risk: ${paymentRisk}`,
       );
+
+      // Debit protection: calculate additional buffer needed for upcoming Meta debits
+      if (debits.length > 0) {
+        const additionalBuffer = planMetaDebitProtection(
+          debits.map(d => ({
+            date: d.expectedDate,
+            amountCents: d.estimatedAmountCents as Cents,
+          })),
+          treasuryState.bankBalanceCents as Cents,
+          50_000 as Cents, // $500 buffer
+        );
+        if ((additionalBuffer as number) > 0) {
+          logger.log(`Meta debit protection: additional buffer needed $${((additionalBuffer as number) / 100).toFixed(2)}`);
+        }
+      }
 
       // CB-5: Evaluate billing breakers with debit data
       const cbResult = evaluateBillingBreakers({
@@ -1106,7 +1144,20 @@ export function registerTreasuryJobs(
     }
   });
 
-  logger.log('Treasury heartbeat jobs registered (8 jobs, WAL recovery active)');
+  // Job 9: treasury-backup (daily — encrypted AES-256-GCM snapshots, 30-day retention)
+  scheduler.add('treasury-backup', 86_400_000, async () => {
+    logger.log('Treasury backup starting');
+    try {
+      const result = await createDailyBackup(vaultKey ?? '');
+      logger.log(`Treasury backup: ${result.files} files backed up to ${result.path}`);
+      await writeCurrentState();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      logger.log(`Treasury backup error: ${msg}`);
+    }
+  });
+
+  logger.log('Treasury heartbeat jobs registered (9 jobs, WAL recovery active)');
 }
 
 // ── Treasury Socket Handlers ─────────────────────────

@@ -37,6 +37,8 @@ import {
 } from './oauth-core.js';
 
 import type { SessionTokenState } from './oauth-core.js';
+import { projectVaultLockAll } from './project-vault.js';
+import { loadAutonomyState, checkCircuitBreakers, saveAutonomyState } from './autonomy-controller.js';
 
 import { appendToLog, atomicWrite, getTreasuryDir, getSpendLog, getRevenueLog } from './financial-core.js';
 import { TREASURY_SUMMARY_FILE, readTreasurySummaryFromLogs } from './treasury-reader.js';
@@ -903,6 +905,19 @@ function registerJobs(scheduler: JobScheduler): void {
     logger.log(`Weekly budget rebalance: current ROAS ${summary.roas.toFixed(2)}x, spend $${(summary.spend / 100).toFixed(2)}`);
   });
 
+  // Autonomy circuit breaker check — hourly: load state, check breakers, pause if tripped
+  scheduler.add('autonomy-check', 3_600_000, async () => {
+    try {
+      const state = await loadAutonomyState();
+      const result = checkCircuitBreakers(state);
+      if (!result.safe) {
+        logger.log(`Autonomy breaker tripped: ${result.reason ?? 'unknown'} (action: ${result.action ?? 'none'})`);
+        state.stopped = true;
+        await saveAutonomyState(state);
+      }
+    } catch { logger.log('Autonomy check: controller unavailable'); }
+  });
+
   // Growth report — weekly: write summary to logs
   scheduler.add('growth-report', 604_800_000, async () => {
     const campaigns = await readCampaigns();
@@ -1010,6 +1025,7 @@ export async function startHeartbeat(vaultPassword: string): Promise<void> {
     daemonState = 'shutting_down';
     await writeCurrentState();
     financialVaultLock();
+    projectVaultLockAll();
     totpSessionInvalidate();
     logger.close();
   }, server);
