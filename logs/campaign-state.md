@@ -20,7 +20,7 @@
 
 | # | Mission | Scope | Status |
 |---|---------|-------|--------|
-| M1 | Dead Code Purge | 17 orphaned files (13 delete, 4 codegen delete, 5 triage→wire-in) | PENDING |
+| M1 | Dead Code Purge | 17 orphaned files (13 delete, 4 codegen delete, 5 triage→wire-in) | **COMPLETE** |
 | M2 | Test API Routes | 12 route handlers, ~60 tests | PENDING |
 | M3 | Test Server Core | server.ts + router.ts, ~20 tests | PENDING |
 | M4 | Test Provisioners | 13 provisioner files, ~40 tests | PENDING |
@@ -31,7 +31,13 @@
 
 **Execution order:** M1 → M2 + M3 (parallel) → M4 + M5 (parallel) → M6 + M7 (parallel) → M8
 
-Missions completed: 0/8. Next checkpoint at: 4.
+Missions completed: 1/8. Next checkpoint at: 4.
+
+## M1 Results
+- Deleted 13 lib/ orphans + 4 codegen/ orphans (2,020 lines removed)
+- Wired in 5 planned features: daemon-aggregator, project-vault, autonomy-controller, treasury-backup, platform-planner
+- 0 TypeScript errors, 741/741 tests passing
+- Commit: da4c80d
 
 ## Orphan Triage (M1)
 
