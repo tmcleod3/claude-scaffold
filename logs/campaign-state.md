@@ -20,7 +20,7 @@
 
 | # | Mission | Scope | Status |
 |---|---------|-------|--------|
-| M1 | Split treasury-heartbeat.ts | 1,495 → ~4 modules | PENDING |
+| M1 | Split treasury-heartbeat.ts | 1,495 → 5 modules (48+360+116+762+346) | **COMPLETE** |
 | M2 | Split heartbeat.ts | 1,067 → ~3 modules | PENDING |
 | M3 | Split API routes | projects.ts (769) + provision.ts (642) | PENDING |
 | M4 | Split provisioners | aws-vps (663) + railway (454) | PENDING |
@@ -29,7 +29,13 @@
 
 **Execution order:** M1 → M2 → M3 + M4 + M5 (parallel) → M6
 
-Missions completed: 0/6. Next checkpoint at: 4.
+Missions completed: 1/6. Next checkpoint at: 4.
+
+## M1 Results
+- treasury-heartbeat.ts: 1,495 → 48 lines (re-export hub)
+- 4 new modules: treasury-io (360), treasury-circuit-breakers (116), treasury-jobs (762), treasury-handlers (346)
+- 1340/1340 tests, 0 TS errors
+- Commit: 406909b
 
 ## BLOCKED Items
 
