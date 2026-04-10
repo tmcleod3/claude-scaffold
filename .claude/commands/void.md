@@ -23,10 +23,9 @@ Orient to the current state:
 Fetch the latest from upstream. Two transports supported:
 
 **Transport A (npm — v21.0+):** If `npx voidforge` is available:
-1. Run `npx voidforge update` — uses the methodology diff/apply system
-2. This handles version comparison, diffing, and applying automatically
-3. If no changes → "The forge burns bright! You're on the latest." → Stop
-4. If changes applied → skip to Step 4 (npm transport handles Steps 2-3)
+1. Run `npx voidforge update` — this auto-upgrades the CLI first if behind npm latest, then diffs and applies methodology changes. The auto-upgrade ensures users on old CLI versions (e.g., v21) get the full v23+ methodology including `.claude/agents/`.
+2. If no changes → "The forge burns bright! You're on the latest." → Stop
+3. If changes applied → skip to Step 4 (npm transport handles Steps 2-3)
 
 **Transport B (git — legacy):** If `npx voidforge` is not installed:
 1. Run `git remote -v` — look for a remote pointing to `tmcleod3/voidforge`

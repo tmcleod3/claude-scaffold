@@ -22,6 +22,7 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { execSync } from 'node:child_process';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -401,6 +402,36 @@ async function main(): Promise<void> {
           const result = selfUpdate();
           console.log(result.message);
           process.exit(result.success ? 0 : 1);
+        }
+        // Auto-upgrade CLI if behind npm latest (unless --no-self-update)
+        if (!args.includes('--self') && !args.includes('--extensions') && !args.includes('--no-self-update')) {
+          try {
+            const npmLatest = execSync('npm view thevoidforge version 2>/dev/null', { encoding: 'utf-8' }).trim();
+            const localVersion = await getPackageVersion();
+            if (npmLatest && localVersion && localVersion !== 'unknown' && npmLatest !== localVersion) {
+              const [nMaj, nMin, nPatch] = npmLatest.split('.').map(Number);
+              const [lMaj, lMin, lPatch] = localVersion.split('.').map(Number);
+              const npmNum = nMaj * 10000 + nMin * 100 + nPatch;
+              const localNum = lMaj * 10000 + lMin * 100 + lPatch;
+              if (npmNum > localNum) {
+                console.log(`\n  CLI is v${localVersion}, npm has v${npmLatest}. Upgrading...`);
+                const { selfUpdate } = await import('../wizard/lib/updater.js');
+                const upgradeResult = selfUpdate();
+                if (upgradeResult.success) {
+                  console.log(`  Upgraded to v${npmLatest}. Re-running update with new version...\n`);
+                  // Re-exec with the new version — the new binary has the updated methodology
+                  try {
+                    execSync('npx voidforge update --no-self-update', { stdio: 'inherit' });
+                  } catch { /* exit code propagated */ }
+                  process.exit(0);
+                } else {
+                  console.log(`  Self-upgrade failed: ${upgradeResult.message}. Continuing with v${localVersion}...`);
+                }
+              }
+            }
+          } catch {
+            // npm view failed — offline or registry issue. Continue with local version.
+          }
         }
         if (args.includes('--extensions')) {
           const { readRegistry } = await import('../wizard/lib/project-registry.js');
