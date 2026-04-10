@@ -21,7 +21,7 @@
 | # | Mission | Scope | Status |
 |---|---------|-------|--------|
 | M1 | Split treasury-heartbeat.ts | 1,495 → 5 modules (48+360+116+762+346) | **COMPLETE** |
-| M2 | Split heartbeat.ts | 1,067 → ~3 modules | PENDING |
+| M2 | Split heartbeat.ts | 1,067 → 3 modules (533+183+194) | **COMPLETE** |
 | M3 | Split API routes | projects.ts (769) + provision.ts (642) | PENDING |
 | M4 | Split provisioners | aws-vps (663) + railway (454) | PENDING |
 | M5 | Split financial campaigns | google (560) + tiktok (478) + meta (413) | PENDING |
@@ -29,7 +29,7 @@
 
 **Execution order:** M1 → M2 → M3 + M4 + M5 (parallel) → M6
 
-Missions completed: 1/6. Next checkpoint at: 4.
+Missions completed: 2/6. Next checkpoint at: 4.
 
 ## M1 Results
 - treasury-heartbeat.ts: 1,495 → 48 lines (re-export hub)

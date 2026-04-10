@@ -1,16 +1,17 @@
 /**
- * AWS VPS provisioner — EC2 + SG + optional RDS/ElastiCache.
- * Uses @aws-sdk for all AWS API calls.
+ * AWS VPS provisioner — orchestrator that coordinates EC2, RDS, ElastiCache,
+ * script generation, env writing, and cleanup.
  */
 
-import { writeFile, mkdir, chmod } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 import { chmodSync } from 'node:fs';
-import { randomBytes } from 'node:crypto';
 import { join } from 'node:path';
 import type { Provisioner, ProvisionContext, ProvisionEmitter, ProvisionResult, CreatedResource } from './types.js';
-import type { IpPermission } from '@aws-sdk/client-ec2';
-import { recordResourcePending, recordResourceCreated } from '../provision-manifest.js';
-import { rdsInstanceClass, cacheNodeType, isValidInstanceType, type InstanceType } from '../instance-sizing.js';
+import type { InstanceType } from '../instance-sizing.js';
+import { buildAwsConfig, validateAwsContext, loadAwsSdk, sleep } from './aws-config.js';
+import type { AwsProvisionState } from './aws-config.js';
+import { validateCredentials, createKeyPair, createSecurityGroup, findAmi, launchAndWaitEc2, restrictSsh } from './aws-ec2.js';
+import { provisionRds, provisionElastiCache } from './aws-rds.js';
 import { generateProvisionScript } from './scripts/provision-vps.js';
 import { generateDeployScript } from './scripts/deploy-vps.js';
 import { generateRollbackScript } from './scripts/rollback-vps.js';
@@ -19,557 +20,68 @@ import { generateCaddyfile } from './scripts/caddyfile.js';
 import { appendEnvSection } from '../env-writer.js';
 import { slugify } from './http-client.js';
 
-const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_MS = 300000; // 5 minutes
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-function cancellableSleep(ms: number, signal?: AbortSignal): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) { reject(new Error('Aborted')); return; }
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new Error('Aborted')); }, { once: true });
-  });
-}
-
 export const awsVpsProvisioner: Provisioner = {
   async validate(ctx: ProvisionContext): Promise<string[]> {
-    const errors: string[] = [];
-    if (!ctx.projectDir) errors.push('Project directory is required');
-    if (!ctx.projectName) errors.push('Project name is required');
-    if (!ctx.credentials['aws-access-key-id']) errors.push('AWS Access Key ID is required');
-    if (!ctx.credentials['aws-secret-access-key']) errors.push('AWS Secret Access Key is required');
-    if (ctx.instanceType && !isValidInstanceType(ctx.instanceType)) {
-      errors.push(`Invalid instance type: "${ctx.instanceType}". Must be one of: t3.micro, t3.small, t3.medium, t3.large`);
-    }
-    return errors;
+    return validateAwsContext(ctx);
   },
 
   async provision(ctx: ProvisionContext, emit: ProvisionEmitter): Promise<ProvisionResult> {
-    const resources: CreatedResource[] = [];
-    const outputs: Record<string, string> = {};
-    const files: string[] = [];
-    const region = ctx.credentials['aws-region'] || 'us-east-1';
-    const slug = slugify(ctx.projectName);
-
-    // Dynamic import of AWS SDK
-    let EC2Client: typeof import('@aws-sdk/client-ec2').EC2Client;
-    let STSClient: typeof import('@aws-sdk/client-sts').STSClient;
-    let GetCallerIdentityCommand: typeof import('@aws-sdk/client-sts').GetCallerIdentityCommand;
-    let ec2Commands: typeof import('@aws-sdk/client-ec2');
-
-    try {
-      const ec2Mod = await import('@aws-sdk/client-ec2');
-      const stsMod = await import('@aws-sdk/client-sts');
-      EC2Client = ec2Mod.EC2Client;
-      STSClient = stsMod.STSClient;
-      GetCallerIdentityCommand = stsMod.GetCallerIdentityCommand;
-      ec2Commands = ec2Mod;
-    } catch {
-      return {
-        success: false, resources, outputs, files,
-        error: 'AWS SDK not installed. Run: npm install @aws-sdk/client-ec2 @aws-sdk/client-sts @aws-sdk/client-rds @aws-sdk/client-elasticache',
-      };
-    }
-
-    const awsConfig = {
-      region,
-      credentials: {
-        accessKeyId: ctx.credentials['aws-access-key-id'],
-        secretAccessKey: ctx.credentials['aws-secret-access-key'],
-      },
+    const awsConfig = buildAwsConfig(ctx);
+    const state: AwsProvisionState = {
+      resources: [],
+      outputs: {},
+      files: [],
+      region: awsConfig.region,
+      slug: slugify(ctx.projectName),
+      sgId: '',
+      instanceId: '',
+      publicIp: '',
+      awsConfig,
     };
 
-    const ec2 = new EC2Client(awsConfig);
-    const sts = new STSClient(awsConfig);
-
-    // Step 1: Validate credentials via STS
-    emit({ step: 'validate-creds', status: 'started', message: 'Validating AWS credentials' });
-    try {
-      const identity = await sts.send(new GetCallerIdentityCommand({}));
-      const entityName = (identity.Arn ?? 'unknown').split(/[/:]/).pop() ?? 'unknown';
-      emit({ step: 'validate-creds', status: 'done', message: `Authenticated as ${entityName}` });
-    } catch (err) {
-      console.error('AWS credential validation error:', (err as Error).message);
-      emit({ step: 'validate-creds', status: 'error', message: 'Invalid AWS credentials', detail: 'Check AWS Console for details' });
-      return { success: false, resources, outputs, files, error: 'AWS credential validation failed' };
+    // Load AWS SDK
+    const sdk = await loadAwsSdk();
+    if ('error' in sdk) {
+      return { success: false, resources: state.resources, outputs: state.outputs, files: state.files, error: sdk.error };
     }
+    const { ec2Mod, stsMod } = sdk;
 
-    // Step 2: Create key pair
-    emit({ step: 'key-pair', status: 'started', message: 'Creating SSH key pair' });
-    const keyName = `${slug}-deploy`;
-    try {
-      await recordResourcePending(ctx.runId, 'key-pair', keyName, region);
-      const keyResult = await ec2.send(new ec2Commands.CreateKeyPairCommand({
-        KeyName: keyName,
-        KeyType: 'ed25519',
-      }));
-
-      if (!keyResult.KeyMaterial) {
-        throw new Error('AWS returned no key material — key pair may already exist');
-      }
-
-      const sshDir = join(ctx.projectDir, '.ssh');
-      await mkdir(sshDir, { recursive: true });
-      const keyPath = join(sshDir, 'deploy-key.pem');
-      await writeFile(keyPath, keyResult.KeyMaterial, 'utf-8');
-      await chmod(keyPath, 0o600);
-      files.push('.ssh/deploy-key.pem');
-      resources.push({ type: 'key-pair', id: keyName, region });
-      await recordResourceCreated(ctx.runId, 'key-pair', keyName, region);
-      outputs['SSH_KEY_PATH'] = '.ssh/deploy-key.pem';
-      emit({ step: 'key-pair', status: 'done', message: `Key pair "${keyName}" created` });
-    } catch (err) {
-      console.error('Key pair creation error:', (err as Error).message);
-      emit({ step: 'key-pair', status: 'error', message: 'Failed to create key pair', detail: 'Check AWS Console for details' });
-      return { success: false, resources, outputs, files, error: 'Failed to create key pair' };
+    // Steps 1-6: EC2 provisioning pipeline
+    if (!await validateCredentials(state, stsMod, emit)) {
+      return { success: false, ...stateResult(state), error: 'AWS credential validation failed' };
     }
-
-    // Step 3: Create security group
-    emit({ step: 'security-group', status: 'started', message: 'Creating security group' });
-    let sgId: string;
-    try {
-      await recordResourcePending(ctx.runId, 'security-group', `${slug}-sg`, region);
-      const sgResult = await ec2.send(new ec2Commands.CreateSecurityGroupCommand({
-        GroupName: `${slug}-sg`,
-        Description: `VoidForge security group for ${ctx.projectName}`,
-      }));
-      sgId = sgResult.GroupId ?? '';
-      resources.push({ type: 'security-group', id: sgId, region });
-      await recordResourceCreated(ctx.runId, 'security-group', sgId, region);
-
-      // Authorize inbound: SSH (22), HTTP (80), HTTPS (443)
-      // SSH initially open to 0.0.0.0/0 for provisioning — restricted to deployer IP at end (DEVOPS-R2-001).
-      const ingressRules: IpPermission[] = [
-        { IpProtocol: 'tcp', FromPort: 22, ToPort: 22, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'SSH' }] },
-        { IpProtocol: 'tcp', FromPort: 80, ToPort: 80, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'HTTP' }] },
-        { IpProtocol: 'tcp', FromPort: 443, ToPort: 443, IpRanges: [{ CidrIp: '0.0.0.0/0', Description: 'HTTPS' }] },
-      ];
-
-      // Allow DB port within the SG (self-referencing) so EC2 can reach RDS
-      // Uses UserIdGroupPairs to restrict access to instances in the same SG only
-      if (ctx.database === 'postgres') {
-        ingressRules.push({ IpProtocol: 'tcp', FromPort: 5432, ToPort: 5432, UserIdGroupPairs: [{ GroupId: sgId, Description: 'PostgreSQL (SG-only)' }] });
-      } else if (ctx.database === 'mysql') {
-        ingressRules.push({ IpProtocol: 'tcp', FromPort: 3306, ToPort: 3306, UserIdGroupPairs: [{ GroupId: sgId, Description: 'MySQL (SG-only)' }] });
-      }
-      // Allow Redis port if cache requested
-      if (ctx.cache === 'redis') {
-        ingressRules.push({ IpProtocol: 'tcp', FromPort: 6379, ToPort: 6379, UserIdGroupPairs: [{ GroupId: sgId, Description: 'Redis (SG-only)' }] });
-      }
-
-      await ec2.send(new ec2Commands.AuthorizeSecurityGroupIngressCommand({
-        GroupId: sgId,
-        IpPermissions: ingressRules,
-      }));
-
-      const portList = ingressRules.map((r) => r.FromPort).join(', ');
-      emit({ step: 'security-group', status: 'done', message: `Security group "${slug}-sg" created (ports ${portList})` });
-    } catch (err) {
-      console.error('Security group creation error:', (err as Error).message);
-      emit({ step: 'security-group', status: 'error', message: 'Failed to create security group', detail: 'Check AWS Console for details' });
-      return { success: false, resources, outputs, files, error: 'Failed to create security group' };
+    if (!await createKeyPair(state, ctx, ec2Mod, emit)) {
+      return { success: false, ...stateResult(state), error: 'Failed to create key pair' };
     }
-
-    // Step 4: Find latest Amazon Linux 2023 AMI
-    emit({ step: 'ami-lookup', status: 'started', message: 'Finding latest Amazon Linux 2023 AMI' });
-    let amiId: string;
-    try {
-      const amiResult = await ec2.send(new ec2Commands.DescribeImagesCommand({
-        Owners: ['amazon'],
-        Filters: [
-          { Name: 'name', Values: ['al2023-ami-*-x86_64'] },
-          { Name: 'state', Values: ['available'] },
-          { Name: 'architecture', Values: ['x86_64'] },
-        ],
-      }));
-
-      const images = (amiResult.Images ?? [])
-        .filter((img: { ImageId?: string; CreationDate?: string }) => img.ImageId && img.CreationDate)
-        .sort((a: { CreationDate?: string }, b: { CreationDate?: string }) => (b.CreationDate ?? '').localeCompare(a.CreationDate ?? ''));
-
-      if (images.length === 0) {
-        throw new Error('No Amazon Linux 2023 AMI found in this region');
-      }
-      amiId = images[0].ImageId!;
-      emit({ step: 'ami-lookup', status: 'done', message: `AMI: ${amiId}` });
-    } catch (err) {
-      console.error('AMI lookup error:', (err as Error).message);
-      emit({ step: 'ami-lookup', status: 'error', message: 'AMI lookup failed', detail: 'Check AWS Console for details' });
-      return { success: false, resources, outputs, files, error: 'AMI lookup failed' };
+    if (!await createSecurityGroup(state, ctx, ec2Mod, emit)) {
+      return { success: false, ...stateResult(state), error: 'Failed to create security group' };
     }
-
-    // Step 5: Launch EC2 instance
+    const amiId = await findAmi(state, ec2Mod, emit);
+    if (!amiId) {
+      return { success: false, ...stateResult(state), error: 'AMI lookup failed' };
+    }
     const ec2InstanceType = (ctx.instanceType || 't3.micro') as InstanceType;
-    emit({ step: 'launch-ec2', status: 'started', message: `Launching EC2 instance (${ec2InstanceType})` });
-    let instanceId: string;
-    try {
-      const userDataScript = `#!/bin/bash
-dnf update -y
-dnf install -y git curl`;
-
-      await recordResourcePending(ctx.runId, 'ec2-instance', 'pending', region);
-      const runResult = await ec2.send(new ec2Commands.RunInstancesCommand({
-        ImageId: amiId,
-        InstanceType: ec2InstanceType,
-        MinCount: 1,
-        MaxCount: 1,
-        KeyName: keyName,
-        SecurityGroupIds: [sgId],
-        UserData: Buffer.from(userDataScript).toString('base64'),
-        TagSpecifications: [{
-          ResourceType: 'instance',
-          Tags: [
-            { Key: 'Name', Value: ctx.projectName },
-            { Key: 'ManagedBy', Value: 'VoidForge' },
-          ],
-        }],
-      }));
-
-      instanceId = runResult.Instances?.[0]?.InstanceId ?? '';
-      if (!instanceId) throw new Error('No instance ID returned');
-      resources.push({ type: 'ec2-instance', id: instanceId, region });
-      await recordResourceCreated(ctx.runId, 'ec2-instance', instanceId, region);
-      emit({ step: 'launch-ec2', status: 'done', message: `Instance ${instanceId} launched` });
-    } catch (err) {
-      console.error('EC2 launch error:', (err as Error).message);
-      emit({ step: 'launch-ec2', status: 'error', message: 'Failed to launch EC2', detail: 'Check AWS Console for details' });
-      return { success: false, resources, outputs, files, error: 'Failed to launch EC2 instance' };
+    if (!await launchAndWaitEc2(state, ctx, ec2Mod, amiId, ec2InstanceType, emit)) {
+      return { success: false, ...stateResult(state), error: 'EC2 instance failed to start' };
     }
 
-    // Step 6: Wait for instance to be running
-    emit({ step: 'wait-running', status: 'started', message: 'Waiting for instance to start...' });
-    let publicIp = '';
-    try {
-      const start = Date.now();
-      while (Date.now() - start < MAX_POLL_MS) {
-        await cancellableSleep(POLL_INTERVAL_MS + Math.random() * 1000, ctx.abortSignal);
-        const desc = await ec2.send(new ec2Commands.DescribeInstancesCommand({
-          InstanceIds: [instanceId],
-        }));
-        const instance = desc.Reservations?.[0]?.Instances?.[0];
-        const state = instance?.State?.Name;
-
-        if (state === 'running') {
-          publicIp = instance?.PublicIpAddress ?? '';
-          if (publicIp) break;
-        }
-        if (state === 'terminated' || state === 'shutting-down') {
-          throw new Error(`Instance entered state: ${state}`);
-        }
-      }
-      if (!publicIp) throw new Error('Instance did not get a public IP within timeout');
-      outputs['SSH_HOST'] = publicIp;
-      outputs['SSH_USER'] = 'ec2-user';
-      emit({ step: 'wait-running', status: 'done', message: `Instance running at ${publicIp}` });
-    } catch (err) {
-      if ((err as Error).message === 'Aborted') {
-        emit({ step: 'wait-running', status: 'skipped', message: 'EC2 polling cancelled' });
-      } else {
-        console.error('EC2 wait error:', (err as Error).message);
-        emit({ step: 'wait-running', status: 'error', message: 'Instance failed to start', detail: 'Check AWS Console for details' });
-        return { success: false, resources, outputs, files, error: 'EC2 instance failed to start' };
-      }
-    }
-
-    // Step 7: Optional RDS
-    if (ctx.database === 'postgres' || ctx.database === 'mysql') {
-      emit({ step: 'rds', status: 'started', message: `Creating RDS instance (${ctx.database})` });
-      try {
-        const { RDSClient, CreateDBInstanceCommand, DescribeDBInstancesCommand } = await import('@aws-sdk/client-rds');
-        const rds = new RDSClient(awsConfig);
-
-        const engine = ctx.database === 'postgres' ? 'postgres' : 'mysql';
-        const port = ctx.database === 'postgres' ? 5432 : 3306;
-        const dbInstanceId = `${slug}-db`;
-        // IG-R2: Random username instead of hardcoded 'admin'
-        const dbUsername = `vf_${randomBytes(4).toString('hex')}`;
-        const specials = '!@#$%^&*';
-        const suffix = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Math.floor(Math.random() * 10) + specials[Math.floor(Math.random() * specials.length)];
-        const dbPassword = randomBytes(16).toString('hex') + suffix;
-
-        await recordResourcePending(ctx.runId, 'rds-instance', dbInstanceId, region);
-        await rds.send(new CreateDBInstanceCommand({
-          DBInstanceIdentifier: dbInstanceId,
-          DBInstanceClass: rdsInstanceClass(ec2InstanceType),
-          Engine: engine,
-          MasterUsername: dbUsername,
-          MasterUserPassword: dbPassword,
-          AllocatedStorage: 20,
-          PubliclyAccessible: false,
-          VpcSecurityGroupIds: [sgId],
-          Tags: [
-            { Key: 'Name', Value: `${ctx.projectName}-db` },
-            { Key: 'ManagedBy', Value: 'VoidForge' },
-          ],
-        }));
-
-        resources.push({ type: 'rds-instance', id: dbInstanceId, region });
-        await recordResourceCreated(ctx.runId, 'rds-instance', dbInstanceId, region);
-        outputs['DB_ENGINE'] = engine;
-        outputs['DB_PORT'] = String(port);
-        outputs['DB_INSTANCE_ID'] = dbInstanceId;
-        outputs['DB_USERNAME'] = dbUsername;
-        outputs['DB_PASSWORD'] = dbPassword;
-        emit({ step: 'rds', status: 'done', message: `RDS instance "${dbInstanceId}" created — waiting for endpoint` });
-
-        // Step 7b: Poll RDS until available (non-fatal on timeout)
-        const RDS_POLL_MS = 10000;
-        const RDS_TIMEOUT_MS = 900000; // 15 minutes
-        const RDS_PROGRESS_MS = 30000;
-        emit({ step: 'rds-wait', status: 'started', message: 'Waiting for RDS to become available (5-10 minutes)...' });
-        try {
-          const rdsStart = Date.now();
-          let lastProgress = rdsStart;
-          let dbHost = '';
-          while (Date.now() - rdsStart < RDS_TIMEOUT_MS) {
-            await cancellableSleep(RDS_POLL_MS + Math.random() * 2000, ctx.abortSignal);
-            const desc = await rds.send(new DescribeDBInstancesCommand({
-              DBInstanceIdentifier: dbInstanceId,
-            }));
-            const instance = desc.DBInstances?.[0];
-            const status = instance?.DBInstanceStatus;
-
-            if (status === 'available') {
-              dbHost = instance?.Endpoint?.Address ?? '';
-              break;
-            }
-
-            // Check for terminal failure states
-            const rdsTerminalStates = ['failed', 'deleting', 'deleted', 'incompatible-parameters', 'incompatible-restore', 'storage-full'];
-            if (status && rdsTerminalStates.includes(status)) {
-              emit({ step: 'rds-wait', status: 'error', message: `RDS entered terminal state: ${status}`, detail: 'Check AWS Console for details' });
-              break;
-            }
-
-            // Emit progress every 30 seconds
-            if (Date.now() - lastProgress >= RDS_PROGRESS_MS) {
-              const elapsed = Math.round((Date.now() - rdsStart) / 1000);
-              emit({ step: 'rds-wait', status: 'started', message: `RDS status: ${status || 'creating'}... (${elapsed}s elapsed)` });
-              lastProgress = Date.now();
-            }
-          }
-
-          if (dbHost) {
-            outputs['DB_HOST'] = dbHost;
-            emit({ step: 'rds-wait', status: 'done', message: `RDS available at ${dbHost}` });
-          } else {
-            emit({ step: 'rds-wait', status: 'error', message: 'RDS polling timed out after 15 minutes', detail: `Instance "${dbInstanceId}" is still provisioning. Check the AWS Console for the endpoint and add DB_HOST to your .env manually.` });
-          }
-        } catch (pollErr) {
-          if ((pollErr as Error).message === 'Aborted') {
-            emit({ step: 'rds-wait', status: 'skipped', message: 'RDS polling cancelled' });
-          } else {
-            console.error('RDS polling error:', (pollErr as Error).message);
-            emit({ step: 'rds-wait', status: 'error', message: 'RDS polling failed', detail: 'Check AWS Console for details' });
-          }
-          // Non-fatal — continue without DB_HOST
-        }
-      } catch (err) {
-        console.error('RDS creation error:', (err as Error).message);
-        emit({ step: 'rds', status: 'error', message: 'Failed to create RDS instance', detail: 'Check AWS Console for details' });
-        // Non-fatal — continue without DB
-      }
-    } else {
-      emit({ step: 'rds', status: 'skipped', message: 'No database requested' });
-    }
-
-    // Step 8: Optional ElastiCache
-    if (ctx.cache === 'redis') {
-      emit({ step: 'elasticache', status: 'started', message: 'Creating ElastiCache Redis cluster' });
-      try {
-        const { ElastiCacheClient, CreateCacheClusterCommand, DescribeCacheClustersCommand } = await import('@aws-sdk/client-elasticache');
-        const elasticache = new ElastiCacheClient(awsConfig);
-        const clusterId = `${slug}-redis`;
-
-        await recordResourcePending(ctx.runId, 'elasticache-cluster', clusterId, region);
-        // Note: CreateCacheClusterCommand does not support AuthToken — Redis AUTH requires
-        // CreateReplicationGroupCommand with TransitEncryptionEnabled. Security relies on
-        // SG isolation (only instances in the same SG can reach the Redis port). (IG-R3)
-        await elasticache.send(new CreateCacheClusterCommand({
-          CacheClusterId: clusterId,
-          CacheNodeType: cacheNodeType(ec2InstanceType),
-          Engine: 'redis',
-          NumCacheNodes: 1,
-          Tags: [
-            { Key: 'Name', Value: `${ctx.projectName}-redis` },
-            { Key: 'ManagedBy', Value: 'VoidForge' },
-          ],
-        }));
-
-        resources.push({ type: 'elasticache-cluster', id: clusterId, region });
-        await recordResourceCreated(ctx.runId, 'elasticache-cluster', clusterId, region);
-        outputs['REDIS_CLUSTER_ID'] = clusterId;
-        emit({ step: 'elasticache', status: 'done', message: `ElastiCache cluster "${clusterId}" created — waiting for endpoint` });
-
-        // Step 8b: Poll ElastiCache until available (non-fatal on timeout)
-        const CACHE_POLL_MS = 5000;
-        const CACHE_TIMEOUT_MS = 300000; // 5 minutes
-        const CACHE_PROGRESS_MS = 15000;
-        emit({ step: 'cache-wait', status: 'started', message: 'Waiting for Redis to become available (1-2 minutes)...' });
-        try {
-          const cacheStart = Date.now();
-          let lastCacheProgress = cacheStart;
-          let redisHost = '';
-          while (Date.now() - cacheStart < CACHE_TIMEOUT_MS) {
-            await cancellableSleep(CACHE_POLL_MS + Math.random() * 1000, ctx.abortSignal);
-            const desc = await elasticache.send(new DescribeCacheClustersCommand({
-              CacheClusterId: clusterId,
-              ShowCacheNodeInfo: true,
-            }));
-            const cluster = desc.CacheClusters?.[0];
-            const status = cluster?.CacheClusterStatus;
-
-            if (status === 'available') {
-              redisHost = cluster?.CacheNodes?.[0]?.Endpoint?.Address ?? '';
-              break;
-            }
-
-            // Check for terminal failure states
-            const cacheTerminalStates = ['deleted', 'deleting', 'create-failed', 'snapshotting'];
-            if (status && cacheTerminalStates.includes(status)) {
-              emit({ step: 'cache-wait', status: 'error', message: `Redis entered terminal state: ${status}`, detail: 'Check AWS Console for details' });
-              break;
-            }
-
-            if (Date.now() - lastCacheProgress >= CACHE_PROGRESS_MS) {
-              const elapsed = Math.round((Date.now() - cacheStart) / 1000);
-              emit({ step: 'cache-wait', status: 'started', message: `Redis status: ${status || 'creating'}... (${elapsed}s elapsed)` });
-              lastCacheProgress = Date.now();
-            }
-          }
-
-          if (redisHost) {
-            outputs['REDIS_HOST'] = redisHost;
-            outputs['REDIS_PORT'] = '6379';
-            emit({ step: 'cache-wait', status: 'done', message: `Redis available at ${redisHost}:6379` });
-          } else {
-            emit({ step: 'cache-wait', status: 'error', message: 'Redis polling timed out after 5 minutes', detail: `Cluster "${clusterId}" is still provisioning. Check the AWS Console for the endpoint.` });
-          }
-        } catch (pollErr) {
-          if ((pollErr as Error).message === 'Aborted') {
-            emit({ step: 'cache-wait', status: 'skipped', message: 'Redis polling cancelled' });
-          } else {
-            console.error('Redis polling error:', (pollErr as Error).message);
-            emit({ step: 'cache-wait', status: 'error', message: 'Redis polling failed', detail: 'Check AWS Console for details' });
-          }
-        }
-      } catch (err) {
-        console.error('ElastiCache creation error:', (err as Error).message);
-        emit({ step: 'elasticache', status: 'error', message: 'Failed to create ElastiCache cluster', detail: 'Check AWS Console for details' });
-        // Non-fatal
-      }
-    } else {
-      emit({ step: 'elasticache', status: 'skipped', message: 'No cache requested' });
-    }
+    // Steps 7-8: Optional RDS + ElastiCache (non-fatal)
+    await provisionRds(state, ctx, ec2InstanceType, emit);
+    await provisionElastiCache(state, ctx, ec2InstanceType, emit);
 
     // Step 9: Generate infrastructure scripts
-    emit({ step: 'generate-scripts', status: 'started', message: 'Generating deploy scripts' });
-    try {
-      const infraDir = join(ctx.projectDir, 'infra');
-      await mkdir(infraDir, { recursive: true });
-
-      const framework = ctx.framework || 'express';
-
-      // provision.sh
-      const provisionSh = generateProvisionScript({ framework, database: ctx.database, cache: ctx.cache, instanceType: ec2InstanceType });
-      await writeFile(join(infraDir, 'provision.sh'), provisionSh, { mode: 0o755 });
-      files.push('infra/provision.sh');
-
-      // deploy.sh
-      const deploySh = generateDeployScript({ framework });
-      await writeFile(join(infraDir, 'deploy.sh'), deploySh, { mode: 0o755 });
-      files.push('infra/deploy.sh');
-
-      // rollback.sh
-      const rollbackSh = generateRollbackScript({ framework });
-      await writeFile(join(infraDir, 'rollback.sh'), rollbackSh, { mode: 0o755 });
-      files.push('infra/rollback.sh');
-
-      // Caddyfile
-      const caddyfile = generateCaddyfile({ framework, hostname: ctx.hostname || undefined });
-      await writeFile(join(infraDir, 'Caddyfile'), caddyfile, 'utf-8');
-      files.push('infra/Caddyfile');
-
-      // ecosystem.config.js (Node frameworks only)
-      if (['next.js', 'express'].includes(framework) || !framework) {
-        const ecosystem = generateEcosystemConfig({ projectName: ctx.projectName, framework });
-        await writeFile(join(ctx.projectDir, 'ecosystem.config.js'), ecosystem, 'utf-8');
-        files.push('ecosystem.config.js');
-      }
-
-      emit({ step: 'generate-scripts', status: 'done', message: `Generated ${files.length} infrastructure files` });
-    } catch (err) {
-      console.error('Script generation error:', (err as Error).message);
-      emit({ step: 'generate-scripts', status: 'error', message: 'Failed to generate scripts', detail: 'Check AWS Console for details' });
-      return { success: false, resources, outputs, files, error: 'Failed to generate infrastructure scripts' };
+    const scriptsOk = await generateScripts(state, ctx, ec2InstanceType, emit);
+    if (!scriptsOk) {
+      return { success: false, ...stateResult(state), error: 'Failed to generate infrastructure scripts' };
     }
 
-    // Step 10: Write .env with infrastructure details
-    emit({ step: 'write-env', status: 'started', message: 'Writing infrastructure config to .env' });
-    try {
-      const envLines = [
-        `# VoidForge Infrastructure — generated ${new Date().toISOString()}`,
-        `SSH_HOST=${publicIp}`,
-        `SSH_USER=ec2-user`,
-        `SSH_KEY_PATH=.ssh/deploy-key.pem`,
-      ];
-      if (outputs['DB_ENGINE']) {
-        envLines.push(`DB_ENGINE=${outputs['DB_ENGINE']}`);
-        envLines.push(`DB_HOST=${outputs['DB_HOST'] || `# pending — check https://${region}.console.aws.amazon.com/rds/home?region=${region}#databases:`}`);
-        envLines.push(`DB_PORT=${outputs['DB_PORT']}`);
-        envLines.push(`DB_INSTANCE_ID=${outputs['DB_INSTANCE_ID']}`);
-        envLines.push(`DB_USERNAME=${outputs['DB_USERNAME']}`);
-        envLines.push(`DB_PASSWORD=${outputs['DB_PASSWORD']}`);
-      }
-      if (outputs['REDIS_CLUSTER_ID']) {
-        envLines.push(`REDIS_CLUSTER_ID=${outputs['REDIS_CLUSTER_ID']}`);
-        envLines.push(`REDIS_HOST=${outputs['REDIS_HOST'] || `# pending — check https://${region}.console.aws.amazon.com/elasticache/home?region=${region}`}`);
-        envLines.push(`REDIS_PORT=${outputs['REDIS_PORT'] || '6379'}`);
-      }
-      await appendEnvSection(ctx.projectDir, envLines);
-      chmodSync(join(ctx.projectDir, '.env'), 0o600);
-      emit({ step: 'write-env', status: 'done', message: 'Infrastructure config written to .env' });
-    } catch (err) {
-      console.error('Env file write error:', (err as Error).message);
-      emit({ step: 'write-env', status: 'error', message: 'Failed to write .env', detail: (err as Error).message });
-      // Non-fatal
-    }
+    // Step 10: Write .env
+    await writeEnvFile(state, ctx, emit);
 
-    // DEVOPS-R2-001: Restrict SSH from 0.0.0.0/0 to deployer's IP after provisioning
-    try {
-      const { EC2Client, RevokeSecurityGroupIngressCommand, AuthorizeSecurityGroupIngressCommand } = await import('@aws-sdk/client-ec2');
-      const ec2Restrict = new EC2Client(awsConfig);
+    // DEVOPS-R2-001: Restrict SSH
+    await restrictSsh(state, emit);
 
-      // Detect deployer's public IP via checkip.amazonaws.com
-      let deployerIp: string | null = null;
-      try {
-        const ipRes = await fetch('https://checkip.amazonaws.com', { signal: AbortSignal.timeout(5000) });
-        if (ipRes.ok) deployerIp = (await ipRes.text()).trim();
-      } catch { /* non-fatal — keep 0.0.0.0/0 if detection fails */ }
-
-      if (deployerIp && /^\d+\.\d+\.\d+\.\d+$/.test(deployerIp)) {
-        // Revoke the wide-open SSH rule
-        await ec2Restrict.send(new RevokeSecurityGroupIngressCommand({
-          GroupId: sgId,
-          IpPermissions: [{ IpProtocol: 'tcp', FromPort: 22, ToPort: 22, IpRanges: [{ CidrIp: '0.0.0.0/0' }] }],
-        }));
-        // Add restricted SSH rule for deployer's IP only
-        await ec2Restrict.send(new AuthorizeSecurityGroupIngressCommand({
-          GroupId: sgId,
-          IpPermissions: [{ IpProtocol: 'tcp', FromPort: 22, ToPort: 22, IpRanges: [{ CidrIp: `${deployerIp}/32`, Description: 'SSH (deployer IP)' }] }],
-        }));
-        emit({ step: 'ssh-restrict', status: 'done', message: `SSH restricted to ${deployerIp}/32 (was 0.0.0.0/0)` });
-      } else {
-        emit({ step: 'ssh-restrict', status: 'warning', message: 'Could not detect public IP — SSH remains open to 0.0.0.0/0. Restrict manually in AWS Console.' });
-      }
-    } catch (err) {
-      emit({ step: 'ssh-restrict', status: 'warning', message: 'SSH restriction failed (non-fatal). Restrict port 22 manually.', detail: (err as Error).message });
-    }
-
-    return { success: true, resources, outputs, files };
+    return { success: true, ...stateResult(state) };
   },
 
   async cleanup(resources: CreatedResource[], credentials: Record<string, string>): Promise<void> {
@@ -595,22 +107,19 @@ dnf install -y git curl`;
             break;
           }
           case 'security-group': {
-            const { EC2Client, DeleteSecurityGroupCommand, DescribeInstancesCommand: DescInst } = await import('@aws-sdk/client-ec2');
+            const { EC2Client, DeleteSecurityGroupCommand } = await import('@aws-sdk/client-ec2');
             const ec2 = new EC2Client(awsConfig);
-            // Wait for all instances in the SG to terminate before deleting
-            const maxWait = 120000; // 2 minutes
+            const maxWait = 120000;
             const start = Date.now();
             while (Date.now() - start < maxWait) {
               await sleep(10000);
               try {
                 await ec2.send(new DeleteSecurityGroupCommand({ GroupId: resource.id }));
-                break; // Success — SG deleted
+                break;
               } catch (sgErr) {
                 const msg = (sgErr as Error).message || '';
-                if (msg.includes('DependencyViolation')) {
-                  continue; // Instance still terminating, retry
-                }
-                throw sgErr; // Different error — propagate
+                if (msg.includes('DependencyViolation')) continue;
+                throw sgErr;
               }
             }
             break;
@@ -661,3 +170,87 @@ dnf install -y git curl`;
     }
   },
 };
+
+function stateResult(state: AwsProvisionState) {
+  return { resources: state.resources, outputs: state.outputs, files: state.files };
+}
+
+async function generateScripts(
+  state: AwsProvisionState,
+  ctx: ProvisionContext,
+  ec2InstanceType: InstanceType,
+  emit: ProvisionEmitter,
+): Promise<boolean> {
+  emit({ step: 'generate-scripts', status: 'started', message: 'Generating deploy scripts' });
+  try {
+    const infraDir = join(ctx.projectDir, 'infra');
+    await mkdir(infraDir, { recursive: true });
+
+    const framework = ctx.framework || 'express';
+
+    const provisionSh = generateProvisionScript({ framework, database: ctx.database, cache: ctx.cache, instanceType: ec2InstanceType });
+    await writeFile(join(infraDir, 'provision.sh'), provisionSh, { mode: 0o755 });
+    state.files.push('infra/provision.sh');
+
+    const deploySh = generateDeployScript({ framework });
+    await writeFile(join(infraDir, 'deploy.sh'), deploySh, { mode: 0o755 });
+    state.files.push('infra/deploy.sh');
+
+    const rollbackSh = generateRollbackScript({ framework });
+    await writeFile(join(infraDir, 'rollback.sh'), rollbackSh, { mode: 0o755 });
+    state.files.push('infra/rollback.sh');
+
+    const caddyfile = generateCaddyfile({ framework, hostname: ctx.hostname || undefined });
+    await writeFile(join(infraDir, 'Caddyfile'), caddyfile, 'utf-8');
+    state.files.push('infra/Caddyfile');
+
+    if (['next.js', 'express'].includes(framework) || !framework) {
+      const ecosystem = generateEcosystemConfig({ projectName: ctx.projectName, framework });
+      await writeFile(join(ctx.projectDir, 'ecosystem.config.js'), ecosystem, 'utf-8');
+      state.files.push('ecosystem.config.js');
+    }
+
+    emit({ step: 'generate-scripts', status: 'done', message: `Generated ${state.files.length} infrastructure files` });
+    return true;
+  } catch (err) {
+    console.error('Script generation error:', (err as Error).message);
+    emit({ step: 'generate-scripts', status: 'error', message: 'Failed to generate scripts', detail: 'Check AWS Console for details' });
+    return false;
+  }
+}
+
+async function writeEnvFile(
+  state: AwsProvisionState,
+  ctx: ProvisionContext,
+  emit: ProvisionEmitter,
+): Promise<void> {
+  emit({ step: 'write-env', status: 'started', message: 'Writing infrastructure config to .env' });
+  try {
+    const envLines = [
+      `# VoidForge Infrastructure — generated ${new Date().toISOString()}`,
+      `SSH_HOST=${state.publicIp}`,
+      `SSH_USER=ec2-user`,
+      `SSH_KEY_PATH=.ssh/deploy-key.pem`,
+    ];
+    if (state.outputs['DB_ENGINE']) {
+      envLines.push(`DB_ENGINE=${state.outputs['DB_ENGINE']}`);
+      envLines.push(`DB_HOST=${state.outputs['DB_HOST'] || `# pending — check https://${state.region}.console.aws.amazon.com/rds/home?region=${state.region}#databases:`}`);
+      envLines.push(`DB_PORT=${state.outputs['DB_PORT']}`);
+      envLines.push(`DB_INSTANCE_ID=${state.outputs['DB_INSTANCE_ID']}`);
+      envLines.push(`DB_USERNAME=${state.outputs['DB_USERNAME']}`);
+      envLines.push(`DB_PASSWORD=${state.outputs['DB_PASSWORD']}`);
+    }
+    if (state.outputs['REDIS_CLUSTER_ID']) {
+      envLines.push(`REDIS_CLUSTER_ID=${state.outputs['REDIS_CLUSTER_ID']}`);
+      envLines.push(`REDIS_HOST=${state.outputs['REDIS_HOST'] || `# pending — check https://${state.region}.console.aws.amazon.com/elasticache/home?region=${state.region}`}`);
+      envLines.push(`REDIS_PORT=${state.outputs['REDIS_PORT'] || '6379'}`);
+    }
+    await appendEnvSection(ctx.projectDir, envLines);
+    chmodSync(join(ctx.projectDir, '.env'), 0o600);
+    emit({ step: 'write-env', status: 'done', message: 'Infrastructure config written to .env' });
+  } catch (err) {
+    console.error('Env file write error:', (err as Error).message);
+    emit({ step: 'write-env', status: 'error', message: 'Failed to write .env', detail: (err as Error).message });
+    // Non-fatal
+  }
+}
