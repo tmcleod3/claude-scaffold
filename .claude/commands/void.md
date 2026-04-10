@@ -1,5 +1,7 @@
 # /void — Bombadil's Forge Sync
 
+> **Note:** This branch is a tombstone redirect. Running `/void` here upgrades your methodology to the latest from `main`. For the best experience, install the VoidForge CLI: `npm install -g thevoidforge`
+
 ## Context Setup
 1. Read `/docs/methods/FORGE_KEEPER.md`
 2. Read `VERSION.md` (~30 lines — current version + history)
@@ -12,6 +14,7 @@ Orient to the current state:
    - `CLAUDE.md` (check both root and `.claude/CLAUDE.md` — if `.claude/CLAUDE.md` exists and root does not, use that path. If both exist, warn and don't create a duplicate.)
    - `HOLOCRON.md`
    - `.claude/commands/*`
+   - `.claude/agents/*`
    - `docs/methods/*`, `docs/patterns/*`, `docs/NAMING_REGISTRY.md`
    - `scripts/thumper/*`
    - `VERSION.md` (conditional — only sync the "Current:" line, preserve project-specific version history rows)
@@ -19,17 +22,27 @@ Orient to the current state:
 4. Announce the current version and that you're checking for updates
 
 ## Step 1 — Listen to the River (Goldberry)
-Fetch the latest from upstream:
-1. Run `git remote -v` — look for a remote pointing to `tmcleod3/voidforge`
-2. If no VoidForge remote exists:
+Fetch the latest from upstream. Two transports supported:
+
+**Transport A (npm — v21.0+):** If `npx voidforge` is available:
+1. Check: run `which npx` and then `npx voidforge --version` to confirm availability
+2. Run `npx voidforge update` — this auto-upgrades the CLI first if behind npm latest, then diffs and applies all methodology changes including `.claude/agents/`. One pass, done.
+3. If no changes → "The forge burns bright! You're on the latest." → Stop
+4. If changes applied → skip to Step 4 (npm transport handles Steps 2-3)
+
+**Transport B (git — legacy):** If `npx voidforge` is NOT available:
+1. Offer to install: "Install VoidForge CLI for one-pass updates: `npm install -g thevoidforge`. Or continue with git transport (may require two passes for new file categories)."
+2. If user declines or npm unavailable, proceed with git:
+3. Run `git remote -v` — look for a remote pointing to `tmcleod3/voidforge`
+4. If no VoidForge remote exists:
    - Run `git remote add voidforge https://github.com/tmcleod3/voidforge.git`
    - Use `voidforge` as the remote name
-3. If a matching remote exists, use that name (could be `origin` or `voidforge`)
-4. Run `git fetch <remote> main` — get the latest main branch
-5. Read remote VERSION.md: `git show <remote>/main:VERSION.md`
-6. Compare versions numerically (parse major.minor.patch as integers, not strings — "3.10.0" is newer than "3.9.0"):
+5. If a matching remote exists, use that name (could be `origin` or `voidforge`)
+6. Run `git fetch <remote> main` — get the latest main branch
+7. Read remote VERSION.md: `git show <remote>/main:VERSION.md`
+8. Compare versions numerically (parse major.minor.patch as integers, not strings — "3.10.0" is newer than "3.9.0"):
    - If current version matches or is ahead → announce "The forge burns bright! You're on the latest." → Stop
-   - If behind → continue
+   - If behind → continue to Step 2
 
 ## Step 1.5 — Spring Cleaning (Treebeard)
 Check the **Migration Registry** in `/docs/methods/FORGE_KEEPER.md` for one-time cleanup actions:
