@@ -23,15 +23,15 @@
 | M1 | Dead Code Purge | 17 orphaned files (13 delete, 4 codegen delete, 5 triage→wire-in) | **COMPLETE** |
 | M2 | Test API Routes | 13 route handlers, 141 tests | **COMPLETE** |
 | M3 | Test Server Core | server.ts + router.ts, 35 tests | **COMPLETE** |
-| M4 | Test Provisioners | 13 provisioner files, ~40 tests | PENDING |
-| M5 | Test Financial Modules | 13 financial files, ~50 tests | PENDING |
+| M4 | Test Provisioners | 16 provisioner files, 111 tests | **COMPLETE** |
+| M5 | Test Financial Modules | 8 financial files, 107 tests | **COMPLETE** |
 | M6 | Test High-Risk lib/ | 15 high-risk files, ~40 tests | PENDING |
 | M7 | Test Remaining Modules | DNS, dashboard, adapters, ~30 tests | PENDING |
 | M8 | Victory Gauntlet | Full suite target ~980, coverage report | PENDING |
 
 **Execution order:** M1 → M2 + M3 (parallel) → M4 + M5 (parallel) → M6 + M7 (parallel) → M8
 
-Missions completed: 3/8. Next checkpoint at: 4.
+Missions completed: 5/8. Next checkpoint at: 8 (Victory).
 
 ## M1 Results
 - Deleted 13 lib/ orphans + 4 codegen/ orphans (2,020 lines removed)
@@ -45,6 +45,13 @@ Missions completed: 3/8. Next checkpoint at: 4.
 - Running total: 917/917 tests passing
 - 0 TypeScript errors
 - Commit: 4799320
+
+## M4+M5 Results (parallel)
+- 24 new test files: 16 provisioner + 8 financial
+- 218 new tests (111 provisioner + 107 financial)
+- Running total: 1135/1135 tests passing
+- 0 TypeScript errors
+- Commit: d1c8ef3
 
 ## Orphan Triage (M1)
 
