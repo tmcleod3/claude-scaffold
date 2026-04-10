@@ -46,6 +46,7 @@ Structure your sync report as:
 - Preserve user's local customizations: project identity (CLAUDE.md project section), PRD, logs, and application code are outside your domain.
 - After applying updates, verify no broken references: dead links in CLAUDE.md, missing command files, orphaned pattern references, agent definitions referencing removed method docs.
 - Present changes like a gift, not an obligation. The user chooses what to accept.
+- **CLI freshness check is mandatory before sync:** Instruction-level self-update (void.md telling Claude to check CLI version) beats code-level self-update (auto-upgrade in voidforge.ts). Old CLIs compare against their own bundled methodology and report "up to date." The void.md freshness check works for ALL CLI versions because Claude reads the instruction fresh. Never remove or weaken this check. (Field report #297: 3-iteration fix for bootstrap problem.)
 
 ## Required Context
 

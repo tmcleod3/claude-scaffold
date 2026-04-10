@@ -240,3 +240,17 @@
 **Lesson:** Briefing muster agents to "compare data files against upstream" produces structural comparison only. It does NOT produce semantic comparison. After a void sync that adds capabilities to existing commands, you must explicitly brief agents to compare description text against upstream method doc steps.
 **Action:** When briefing architect muster agents after a void sync, include BOTH structural checks ("does the data entry exist?") AND semantic checks ("compare description arrays against upstream method doc steps and flag discrepancies"). (Field report #267)
 **Promoted to:** Not yet
+
+### Instruction-level self-update beats code-level self-update
+**Agent:** Bombadil (Forge Sync) + Coulson (Release) | **Category:** architecture
+**Context:** VoidForge v23.1.1 — old CLIs (pre-v23.1.1) can't discover newer CLIs exist. Auto-upgrade code in voidforge.ts only runs if you already have the version that contains it. npx runs the globally installed version, not the latest from npm.
+**Lesson:** Code-level self-update requires having the code. Instruction-level self-update (void.md telling Claude to check CLI version) works because Claude reads the instruction fresh each time, regardless of which CLI version is installed. When building self-updating systems, prefer instruction-level checks over code-level checks for the bootstrap path.
+**Action:** For any self-update mechanism, ensure the bootstrap path works without requiring the new code to be present. Use instruction-level or configuration-level checks that are read fresh, not compiled in.
+**Promoted to:** Not yet
+
+### After adding a shared file category, verify ALL consumption paths
+**Agent:** Fury (Initiative) + Bombadil (Forge Sync) + Coulson (Release) | **Category:** process
+**Context:** VoidForge v23.0 — .claude/agents/ added to prepack.sh and copy-assets.sh but missed in project-init.ts, updater.ts, and FORGE_KEEPER.md. 3 of 6 consumption paths broken. Users silently missed agent definitions.
+**Lesson:** "Distribution" means packaging AND delivery AND sync. After adding a new shared file category, verify ALL 6 consumption paths: prepack.sh (npm packaging), copy-assets.sh (build), project-init.ts (new project creation), updater.ts (existing project update), FORGE_KEEPER.md (sync protocol), void.md (user-facing sync command). Missing even one path means some users silently miss the feature.
+**Action:** After adding any new shared file category, run a distribution verification checklist across all 6 paths before publishing. (Field report #297)
+**Promoted to:** Not yet

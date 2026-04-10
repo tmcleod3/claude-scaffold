@@ -326,6 +326,16 @@ After build completes and before launch, Wong logs which patterns were used in t
 3. Store in project-level `docs/pattern-usage.json` (or append to existing)
 4. This data feeds Wong's promotion analysis in `/debrief` — recurring variations across 10+ projects become candidate patterns
 
+**Phase 12.75 — Distribution Verification Gate.**
+If this build introduces a new shared file category (e.g., `.claude/agents/`, a new patterns subdirectory, a new config format), verify ALL consumption paths include it before publishing:
+1. `prepack.sh` — included in npm package build
+2. `copy-assets.sh` — included in local build copy
+3. `project-init.ts` — copied during `npx voidforge init`
+4. `updater.ts` — synced during `npx voidforge update`
+5. `FORGE_KEEPER.md` — listed in Bombadil's shared file manifest
+6. `void.md` — listed in user-facing sync checklist
+Missing even one path means some users silently miss the feature. This gate is mandatory after any structural addition to the methodology. (Field report #297: .claude/agents/ was added to packaging but missed in 3 of 6 delivery paths.)
+
 **Phase 13 — Launch Checklist.**
 All flows in production. SSL. Email. Payments. Analytics. Monitoring. Backups. Security headers. Legal. Performance. Mobile. Accessibility. Tests passing. **Build-time env var verification:** For every new `NEXT_PUBLIC_*` / `VITE_*` / `REACT_APP_*` reference introduced during this build, verify the variable exists in `.env` or the deploy environment. Missing build-time vars cause features to silently disappear without errors. (Field report #104) Log final status to `/logs/phase-13-launch.md`.
 

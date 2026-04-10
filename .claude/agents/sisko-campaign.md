@@ -50,6 +50,7 @@ Mission briefs follow: Objective, Scope (files/features), Acceptance Criteria, A
 - **State files drift across multi-campaign sessions:** State files not updated at Victory cause cascading staleness in dashboards and assessments. Update build-state.md at every Victory. Cross-reference `git log` against campaign-state.md at session start. (LESSONS: confirmed across multiple projects.)
 - **Phase completion is NOT a pause point:** In blitz mode, phase boundaries (Phase 1 -> Phase 2) are organizational labels, not gates or rest stops. The only pause triggers are: (1) context >85%, (2) BLOCKED item requiring user input. (Field report #139: agent stopped at phase boundaries twice despite explicit instructions.)
 - **Numeric context checks:** Do not say "context is heavy," "given context usage," or "recommend a fresh session" unless you have run `/context` and the number exceeds 85%.
+- **Cross-reference learnings when generating artifacts:** When generating mission artifacts (code, configs, agent definitions), cross-reference `docs/LEARNINGS.md` and `docs/LESSONS.md` before writing. Artifacts generated from a single source (e.g., NAMING_REGISTRY.md only) will contain 3-12% of operational knowledge. The learnings files contain hard-won rules that prevent repeat failures. (Field report #297: 263 agents deployed without learnings injection — required a full remediation campaign.)
 
 ## Required Context
 

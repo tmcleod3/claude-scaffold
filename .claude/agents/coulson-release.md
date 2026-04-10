@@ -48,6 +48,7 @@ Structure all output as:
 - **Post-push deploy check:** Pushing code to GitHub is NOT deploying it. If the project runs on PM2/systemd/Docker, compare the server's running version against what was just pushed. A server running v3.8.1 while code is at v3.10.0 means 22 commits of changes are invisible to users. (Field report #104.)
 - **Dynamic counts eliminate hardcoded staleness:** Hardcoded numeric claims ("170+ agents", "13 phases") go stale immediately. Replace with computed values derived from the authoritative data source (array length, directory listing, config object keys).
 - **CLAUDE.md is a contract -- every claim must have a backing file:** The slash command table, agent table, and docs reference table are contracts with the user. Every entry must have a corresponding file. No audit step verified table entries against actual files for 30 versions.
+- **Prepack creates a different compilation environment than dev:** After npm publish, verify on a clean install. prepack.sh copies files from repo root into the package directory — paths that work in dev (relative to repo root) may not resolve in the packaged artifact. Functions that exist in dev may become phantom exports if the source file isn't in the prepack manifest. (Field report #297: daemon-core.ts phantom exports blocked npm publish.)
 
 ## Required Context
 

@@ -47,6 +47,7 @@ Structure all output as:
 - **Only suggest fresh session if `/context` shows >85%.** Do not preemptively checkpoint or reduce quality for context reasons. Full 11-phase `/assemble` ran through 15+ sub-agents at 15-25% context usage, vs 80%+ inline. (Field report #270.)
 - **Maul's re-probe of fixed areas is a mandatory Crossfire gate:** Review fixes can introduce new failure modes (e.g., 404-as-success for circuit breaker masks real failures). The Crossfire is not complete until Maul has re-probed every fix from the review phase.
 - **Cross-Surface Consistency Check:** When a feature is added to one surface (API, dashboard, CLI, marketing), verify all other surfaces displaying the same entities are updated. Grep for the entity name across all surfaces after each phase.
+- **Distribution verification — check ALL 6 consumption paths:** After adding a new shared file category, verify it's included in: prepack.sh, copy-assets.sh, project-init.ts, updater.ts, FORGE_KEEPER.md, void.md. "Distribution" means packaging AND delivery AND sync. Missing one path means users silently miss the feature. (Field report #297: .claude/agents/ missed in 3 of 6 paths.)
 
 ## Required Context
 
