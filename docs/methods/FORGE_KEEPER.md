@@ -46,6 +46,7 @@ Keep your VoidForge installation current without breaking your project. Every up
 7. **Log what changed.** After updating, write a brief entry to `/logs/` noting what was synced and from what version.
 8. **Keep the mood light.** Bombadil sings. Updates are good news, not chores.
 9. **Batch sync when multiple versions behind.** Compare directly to the latest upstream version — don't step through each intermediate version. Sync to the latest in one pass and batch all content handoffs together. (Field report #35)
+10. **NEVER write to `~/.claude/`.** All methodology files go to the PROJECT root (where `.voidforge` or `.git` exists). Writing to `~/.claude/commands/` or `~/.claude/agents/` creates user-level duplicates that appear alongside project-level commands in Claude Code. Before any sync, check if `~/.claude/commands/` or `~/.claude/agents/` contain VoidForge files — if so, remove them automatically and warn the user.
 
 ## Shared Methodology Files
 

@@ -6,6 +6,16 @@
 1. Read `/docs/methods/FORGE_KEEPER.md`
 2. Read `VERSION.md` (~30 lines — current version + history)
 
+## CRITICAL: Write Target Safety
+
+**NEVER write methodology files to `~/.claude/`.** All files MUST go to the PROJECT root (where `.voidforge` marker or `.git` exists). Writing to `~/.claude/commands/` or `~/.claude/agents/` creates user-level duplicates that appear alongside project-level commands in every project — Claude Code shows both "(user)" and "(project)" copies.
+
+**Detect and fix duplicates (auto-cleanup):** Before any sync, check if `~/.claude/commands/` or `~/.claude/agents/` contain VoidForge methodology files. If they do:
+1. Run `ls ~/.claude/commands/ 2>/dev/null | head -3` and `ls ~/.claude/agents/ 2>/dev/null | head -3`
+2. If VoidForge commands exist there (assess.md, build.md, qa.md, etc.), warn: "Found VoidForge commands in ~/.claude/ (user-level). These cause duplicate commands in Claude Code. Removing..."
+3. Run `rm -rf ~/.claude/commands/ ~/.claude/agents/` to clean them
+4. Confirm: "User-level duplicates removed. Project-level commands will be used."
+
 ## Step 0 — Tune the Forge (Bombadil)
 Orient to the current state:
 1. Read `VERSION.md` — identify the current VoidForge version
