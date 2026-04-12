@@ -230,6 +230,8 @@
       emptyState.style.display = 'none';
       const errorDiv = document.createElement('div');
       errorDiv.className = 'error-state';
+      errorDiv.setAttribute('role', 'alert');
+      errorDiv.setAttribute('aria-live', 'polite');
       errorDiv.style.cssText = 'text-align: center; padding: 80px 24px; color: var(--text-dim); grid-column: 1 / -1;';
       errorDiv.innerHTML =
         '<h2 style="color: var(--error, #ef4444); margin-bottom: 8px;">Could not connect to server</h2>' +

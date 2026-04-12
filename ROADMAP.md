@@ -2,8 +2,8 @@
 
 > The plan for the plan-maker.
 
-**Current:** v23.3.1 (2026-04-12)
-**Next:** v23.4 — The Wizard Remediation (UI audit fixes: 3 critical API, 4 WCAG, 8 content accuracy, 8 UX improvements)
+**Current:** v23.4.0 (2026-04-12)
+**Next:** v23.5 (TBD)
 **Status:** v23.3 complete (Campaigns 34+35). Test coverage + file splitting done.
 **1340 tests**, 9 universes, 263 agents, 28 slash commands, 37 code patterns.
 

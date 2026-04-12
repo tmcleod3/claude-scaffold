@@ -1294,7 +1294,7 @@
           if (blueprintBanner) {
             blueprintBanner.innerHTML = `
               <h2 style="margin: 0 0 0.5rem 0; color: var(--success, #4ade80);">Blueprint Validated</h2>
-              <p style="margin: 0 0 0.5rem 0;">${data.summary || 'PRD is valid and ready to build.'}</p>
+              <p style="margin: 0 0 0.5rem 0;">${escapeHtml(data.summary || 'PRD is valid and ready to build.')}</p>
               <p style="margin: 0 0 1rem 0; opacity: 0.8;">Run <code>/blueprint</code> in Claude Code to provision and start building.</p>
               <button type="button" onclick="this.closest('#blueprint-detection').classList.add('hidden'); document.querySelector('#step-4').classList.remove('hidden');"
                 style="padding: 0.5rem 1rem; background: transparent; color: var(--text, #ccc); border: 1px solid var(--border, #333); border-radius: 6px; cursor: pointer;">
@@ -1305,7 +1305,7 @@
         } else {
           // Show errors but don't dead-end — let user fix or continue
           if (blueprintBanner) {
-            const errors = data.frontmatterErrors?.join('<br>') || 'Unknown validation error';
+            const errors = (data.frontmatterErrors || ['Unknown validation error']).map(e => escapeHtml(e)).join('<br>');
             blueprintBanner.innerHTML = `
               <h2 style="margin: 0 0 0.5rem 0; color: var(--warning, #fbbf24);">Blueprint Has Issues</h2>
               <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">${errors}</p>
