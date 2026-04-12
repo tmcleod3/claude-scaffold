@@ -18,7 +18,7 @@
 
 **Before executing ANY of these commands** — `/review`, `/qa`, `/security`, `/ux`, `/architect`, `/build`, `/assemble`, `/gauntlet`, `/campaign`, `/test`, `/devops`, `/deploy`, `/ai`, `/assess` — you MUST launch the Silver Surfer as a sub-agent FIRST. No exceptions. No rationalizations. Not "the task is simple." Not "I already know which agents to use." Not "it wouldn't change the output." Not "this is data analysis, not architecture."
 
-**Every single time.** Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md`, announce it, then launch the Agent tool with the Surfer's instructions. The Surfer reads all agent definitions and returns the optimal roster.
+**Every single time.** Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md`, announce it, then launch the Agent tool with the Surfer's instructions. The Surfer reads all agent definitions and returns the optimal roster. **Do NOT start analyzing, planning, answering, or doing ANY work on the command while the Surfer is running.** Wait for the Surfer to return its roster, THEN proceed. Starting work before the roster arrives means you've already decided what to do without the Surfer's input — which is skipping with extra steps.
 
 **Deploy the FULL roster.** When the Surfer returns 33 agents, you launch 33 agents. Not 2. Not "the key specialists." Not "the ones I think matter for this question." ALL of them. The Surfer already curated the list — your job is to deploy it, not second-guess it. Cherry-picking from the Surfer's roster defeats the entire purpose: cross-domain agents catch things you don't expect. If you deploy 2 out of 33, you've wasted the Surfer's scan and denied the user 31 perspectives they're paying for.
 
