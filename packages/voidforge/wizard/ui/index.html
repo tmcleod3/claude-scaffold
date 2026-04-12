@@ -100,7 +100,8 @@
       </section>
 
       <!-- Blueprint Detection Banner (shown when docs/PRD.md exists) -->
-      <div id="blueprint-detection" class="hidden" role="alert" aria-live="assertive" style="background: var(--surface, #111); border: 1px solid var(--accent, #5b5bf7); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; text-align: center;">
+      <div id="blueprint-detection" class="hidden" role="alert" aria-live="assertive" style="background: var(--surface, #111); border: 1px solid var(--accent, #5b5bf7); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; text-align: center; position: relative;">
+        <button type="button" id="btn-dismiss-blueprint" aria-label="Dismiss" style="position: absolute; top: 8px; right: 12px; background: none; border: none; color: var(--text-dim, #888); font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;">&times;</button>
         <h2 style="margin: 0 0 0.5rem 0; color: var(--accent, #5b5bf7);">Blueprint Detected</h2>
         <p style="margin: 0 0 1rem 0;">Gandalf notices a scroll on the table. You already have a PRD for <strong id="blueprint-project-name">your project</strong>.</p>
         <p style="margin: 0 0 1.5rem 0; opacity: 0.8;">Shall I use this as your blueprint, or would you prefer to start the interview fresh?</p>

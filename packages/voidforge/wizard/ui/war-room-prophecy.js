@@ -1,7 +1,7 @@
 /**
  * Prophecy Visualizer — interactive SVG dependency graph for campaign missions.
  *
- * Reads campaign data from /api/war-room/campaign and renders a node/edge graph.
+ * Standalone page now redirects to project dashboard; campaign data loaded via project API.
  * Nodes = missions. Edges = dependency order. Color = status.
  * Clickable nodes show mission details.
  */

@@ -36,7 +36,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .tower-header .actions { display: flex; gap: 8px; }
+    .tower-header .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
     /* Tab bar */
     .tab-bar {
@@ -123,6 +123,12 @@
     .deploy-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .deploy-time { color: var(--text-dim); }
     .deploy-url { color: var(--accent); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .tower-header { flex-wrap: wrap; gap: 8px; }
+      .tower-header .actions { width: 100%; justify-content: flex-end; }
+    }
 
     /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {

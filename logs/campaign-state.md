@@ -20,14 +20,14 @@
 |---|---------|-------|--------|
 | M1 | Critical API Fixes | danger-room.js, war-room.js → redirect to project dashboard | **COMPLETE** |
 | M2 | Retired Flag Cleanup | --blitz in 4 locations (5th removed in M1) | **COMPLETE** |
-| M3 | WCAG Compliance | 4 high-severity a11y fixes | PENDING |
+| M3 | WCAG Compliance | 4 high-severity a11y fixes (validation, tabs, nav, heading) | **COMPLETE** |
 | M4 | Content Accuracy | Stale counts, dead links, copy fixes | PENDING |
 | M5 | UX Improvements | 8 medium-severity fixes | PENDING |
 | M6 | Victory Gauntlet | Full test suite + cross-page audit | PENDING |
 
 **Execution order:** M1 → M2 → M3 → M4 + M5 (parallel) → M6
 
-Missions completed: 2/6. Next checkpoint at: 4.
+Missions completed: 3/6. Next checkpoint at: 4.
 
 ## M1 Results
 - Standalone dashboards converted to redirects (-2,384 lines)

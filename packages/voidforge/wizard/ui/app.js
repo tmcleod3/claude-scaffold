@@ -1342,6 +1342,16 @@
     });
   }
 
+  // Dismiss button — same behavior as "Start fresh"
+  const btnDismissBlueprint = $('#btn-dismiss-blueprint');
+  if (btnDismissBlueprint) {
+    btnDismissBlueprint.addEventListener('click', () => {
+      const blueprintBanner = $('#blueprint-detection');
+      if (blueprintBanner) blueprintBanner.classList.add('hidden');
+      showStep(4);
+    });
+  }
+
   // Init
   showStep(1);
 })();

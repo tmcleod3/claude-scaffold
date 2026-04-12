@@ -205,7 +205,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | **Learnings** | `/docs/LEARNINGS.md` | Project-scoped operational knowledge — read at session start if exists |
 | **The Muster** | `/docs/methods/MUSTER.md` | When using `--muster` flag on any command |
 | **Time Vault** | `/docs/methods/TIME_VAULT.md` | Seldon — when preserving session intelligence for transfer |
-| **Patterns** | `/docs/patterns/` | When writing code (35 reference implementations) |
+| **Patterns** | `/docs/patterns/` | When writing code (37 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team

@@ -269,7 +269,8 @@
       container.innerHTML =
         '<div style="padding: 24px; color: var(--text-dim); text-align: center;">' +
         '<p>Terminal requires xterm.js which is loaded from CDN.</p>' +
-        '<p>Check your network connection or configure a local xterm.js installation.</p></div>';
+        '<p>Check your network connection or configure a local xterm.js installation.</p>' +
+        '<button class="btn" style="margin-top: 16px;" onclick="location.reload()">Retry</button></div>';
       return;
     }
 

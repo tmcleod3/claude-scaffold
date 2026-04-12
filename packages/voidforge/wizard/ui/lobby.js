@@ -11,6 +11,7 @@
   let pollTimer = null;
   let previousFocusEl = null; // For modal focus restoration
   let currentUser = { username: '', role: '' };
+  let fetchFailed = false; // Distinguish "no projects" from "server error"
   const REFRESH_INTERVAL_MS = 30_000; // 30 seconds
 
   // ── DOM refs ───────────────────────────────────────
@@ -39,10 +40,15 @@
   async function fetchProjects() {
     try {
       const res = await fetch('/api/projects');
-      if (!res.ok) return [];
+      if (!res.ok) {
+        fetchFailed = true;
+        return [];
+      }
       const body = await res.json();
+      fetchFailed = false;
       return body.data || [];
     } catch {
+      fetchFailed = true;
       return [];
     }
   }
@@ -214,11 +220,27 @@
   }
 
   function render() {
-    // Clear existing cards (keep empty state for reference)
+    // Clear existing cards and error state (keep empty state for reference)
     const existing = grid.querySelectorAll('.project-card');
     existing.forEach((el) => el.remove());
+    const existingError = grid.querySelector('.error-state');
+    if (existingError) existingError.remove();
 
-    if (projects.length === 0) {
+    if (fetchFailed && projects.length === 0) {
+      emptyState.style.display = 'none';
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-state';
+      errorDiv.style.cssText = 'text-align: center; padding: 80px 24px; color: var(--text-dim); grid-column: 1 / -1;';
+      errorDiv.innerHTML =
+        '<h2 style="color: var(--error, #ef4444); margin-bottom: 8px;">Could not connect to server</h2>' +
+        '<p style="margin-bottom: 24px;">The Lobby could not reach VoidForge. Check that the server is running.</p>' +
+        '<button class="btn" id="btn-retry-fetch">Retry</button>';
+      grid.appendChild(errorDiv);
+      document.getElementById('btn-retry-fetch').addEventListener('click', async () => {
+        projects = await fetchProjects();
+        render();
+      });
+    } else if (projects.length === 0) {
       emptyState.style.display = '';
     } else {
       emptyState.style.display = 'none';
@@ -285,6 +307,10 @@
 
   function trapFocus(e) {
     if (!importModal.classList.contains('active')) return;
+    if (e.key === 'Escape') {
+      closeImportModal();
+      return;
+    }
     if (e.key !== 'Tab') return;
 
     const focusable = getFocusableElements();
