@@ -40,11 +40,6 @@ vi.mock('../lib/project-registry.js', () => ({
   getProject: vi.fn(),
 }));
 
-vi.mock('../lib/tower-auth.js', () => ({
-  isRemoteMode: vi.fn(() => false),
-  isLanMode: vi.fn(() => false),
-}));
-
 vi.mock('../lib/dashboard-data.js', () => ({
   parseCampaignState: vi.fn(() => ({ missions: [], active: null })),
   parseBuildState: vi.fn(() => ({ phase: 0, status: 'not started' })),
@@ -95,7 +90,6 @@ vi.mock('node:fs/promises', () => ({
 
 const { sendJson, readFileOrNull } = await import('../lib/http-helpers.js');
 const { resolveProject } = await import('../lib/project-scope.js');
-const { isRemoteMode, isLanMode } = await import('../lib/tower-auth.js');
 const {
   parseCampaignState, readTestResults, readGitStatus, detectDeployDrift,
 } = await import('../lib/dashboard-data.js');
@@ -111,8 +105,6 @@ function mockRes(): ServerResponse {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(isRemoteMode).mockReturnValue(false);
-  vi.mocked(isLanMode).mockReturnValue(false);
 });
 
 // ── Project-scoped route tests ─────────────────────────────
@@ -215,30 +207,7 @@ describe('GET /api/projects/:id/danger-room/current', () => {
   });
 });
 
-// ── Legacy routes ──────────────────────────────────────────
-
-describe('Legacy /api/danger-room/* routes', () => {
-  it('should block in remote mode', async () => {
-    vi.mocked(isRemoteMode).mockReturnValue(true);
-    const handler = registeredRoutes.get('GET /api/danger-room/campaign')!;
-    const req = mockReq('/api/danger-room/campaign');
-    const res = mockRes();
-    await handler(req, res);
-    expect(sendJson).toHaveBeenCalledWith(res, 404, {
-      success: false,
-      error: 'Use /api/projects/:id/danger-room/* endpoints',
-    });
-  });
-
-  it('should block in LAN mode', async () => {
-    vi.mocked(isLanMode).mockReturnValue(true);
-    const handler = registeredRoutes.get('GET /api/danger-room/context')!;
-    const req = mockReq('/api/danger-room/context');
-    const res = mockRes();
-    await handler(req, res);
-    expect(sendJson).toHaveBeenCalledWith(res, 404, {
-      success: false,
-      error: 'Use project-scoped endpoints',
-    });
-  });
-});
+// ── Legacy routes removed (ADR-046, v23.4) ──────────────────
+// Legacy /api/danger-room/* shim routes have been removed.
+// The standalone danger-room.html now redirects to the project dashboard.
+// All data is served via the project-scoped routes tested above.
