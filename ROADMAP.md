@@ -3,9 +3,60 @@
 > The plan for the plan-maker.
 
 **Current:** v23.5.4 (2026-04-12)
-**Next:** v24.0 (TBD)
+**Next:** v23.6 — The Silver Surfer (Herald invocation bridge: CLI subcommand, agent identity, end-to-end pipeline)
 **Status:** v23.5 complete (Campaigns 34-37). Herald intelligent dispatch shipped.
 **1384 tests**, 9 universes, 263 agents, 28 slash commands, 37 code patterns.
+
+---
+
+## v23.6 — The Silver Surfer
+
+*"All that you know is at an end." — Norrin Radd*
+
+**Depends on: v23.5 complete. Campaign 38. ADR-048.**
+
+**The problem:** The Herald dispatch engine (ADR-047) is built, tested, and distributed, but has no invocation bridge. Command files contain pseudocode instructions that Claude can't execute as actual Haiku API calls. The pipeline is: command → ??? → agent deployment. The ??? is missing.
+
+**The solution:** Add a `voidforge herald` CLI subcommand that wraps the Herald call. Commands tell Claude to run `npx thevoidforge herald --command /review`, which calls Haiku, returns a JSON roster, and Claude launches those agents. Also: name the Herald "Silver Surfer" (Marvel's canonical Herald of Galactus).
+
+**Missions (5):**
+
+### Mission 1: Silver Surfer Agent Definition + Identity
+- Create `.claude/agents/silver-surfer-herald.md` — Haiku tier, scout tools, description: "Pre-scan dispatch — reads codebase and selects optimal agent roster"
+- Update NAMING_REGISTRY.md — add Silver Surfer to Marvel universe
+- Update AGENT_CLASSIFICATION.md — add to scouts
+- Agent count: 263 → 264
+
+### Mission 2: CLI Subcommand (`voidforge herald`)
+- Add `herald` case to `packages/voidforge/scripts/voidforge.ts` CLI router
+- Input: `--command /review`, `--focus "topic"` (optional), `--json` (output format)
+- Behavior: calls `gatherHeraldContext()` + `loadAgentRegistry()` + `runHerald()`, outputs JSON roster to stdout
+- Fallback: if no API key or Haiku fails, output empty roster `{"roster":[],"reasoning":"Herald unavailable"}`
+- Estimated: ~40 lines in voidforge.ts
+
+### Mission 3: Update 14 Command Files
+- Replace the pseudocode Herald section in all 14 commands with actual CLI invocation:
+  ```
+  ## Silver Surfer Pre-Scan (ADR-048)
+  Run: `npx thevoidforge herald --command /<name> --focus "<user-focus>" --json`
+  Parse the JSON roster. Launch each agent ID via the Agent tool.
+  If the command fails or returns empty roster, fall back to hardcoded manifest.
+  ```
+- Rename "Herald Pre-Scan" → "Silver Surfer Pre-Scan" in all files
+- Update CLAUDE.md references
+
+### Mission 4: Tests
+- Add CLI test for `voidforge herald` subcommand
+- Test: outputs valid JSON, handles missing API key, respects --command and --focus
+- Estimated: ~10 new tests
+
+### Mission 5: Victory Gauntlet
+- Full test suite pass
+- Run `npx thevoidforge herald --command /review --json` and verify output
+- Verify agent count is 264
+- Version bump + publish
+
+**Execution order:** M1 → M2 → M3 → M4 → M5
 
 ---
 
