@@ -10,13 +10,15 @@ Opus scans `git diff --stat` and matches changed files against the `description`
 
 ## Silver Surfer Pre-Scan (ADR-048)
 
-**MANDATORY.** Before deploying any domain agents, launch **Silver Surfer** `subagent_type: Silver Surfer` as a sub-agent. The Surfer reads all agent definitions, assesses the codebase, and returns the optimal roster for this command. This is not optional — skipping the Surfer means the command uses a generic team instead of one tailored to the codebase.
+**MANDATORY.** Before deploying any domain agents, launch the Silver Surfer as a sub-agent to select the optimal roster for this command. **Do NOT skip this step.**
 
-**Prompt the Surfer with:** "Command: /security. User args: <user's arguments>. Focus: <focus if provided, otherwise 'none'>. Select the optimal agent roster."
+**How to launch:** Use the Agent tool with these exact parameters:
+- `description`: "Silver Surfer roster scan"
+- `prompt`: "You are the Silver Surfer, Herald of Galactus. Read your instructions from .claude/agents/silver-surfer-herald.md, then execute your task. Command: /security. User args: <ARGS>. Focus: <FOCUS or 'none'>. Scan the .claude/agents/ directory, read agent descriptions and tags, and return the optimal roster for this command on this codebase."
 
-**Merge the Surfer's roster** with this command's hardcoded lead agents below. Leads are non-negotiable; the Surfer adds specialists.
+**After the Surfer returns**, merge its roster with this command's hardcoded lead agents below. Leads are non-negotiable; the Surfer adds specialists.
 
-**`--focus "topic"`** — pass to the Surfer as the focus bias.
+**`--focus "topic"`** — include in the Surfer's prompt as the focus bias.
 **`--light`** — skip the Surfer, use only hardcoded roster below.
 **`--solo`** — skip Surfer and all sub-agents, lead only.
 

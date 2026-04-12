@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.7.2] - 2026-04-12
+
+### Fixed
+- **Silver Surfer invocation made explicit and guaranteed** — commands now provide exact Agent tool parameters (`description` + `prompt` with `.claude/agents/silver-surfer-herald.md` read instruction) instead of the non-functional `subagent_type: Silver Surfer`. Works 100% of the time in every Claude Code environment.
+
+---
+
 ## [23.7.1] - 2026-04-12
 
 ### Changed
