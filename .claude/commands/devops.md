@@ -13,7 +13,9 @@ Opus scans `git diff --stat` and matches changed files against the `description`
 
 ## Silver Surfer Pre-Scan (ADR-048)
 
-**MANDATORY.** Before deploying any domain agents, launch the Silver Surfer. **Do NOT skip this step.** Before launching, read the `## Cosmic Heraldings` section from `.claude/agents/silver-surfer-herald.md` and announce one at random (never repeat in the same session). Then launch the Surfer.
+**MANDATORY — NO EXCEPTIONS.** Launch the Silver Surfer before deploying ANY other agents. This is not negotiable, not deferrable, and not skippable regardless of how simple the task appears. "The task is simple" is NOT a valid reason to skip — the Surfer catches cross-domain relevance that you cannot predict. "I already know which agents to use" is NOT a valid reason — the Surfer reads agent definitions you haven't loaded. Skipping the Surfer is a protocol violation equivalent to skipping the Victory Gauntlet. **If you find yourself thinking "I don't need the Surfer for this" — that is exactly when you need it most.**
+
+Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md` and announce it before launching.
 
 **How to launch:** Use the Agent tool with these exact parameters:
 - `description`: "Silver Surfer roster scan"

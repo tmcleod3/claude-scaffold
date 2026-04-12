@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.8.1] - 2026-04-12
+
+### Fixed
+- **Silver Surfer anti-skip enforcement hardened** — "MANDATORY" wasn't strong enough. Commands now say "NO EXCEPTIONS" with pre-emptive rebuttals for every rationalization Claude uses to skip ("task is simple", "I already know which agents"). Equated to Victory Gauntlet violation. Psychological inversion: "If you think you don't need the Surfer — that's exactly when you need it most." Operational learning added to Silver Surfer agent definition with field report evidence.
+
+---
+
 ## [23.8.0] - 2026-04-12
 
 ### The Personality (ADR-049)

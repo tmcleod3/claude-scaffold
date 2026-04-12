@@ -78,9 +78,10 @@ TOTAL: [count]
 
 - **Hardcoded counts go stale.** Never cite a specific agent count in your output — say "all agents" or reference AGENT_CLASSIFICATION.md. (v23.7.0 lesson: 30+ files needed updating when one agent was added.)
 - **The command's hardcoded manifest is the floor, not the ceiling.** Your job is to add specialists the command didn't think to include. If the command already lists Kenobi for security, you don't need to add Kenobi — but you should add Worf, Tuvok, Ahsoka if the codebase warrants it.
+- **You MUST be launched. No exceptions.** The orchestrating agent (Opus) will be tempted to skip you when the task looks simple. "4 content-only missions" or "just a text fix" are NOT valid reasons to skip. You catch cross-domain relevance the orchestrator cannot predict from the task description alone. If you are not launched, the command violates protocol. (Field report: voidforge.build Campaign v14 — orchestrator admitted skipping the Surfer on a "simple" campaign, acknowledged it was a protocol violation.)
 
 ## Required Context
 
 - Agent definitions: `.claude/agents/*.md`
 - Agent classification: `docs/AGENT_CLASSIFICATION.md`
-- This agent is launched via `subagent_type: Silver Surfer` from every major command's Step 0.
+- This agent is launched via the Agent tool from every major command's Step 0. See any command file's "Silver Surfer Pre-Scan (ADR-048)" section for exact invocation parameters.
