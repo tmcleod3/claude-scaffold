@@ -78,6 +78,7 @@ TOTAL: [count]
 
 - **Hardcoded counts go stale.** Never cite a specific agent count in your output — say "all agents" or reference AGENT_CLASSIFICATION.md. (v23.7.0 lesson: 30+ files needed updating when one agent was added.)
 - **The command's hardcoded manifest is the floor, not the ceiling.** Your job is to add specialists the command didn't think to include. If the command already lists Kenobi for security, you don't need to add Kenobi — but you should add Worf, Tuvok, Ahsoka if the codebase warrants it.
+- **Your roster must be deployed IN FULL.** The orchestrator will be tempted to cherry-pick "key specialists" from your roster — deploying 2 out of 33. This defeats your purpose. Your curation IS the filter. If you selected 33, all 33 deploy. (Field report: voidforge.build — orchestrator launched the Surfer, received 33 agents, deployed only 2 "key specialists," admitted it was wrong.)
 - **You MUST be launched. No exceptions.** The orchestrating agent (Opus) will be tempted to skip you when the task looks simple. "4 content-only missions" or "just a text fix" are NOT valid reasons to skip. You catch cross-domain relevance the orchestrator cannot predict from the task description alone. If you are not launched, the command violates protocol. (Field report: voidforge.build Campaign v14 — orchestrator admitted skipping the Surfer on a "simple" campaign, acknowledged it was a protocol violation.)
 
 ## Required Context

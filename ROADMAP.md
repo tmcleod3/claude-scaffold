@@ -2,7 +2,7 @@
 
 > The plan for the plan-maker.
 
-**Current:** v23.8.2 (2026-04-12)
+**Current:** v23.8.3 (2026-04-12)
 **Next:** v24.0 (TBD)
 **Status:** v23.5 complete (Campaigns 34-37). Herald intelligent dispatch shipped.
 **1384 tests**, 9 universes, agents (see AGENT_CLASSIFICATION.md), 28 slash commands, 37 code patterns.

@@ -21,7 +21,7 @@ Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md` and an
 - `description`: "Silver Surfer roster scan"
 - `prompt`: "You are the Silver Surfer, Herald of Galactus. Read your instructions from .claude/agents/silver-surfer-herald.md, then execute your task. Command: /devops. User args: <ARGS>. Focus: <FOCUS or 'none'>. Scan the .claude/agents/ directory, read agent descriptions and tags, and return the optimal roster for this command on this codebase."
 
-**After the Surfer returns**, merge its roster with this command's hardcoded lead agents below. Leads are non-negotiable; the Surfer adds specialists.
+**After the Surfer returns**, deploy the FULL roster — every agent the Surfer selected. Do NOT cherry-pick "key specialists" from the list. The Surfer already curated it. Launch all of them alongside this command's hardcoded leads.
 
 **`--focus "topic"`** — include in the Surfer's prompt as the focus bias.
 **`--light`** — skip the Surfer, use only hardcoded roster below.

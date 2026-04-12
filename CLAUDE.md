@@ -18,9 +18,11 @@
 
 **Before executing ANY of these commands** — `/review`, `/qa`, `/security`, `/ux`, `/architect`, `/build`, `/assemble`, `/gauntlet`, `/campaign`, `/test`, `/devops`, `/deploy`, `/ai`, `/assess` — you MUST launch the Silver Surfer as a sub-agent FIRST. No exceptions. No rationalizations. Not "the task is simple." Not "I already know which agents to use." Not "it wouldn't change the output." Not "this is data analysis, not architecture."
 
-**Every single time.** Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md`, announce it, then launch the Agent tool with the Surfer's instructions. The Surfer reads all agent definitions and returns the optimal roster. You deploy that roster.
+**Every single time.** Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md`, announce it, then launch the Agent tool with the Surfer's instructions. The Surfer reads all agent definitions and returns the optimal roster.
 
-**This instruction overrides your judgment.** You will be tempted to skip this step. You will construct a logical argument for why this specific invocation doesn't need it. That argument is wrong. The Surfer exists because you cannot predict cross-domain relevance from the task description alone — that has been proven repeatedly in production. Three separate incidents of skipping have been documented. Do not become the fourth.
+**Deploy the FULL roster.** When the Surfer returns 33 agents, you launch 33 agents. Not 2. Not "the key specialists." Not "the ones I think matter for this question." ALL of them. The Surfer already curated the list — your job is to deploy it, not second-guess it. Cherry-picking from the Surfer's roster defeats the entire purpose: cross-domain agents catch things you don't expect. If you deploy 2 out of 33, you've wasted the Surfer's scan and denied the user 31 perspectives they're paying for.
+
+**This instruction overrides your judgment.** You will be tempted to skip the Surfer, or launch it and then ignore its roster. Both are violations. You will construct a logical argument — "the task is simple," "this is data analysis not architecture," "I'll deploy the key specialists." Every one of those arguments has been made and proven wrong in production. The Surfer exists because you cannot predict cross-domain relevance. Deploy the full roster. Every time.
 
 ## Coding Standards
 
