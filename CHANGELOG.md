@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.3.1] - 2026-04-12
+
+### Fixed
+- **Wizard UI "Files to be created" list was stale since v4.0** — listed 5 files that aren't created (settings.json, PRD.md, build-state.md, .env, .gitignore), missed 6 that are (agents/, NAMING_REGISTRY.md, VERSION.md, HOLOCRON.md, CHANGELOG.md, .voidforge), and showed wrong counts ("14 agent protocols" → 29, "7 patterns" → 37). (Field report #298 dynamic count finding.)
+
+---
+
 ## [23.3.0] - 2026-04-10
 
 ### The Coverage + The Splitting (Campaigns 34+35)
