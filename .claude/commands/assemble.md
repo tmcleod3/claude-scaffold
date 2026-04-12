@@ -15,7 +15,7 @@ Opus scans `git diff --stat` and matches changed files against the `description`
 
 ## Silver Surfer Pre-Scan (ADR-048)
 
-**MANDATORY.** Before deploying any domain agents, launch the Silver Surfer as a sub-agent to select the optimal roster for this command. **Do NOT skip this step.**
+**MANDATORY.** Before deploying any domain agents, launch the Silver Surfer. **Do NOT skip this step.** Before launching, read the `## Cosmic Heraldings` section from `.claude/agents/silver-surfer-herald.md` and announce one at random (never repeat in the same session). Then launch the Surfer.
 
 **How to launch:** Use the Agent tool with these exact parameters:
 - `description`: "Silver Surfer roster scan"

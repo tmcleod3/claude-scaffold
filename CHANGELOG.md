@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.7.3] - 2026-04-12
+
+### Added
+- **Cosmic Heraldings** — 14 Silver Surfer one-liners announced at random before each roster scan. "Norrin Radd soars ahead. The Power Cosmic reads your code before any mortal agent touches it." Brings delight to every command invocation — same energy as Bombadil's /void personality.
+
+---
+
 ## [23.7.2] - 2026-04-12
 
 ### Fixed
