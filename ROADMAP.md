@@ -3,9 +3,73 @@
 > The plan for the plan-maker.
 
 **Current:** v23.4.1 (2026-04-12)
-**Next:** v23.5 (TBD)
+**Next:** v23.5 — The Herald (intelligent agent dispatch: Haiku pre-scan selects optimal roster from 263 agents per command)
 **Status:** v23.3 complete (Campaigns 34+35). Test coverage + file splitting done.
 **1340 tests**, 9 universes, 263 agents, 28 slash commands, 37 code patterns.
+
+---
+
+## v23.5 — The Herald
+
+*"One does not simply walk into Mordor. Unless the Herald has already assembled the fellowship." — Boromir, probably*
+
+**Depends on: v23.4 complete. Campaign 37. ADR-047.**
+
+**The problem:** Every command has a hardcoded agent manifest — `/review` always calls 5 agents, `/qa` always calls 7, regardless of what the codebase contains. Dynamic dispatch (ADR-044) adds agents based on git diff, but that's reactive. A financial app gets the same `/review` as a game. Users want more agents debating to reach the best answer in fewer prompts.
+
+**The solution:** A Haiku pre-scan ("The Herald") runs before every major command, reads the codebase + command + user intent, and selects the optimal roster from all 263 agents. One cheap LLM call (~$0.001, <2s) replaces hardcoded manifests with intelligent curation.
+
+**Missions (7):**
+
+### Mission 1: Herald Core — The Pre-Scan Engine
+- Create `packages/voidforge/wizard/lib/herald.ts` — the Haiku dispatch engine
+- Input: command name, user args, codebase file tree, PRD frontmatter, git diff summary, full agent registry (263 names + descriptions)
+- Output: JSON roster of agent IDs + reasoning
+- Haiku call via the Anthropic SDK (already in the codebase as `lib/anthropic.ts`)
+- Bias toward inclusion: over-select rather than under-select
+- Estimated: ~150 lines
+
+### Mission 2: Agent Registry Loader
+- Create `packages/voidforge/wizard/lib/agent-registry.ts` — reads all `.claude/agents/*.md` files, extracts YAML frontmatter (name, description, model, tags), returns structured array
+- Cache the registry in memory (263 files don't change mid-session)
+- Add optional `tags` field to agent YAML frontmatter schema
+- Estimated: ~80 lines
+
+### Mission 3: Tag Enrichment (40 key agents)
+- Add `tags: [...]` to the YAML frontmatter of the 40 most cross-domain agents
+- Focus on agents whose expertise spans universes (Worf=security+architecture, Tuvok=security+intelligence, Dockson=financial+devops, etc.)
+- Tags supplement descriptions for faster Herald matching
+- Estimated: 40 files, ~2 lines each
+
+### Mission 4: Wire Herald Into 14 Commands
+- Modify each command's Step 0 to call the Herald before agent deployment
+- Commands: `/review`, `/qa`, `/security`, `/ux`, `/architect`, `/build`, `/assemble`, `/gauntlet`, `/campaign`, `/test`, `/devops`, `/deploy`, `/ai`, `/assess`
+- Herald's roster merges with (never replaces) the command's lead agents
+- `--light` skips Herald, `--solo` skips Herald + all sub-agents
+- Estimated: 14 command files, ~10 lines each
+
+### Mission 5: --focus Flag Implementation
+- Add `--focus "topic"` flag to all 14 Herald-enabled commands
+- Passed to Herald as a bias signal — weights matching agents higher
+- Natural language: `--focus "security"`, `--focus "financial accuracy"`, `--focus "mobile UX"`
+- Update CLAUDE.md flag taxonomy and command tables
+- Estimated: ~30 lines in herald.ts + 14 command file updates
+
+### Mission 6: Tests
+- Unit tests for herald.ts: mock Haiku response, verify roster merging, test --focus bias, test --light bypass
+- Unit tests for agent-registry.ts: mock filesystem, verify YAML parsing, test caching
+- Integration test: run Herald against actual agent files, verify output shape
+- Estimated: ~40 tests
+
+### Mission 7: Victory Gauntlet
+- Full test suite (1336+ tests must pass)
+- Run `/review --focus "security"` on the VoidForge codebase itself — verify Herald selects security-heavy roster
+- Run `/qa` on VoidForge — verify Herald selects test-relevant agents
+- Verify `--light` still bypasses Herald cleanly
+- Verify `--solo` still works
+- Update HOLOCRON.md with Herald documentation
+
+**Execution order:** M1 + M2 (parallel) → M3 → M4 + M5 (parallel) → M6 → M7
 
 ---
 
