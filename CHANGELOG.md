@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.7.0] - 2026-04-12
+
+### The Decount — Dynamic Agent References
+
+### Changed
+- **Eliminated hardcoded agent counts from 30+ files.** Commands, method docs, CLAUDE.md, HOLOCRON.md, ROADMAP.md, SUB_AGENTS.md, and herald.ts now say "all agents" instead of hardcoding a number. Only two files retain the count: `AGENT_CLASSIFICATION.md` (the single source of truth) and `wizard/ui/index.html` (user-facing, with an HTML comment documenting how to compute it).
+- Adding a new agent no longer requires updating 30+ files — just the agent definition and AGENT_CLASSIFICATION.md.
+
+---
+
 ## [23.6.1] - 2026-04-12
 
 ### Fixed

@@ -2,10 +2,10 @@
 
 > The plan for the plan-maker.
 
-**Current:** v23.6.1 (2026-04-12)
+**Current:** v23.7.0 (2026-04-12)
 **Next:** v24.0 (TBD)
 **Status:** v23.5 complete (Campaigns 34-37). Herald intelligent dispatch shipped.
-**1384 tests**, 9 universes, 264 agents, 28 slash commands, 37 code patterns.
+**1384 tests**, 9 universes, agents (see AGENT_CLASSIFICATION.md), 28 slash commands, 37 code patterns.
 
 ---
 
@@ -68,7 +68,7 @@
 
 **The problem:** Every command has a hardcoded agent manifest — `/review` always calls 5 agents, `/qa` always calls 7, regardless of what the codebase contains. Dynamic dispatch (ADR-044) adds agents based on git diff, but that's reactive. A financial app gets the same `/review` as a game. Users want more agents debating to reach the best answer in fewer prompts.
 
-**The solution:** A Haiku pre-scan ("The Herald") runs before every major command, reads the codebase + command + user intent, and selects the optimal roster from all 264 agents. One cheap LLM call (~$0.001, <2s) replaces hardcoded manifests with intelligent curation.
+**The solution:** A Haiku pre-scan ("The Herald") runs before every major command, reads the codebase + command + user intent, and selects the optimal roster from all agents. One cheap LLM call (~$0.001, <2s) replaces hardcoded manifests with intelligent curation.
 
 **Missions (7):**
 
@@ -585,7 +585,7 @@
 
 **Depends on: v23.0 complete. Architecture: ADR-045. Campaign 33.**
 
-**The problem:** v23.0 materialized 264 agents but their definitions contain only 3-12% of the operational knowledge in the method docs. 25+ hard-won lessons from LESSONS.md and 4 learnings from LEARNINGS.md are absent from every agent definition. Six breaks exist in the knowledge flow: agents aren't distributed via init/update/void code paths, /debrief doesn't target agent definitions, and scaffold users have no migration path. VoidForge's recursive knowledge loop — build → debrief → learn → inject → build better — is broken at the injection step.
+**The problem:** v23.0 materialized 263 agents but their definitions contain only 3-12% of the operational knowledge in the method docs. 25+ hard-won lessons from LESSONS.md and 4 learnings from LEARNINGS.md are absent from every agent definition. Six breaks exist in the knowledge flow: agents aren't distributed via init/update/void code paths, /debrief doesn't target agent definitions, and scaffold users have no migration path. VoidForge's recursive knowledge loop — build → debrief → learn → inject → build better — is broken at the injection step.
 
 **Missions (7):**
 
@@ -619,7 +619,7 @@
   - Spock (statistical code math review, data mutation parity)
   - All other sub-agents with field-report-specific checks
 - Inject their parent section's specific checks into `## Operational Learnings`
-- Add `## Required Context` footer to all 264 agents (bulk operation)
+- Add `## Required Context` footer to all agents (bulk operation)
 - Target: ~60-80 lines for key sub-agents
 
 ### Mission 4: Debrief Pipeline Update (Break 2 + Break 3)
@@ -648,7 +648,7 @@
 - Verify /debrief proposes agent updates for agent-relevant findings
 - Verify /void syncs agents
 - Verify `npx voidforge init` and `npx voidforge update` include agents
-- Full consistency check: all 264 agents have `## Required Context` sections
+- Full consistency check: all agents have `## Required Context` sections
 - Verify scaffold migration path works
 
 **Execution order:** M1 (already done) → M2 + M3 (parallel) → M4 → M5 → M6 → M7
@@ -666,7 +666,7 @@
 **Missions (8):**
 
 ### Mission 1: Agent Classification
-- Parse `docs/NAMING_REGISTRY.md` — extract all 264 agents with name, universe, role, lens
+- Parse `docs/NAMING_REGISTRY.md` — extract all agents with name, universe, role, lens
 - Classify each into tier: Lead (~18, Opus), Specialist (~200, Sonnet), Scout (~40, Haiku)
 - Classify each by tool access: Builder (full), Reviewer (read+bash), Scout (read-only), Adversarial (read+bash)
 - Produce classification manifest: `docs/AGENT_CLASSIFICATION.md`

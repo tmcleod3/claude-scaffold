@@ -2,7 +2,7 @@
  * The Herald — intelligent agent dispatch via Haiku pre-scan.
  *
  * Before every major slash command, a single Haiku call selects the optimal
- * agent roster from all 264 agents based on the current context. ADR-048.
+ * agent roster from all agents based on the current context. ADR-048.
  */
 
 import { request as httpsRequest } from 'node:https';

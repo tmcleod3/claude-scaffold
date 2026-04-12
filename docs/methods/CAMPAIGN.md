@@ -239,7 +239,7 @@ User confirms, redirects, or overrides. On confirm → Step 4.
 
 **Post-infrastructure enforcement gate:** For infrastructure campaigns (deploy targets, CI/CD, monitoring, staging environments): after the infrastructure is provisioned, run `/architect --plan` to verify workflow enforcement gates exist — not just infrastructure existence. Infrastructure without process gates is incomplete.
 
-**Dispatch model (ADR-044):** Per-mission `/assemble` runs SHOULD dispatch phases to sub-agents per `SUB_AGENTS.md` "Parallel Agent Standard." Agents are launched as named subagent types defined in `.claude/agents/` with description-driven dispatch — Opus scans `git diff --stat` and matches changed files against agent descriptions to auto-select specialists. The campaign orchestrator (main thread) manages the mission sequence, inter-mission gates, and campaign state — it does NOT perform inline code analysis. Pass findings summaries between missions, not raw code. See `docs/AGENT_CLASSIFICATION.md` for the full 264-agent manifest. (Field report #270)
+**Dispatch model (ADR-044):** Per-mission `/assemble` runs SHOULD dispatch phases to sub-agents per `SUB_AGENTS.md` "Parallel Agent Standard." Agents are launched as named subagent types defined in `.claude/agents/` with description-driven dispatch — Opus scans `git diff --stat` and matches changed files against agent descriptions to auto-select specialists. The campaign orchestrator (main thread) manages the mission sequence, inter-mission gates, and campaign state — it does NOT perform inline code analysis. Pass findings summaries between missions, not raw code. See `docs/AGENT_CLASSIFICATION.md` for the full agent manifest (see docs/AGENT_CLASSIFICATION.md). (Field report #270)
 
 ### Campaign-Mode Pipeline
 

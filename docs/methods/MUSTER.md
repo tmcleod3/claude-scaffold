@@ -143,7 +143,7 @@ Synthesize all findings:
 
 ## Subagent Definitions (ADR-044)
 
-Muster agents are now launched as named subagent types defined in `.claude/agents/`. Instead of inline prompts, each agent invocation uses `subagent_type: {agent-id}` to reference a materialized definition with model tiering (Opus leads, Sonnet specialists, Haiku scouts) and tool restrictions. See `docs/AGENT_CLASSIFICATION.md` for the full 264-agent classification manifest.
+Muster agents are now launched as named subagent types defined in `.claude/agents/`. Instead of inline prompts, each agent invocation uses `subagent_type: {agent-id}` to reference a materialized definition with model tiering (Opus leads, Sonnet specialists, Haiku scouts) and tool restrictions. See `docs/AGENT_CLASSIFICATION.md` for the full agent classification manifest.
 
 ## Cost Awareness
 

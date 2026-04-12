@@ -27,7 +27,7 @@
 
 ## Dynamic Dispatch (ADR-044)
 
-Agent dispatch is now description-driven. When Opus processes a command, it scans `git diff --stat` and matches changed files against the `description` fields of all 264 agents in `.claude/agents/`. Matching specialists launch automatically alongside core agents. No static dispatch tables needed.
+Agent dispatch is now description-driven. When Opus processes a command, it scans `git diff --stat` and matches changed files against the `description` fields of all agents in `.claude/agents/`. Matching specialists launch automatically alongside core agents. No static dispatch tables needed.
 
 See `docs/AGENT_CLASSIFICATION.md` for the full classification and `docs/adrs/ADR-044-subagent-materialization.md` for the architecture.
 

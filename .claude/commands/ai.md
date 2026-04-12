@@ -11,7 +11,7 @@ The AI Intelligence Audit reviews every LLM-powered component in your applicatio
 
 ## Dynamic Dispatch (ADR-044)
 
-Opus scans `git diff --stat` and matches changed files against the `description` fields of all 264 agents in `.claude/agents/`. Matching specialists launch alongside the core agents below.
+Opus scans `git diff --stat` and matches changed files against the `description` fields of all agents in `.claude/agents/`. Matching specialists launch alongside the core agents below.
 
 **Dispatch control:** `--light` skips dynamic dispatch (core only). `--solo` runs lead agent only.
 

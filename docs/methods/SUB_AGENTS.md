@@ -10,7 +10,7 @@ Parallelize development across multiple Claude Code sessions. Each session runs 
 
 **All orchestration uses the build journal.** Every delegation, handoff, and resolution is logged to `/logs/handoffs.md`. Agents read journal files to recover context. See `/docs/methods/BUILD_JOURNAL.md`.
 
-**Full character roster: `/docs/NAMING_REGISTRY.md`** — 264 named characters across 9 universes. No duplicates allowed. All agents materialized as subagent definitions in `.claude/agents/`.
+**Full character roster: `/docs/NAMING_REGISTRY.md`** — all named characters across 9 universes. No duplicates allowed. All agents materialized as subagent definitions in `.claude/agents/`.
 
 ---
 
@@ -176,7 +176,7 @@ Users can create project-specific sub-agents that carry domain knowledge. Define
 
 ## Subagent Definitions (ADR-044)
 
-All 264 agents are materialized as `.claude/agents/{name}.md` files. Commands now use `subagent_type: {agent-id}` instead of inline prompts. Each definition contains the agent's identity, behavioral directives, domain expertise, and output format.
+All agents are materialized as `.claude/agents/{name}.md` files. Commands now use `subagent_type: {agent-id}` instead of inline prompts. Each definition contains the agent's identity, behavioral directives, domain expertise, and output format.
 
 ### The `.claude/agents/` Directory
 
@@ -206,7 +206,7 @@ Leads inherit the main session's model (Opus). Specialists run on Sonnet for cos
 Commands no longer use static dispatch tables (the old ADR-042 Cross-Domain Triggers). Instead, when Opus processes a command, it:
 
 1. Scans `git diff --stat` to identify changed files
-2. Matches changed file paths against the `description` fields of all 264 agents
+2. Matches changed file paths against the `description` fields of all agents
 3. Launches matching specialists automatically alongside core agents
 
 This means a security audit that touches database migrations automatically picks up Spock (schema) without a hardcoded trigger table. The descriptions in `.claude/agents/*.md` ARE the dispatch rules.

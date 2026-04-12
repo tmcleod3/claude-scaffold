@@ -13,7 +13,7 @@
 | Scouts (Haiku, Scout/Reviewer) | 38 |
 | Adversarial (Sonnet, Adversarial) | 15 |
 
-**Note:** The authoritative count from NAMING_REGISTRY.md is 264. All methodology docs updated in M7. ADR-044 and ADR-042 retain their original "259" count as historical records.
+**Note:** This file is the single source of truth for agent counts. Other files reference "all agents" without hardcoding the number — verify with `ls .claude/agents/*.md | wc -l`. ADR-044 and ADR-042 retain their original "259" count as historical records.
 
 ## Tiers (Model Assignment)
 

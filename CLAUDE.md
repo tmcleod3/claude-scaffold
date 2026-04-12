@@ -234,7 +234,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | Deploy Wizard | **Haku** (Anime) | Browser-based deploy wizard, infrastructure provisioning |
 | Setup Wizard | **Gandalf** (Tolkien) | Project scaffolding, initialization, dependency setup |
 
-264 sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions. All agents materialized as subagent definitions in `.claude/agents/` (ADR-044). Silver Surfer (ADR-048) dispatches the optimal roster via Haiku pre-scan.
+Agent names in `/docs/NAMING_REGISTRY.md` (run `ls .claude/agents/*.md | wc -l` for current count). No duplicates across active sessions. All agents materialized as subagent definitions in `.claude/agents/` (ADR-044). Silver Surfer (ADR-048) dispatches the optimal roster via Haiku pre-scan.
 
 ## Distribution
 
