@@ -32,6 +32,8 @@ Before agent deployment, run the Herald to select the optimal roster:
 Detect: framework, styling system, component library, routing, state management.
 Document in phase log: "How to run", key routes, where components/styles/copy live.
 
+**Screenshot mandate (MANDATORY):** If the app is runnable, start the server, take screenshots of EVERY page via Playwright or browser, and READ them via the Read tool. Without screenshots, the review is code-reading — not visual verification. Take at desktop (1440x900), plus 375px and 768px for responsive proof-of-life.
+
 ## Step 1 — Product Surface Map
 List every screen/route, primary user journeys, key shared components, and the state taxonomy (loading/empty/error/success/partial/unauthorized). Write to phase log.
 

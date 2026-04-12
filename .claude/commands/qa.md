@@ -50,6 +50,10 @@ Before agent deployment, run the Herald to select the optimal roster:
 ## Step 2 — Baseline
 Get the project running. Verify manually: app starts, primary flow works, auth works (if applicable), data persists, error states display.
 
+**Dynamic count check:** Grep for hardcoded numeric claims ("263 agents", "37 patterns", etc.) across all pages and data files. Every count that can change between releases must be computed from the source, not hardcoded. (Field report #298.)
+
+**Cross-array uniqueness audit:** If the codebase uses multiple data arrays for entity categories (e.g., leadAgents + subAgents), verify no entity appears in more than one array. Duplicates inflate totals. (Field report #298.)
+
 ## Step 2.5 — Smoke Tests
 After build + restart, **Flash** `subagent_type: Flash` parallelizes curl commands against the running server for each new or modified feature:
 - **Primary user flow:** Execute via curl/fetch against localhost — verify the end-to-end path works

@@ -125,6 +125,9 @@ Before agent deployment, run the Herald to select the optimal roster:
 ## Phase 12.5 — Wong's Pattern Usage Log
 After build and before launch, log which patterns were used: pattern name, framework adaptation, custom mods. Store in `docs/pattern-usage.json`. Feeds Wong's promotion analysis in `/debrief`.
 
+## Phase 12.75 — Distribution Verification Gate
+If this build introduces a new shared file category (e.g., `.claude/agents/`, new patterns subdirectory), verify ALL 6 consumption paths include it: prepack.sh, copy-assets.sh, project-init.ts, updater.ts, FORGE_KEEPER.md, void.md. Missing one path = users silently miss the feature. (Field report #297.)
+
 ## Phase 13 — Launch (All agents)
 1. Full checklist: SSL, email, payments, analytics, monitoring, backups, security headers, legal, performance, mobile, accessibility, all tests passing
 2. Log final status to `/logs/phase-13-launch.md`
