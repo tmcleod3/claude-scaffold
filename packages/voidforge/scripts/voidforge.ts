@@ -319,6 +319,7 @@ function showHelp(): void {
   console.log('  deploy             Deploy project');
   console.log('  migrate            Migrate v20.x project to v21.0');
   console.log('  migrate treasury   Migrate global treasury to per-project (v22.1)');
+  console.log('  herald             Silver Surfer — select optimal agent roster via Haiku');
   console.log('  doctor             Check versions, compatibility, health');
   console.log('  version            Show version information');
   console.log('  templates          List project templates');
@@ -354,6 +355,37 @@ async function main(): Promise<void> {
       case 'deploy':
         await cmdDeploy();
         break;
+
+      case 'herald': {
+        // Silver Surfer — Herald dispatch: Haiku pre-scan selects optimal agent roster
+        const commandFlag = args.find((_a, i) => args[i - 1] === '--command') ?? '';
+        const focusFlag = args.find((_a, i) => args[i - 1] === '--focus') ?? undefined;
+        const jsonMode = args.includes('--json');
+        try {
+          const { gatherHeraldContext, runHerald } = await import('../wizard/lib/herald.js');
+          const { loadAgentRegistry, getRegistrySummary } = await import('../wizard/lib/agent-registry.js');
+          const context = await gatherHeraldContext(commandFlag, '', focusFlag);
+          const registry = await loadAgentRegistry();
+          const summary = getRegistrySummary(registry);
+          const result = await runHerald(context, registry);
+          if (jsonMode) {
+            console.log(JSON.stringify(result));
+          } else {
+            console.log(`\n  Silver Surfer scanned ${registry.length} agents for ${commandFlag || 'unknown command'}`);
+            if (focusFlag) console.log(`  Focus bias: "${focusFlag}"`);
+            console.log(`  Selected ${result.estimatedAgents} agents: ${result.roster.join(', ')}`);
+            console.log(`  Reasoning: ${result.reasoning}\n`);
+          }
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          if (jsonMode) {
+            console.log(JSON.stringify({ roster: [], reasoning: `Herald unavailable: ${msg}`, estimatedAgents: 0 }));
+          } else {
+            console.log(`\n  Silver Surfer unavailable: ${msg}\n  Commands will use their default agent roster.\n`);
+          }
+        }
+        break;
+      }
 
       case 'install': {
         const extName = args[1];

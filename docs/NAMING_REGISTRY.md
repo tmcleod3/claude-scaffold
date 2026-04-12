@@ -113,8 +113,9 @@
 28. Jarvis — AI assistant, status reporting, progress summaries
 
 29. Thanos — **Lead: The Gauntlet.** Comprehensive multi-round review. Tests every domain, every stone. "I am inevitable."
+30. Silver Surfer (Norrin Radd) — **The Herald.** Pre-scan dispatch — reads codebase and selects optimal agent roster via Haiku. Scouts ahead, summons the right team. "All that you know is at an end."
 
-**Reserved:** Stark (lead — backend), Coulson (lead — release), Fury (lead — the initiative), Thanos (lead — the gauntlet)
+**Reserved:** Stark (lead — backend), Coulson (lead — release), Fury (lead — the initiative), Thanos (lead — the gauntlet), Silver Surfer (herald — dispatch)
 
 ---
 

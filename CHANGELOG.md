@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.6.0] - 2026-04-12
+
+### The Silver Surfer (ADR-048, Campaign 38)
+
+### Added
+- **Silver Surfer** (Norrin Radd) — agent #264. Herald of Galactus. Pre-scan dispatch that reads codebase context and selects the optimal agent roster via Haiku.
+- **`voidforge herald` CLI subcommand** — the invocation bridge. Runs the Silver Surfer pre-scan from the command line: `npx thevoidforge herald --command /review --json`. Outputs JSON roster for Claude to deploy.
+- Silver Surfer agent definition with Haiku tier, scout tools, and dispatch tags.
+
+### Changed
+- All 14 major commands updated: "Herald Pre-Scan (ADR-047)" replaced with "Silver Surfer Pre-Scan (ADR-048)" using actual CLI invocation instead of pseudocode.
+- Agent count: 263 → 264.
+- CLAUDE.md and NAMING_REGISTRY.md updated with Silver Surfer identity.
+
+---
+
 ## [23.5.4] - 2026-04-12
 
 ### Fixed
