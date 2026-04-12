@@ -197,7 +197,8 @@ ${deployLine}${hostnameLine}
       await execFileAsync('git', ['commit', '-m', `Initial commit: ${safeName} via VoidForge`], { cwd: projectDir });
     } catch (err) {
       // Git init is best-effort
-      console.warn('Git initialization warning:', err);
+      const msg = err instanceof Error ? err.message.split('\n')[0] : String(err);
+      console.warn(`Git initialization skipped: ${msg}. Project created but not version-controlled.`);
     }
 
     // Register in project registry for The Lobby
