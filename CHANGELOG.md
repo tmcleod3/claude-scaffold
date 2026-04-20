@@ -6,6 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.8.18] - 2026-04-20
+
+### Assemble Hardening Pass — closes 7 of 10 deferred Gauntlet 40b findings
+
+Ran `/assemble` to build the hardening pass. Silver Surfer returned 20 agents;
+Picard + Spock + Worf + O'Brien designed the architecture decisions in Phase 1,
+fixes applied in Phase 2, test coverage added. All 20 offline tests pass.
+
+### Added
+- **ADR-060: Surfer Gate State Location.** Relocates gate state from `/tmp/voidforge-*/` to `$XDG_RUNTIME_DIR/voidforge-gate/` (Linux tmpfs, per-user 0700) with `$HOME/.voidforge/gate/` fallback (macOS + non-systemd). Closes SEC-002 multi-tenant pre-seed vector.
+- `scripts/surfer-gate/_paths.sh` — shared state-directory resolver sourced by all three helpers. Exports `SURFER_GATE_DIR`, `surfer_gate_session_dir()`, `surfer_gate_pointer_file()`, `surfer_gate_reap_stale_sessions()`.
+- `scripts/surfer-gate/test.sh` — **committed test harness** (previously at `/tmp/test-check-sh.sh`, un-auditable). 20 tests including SEC-003 fail-closed + QA-001/2/3 coverage. Wired to `npm test` via `pretest`.
+
+### Security
+- **SEC-001 (HIGH latent) FIXED.** `parse_json` in `check.sh` now passes `$path` via `sys.argv[1]` instead of interpolating into Python source. Closes the refactor-trap injection path — arbitrary Python execution if any future caller passed a dynamic path argument.
+- **SEC-002 (MEDIUM) FIXED.** State relocated per ADR-060. `/tmp` enumeration no longer leaks session UUIDs. Pre-seed attacks require the same UID as the running session.
+- **SEC-003 (LOW → NOW FIXED AS HIGH).** `bypass.sh` is now fail-closed on unknown flag values. Previously: `bash bypass.sh --anything` silently wrote a bypass with only a stderr warning (swallowed by hook runner). Now: exit 2 with explicit error. Prompt-injection path closed. Two test cases added.
+- **File permissions hardened.** State directories created with `chmod 0700`; state files with `chmod 0600`. Defense against lax user umask.
+
+### Architecture
+- **BE-003 (HIGH) FIXED.** `record-roster.sh` now uses `jq` (when available) to emit ROSTER_RECEIVED events with `roster` as a nested JSON object — not a string requiring two-step decode. Eliminates the sentinel-vs-JSONL schema divergence that Gauntlet 40b Round 2 caught. Falls back gracefully to `roster_text` (string-encoded) when `$1` isn't valid JSON, or to manual escaping when `jq` is unavailable. No backslash stripping on orchestrator input.
+- **BE-002 (MEDIUM) FIXED.** `REPO_PATH="${REPO_PATH%/}"` normalizes trailing slashes in `record-roster.sh` and `bypass.sh`. Prevents hash divergence when paths differ by one byte.
+
+### Test coverage (Batman)
+- **QA-001** — test for `CLAUDE_PROJECT_DIR != $PWD` discovery from subdirectory. PASS.
+- **QA-002** — test for JSONL escape preservation with complex roster JSON (backslashes, quotes, nested objects). PASS.
+- **QA-003** — test for auto-creation of repo-persistent `logs/` directory. PASS.
+
+### Documentation
+- CLAUDE.md + `packages/methodology/CLAUDE.md` Silver Surfer Gate section updated: state location (ADR-060), bypass.sh fail-closed behavior (SEC-003), helper script references.
+
+### Explicitly deferred (NOT in this release)
+- **AP-4 (Worf, threat model)** — Silver Surfer identity spoofing via `subagent_type`. Any agent that knows the magic string self-approves. Mitigating would require real cryptographic attestation — out of scope; the gate is a discipline mechanism, not a security boundary.
+- **UX-004** — BLOCK error message rewrite for orchestrator audience. Improved in this release ("BLOCKED: " prefix + required/bypass structure) but the implementation-detail leak (`bash record-roster.sh`) is accepted as orchestrator-instructive. Future polish pass.
+- **UX-005/6/7** — HOLOCRON pointer to surfer-gate README, count inconsistencies, residual `thevoidforge`. Documentation hygiene, defer to docs pass.
+
+### Verification
+- `bash scripts/surfer-gate/test.sh` — **20/20 pass** (was 14/14 pre-hardening)
+- `npm test` — 1384/1384 pass (suite unchanged, pretest now runs surfer-gate tests too)
+- Live hook verified: this session's Agent launches allowed via pre-migrated state at `$HOME/.voidforge/gate/sessions/87afbf7d.../`
+- State paths confirmed at correct location: `$HOME/.voidforge/gate/pointers/pointer-<hash>`, `$HOME/.voidforge/gate/sessions/<session_id>/`
+
+### Still-deferred findings catalog
+- AP-4 (Surfer spoofing — architectural limitation, not fixable without attestation)
+- UX-004 (error message polish)
+- UX-005, UX-006, UX-007 (docs hygiene)
+
+3 of 10 Gauntlet 40b findings remain deferred. 7 closed in this release.
+
+---
+
 ## [23.8.17] - 2026-04-20
 
 ### Gauntlet 40b Round 1 + 2 fix batch

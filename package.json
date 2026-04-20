@@ -11,6 +11,7 @@
     "test": "npm run test -w thevoidforge",
     "test:e2e": "npm run test:e2e -w thevoidforge",
     "validate:agents": "bash scripts/validate-agent-refs.sh",
-    "pretest": "bash scripts/validate-agent-refs.sh"
+    "test:surfer-gate": "bash scripts/surfer-gate/test.sh",
+    "pretest": "bash scripts/validate-agent-refs.sh && bash scripts/surfer-gate/test.sh"
   }
 }

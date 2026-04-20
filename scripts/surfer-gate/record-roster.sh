@@ -1,85 +1,103 @@
 #!/usr/bin/env bash
-# record-roster.sh — Orchestrator helper for ADR-051 Silver Surfer Gate.
+# record-roster.sh — Orchestrator helper (ADR-051 + ADR-060).
 #
-# Called by the orchestrator AFTER the Silver Surfer sub-agent returns its
-# roster, BEFORE launching any further Agent tool calls.
-#
-# Discovers the current session_id via a pointer file that check.sh writes
-# on every hook invocation. Writes a session-scoped sentinel that check.sh
-# will recognize as "roster has been returned — allow further Agent calls."
+# Called AFTER the Silver Surfer returns its roster. Discovers session_id via
+# the pointer file check.sh wrote, then writes the roster sentinel + emits a
+# ROSTER_RECEIVED JSONL event.
 #
 # Usage:
-#   bash scripts/surfer-gate/record-roster.sh               # minimal — marks roster received
-#   bash scripts/surfer-gate/record-roster.sh "<json>"      # optional — include roster content for audit
+#   bash scripts/surfer-gate/record-roster.sh                     # minimal
+#   bash scripts/surfer-gate/record-roster.sh "<roster-json>"     # with audit payload
 #
 # Exit codes:
-#   0 = roster recorded, or hook not active (no-op; orchestrator keeps going)
-#   1 = something went wrong but the orchestrator should not abort
+#   0 = recorded, or hook inactive (no-op), or failed harmlessly
+#   1 = not currently used — helper is fail-open by design
 
 set -uo pipefail
 
-# Locate the session pointer that check.sh writes on every hook fire.
-# Prefer $CLAUDE_PROJECT_DIR (injected by Claude Code into hook/command env) —
-# check.sh hashes stdin's `cwd`, which equals $CLAUDE_PROJECT_DIR in practice.
-# Fall back to $PWD if the env var isn't set (e.g., run manually from terminal).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=_paths.sh
+. "$SCRIPT_DIR/_paths.sh" 2>/dev/null || {
+    echo "[record-roster] _paths.sh missing — no-op." >&2
+    exit 0
+}
+
+# Prefer $CLAUDE_PROJECT_DIR over $PWD — check.sh hashes stdin's cwd which
+# is $CLAUDE_PROJECT_DIR in practice (per ADR-051 empirical findings).
 REPO_PATH="${CLAUDE_PROJECT_DIR:-$PWD}"
-REPO_HASH="$(printf '%s' "$REPO_PATH" | shasum -a 256 2>/dev/null | cut -c1-12)"
-if [ -z "$REPO_HASH" ]; then
-    echo "[record-roster] shasum unavailable — cannot compute repo hash. No-op." >&2
+REPO_PATH="${REPO_PATH%/}"  # normalize trailing slash (BE-002)
+
+if [ -z "$SURFER_GATE_DIR" ]; then
+    # Hook can't run either — no-op.
     exit 0
 fi
 
-POINTER="/tmp/voidforge-gate/pointer-${REPO_HASH}"
-if [ ! -f "$POINTER" ]; then
-    # No pointer means the PreToolUse hook isn't active. That's fine —
-    # this helper is a no-op when the gate isn't enforcing. The Silver
-    # Surfer Gate prose in CLAUDE.md remains the backstop.
-    echo "[record-roster] no session pointer at $POINTER — hook not active. No-op." >&2
+POINTER_FILE="$(surfer_gate_pointer_file "$REPO_PATH")"
+if [ -z "$POINTER_FILE" ] || [ ! -f "$POINTER_FILE" ]; then
+    echo "[record-roster] no session pointer at $POINTER_FILE — hook not active. No-op." >&2
     exit 0
 fi
 
-SESSION_ID="$(cat "$POINTER" 2>/dev/null)"
+SESSION_ID="$(cat "$POINTER_FILE" 2>/dev/null)"
 if [ -z "$SESSION_ID" ]; then
     echo "[record-roster] session pointer empty — no-op." >&2
     exit 0
 fi
 
-SESSION_DIR="/tmp/voidforge-session-${SESSION_ID}"
+SESSION_DIR="$(surfer_gate_session_dir "$SESSION_ID")"
+if [ -z "$SESSION_DIR" ]; then
+    exit 0
+fi
 ROSTER_FILE="$SESSION_DIR/surfer-roster.json"
+EVENTS_FILE="$SESSION_DIR/surfer-gate-events.jsonl"
 
-mkdir -p "$SESSION_DIR" 2>/dev/null || {
+mkdir -p "$SESSION_DIR" 2>/dev/null && chmod 0700 "$SESSION_DIR" 2>/dev/null || {
     echo "[record-roster] could not create $SESSION_DIR" >&2
-    exit 1
+    exit 0
 }
 
-# Write whatever the orchestrator passed (or a minimal sentinel).
-# Use printf to construct the default without shell-escape artifacts — avoids the
-# prior `{\"recorded\":true\}` expansion that wrote a literal backslash on some
-# shells. Do NOT strip backslashes from orchestrator-supplied $1, which may
-# contain legitimate JSON escapes (\u0041, \", etc.).
+# Construct the roster content. No backslash stripping — legitimate JSON
+# escapes (\u0041, \", \n) must pass through. If no argument passed, use a
+# minimal sentinel.
 if [ "$#" -ge 1 ]; then
     ROSTER_CONTENT="$1"
 else
     ROSTER_CONTENT='{"recorded":true}'
 fi
-printf '%s\n' "$ROSTER_CONTENT" > "$ROSTER_FILE" 2>/dev/null || {
+
+printf '%s\n' "$ROSTER_CONTENT" > "$ROSTER_FILE" 2>/dev/null && chmod 0600 "$ROSTER_FILE" 2>/dev/null || {
     echo "[record-roster] could not write $ROSTER_FILE" >&2
-    exit 1
+    exit 0
 }
 
-# Emit a structured ROSTER_RECEIVED event to the gate-events JSONL stream (ADR-056).
-# Non-fatal: any emit failure is swallowed.
+# Emit ROSTER_RECEIVED event to both session-scoped and repo-persistent JSONL.
+# Use jq for safe JSON construction (BE-003: avoids string-escape divergence).
+# If $ROSTER_CONTENT is valid JSON, embed as nested object via --argjson.
+# If not, embed as string via --arg (preserves lossless round-trip via fromjson).
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-SAFE_ROSTER="$(printf '%s' "$ROSTER_CONTENT" | tr -d '\n' | sed 's/\\/\\\\/g; s/"/\\"/g')"
-JSONL_LINE="$(printf '{"ts":"%s","session_id":"%s","event":"ROSTER_RECEIVED","roster_json":"%s"}' \
-    "$TS" "$SESSION_ID" "$SAFE_ROSTER")"
+JSONL_LINE=""
+if command -v jq >/dev/null 2>&1; then
+    # Try nested-object form first. --argjson requires valid JSON.
+    JSONL_LINE="$(jq -cn --arg ts "$TS" --arg sid "$SESSION_ID" \
+        --argjson roster "$ROSTER_CONTENT" \
+        '{ts:$ts,session_id:$sid,event:"ROSTER_RECEIVED",roster:$roster}' 2>/dev/null)"
+    if [ -z "$JSONL_LINE" ]; then
+        # Roster isn't valid JSON — emit as string field for fidelity.
+        JSONL_LINE="$(jq -cn --arg ts "$TS" --arg sid "$SESSION_ID" \
+            --arg roster "$ROSTER_CONTENT" \
+            '{ts:$ts,session_id:$sid,event:"ROSTER_RECEIVED",roster_text:$roster}' 2>/dev/null)"
+    fi
+fi
+if [ -z "$JSONL_LINE" ]; then
+    # jq unavailable — fall back to manual string escape.
+    SAFE_ROSTER="$(printf '%s' "$ROSTER_CONTENT" | tr -d '\n' | sed 's/\\/\\\\/g; s/"/\\"/g')"
+    JSONL_LINE="$(printf '{"ts":"%s","session_id":"%s","event":"ROSTER_RECEIVED","roster_text":"%s"}' \
+        "$TS" "$SESSION_ID" "$SAFE_ROSTER")"
+fi
 
 # Session-scoped
-printf '%s\n' "$JSONL_LINE" >> "$SESSION_DIR/surfer-gate-events.jsonl" 2>/dev/null || true
-# Repo-persistent (use $REPO_PATH — set earlier from $CLAUDE_PROJECT_DIR — not
-# bare $PWD, so the JSONL lands in the correct repo even when the orchestrator
-# calls this helper from a subdirectory).
-# Create logs/ if missing to avoid silent drops — BE-005.
+printf '%s\n' "$JSONL_LINE" >> "$EVENTS_FILE" 2>/dev/null || true
+# Repo-persistent (mkdir logs/ if missing — BE-005 fix)
 mkdir -p "$REPO_PATH/logs" 2>/dev/null && \
     printf '%s\n' "$JSONL_LINE" >> "$REPO_PATH/logs/surfer-gate-events.jsonl" 2>/dev/null || true
 
