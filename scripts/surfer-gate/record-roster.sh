@@ -49,9 +49,24 @@ mkdir -p "$SESSION_DIR" 2>/dev/null || {
 }
 
 # Write whatever the orchestrator passed (or a minimal sentinel).
-printf '%s\n' "${1:-{\"recorded\":true\}}" > "$ROSTER_FILE" 2>/dev/null || {
+ROSTER_CONTENT="${1:-{\"recorded\":true\}}"
+printf '%s\n' "$ROSTER_CONTENT" > "$ROSTER_FILE" 2>/dev/null || {
     echo "[record-roster] could not write $ROSTER_FILE" >&2
     exit 1
 }
+
+# Emit a structured ROSTER_RECEIVED event to the gate-events JSONL stream (ADR-056).
+# Non-fatal: any emit failure is swallowed.
+TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+SAFE_ROSTER="$(printf '%s' "$ROSTER_CONTENT" | tr -d '\n' | sed 's/\\/\\\\/g; s/"/\\"/g')"
+JSONL_LINE="$(printf '{"ts":"%s","session_id":"%s","event":"ROSTER_RECEIVED","roster_json":"%s"}' \
+    "$TS" "$SESSION_ID" "$SAFE_ROSTER")"
+
+# Session-scoped
+printf '%s\n' "$JSONL_LINE" >> "$SESSION_DIR/surfer-gate-events.jsonl" 2>/dev/null || true
+# Repo-persistent
+if [ -d "$PWD/logs" ]; then
+    printf '%s\n' "$JSONL_LINE" >> "$PWD/logs/surfer-gate-events.jsonl" 2>/dev/null || true
+fi
 
 echo "[record-roster] roster recorded for session $SESSION_ID"

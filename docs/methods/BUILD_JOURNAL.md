@@ -32,7 +32,28 @@ logs/
   handoffs.md                 ← Every agent-to-agent handoff with context
   errors.md                   ← Every significant error encountered and resolution
   agent-activity.jsonl        ← Live agent dispatch log (JSONL — powers Danger Room ticker)
+  surfer-gate-events.jsonl    ← Silver Surfer Gate events (JSONL) — written by PreToolUse hook and record-roster.sh per ADR-056. Cross-session, append-only.
 ```
+
+### Silver Surfer Gate Events (ADR-056)
+
+`logs/surfer-gate-events.jsonl` is a repo-persistent append-only log of every gate decision. The `PreToolUse` hook (`scripts/surfer-gate/check.sh`) writes one line per Agent tool call; `scripts/surfer-gate/record-roster.sh` writes one line when the orchestrator records the Surfer's roster.
+
+**Schema:**
+
+```json
+{"ts":"2026-04-20T20:00:00Z","session_id":"<uuid>","event":"ALLOW|BLOCK","subagent_type":"<name>","tool_name":"Agent","reason":"<human-readable>"}
+{"ts":"2026-04-20T20:00:01Z","session_id":"<uuid>","event":"ROSTER_RECEIVED","roster_json":"<escaped JSON>"}
+```
+
+`event` values in use:
+- `ALLOW` — hook allowed the Agent call (self-launch, bypass, or roster present)
+- `BLOCK` — hook blocked the Agent call (no roster, no bypass, not Surfer)
+- `ROSTER_RECEIVED` — orchestrator recorded a roster via `record-roster.sh`
+
+**Cherry-pick detection:** count `ROSTER_RECEIVED` entries minus distinct `subagent_type` values under `ALLOW` in the same session. Non-zero deltas indicate rosters that weren't fully deployed.
+
+A session-scoped copy also lives at `/tmp/voidforge-session-<session_id>/surfer-gate-events.jsonl` for per-session debugging alongside `gate.log`.
 
 ## Log Entry Format
 

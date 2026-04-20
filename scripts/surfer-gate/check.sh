@@ -87,8 +87,28 @@ ROSTER_TTL_SECONDS=600  # 10 minutes — long enough for any single command turn
 mkdir -p "$SESSION_DIR" 2>/dev/null || exit 0  # unwritable tmp -> fail open
 
 _log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" >> "$LOG_FILE" 2>/dev/null || true; }
-_allow() { _log "ALLOW subagent=$SUBAGENT_TYPE: $*"; exit 0; }
-_block() { echo "[Silver Surfer Gate] $*" >&2; _log "BLOCK subagent=$SUBAGENT_TYPE: $*"; exit 2; }
+
+# Emit structured JSONL event (ADR-056) to both session-scoped and repo-persistent
+# locations. Non-fatal: any emit failure is swallowed and the gate still works.
+_emit_jsonl() {
+    local event="$1"; local reason="$2"
+    local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    # Escape quotes in subagent_type and reason for JSON safety.
+    local safe_sub; safe_sub="$(printf '%s' "$SUBAGENT_TYPE" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+    local safe_reason; safe_reason="$(printf '%s' "$reason" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+    local line
+    line="$(printf '{"ts":"%s","session_id":"%s","event":"%s","subagent_type":"%s","tool_name":"%s","reason":"%s"}' \
+        "$ts" "$SESSION_ID" "$event" "$safe_sub" "$TOOL_NAME" "$safe_reason")"
+    # Session-scoped (ephemeral, per-session debugging). Newline appended via format.
+    printf '%s\n' "$line" >> "$SESSION_DIR/surfer-gate-events.jsonl" 2>/dev/null || true
+    # Repo-persistent (survives sessions, for long-term cherry-pick trend analysis).
+    if [ -n "${CWD:-}" ] && [ -d "$CWD/logs" ]; then
+        printf '%s\n' "$line" >> "$CWD/logs/surfer-gate-events.jsonl" 2>/dev/null || true
+    fi
+}
+
+_allow() { _log "ALLOW subagent=$SUBAGENT_TYPE: $*"; _emit_jsonl "ALLOW" "$*"; exit 0; }
+_block() { echo "[Silver Surfer Gate] $*" >&2; _log "BLOCK subagent=$SUBAGENT_TYPE: $*"; _emit_jsonl "BLOCK" "$*"; exit 2; }
 
 # -------- Rule 1: Silver Surfer self-launch always allowed --------
 case "$(echo "$SUBAGENT_TYPE" | tr '[:upper:]' '[:lower:]')" in

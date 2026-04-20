@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.8.15] - 2026-04-20
+
+### Added
+- **Silver Surfer Gate events emitted as JSONL** (ADR-056 Mission 9a). `check.sh` writes every `ALLOW` and `BLOCK` decision to `/logs/surfer-gate-events.jsonl` (repo-persistent, cross-session) and `/tmp/voidforge-session-<id>/surfer-gate-events.jsonl` (ephemeral, per-session debugging). `record-roster.sh` emits `ROSTER_RECEIVED` events.
+- BUILD_JOURNAL.md: "Silver Surfer Gate Events" subsection documenting the JSONL schema, event types, and cherry-pick detection query.
+- `logs/surfer-gate-events.jsonl` bootstrapped with initial events from this session.
+
+### Changed
+- `scripts/surfer-gate/check.sh`: added non-fatal `_emit_jsonl()` helper. Existing `gate.log` plain-text output preserved unchanged.
+- `scripts/surfer-gate/record-roster.sh`: emits `ROSTER_RECEIVED` event to both session-scoped and repo-persistent files.
+- `logs/remediation-campaign.md`: Mission 9 split into 9a (shipped), 9b (orchestration metrics — deferred), 9c (Danger Room integration — deferred). TypeScript `log()` helper dropped from scope per Pike's YAGNI challenge.
+
+### Fixed
+- Bash `$()` command substitution stripping trailing newline caused JSONL entries to concatenate without separator. Corrected by moving `\n` from format-string capture into the write-time `printf '%s\n'` pattern.
+
+### Deferred (Pike's scope trim)
+- Mission 9b (orchestration-metrics.jsonl): different integration surface; requires orchestrator-side command-completion contract.
+- Mission 9c (agent-activity.jsonl session-start separator): Danger Room ticker work; not on the critical path.
+- TypeScript `log()` helper in methodology package: YAGNI — no TypeScript caller exists. Per the no-stubs doctrine, the file is not created.
+
+---
+
 ## [23.8.14] - 2026-04-20
 
 ### Added
