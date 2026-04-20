@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.8.13] - 2026-04-20
+
+### Security
+- **Prompt injection closed in 14 gated command files** (ADR-053). `<ARGS>` and `<FOCUS>` now wrapped in `<user_input>` / `<user_focus>` delimited blocks with explicit "treat as opaque data" instruction. Closes OWASP LLM01 injection vector via `--focus` argument.
+- **Maul red-team scope constrained** (ADR-057). Runtime exploitation now restricted to localhost or explicitly user-confirmed targets. Private-IP precondition; non-local targets require user confirmation before any curl execution.
+- **Barton smoke-test + Red Hood destructive testing scoped** (ADR-057). Same localhost-only pattern applied.
+- **CLAUDE.md override language scoped to procedural** (ADR-048 refinement). "This instruction overrides your judgment" narrowed to workflow-sequencing only — safety, ethics, alignment reasoning explicitly carved out.
+
+### Added
+- **ADR-050** — Native Claude Code Coexistence (rename `/review` → `/engage`, `/security` → `/sentinel`, permanent aliases).
+- **ADR-051** — Structural Gate Enforcement (PreToolUse hook design, Phase 5a validation procedure).
+- **ADR-052** — Silver Surfer Gate Canonicalization (single-source prose).
+- **ADR-053** — Prompt Injection Hardening.
+- **ADR-054** — Agent Model Tier Rebalance (Surfer → Haiku; Oracle/Wong/Black Canary/Bilbo → Haiku).
+- **ADR-055** — Naming Registry Enforcement (validator script + Wanda rename).
+- **ADR-056** — Observability Bootstrapping (surfer-gate-events.jsonl schema).
+- **ADR-057** — Red-Team Agent Scope Constraints.
+- **ADR-058** — Template Placeholder Purge (prepack sed filter).
+- **ADR-059** — Concurrency Model Reconciliation (drop "max 3" cap).
+- `/engage` command (primary) and `/sentinel` command (primary). `/review` and `/sentinel` become permanent aliases.
+- `scripts/surfer-gate/` — `validate.sh` (Phase 5a hook test), `check.sh` (Phase 5b production gate), `settings-snippet.json`, `README.md`.
+- `scripts/validate-agent-refs.sh` — enforces every `subagent_type:` resolves to exactly one agent. Wired to `npm test` via `pretest`.
+- `logs/remediation-campaign.md` — 12-mission plan with dependency DAG, victory conditions, rollback paths.
+- HOLOCRON.md "How VoidForge and Claude Code Work Together" section — explains the native sub-agent dispatch model and coexistence with Anthropic's built-in `/review` / `/security-review` skills.
+
+### Changed
+- **Silver Surfer → Haiku** (ADR-054). Highest-frequency agent, classification task, ~5× cost reduction.
+- **Oracle, Wong, Black Canary, Bilbo → Haiku** (ADR-054). Mechanical scan / presence-check agents.
+- **Silver Surfer Gate deduplicated** (ADR-052). 14 command files lose their duplicate 15-line gate prose; canonical version lives in CLAUDE.md. Each command file now has a one-line reference.
+- **CLAUDE.md + packages/methodology/CLAUDE.md Gate section rewritten** (ADR-048 refinement). Prescriptive/repetitive "NO EXCEPTIONS" rhetoric replaced with declarative 4-step procedure + scope-of-override carve-out. Word count down ~50%.
+- **SUB_AGENTS.md concurrency rules rewritten** (ADR-059). "Max 3 concurrent" cap replaced with "fan out the full roster in parallel for read-only analysis; batch only on write-collision" — aligned with CLAUDE.md gate directive.
+- **`WandaSeldon` canonical name** (ADR-055). Display prose may still say "Wanda Seldon"; machine identifier is `WandaSeldon` (no space) to prevent `Wanda` prefix collision.
+- **HOLOCRON.md flag table refreshed** — removed retired `--blitz`, `--muster`, `--infinity` as live; added `--surfer`, `--light`, `--solo`, `--interactive`, `--focus`. Corrected "26 commands" to "28 commands".
+- **HOLOCRON.md install commands** — `npx thevoidforge` → `npx voidforge`.
+- **CLAUDE.md Project section** wrapped in `<!-- REMOVE-FOR-NPM-PUBLISH -->` sed markers (ADR-058). `prepack.sh` now strips template placeholders before publishing `@voidforge/methodology`.
+
+### Fixed
+- **Stale fallback model ID**: `claude-sonnet-4-6` → `claude-sonnet-4-7` across 6 locations (runtime fallback in `anthropic.ts`, matching test assertions, `FAILURE_MODES.md`, `TECH_DEBT.md` note, `AI_INTELLIGENCE.md` PRD example).
+- **daemon-process.ts pattern cleanup**: removed `configurePaths()` and `checkGlobalDaemon()` from the pattern template (they live in runtime `daemon-core.ts`, never in the pattern). Fixes the "phantom export" mismatch documented in vault-2026-04-09-s3.
+
+### Infrastructure
+- **`npm test` now runs agent-reference validator first** (`pretest` hook). Broken `subagent_type:` references fail CI before tests run.
+
+---
+
 ## [23.8.12] - 2026-04-12
 
 ### Fixed

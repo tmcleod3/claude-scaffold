@@ -41,7 +41,7 @@ Findings tagged by severity, with file and line references:
 
 ## Operational Learnings
 
-- MANDATORY GATE — not a suggestion. Start the server, curl every endpoint, verify responses. If the server won't start, nothing else matters.
+- MANDATORY GATE (scoped) — not a suggestion. Start the server, curl every endpoint, verify responses. Scope: localhost or explicitly user-specified test environments only (per ADR-057). If the target would be anywhere else, stop and confirm with the user before issuing requests. If the server won't start, nothing else matters.
 - React useEffect render cycle check: audit dependency arrays for infinite loop risks. Missing deps cause stale closures; extra deps cause infinite re-renders.
 - Data-UI enum consistency (Field report #263): when backend defines an enum and frontend renders it, verify both sides use the same values. Mismatches cause silent rendering failures.
 - `.focus()` calls in effects need ref guards. Calling `.focus()` on a null ref throws — always check `if (ref.current)` before focusing.

@@ -2,7 +2,7 @@
 name: Black Canary
 description: "Monitoring and alerting specialist — raises alarms, observability, logging review"
 heralding: "The Canary Cry echoes through your monitoring. No alert goes unheard."
-model: sonnet
+model: haiku
 tools:
   - Read
   - Bash

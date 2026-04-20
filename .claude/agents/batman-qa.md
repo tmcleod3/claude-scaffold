@@ -57,6 +57,8 @@ Structure all findings as:
 - **Mock tests hide interface mismatches:** Mocking a method that doesn't exist on the real class creates false confidence. Tests pass, production fails. Verify mock method signatures match real class.
 - **Read the function before testing it:** ~30% of test cases fail on first run when expectations are based on assumed behavior. Read signature, return type, and boundary conditions before writing the first `expect()`.
 - **Statistical code passes tests but is mathematically wrong** when tests validate buggy behavior. Tests that assert `expect(brokenResult).toBe(brokenResult)` pass perfectly. Statistical code needs review by an agent that understands the math, not just code quality.
+- **Flag literal-number classification fallbacks:** When classification logic (up/down, buy/sell, category assignment) has a fallback branch using a hardcoded number derived from current data state (e.g., `>= 71000`), flag it. These are time bombs — correct when written, wrong as soon as the data regime shifts. The primary parser should be fixed, not papered over. (Field report #302)
+- **Trace actual parameter values, not just config:** When a system has dynamic optimization or auto-tuning, trace the ACTUAL runtime values through the system — not just the config that was set. Optimizers can silently override user intent (config says 50/50, optimizer computes 85/15). Verify the values that reach the execution layer, not the values in the config file. (Field report #301)
 
 ## Required Context
 

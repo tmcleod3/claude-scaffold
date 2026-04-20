@@ -7,8 +7,10 @@
   },
   "workspaces": ["packages/*"],
   "scripts": {
-    "typecheck": "npm run typecheck -w voidforge",
-    "test": "npm run test -w voidforge",
-    "test:e2e": "npm run test:e2e -w voidforge"
+    "typecheck": "npm run typecheck -w thevoidforge",
+    "test": "npm run test -w thevoidforge",
+    "test:e2e": "npm run test:e2e -w thevoidforge",
+    "validate:agents": "bash scripts/validate-agent-refs.sh",
+    "pretest": "bash scripts/validate-agent-refs.sh"
   }
 }

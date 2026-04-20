@@ -69,7 +69,7 @@ describe('resolveBestModel', () => {
     expect(model).toContain('claude-sonnet');
   });
 
-  it('falls back to claude-sonnet-4-6 on API error', async () => {
+  it('falls back to claude-sonnet-4-7 on API error', async () => {
     mockRequest.mockImplementation((_opts: unknown, _cb: unknown) => {
       const req = new EventEmitter();
       (req as unknown as { end: () => void; destroy: () => void }).end = vi.fn();
@@ -79,7 +79,7 @@ describe('resolveBestModel', () => {
     });
 
     const model = await resolveBestModel('test-key');
-    expect(model).toBe('claude-sonnet-4-6');
+    expect(model).toBe('claude-sonnet-4-7');
   });
 
   it('caches model after first resolution', async () => {

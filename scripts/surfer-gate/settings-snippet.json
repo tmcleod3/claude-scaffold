@@ -1,0 +1,31 @@
+{
+  "__comment": "Copy ONE of these entries into .claude/settings.json under hooks.PreToolUse. Start with the 'validation' entry (Phase 5a). After the log confirms hooks fire correctly, replace with the 'production' entry (Phase 5b).",
+
+  "validation_phase_5a": {
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/surfer-gate/validate.sh"
+          }
+        ]
+      }
+    ]
+  },
+
+  "production_phase_5b": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/surfer-gate/check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

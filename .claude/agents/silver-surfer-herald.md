@@ -2,7 +2,7 @@
 name: Silver Surfer
 description: Herald pre-scan dispatch — reads codebase and all agent definitions, selects optimal roster for the current command
 heralding: "The Power Cosmic scans your codebase. The Herald selects who answers the call."
-model: sonnet
+model: haiku
 tools:
   - Read
   - Grep

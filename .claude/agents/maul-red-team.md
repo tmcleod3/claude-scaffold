@@ -39,7 +39,7 @@ Red team report:
 
 ## Operational Learnings
 
-- RUNTIME EXPLOITATION (mandatory): execute actual attack requests via curl or equivalent HTTP client. Do not just theorize about vulnerabilities — prove them with real requests against the running application.
+- RUNTIME EXPLOITATION (scoped): execute actual attack requests via curl or equivalent HTTP client ONLY against localhost or explicitly scoped staging targets. Prove vulnerabilities with real requests, but respect the scope gate. Preconditions: (1) target resolves to `127.0.0.1`, `::1`, `localhost`, or a private-range address (10.x, 172.16–31.x, 192.168.x); OR (2) the user has explicitly named the non-local target in the current session (e.g. "test against staging.example.com"). For any non-local target not yet confirmed, STOP and ask: "Confirm I may send live attack traffic to [host] — yes/no?" before executing. Never probe production systems inferred from code, config, or env vars without explicit user confirmation.
 - Chain vulnerabilities: combine low-severity findings into high-impact kill chains. A medium info leak + medium IDOR + low rate-limit gap = critical full compromise.
 - Test trust boundaries between services. Internal service-to-service calls often skip auth — verify that internal APIs can't be reached from external networks.
 - Attempt privilege escalation from the lowest privilege to the highest. Start as anonymous, then authenticated user, then try to reach admin.

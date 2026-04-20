@@ -12,7 +12,10 @@ REPO_ROOT="$(cd "$PKG_DIR/../.." && pwd)"
 echo "Prepack: copying methodology files from $REPO_ROOT into $PKG_DIR"
 
 # Copy root-level methodology files
-cp "$REPO_ROOT/CLAUDE.md" "$PKG_DIR/CLAUDE.md"
+# CLAUDE.md is filtered to strip the template Project section (ADR-058) —
+# the section is for monorepo root only; published consumers fill it after init.
+sed '/<!-- REMOVE-FOR-NPM-PUBLISH/,/END-REMOVE-FOR-NPM-PUBLISH -->/d' \
+    "$REPO_ROOT/CLAUDE.md" > "$PKG_DIR/CLAUDE.md"
 cp "$REPO_ROOT/HOLOCRON.md" "$PKG_DIR/HOLOCRON.md"
 cp "$REPO_ROOT/VERSION.md" "$PKG_DIR/VERSION.md"
 cp "$REPO_ROOT/CHANGELOG.md" "$PKG_DIR/CHANGELOG.md"

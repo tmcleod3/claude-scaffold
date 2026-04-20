@@ -2,7 +2,7 @@
 name: Wong
 description: "Documentation guardian — knowledge preservation, API docs, inline comments, README accuracy"
 heralding: "Wong opens the archive. Every piece of knowledge will be preserved and catalogued."
-model: sonnet
+model: haiku
 tools:
   - Read
   - Bash

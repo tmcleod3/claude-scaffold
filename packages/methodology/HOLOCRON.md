@@ -24,7 +24,7 @@
 
 ### What VoidForge Is
 
-VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of 264 AI agents across 9 fictional universes builds your application through a 13-phase protocol.
+VoidForge is a **methodology framework** for building full-stack applications with Claude Code. It's not a code template — it's a *process* template. Drop in a Product Requirements Document, and a named team of AI agents across 9 fictional universes builds your application through a 13-phase protocol.
 
 **From nothing, everything.**
 
@@ -54,7 +54,7 @@ See `/docs/templates/PRD-TEMPLATE.md` for the frontmatter format and field refer
 The methodology without the tooling. CLAUDE.md, all 28 slash commands, all agent protocols, all code patterns. No wizard UI, no npm runtime dependencies.
 
 ```bash
-npx thevoidforge init --headless my-app
+npx voidforge init --headless my-app
 cd my-app
 # Write your PRD in docs/PRD.md
 # Open in Claude Code
@@ -68,7 +68,7 @@ The lightest possible version. CLAUDE.md, all 28 slash commands, full agent prot
 
 ```bash
 # Drop into an existing project
-npx thevoidforge init --headless --target your-project/
+npx voidforge init --headless --target your-project/
 ```
 
 Or manually: copy CLAUDE.md, .claude/, and docs/ from the npm package into your project.
@@ -79,14 +79,14 @@ Or manually: copy CLAUDE.md, .claude/, and docs/ from the npm package into your 
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **28 slash commands** — `/prd`, `/blueprint`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/vault`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
+- **28 slash commands** — `/prd`, `/blueprint`, `/build`, `/qa`, `/test`, `/sentinel` (alias: `/security`), `/ux`, `/engage` (alias: `/review`), `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/vault`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
-- **264 named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation — each materialized as a subagent definition in `.claude/agents/`
+- **Named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation — each materialized as a subagent definition in `.claude/agents/`
 - **35 code patterns** — Reference implementations with framework adaptations (including E2E testing)
 - **No Stubs Doctrine** — Zero placeholder code. Every file does what it claims. Enforced across all method docs.
 - **E2E browser testing** — Playwright + axe-core. Agents take screenshots, capture console errors, and interact with running applications.
-- **Flag taxonomy** — Standardized flags across all commands: `--fast`, `--blitz`, `--muster`, `--plan`, `--dry-run`, `--resume`
+- **Flag taxonomy** — Standardized flags across all commands: `--fast`, `--light`, `--solo`, `--interactive`, `--surfer`, `--plan`, `--dry-run`, `--resume`, `--status`, `--focus`
 - **Meta-Workflow** — How VoidForge uses itself to develop itself (`docs/META_WORKFLOW.md`)
 - **This Holocron** — The guide you're reading now
 
@@ -304,7 +304,7 @@ VoidForge uses 18 lead agents across 9 fictional universes, each commanding a ro
 | Forge Sync | **Bombadil** | Lord of the Rings | VoidForge self-update from upstream | Ancient, joyful, sings while he works, tends the forge itself |
 | Worm Rider | **Chani** | Dune | Telegram bridge, Gom Jabbar, sandworm relay | Desert-born, fierce, speaks across any distance |
 | The Initiative | **Fury** | Marvel | Full pipeline orchestration, crossfire, council | Assembles the team. Doesn't leave until the mission is complete. |
-| The Gauntlet | **Thanos** | Marvel | Comprehensive 5-round review, 30+ agents | "I am inevitable." Tests everything. The project survives or it doesn't. |
+| The Gauntlet | **Thanos** | Marvel | Comprehensive 5-round review, agents across all domains | "I am inevitable." Tests everything. The project survives or it doesn't. |
 | Campaign Command | **Sisko** | Star Trek | PRD-to-product campaign, mission sequencing | The builder, the prophet, the war commander. Reads the plan, picks the next fight. |
 | Forge Artist | **Celebrimbor** | Lord of the Rings | AI image generation from PRD descriptions | Hand of Silver. Greatest elven smith. Forges visual assets from prose. |
 | Field Medic | **Bashir** | Star Trek | Post-mortem analysis, upstream feedback | Genetically enhanced diagnostician. Traces root causes, sends field reports to Starfleet. |
@@ -366,7 +366,7 @@ Each lead has a deep bench. Here are some standouts:
 - **Idaho** keeps the connection alive — the eternal ghola who always returns
 - **Thufir** parses every signal — Mentat precision, a million calculations per second
 
-The full roster of 264 characters lives in `docs/NAMING_REGISTRY.md`. Each agent is materialized as a subagent definition in `.claude/agents/` with model tiering (Opus leads, Sonnet specialists, Haiku scouts) and tool restrictions (Builder, Reviewer, Scout, Adversarial). See `docs/AGENT_CLASSIFICATION.md` for the full manifest.
+The full roster of characters lives in `docs/NAMING_REGISTRY.md`. Each agent is materialized as a subagent definition in `.claude/agents/` with model tiering (Opus leads, Sonnet specialists, Haiku scouts) and tool restrictions (Builder, Reviewer, Scout, Adversarial). See `docs/AGENT_CLASSIFICATION.md` for the full manifest.
 
 ### How Handoffs Work
 
@@ -424,7 +424,7 @@ Double-pass review: Pass 1 runs parallel analysis — Oracle scans the system, R
 
 Analyzes coverage gaps (Oracle + Alfred in parallel), reviews test architecture (Nightwing), writes missing unit/integration/component tests in priority order, then Red Hood writes adversarial tests for boundary values and edge cases.
 
-#### `/security` — Kenobi's Audit
+#### `/sentinel` — Kenobi's Audit (alias: `/security`)
 **When:** Before any deploy. After adding auth, payments, or external integrations.
 
 Phase 1 runs parallel scans (Leia: secrets, Chewie: dependencies, Rex: infrastructure, Maul: red-team). Phase 2 runs sequential deep audits (auth, input, access control, data). Critical/high findings are fixed. Phase 3: Maul re-probes all remediations to verify fixes hold.
@@ -434,7 +434,7 @@ Phase 1 runs parallel scans (Leia: secrets, Chewie: dependencies, Rex: infrastru
 
 Adversarial UX/UI review with double-pass: Pass 1 walks every user flow with 7 agents in parallel (UX, visual, a11y, copy, code, perf, edge cases). Fixes are applied. Pass 2: Samwise re-audits a11y on modified components, Gandalf re-checks edge cases. Ensures fixes don't break other properties.
 
-#### `/review` — Picard's Code Review
+#### `/engage` — Picard's Code Review (alias: `/review`)
 **When:** After writing code, before committing. For pattern compliance and quality.
 
 Picard-affiliated (Star Trek). Parallel analysis: Spock checks pattern compliance against `/docs/patterns/`, Seven reviews code quality (complexity, dead code, duplication), Data reviews maintainability (abstractions, coupling, boundaries). Re-verification pass after fixes. Findings categorized as Must Fix, Should Fix, Consider, or Nit.
@@ -457,7 +457,7 @@ Full architecture review with parallel analysis: Spock (schema) + Uhura (integra
 #### `/void` — Bombadil's Forge Sync
 **When:** You want to update your VoidForge methodology to the latest version.
 
-Old Tom Bombadil tends the forge itself. He checks for the latest VoidForge methodology (via `npx thevoidforge update` or git fetch as fallback), compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). If you're already on the latest, Tom tells you so and goes back to singing.
+Old Tom Bombadil tends the forge itself. He checks for the latest VoidForge methodology (via `npx voidforge update` or git fetch as fallback), compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). If you're already on the latest, Tom tells you so and goes back to singing.
 
 #### `/thumper` — Chani's Worm Rider
 **When:** You want to control Claude Code from your phone via Telegram.
@@ -479,7 +479,7 @@ Setup: `/thumper setup` (one-time). Control: `/thumper on` / `/thumper off` / `/
 
 Fury assembles every agent in VoidForge and runs the complete pipeline: architecture review, full build, three rounds of code review, UX pass, two rounds of security audit, infrastructure review, QA, and test suite — then the Crossfire (adversarial agents from four universes attack each other's work) and the Council (domain specialists verify nobody broke anyone else's fixes).
 
-13 phases, all 9 universes, 40+ agents. Checkpoints after every phase so you can resume across sessions with `/assemble --resume`. Skip the build with `--skip-build` to re-run reviews on existing code. Skip the Crossfire and Council with `--fast` for lower-stakes projects.
+Multi-phase protocol, all 9 universes, agents across all domains. Checkpoints after every phase so you can resume across sessions with `/assemble --resume`. Skip the build with `--skip-build` to re-run reviews on existing code. Skip the Crossfire and Council with `--fast` for lower-stakes projects.
 
 This is the nuclear option. Use it when quality is non-negotiable.
 
@@ -599,17 +599,33 @@ Flags: `--seal` (auto-confirm), `--open` (read most recent vault), `--list` (lis
 
 ### Flag System
 
-VoidForge flags are standardized across all 26 commands. Same flag = same meaning everywhere.
+VoidForge flags are standardized across all 28 commands. Same flag = same meaning everywhere.
 
-**Tier 1 — Universal:** `--resume` (resume from state), `--plan` (plan without executing), `--fast` (reduced review passes), `--dry-run` (preview without doing), `--status` (show state), `--blitz` (autonomous, no pauses)
+**Tier 1 — Universal:** `--resume` (resume from state), `--plan` (plan without executing), `--fast` (reduced review passes), `--dry-run` (preview without doing), `--status` (show state), `--focus "topic"` (bias Herald selection toward topic).
 
-**Tier 2 — Scope:** `--security-only`, `--ux-only`, `--qa-only` (focus on one domain)
+**Tier 1 — Override:** `--surfer` (force-launch the Silver Surfer and deploy full roster — manual override for the automatic gate).
 
-**Tier 3 — Intensity:**
-- `--fast` — fewer agents, still comprehensive
-- *(default)* — standard deployment
-- `--muster` — every viable agent across all 9 universes, 3 waves (Vanguard → Main Force → Adversarial). The beacons are lit.
-- `--infinity` — 10 rounds, ~80 agent launches (Gauntlet only)
+**Tier 2 — Scope:** `--security-only`, `--ux-only`, `--qa-only` (focus on one domain).
+
+**Tier 3 — Opt-Out (ADR-043: Max by Default):**
+Default is maximum quality: autonomous execution + full agent roster + all review passes.
+- *(default)* — full roster, all passes, autonomous
+- `--fast` — fewer agents/rounds, still comprehensive
+- `--light` — standard agents only; no cross-domain spot-checks
+- `--interactive` — pause for human confirmation between missions
+- `--solo` — lead agent only, no sub-agents (quick checks)
+
+**Retired flags (accepted silently as no-ops for backward compatibility):** `--blitz`, `--muster`, `--infinity`.
+
+### How VoidForge and Claude Code Work Together
+
+VoidForge agents are not abstractions or personas — they are native Claude Code sub-agent definitions. Every named character (Batman, Galadriel, Picard, etc.) exists as a file in `.claude/agents/` that Claude Code can launch as a subprocess via the `Agent` tool.
+
+- **Parallelism is real.** When the Silver Surfer returns a roster, Claude Code launches N `Agent` tool calls in parallel. Each runs in its own context with its own tool restrictions and model tier.
+- **Isolation is enforced.** Each agent's `.claude/agents/{name}.md` declares which tools it can call. Reviewers cannot write files; builders can.
+- **Model tiering is real.** Opus leads orchestrate. Sonnet specialists execute. Haiku scouts (the Silver Surfer) pre-scan cheaply.
+- **Native Claude Code coexistence.** Claude Code ships native `/review` and `/security-review` skills. VoidForge's `/engage` (Picard) and `/sentinel` (Kenobi) are the richer, multi-agent equivalents. The old names `/review` and `/security` remain as permanent aliases. See ADR-050 for the full coexistence policy.
+- **The Silver Surfer gate (ADR-048, ADR-051) is structural.** A PreToolUse hook enforces the gate before any gated command fires — the prose in CLAUDE.md is a backstop, not the primary mechanism.
 
 ---
 
@@ -798,7 +814,7 @@ If Phase 12 or a deploy script fails:
 | Deploy script hangs | Check SSH connectivity, verify key permissions (0600) |
 | Test runner not found | Phase 1 should set it up — re-run scaffold if missing |
 | Context fills mid-phase | Checkpoint to journal, new session, continue |
-| npm install fails on Windows | node-pty needs C++ tools. Use `--ignore-scripts` or `npx thevoidforge init --headless` |
+| npm install fails on Windows | node-pty needs C++ tools. Use `--ignore-scripts` or `npx voidforge init --headless` |
 
 ---
 

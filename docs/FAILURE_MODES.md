@@ -58,7 +58,7 @@
 | Timeout (>120s) | Error shown to user | Configurable timeout |
 | Stream truncated (network loss) | **Gap:** Partial PRD accepted without warning | Need incomplete detection |
 | API rate limited | Error shown with API message | User retries |
-| Model unavailable | Fallback to `claude-sonnet-4-6` | Dynamic model resolution |
+| Model unavailable | Fallback to `claude-sonnet-4-7` | Dynamic model resolution |
 
 ### Project Creation
 

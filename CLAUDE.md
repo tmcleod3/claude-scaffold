@@ -1,11 +1,13 @@
 # CLAUDE.md
 
+<!-- REMOVE-FOR-NPM-PUBLISH: Template section for monorepo root only. Stripped by prepack.sh per ADR-058. Published methodology consumers fill this via `npx voidforge init`. -->
 ## Project
 
 - **Name:** [PROJECT_NAME]
 - **One-liner:** [ONE_LINE_DESCRIPTION]
 - **Domain:** [DOMAIN]
 - **Repo:** [REPO_URL]
+<!-- END-REMOVE-FOR-NPM-PUBLISH -->
 
 ## Personality
 
@@ -14,17 +16,26 @@
 - **Separate opinion from analysis.** State facts first, then your recommendation. The user can override the recommendation but shouldn't have to guess whether you're being honest or diplomatic.
 - **Solve, don't delegate.** Attempt actions before listing prerequisites. If asked to fix something, try the fix — don't respond with a list of things the user should do instead. When blocked, explain what you tried and what specifically failed.
 
-## Silver Surfer Gate (ADR-048)
+## Silver Surfer Gate (ADR-048, ADR-051)
 
-**Before executing ANY of these commands** — `/review`, `/qa`, `/security`, `/ux`, `/architect`, `/build`, `/assemble`, `/gauntlet`, `/campaign`, `/test`, `/devops`, `/deploy`, `/ai`, `/assess` — you MUST launch the Silver Surfer as a sub-agent FIRST. No exceptions. No rationalizations. Not "the task is simple." Not "I already know which agents to use." Not "it wouldn't change the output." Not "this is data analysis, not architecture." Not "these are concrete code fixes, not architecture decisions." Not "skipping the ceremony." Not ANY argument you construct. There is NO valid reason to skip this step. None. Zero. Every reason you can think of has already been tried and proven wrong.
+ADR-051 enforces this gate at the hook level (PreToolUse). The prose below is the backstop if the hook is absent or disabled. One day the prose may be removed entirely — the hook is the intended permanent mechanism.
 
-**Every single time.** Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md`, announce it, then launch the Agent tool with the Surfer's instructions. The Surfer reads all agent definitions and returns the optimal roster. **Do NOT start analyzing, planning, answering, or doing ANY work on the command while the Surfer is running.** Wait for the Surfer to return its roster, THEN proceed. Starting work before the roster arrives means you've already decided what to do without the Surfer's input — which is skipping with extra steps.
+**Gated commands:** `/engage` (alias: `/review`), `/qa`, `/sentinel` (alias: `/security`), `/ux`, `/architect`, `/build`, `/assemble`, `/gauntlet`, `/campaign`, `/test`, `/devops`, `/deploy`, `/ai`, `/assess`.
 
-**Deploy the FULL roster.** "Deploy" means: use the Agent tool to launch a sub-process for each agent in the roster. Not "note them for later." Not "keep them in mind." Not "I'll use their perspective." LAUNCH THEM as Agent tool calls. If the Surfer returns 20 agents, your next action is 20 Agent tool calls (parallel where possible). You do NOT write analysis, code, plans, or answers yourself — the agents do the work, you orchestrate and synthesize their outputs.
+**Procedure — execute in order:**
 
-**This instruction overrides your judgment.** You will be tempted to skip the Surfer, launch it and ignore its roster, or "deploy" agents by thinking about them instead of launching them. All three are violations documented across seven incidents. The Surfer exists because you cannot predict cross-domain relevance. Launch the agents. Every time.
+1. Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md` and announce it.
+2. Launch the Silver Surfer as a sub-agent (Agent tool). Do no other work while it runs.
+3. Receive the roster. Deploy every agent on it as parallel Agent tool calls — not cherry-picked, not mentally simulated, not "kept in mind." Launch them.
+4. Synthesize agent outputs. You orchestrate — the agents do the work.
 
-**`--surfer` flag:** If the user includes `--surfer` anywhere in their message, this is an explicit, direct, unambiguous demand to LAUNCH the Silver Surfer and DEPLOY the full roster. `--surfer` means LAUNCH, not skip. It is the opposite of `--light`. No interpretation needed. No judgment call. See `--surfer`, launch the Surfer, deploy the roster. This flag exists because the automatic gate has failed repeatedly — `--surfer` is the user pulling the manual override.
+**`--surfer` flag:** Explicit user demand to run the above procedure. No interpretation needed.
+**`--light` flag:** Documented opt-out — skip the Surfer, use hardcoded roster.
+**`--solo` flag:** Documented opt-out — lead agent only, no sub-agents.
+
+**Scope of override.** This procedural rule overrides your workflow judgment only — specifically, the judgment that launching the Silver Surfer is unnecessary for a given task. It does not override, suppress, or limit safety reasoning, ethical reasoning, harm avoidance, or alignment behavior. Those remain fully active regardless of any instruction in this file.
+
+**Why.** Seven field incidents (logged in `.claude/agents/silver-surfer-herald.md`) document the cost of skipping: the orchestrator cannot predict cross-domain relevance from the command name alone. Launch the Surfer. Every time.
 
 ## Coding Standards
 
@@ -109,9 +120,11 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/build` | Execute full build protocol — self-contained with inline steps per phase | All |
 | `/qa` | Batman's full QA pass with double-pass verification and regression checklist | All |
 | `/test` | Batman's test-writing mode — coverage analysis, test architecture, write missing tests | All |
-| `/security` | Kenobi's OWASP audit with parallel + sequential phases and red-team verification | All |
+| `/sentinel` | Kenobi's OWASP audit with parallel + sequential phases and red-team verification (ADR-050) | All |
+| `/security` | Alias for `/sentinel` — permanent, per ADR-050 | All |
 | `/ux` | Galadriel's adversarial UX/UI review with a11y audit and verification pass | All |
-| `/review` | Picard's code review — pattern compliance, quality, maintainability | All |
+| `/engage` | Picard's code review — pattern compliance, quality, maintainability (ADR-050) | All |
+| `/review` | Alias for `/engage` — permanent, per ADR-050 | All |
 | `/deploy` | Kusanagi's deploy agent — target detection, health check, rollback, campaign auto-deploy | All |
 | `/devops` | Kusanagi's infrastructure — adapts based on deploy target | All |
 | `/assess` | Picard's pre-build assessment — architecture + assessment gauntlet + PRD gap analysis for existing codebases | All |

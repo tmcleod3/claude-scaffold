@@ -327,13 +327,13 @@ CONSTRAINTS: [list]
 | Architecture / Council | Position Statement: assessment, concerns, sign-off |
 | Build agents | Build Report: files created/modified, tests added, decisions made |
 
-### Concurrency Rules
+### Concurrency Rules (ADR-059)
 
-- **Max 3 concurrent agents** (hard cap — prevents context thrashing)
-- Batch into waves when >3 agents needed
-- **No two concurrent agents may write to the same file** — partition by domain or concern
-- Read-only agents can run in parallel without restriction
-- Partition strategies: by domain (frontend/backend), by concern (security/UX), or read-only
+- **Fan out the full roster in parallel for read-only analysis.** Opus 4.7's 1M context window handles 20+ concurrent findings tables without thrashing. Field report #270 confirmed 15+ parallel agents at 15-25% context usage.
+- **No two concurrent agents may write to the same file** — partition by domain/concern, or serialize writes.
+- **Fix/build agents:** batch into waves only when writes overlap. Independent files = parallel.
+- **Wait for ALL parallel agents before synthesizing** (field report #300).
+- Partition strategies: by domain (frontend/backend), by concern (security/UX), or read-only vs. write.
 
 ### Context Passing Between Phases
 

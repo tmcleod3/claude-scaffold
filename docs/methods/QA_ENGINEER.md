@@ -126,6 +126,9 @@ When the backend (Python, Go, Rust) and frontend (JavaScript) use different type
 
 When a function delegates to another function (e.g., `handleRequest` calls `processItem` which calls `applyTransform`), trace the full chain. Verify that configuration set at the top of the chain actually reaches the bottom. Common failure: `json.dumps(default=str)` computed but a framework's `JSONResponse` used instead, silently dropping the custom serializer. For every sweep/batch operation, verify the per-item function receives the same configuration as the orchestrating function. (Field report #57)
 
+### Dynamic Optimizer Override Detection
+When a system has dynamic optimization (auto-tuning, parameter sweeps, adaptive allocation), verify that the optimizer's ACTUAL output matches the operator's CONFIG intent. Common failure: `enableDynamicSplit: true` causes an optimizer to choose 85/15 allocation while config specifies 50/50 — the optimizer's EV formula silently overrides the user's intent with no log entry. For every dynamically computed parameter: (1) log the computed value alongside the config value, (2) assert or warn when deviation exceeds a threshold (e.g., >20%), (3) verify downstream consumers use the computed value, not the stale config. If the optimizer is allowed to override config, the override must be visible — not silent. (Field report #301: `findOptimalSplit` chose 85/15 PM/HL while config said 50/50. HL had $15 margin instead of $50. Hours of analysis based on incorrect sizing.)
+
 **Client-Side Reliability:** When a client flow sends multiple network requests (beacon pairs, multi-step forms, chained API calls), test: "What happens when request 1 of N succeeds but request 2 fails?" Verify the system doesn't reach an inconsistent state (e.g., record created but counter not incremented, payment charged but order not confirmed). Test with network throttling and selective request blocking. (Field report #46: dual-beacon tracking — sendBeacon succeeded but fetch failed due to CORS, creating records without incrementing view counts.)
 
 **Robots.txt & Domain Reference Audit:** Verify robots.txt sitemap URL and hardcoded domain references match production hostname. Grep for hardcoded domains across all config files, sitemap generators, canonical tags, and OG meta tags. A staging domain in robots.txt blocks production indexing; a wrong sitemap URL means search engines never find your pages. (Triage fix from field report batch #149-#153.)
@@ -157,6 +160,14 @@ After removing any import statement, verify the symbol is not consumed indirectl
 
 ### Degraded Dependency Testing
 For each external data source (APIs, databases, message queues), test what happens when it returns empty, broken, or partial data. Monitoring and reconciliation systems should degrade gracefully (skip check + warn) not catastrophically (halt all operations). A reconciler that sees "0 local positions" when the parser is broken should not declare MAJOR DIVERGENCE and halt trading. (Field report #152)
+
+### Stale Fallback Detection
+When reviewing code that classifies external data (API responses, market data, event categorization), check for:
+- **Hardcoded thresholds** that assume current data ranges (e.g., `level >= 71000 ? 'up' : 'down'` — correct when BTC was $71K, wrong at any other price). Grep for literal numbers in ternaries and switch cases within classification functions.
+- **Fallback branches** that fire when the primary parser fails — are the fallback values validated? A fallback that returns a plausible-but-wrong classification is worse than throwing, because it produces silent data corruption instead of a visible error.
+- **Classification logic written for a specific data regime** — does the code handle the full range of input values, or was it written for "today's data" and will break when the domain shifts?
+
+**Detection pattern:** If the primary classification method (regex, field lookup, API response parsing) has a catch-all fallback that uses a literal number or hardcoded string, flag it. The primary parser should be fixed, not papered over with a fallback that will rot. (Field report #302: Polymarket barrier classifier fell through to `level >= 71000 ? 'up' : 'down'` on 100% of inputs because the primary parser never matched — 3 of 4 historical datasets misclassified, hiding a $699 trade.)
 
 ### Tier Enforcement — UI Components
 After checking API routes for tier gating, ALSO search `.tsx` and `.jsx` files for hardcoded tier comparisons (`=== 'PRO'`, `=== 'ENTERPRISE'`, `includes('SCALE')`). These must include ALL paid tiers or use the centralized tier config. Tier drift in UI components is invisible to API-level audits — a paying customer can be blocked from features they paid for by a stale comparison in a settings page.

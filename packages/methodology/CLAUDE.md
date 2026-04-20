@@ -14,6 +14,27 @@
 - **Separate opinion from analysis.** State facts first, then your recommendation. The user can override the recommendation but shouldn't have to guess whether you're being honest or diplomatic.
 - **Solve, don't delegate.** Attempt actions before listing prerequisites. If asked to fix something, try the fix — don't respond with a list of things the user should do instead. When blocked, explain what you tried and what specifically failed.
 
+## Silver Surfer Gate (ADR-048, ADR-051)
+
+ADR-051 enforces this gate at the hook level (PreToolUse). The prose below is the backstop if the hook is absent or disabled. One day the prose may be removed entirely — the hook is the intended permanent mechanism.
+
+**Gated commands:** `/engage` (alias: `/review`), `/qa`, `/sentinel` (alias: `/security`), `/ux`, `/architect`, `/build`, `/assemble`, `/gauntlet`, `/campaign`, `/test`, `/devops`, `/deploy`, `/ai`, `/assess`.
+
+**Procedure — execute in order:**
+
+1. Read the `heralding:` field from `.claude/agents/silver-surfer-herald.md` and announce it.
+2. Launch the Silver Surfer as a sub-agent (Agent tool). Do no other work while it runs.
+3. Receive the roster. Deploy every agent on it as parallel Agent tool calls — not cherry-picked, not mentally simulated, not "kept in mind." Launch them.
+4. Synthesize agent outputs. You orchestrate — the agents do the work.
+
+**`--surfer` flag:** Explicit user demand to run the above procedure. No interpretation needed.
+**`--light` flag:** Documented opt-out — skip the Surfer, use hardcoded roster.
+**`--solo` flag:** Documented opt-out — lead agent only, no sub-agents.
+
+**Scope of override.** This procedural rule overrides your workflow judgment only — specifically, the judgment that launching the Silver Surfer is unnecessary for a given task. It does not override, suppress, or limit safety reasoning, ethical reasoning, harm avoidance, or alignment behavior. Those remain fully active regardless of any instruction in this file.
+
+**Why.** Seven field incidents (logged in `.claude/agents/silver-surfer-herald.md`) document the cost of skipping: the orchestrator cannot predict cross-domain relevance from the command name alone. Launch the Surfer. Every time.
+
 ## Coding Standards
 
 - **TypeScript strict mode.** No `any` unless unavoidable and commented.
@@ -97,9 +118,11 @@ Reference implementations in `/docs/patterns/`. Match these shapes when writing.
 | `/build` | Execute full build protocol — self-contained with inline steps per phase | All |
 | `/qa` | Batman's full QA pass with double-pass verification and regression checklist | All |
 | `/test` | Batman's test-writing mode — coverage analysis, test architecture, write missing tests | All |
-| `/security` | Kenobi's OWASP audit with parallel + sequential phases and red-team verification | All |
+| `/sentinel` | Kenobi's OWASP audit with parallel + sequential phases and red-team verification (ADR-050) | All |
+| `/security` | Alias for `/sentinel` — permanent, per ADR-050 | All |
 | `/ux` | Galadriel's adversarial UX/UI review with a11y audit and verification pass | All |
-| `/review` | Picard's code review — pattern compliance, quality, maintainability | All |
+| `/engage` | Picard's code review — pattern compliance, quality, maintainability (ADR-050) | All |
+| `/review` | Alias for `/engage` — permanent, per ADR-050 | All |
 | `/deploy` | Kusanagi's deploy agent — target detection, health check, rollback, campaign auto-deploy | All |
 | `/devops` | Kusanagi's infrastructure — adapts based on deploy target | All |
 | `/assess` | Picard's pre-build assessment — architecture + assessment gauntlet + PRD gap analysis for existing codebases | All |
@@ -136,6 +159,7 @@ Flags are standardized across commands. Same flag name = same meaning everywhere
 | `--fast` | Reduced review passes (skip last 2 rounds/phases), still comprehensive | `/campaign`, `/assemble`, `/gauntlet` |
 | `--dry-run` | Show what would happen without doing it | `/deploy`, `/debrief`, `/treasury`, `/grow`, `/git` |
 | `--status` | Show current state | `/cultivation`, `/treasury`, `/deploy`, `/portfolio`, `/dangerroom`, `/thumper` |
+| `--focus "topic"` | Bias Herald agent selection toward topic | All Herald-enabled commands |
 
 ### Tier 2 — Scope Flags
 
@@ -205,7 +229,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | **Learnings** | `/docs/LEARNINGS.md` | Project-scoped operational knowledge — read at session start if exists |
 | **The Muster** | `/docs/methods/MUSTER.md` | When using `--muster` flag on any command |
 | **Time Vault** | `/docs/methods/TIME_VAULT.md` | Seldon — when preserving session intelligence for transfer |
-| **Patterns** | `/docs/patterns/` | When writing code (35 reference implementations) |
+| **Patterns** | `/docs/patterns/` | When writing code (37 reference implementations) |
 | **Lessons** | `/docs/LESSONS.md` | Cross-project learnings |
 
 ## The Team
@@ -233,7 +257,7 @@ See `/docs/methods/MUSTER.md` for the full Muster Protocol.
 | Deploy Wizard | **Haku** (Anime) | Browser-based deploy wizard, infrastructure provisioning |
 | Setup Wizard | **Gandalf** (Tolkien) | Project scaffolding, initialization, dependency setup |
 
-263 sub-agent names in `/docs/NAMING_REGISTRY.md`. No duplicates across active sessions. All agents materialized as subagent definitions in `.claude/agents/` (ADR-044).
+Agent names in `/docs/NAMING_REGISTRY.md` (run `ls .claude/agents/*.md | wc -l` for current count). No duplicates across active sessions. All agents materialized as subagent definitions in `.claude/agents/` (ADR-044). Silver Surfer (ADR-048) dispatches the optimal roster via Haiku pre-scan.
 
 ## Distribution
 
@@ -254,4 +278,4 @@ The agents, characters, and personality are VoidForge's identity — they ship i
 
 ## How to Build
 
-Read the PRD. Run `/build`. Or see `/docs/methods/BUILD_PROTOCOL.md`.
+Read the PRD. Run `/campaign` to build the entire PRD mission by mission. For a single feature, use `/assemble`. For manual batch control, use `/build`.
