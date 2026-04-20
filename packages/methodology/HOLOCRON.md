@@ -86,7 +86,7 @@ Every tier includes:
 - **35 code patterns** — Reference implementations with framework adaptations (including E2E testing)
 - **No Stubs Doctrine** — Zero placeholder code. Every file does what it claims. Enforced across all method docs.
 - **E2E browser testing** — Playwright + axe-core. Agents take screenshots, capture console errors, and interact with running applications.
-- **Flag taxonomy** — Standardized flags across all commands: `--fast`, `--light`, `--solo`, `--interactive`, `--surfer`, `--plan`, `--dry-run`, `--resume`, `--status`, `--focus`
+- **Flag taxonomy** — Standardized flags across all commands: `--fast`, `--blitz`, `--muster`, `--plan`, `--dry-run`, `--resume`
 - **Meta-Workflow** — How VoidForge uses itself to develop itself (`docs/META_WORKFLOW.md`)
 - **This Holocron** — The guide you're reading now
 
@@ -427,6 +427,10 @@ Analyzes coverage gaps (Oracle + Alfred in parallel), reviews test architecture 
 #### `/sentinel` — Kenobi's Audit (alias: `/security`)
 **When:** Before any deploy. After adding auth, payments, or external integrations.
 
+> Renamed from `/security` in v23.8.13 (ADR-050) to avoid collision with Claude Code's native `/security-review` skill. `/security` remains as a permanent alias — both names invoke Kenobi's OWASP audit.
+
+**Hit a gate block?** See `scripts/surfer-gate/README.md` for the enforcement contract, or add `--light` to skip the Silver Surfer pre-scan.
+
 Phase 1 runs parallel scans (Leia: secrets, Chewie: dependencies, Rex: infrastructure, Maul: red-team). Phase 2 runs sequential deep audits (auth, input, access control, data). Critical/high findings are fixed. Phase 3: Maul re-probes all remediations to verify fixes hold.
 
 #### `/ux` — Galadriel's Review
@@ -436,6 +440,8 @@ Adversarial UX/UI review with double-pass: Pass 1 walks every user flow with 7 a
 
 #### `/engage` — Picard's Code Review (alias: `/review`)
 **When:** After writing code, before committing. For pattern compliance and quality.
+
+> Renamed from `/review` in v23.8.13 (ADR-050) to avoid collision with Claude Code's native `/review` skill. `/review` remains as a permanent alias — both names invoke Picard's multi-agent code review.
 
 Picard-affiliated (Star Trek). Parallel analysis: Spock checks pattern compliance against `/docs/patterns/`, Seven reviews code quality (complexity, dead code, duplication), Data reviews maintainability (abstractions, coupling, boundaries). Re-verification pass after fixes. Findings categorized as Must Fix, Should Fix, Consider, or Nit.
 
@@ -599,33 +605,17 @@ Flags: `--seal` (auto-confirm), `--open` (read most recent vault), `--list` (lis
 
 ### Flag System
 
-VoidForge flags are standardized across all 28 commands. Same flag = same meaning everywhere.
+VoidForge flags are standardized across all 26 commands. Same flag = same meaning everywhere.
 
-**Tier 1 — Universal:** `--resume` (resume from state), `--plan` (plan without executing), `--fast` (reduced review passes), `--dry-run` (preview without doing), `--status` (show state), `--focus "topic"` (bias Herald selection toward topic).
+**Tier 1 — Universal:** `--resume` (resume from state), `--plan` (plan without executing), `--fast` (reduced review passes), `--dry-run` (preview without doing), `--status` (show state), `--blitz` (autonomous, no pauses)
 
-**Tier 1 — Override:** `--surfer` (force-launch the Silver Surfer and deploy full roster — manual override for the automatic gate).
+**Tier 2 — Scope:** `--security-only`, `--ux-only`, `--qa-only` (focus on one domain)
 
-**Tier 2 — Scope:** `--security-only`, `--ux-only`, `--qa-only` (focus on one domain).
-
-**Tier 3 — Opt-Out (ADR-043: Max by Default):**
-Default is maximum quality: autonomous execution + full agent roster + all review passes.
-- *(default)* — full roster, all passes, autonomous
-- `--fast` — fewer agents/rounds, still comprehensive
-- `--light` — standard agents only; no cross-domain spot-checks
-- `--interactive` — pause for human confirmation between missions
-- `--solo` — lead agent only, no sub-agents (quick checks)
-
-**Retired flags (accepted silently as no-ops for backward compatibility):** `--blitz`, `--muster`, `--infinity`.
-
-### How VoidForge and Claude Code Work Together
-
-VoidForge agents are not abstractions or personas — they are native Claude Code sub-agent definitions. Every named character (Batman, Galadriel, Picard, etc.) exists as a file in `.claude/agents/` that Claude Code can launch as a subprocess via the `Agent` tool.
-
-- **Parallelism is real.** When the Silver Surfer returns a roster, Claude Code launches N `Agent` tool calls in parallel. Each runs in its own context with its own tool restrictions and model tier.
-- **Isolation is enforced.** Each agent's `.claude/agents/{name}.md` declares which tools it can call. Reviewers cannot write files; builders can.
-- **Model tiering is real.** Opus leads orchestrate. Sonnet specialists execute. Haiku scouts (the Silver Surfer) pre-scan cheaply.
-- **Native Claude Code coexistence.** Claude Code ships native `/review` and `/security-review` skills. VoidForge's `/engage` (Picard) and `/sentinel` (Kenobi) are the richer, multi-agent equivalents. The old names `/review` and `/security` remain as permanent aliases. See ADR-050 for the full coexistence policy.
-- **The Silver Surfer gate (ADR-048, ADR-051) is structural.** A PreToolUse hook enforces the gate before any gated command fires — the prose in CLAUDE.md is a backstop, not the primary mechanism.
+**Tier 3 — Intensity:**
+- `--fast` — fewer agents, still comprehensive
+- *(default)* — standard deployment
+- `--muster` — every viable agent across all 9 universes, 3 waves (Vanguard → Main Force → Adversarial). The beacons are lit.
+- `--infinity` — 10 rounds, ~80 agent launches (Gauntlet only)
 
 ---
 

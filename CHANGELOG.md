@@ -6,6 +6,59 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.8.19] - 2026-04-20
+
+### Gauntlet 41 Victory-pass — Round 1 + condensed Rounds 2-5
+
+Ran full `/gauntlet` (Victory Gauntlet) on v23.8.18. Round 1 Discovery + condensed late-rounds probe. Thanos's verdict on v23.8.19 state: "I am not yet inevitable" — two HIGH findings surfaced Rounds 2-5. Both are doc-level; the gate machinery itself is sound.
+
+### Fixed
+- **REV-001 (HIGH) — `packages/methodology/.claude/commands/` was 5+ versions stale.** Root `.claude/commands/` had ADR-052 one-liner gate references (v23.8.13+), ARGS injection hardening (v23.8.13), hook references (v23.8.14+). The methodology package copies predated all of it. **Resolution:** ran `bash packages/methodology/scripts/prepack.sh` to regenerate. All 14 gated command files in the methodology package now match root.
+- **SCHEMA-001 (HIGH) — ADR-056 documented ghost `roster_json` field** that the code never emitted. Code emits `roster` / `roster_text` / `roster_parsed`. ADR-056 rewritten end-to-end: documents all three shapes (Shape A jq+valid-JSON, Shape B jq+invalid-JSON, Shape C no-jq), adds `roster_parsed` boolean discriminator, includes full cherry-pick `jq` query, explicitly supersedes the prior schema proposal. (Thanos Round 2-5 flagged that BUILD_JOURNAL.md:46 still had `roster_json` too — fixed.)
+- **BE-001 (HIGH) — Schema parity between jq path and fallback path** (`record-roster.sh`). Previous state: jq path emitted either `roster` (object) or `roster_text` (string); fallback path emitted only `roster_text`. Consumers couldn't reliably select. Now: all three paths emit `roster_text` (always present, JSON-string-escaped form of the roster), plus `roster` (nested object, only when jq is available AND input parses as valid JSON), plus `roster_parsed` boolean discriminator. Consumers read `roster_parsed` first, then `.roster` for structured or `.roster_text` for raw.
+- **UX-G1-006 — ROOT `HOLOCRON.md`** still had three `npx thevoidforge` references that v23.8.13's edit had missed (edit only touched the methodology-package copy, which prepack now overwrites from root). Root fixed. Full list: line 57 (methodology-only install), line 71 (minimal install), line 464 (Bombadil update line), line 805 (Windows troubleshooting). Also updated the 28-command list to include `/engage` (alias: `/review`) and `/sentinel` (alias: `/security`) as primary names.
+- **REV-002 — CLAUDE.md gate section header** now cites ADR-048, ADR-051, and **ADR-060**. Was missing ADR-060 (state location) in both root and methodology package copies.
+- **HOLOCRON.md `/sentinel` Arsenal entry** gained a "Hit a gate block? See scripts/surfer-gate/README.md" pointer (partial UX-005 fix).
+- **La Forge failure mode 4 (MEDIUM) — disk-full diagnostic** in `record-roster.sh`. Previous behavior: if the roster write failed silently, check.sh would block all subsequent agents with no clue that a disk-full was responsible. Now: explicit stderr diagnostic, exit 1, directs user to free space or use `--light`/`--solo` bypass. Write also wrapped in `(umask 077; ...)` subshell to harden permissions (Kenobi SEC-004 partial).
+- **Oracle MEDIUM — docs/methods/AI_INTELLIGENCE.md:263** example YAML now has a trailing comment "`# Models used — update to current runtime model`" so the example doesn't read as a canonical pin.
+
+### Release discipline
+- VERSION.md + both package.json files bumped to 23.8.19.
+- CHANGELOG.md has this entry (Thanos caught the earlier omission — Fix Batch 1 had landed in the tree without a release stamp).
+- Root `CLAUDE.md` Gate header updated; methodology package CLAUDE.md mirrored via prepack.
+
+### Still deferred (carried forward — NOT fixed this release)
+
+**Pre-existing package-name inconsistency discovered during Gauntlet 41:**
+- `packages/voidforge/package.json` declares `"name": "thevoidforge"`.
+- `packages/methodology/package.json` declares `"name": "thevoidforge-methodology"`.
+- Root `CLAUDE.md` Distribution section declares canonical names `voidforge` and `@voidforge/methodology`.
+- README + HOLOCRON use `npx voidforge init`.
+
+The stated intent (CLAUDE.md + docs) and the actual published package names diverge. Renaming the published packages is a breaking change that deserves its own ADR (migration path, npm redirect strategy, transitional dual-publish). Documenting here as a known gap; Victory gate does NOT require this fix — user-facing install commands match whichever name they type, but `npx voidforge init` would currently fail against the npm registry because the package is published as `thevoidforge`. Flag for next minor release.
+
+**Carried from Gauntlet 40b + 41:**
+- AP-4 Surfer spoofing (architectural — requires cryptographic attestation, out of scope)
+- UX-G1-001 / UX-G1-002 / UX-G1-004 / UX-G1-007 / UX-G1-008 (README value-prop framing, "first command" pointer, BLOCK error copy rewrite, residual `thevoidforge` in troubleshooting table if any remain, count-inconsistency single-source-of-truth)
+- La Forge failure mode 5 (reaper race at 60min boundary on Linux relatime filesystems)
+- REV-003 (gated command files don't repeat orchestrator contract)
+- REV-004 (alias file structural diff)
+- G41-R2-003 (HOLOCRON.md:89 still lists retired flags)
+- G41-R2-005 (test.sh unsets XDG_RUNTIME_DIR — zero Linux XDG-path coverage)
+
+### Verification
+- `bash scripts/surfer-gate/test.sh` → **20/20 pass** (unchanged)
+- `scripts/validate-agent-refs.sh` → PASS (via `npm test` pretest)
+- `grep -rn "thevoidforge" HOLOCRON.md packages/methodology/HOLOCRON.md` → 0 results (outside CHANGELOG)
+- Package version propagation: VERSION.md = `23.8.19`, methodology/package.json = `23.8.19`, voidforge/package.json = `23.8.19`.
+- Methodology package CLAUDE.md gate header = `ADR-048, ADR-051, ADR-060` ✓
+- Methodology package engage.md header verified correct.
+
+### Thanos's verdict
+"I am not yet inevitable, but the wounds are paperwork-only." With this release: 2 HIGH + 6 MEDIUM findings closed, package-name ADR identified as next-release work. The gate machinery (check.sh, record-roster.sh, bypass.sh, test.sh) is solid across both Gauntlets. The remaining deferred work is docs + UX polish + one breaking-change package rename. Not Victory — honest progress.
+
+---
+
 ## [23.8.18] - 2026-04-20
 
 ### Assemble Hardening Pass — closes 7 of 10 deferred Gauntlet 40b findings

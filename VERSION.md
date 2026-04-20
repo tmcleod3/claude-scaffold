@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 23.8.18
+**Current:** 23.8.19
 
 ## Versioning Scheme
 

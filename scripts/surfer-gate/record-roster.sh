@@ -65,33 +65,44 @@ else
     ROSTER_CONTENT='{"recorded":true}'
 fi
 
-printf '%s\n' "$ROSTER_CONTENT" > "$ROSTER_FILE" 2>/dev/null && chmod 0600 "$ROSTER_FILE" 2>/dev/null || {
-    echo "[record-roster] could not write $ROSTER_FILE" >&2
-    exit 0
-}
+if ! ( umask 077; printf '%s\n' "$ROSTER_CONTENT" > "$ROSTER_FILE" ) 2>/dev/null; then
+    # La Forge failure mode 4: disk full during roster write. Surface a clear
+    # diagnostic so the user isn't confused when all subsequent agents are
+    # blocked despite the Surfer having returned successfully.
+    echo "[record-roster] ERROR: could not write $ROSTER_FILE (disk full? filesystem readonly?)" >&2
+    echo "[record-roster] The gate will now block all Agent calls for this session. Free space or pass --light/--solo to bypass." >&2
+    exit 1
+fi
 
-# Emit ROSTER_RECEIVED event to both session-scoped and repo-persistent JSONL.
-# Use jq for safe JSON construction (BE-003: avoids string-escape divergence).
-# If $ROSTER_CONTENT is valid JSON, embed as nested object via --argjson.
-# If not, embed as string via --arg (preserves lossless round-trip via fromjson).
+# Emit ROSTER_RECEIVED event. Schema contract (ADR-056):
+#   - `roster_text` is ALWAYS present (string form, verbatim of $1 with JSON
+#     string-escape — safe for jq -r decoding).
+#   - `roster` is present ONLY when (a) jq is available AND (b) $1 parses as
+#     valid JSON. It contains the parsed structure as a nested object.
+#   - `roster_parsed` boolean discriminator: true when `roster` is present,
+#     false otherwise. Consumers use this instead of testing for field
+#     presence.
+# This makes both jq and fallback paths schema-identical for `roster_text`
+# (BE-001 fix) while preserving the nested-object affordance when available.
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 JSONL_LINE=""
 if command -v jq >/dev/null 2>&1; then
-    # Try nested-object form first. --argjson requires valid JSON.
+    # Try nested + text form first. --argjson requires valid JSON for roster.
     JSONL_LINE="$(jq -cn --arg ts "$TS" --arg sid "$SESSION_ID" \
-        --argjson roster "$ROSTER_CONTENT" \
-        '{ts:$ts,session_id:$sid,event:"ROSTER_RECEIVED",roster:$roster}' 2>/dev/null)"
+        --argjson roster "$ROSTER_CONTENT" --arg roster_text "$ROSTER_CONTENT" \
+        '{ts:$ts,session_id:$sid,event:"ROSTER_RECEIVED",roster_parsed:true,roster:$roster,roster_text:$roster_text}' 2>/dev/null)"
     if [ -z "$JSONL_LINE" ]; then
-        # Roster isn't valid JSON — emit as string field for fidelity.
+        # Roster isn't valid JSON — emit text-only shape.
         JSONL_LINE="$(jq -cn --arg ts "$TS" --arg sid "$SESSION_ID" \
-            --arg roster "$ROSTER_CONTENT" \
-            '{ts:$ts,session_id:$sid,event:"ROSTER_RECEIVED",roster_text:$roster}' 2>/dev/null)"
+            --arg roster_text "$ROSTER_CONTENT" \
+            '{ts:$ts,session_id:$sid,event:"ROSTER_RECEIVED",roster_parsed:false,roster_text:$roster_text}' 2>/dev/null)"
     fi
 fi
 if [ -z "$JSONL_LINE" ]; then
-    # jq unavailable — fall back to manual string escape.
+    # jq unavailable — fall back to manual string escape. Always emits
+    # roster_text with roster_parsed:false (consumers see schema parity).
     SAFE_ROSTER="$(printf '%s' "$ROSTER_CONTENT" | tr -d '\n' | sed 's/\\/\\\\/g; s/"/\\"/g')"
-    JSONL_LINE="$(printf '{"ts":"%s","session_id":"%s","event":"ROSTER_RECEIVED","roster_text":"%s"}' \
+    JSONL_LINE="$(printf '{"ts":"%s","session_id":"%s","event":"ROSTER_RECEIVED","roster_parsed":false,"roster_text":"%s"}' \
         "$TS" "$SESSION_ID" "$SAFE_ROSTER")"
 fi
 

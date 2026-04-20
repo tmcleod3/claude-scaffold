@@ -54,7 +54,7 @@ See `/docs/templates/PRD-TEMPLATE.md` for the frontmatter format and field refer
 The methodology without the tooling. CLAUDE.md, all 28 slash commands, all agent protocols, all code patterns. No wizard UI, no npm runtime dependencies.
 
 ```bash
-npx thevoidforge init --headless my-app
+npx voidforge init --headless my-app
 cd my-app
 # Write your PRD in docs/PRD.md
 # Open in Claude Code
@@ -68,7 +68,7 @@ The lightest possible version. CLAUDE.md, all 28 slash commands, full agent prot
 
 ```bash
 # Drop into an existing project
-npx thevoidforge init --headless --target your-project/
+npx voidforge init --headless --target your-project/
 ```
 
 Or manually: copy CLAUDE.md, .claude/, and docs/ from the npm package into your project.
@@ -79,7 +79,7 @@ Or manually: copy CLAUDE.md, .claude/, and docs/ from the npm package into your 
 
 Every tier includes:
 - **CLAUDE.md** — Root context loaded at every session start
-- **28 slash commands** — `/prd`, `/blueprint`, `/build`, `/qa`, `/test`, `/security`, `/ux`, `/review`, `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/vault`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
+- **28 slash commands** — `/prd`, `/blueprint`, `/build`, `/qa`, `/test`, `/sentinel` (alias: `/security`), `/ux`, `/engage` (alias: `/review`), `/deploy`, `/devops`, `/architect`, `/assess`, `/git`, `/void`, `/vault`, `/thumper`, `/assemble`, `/gauntlet`, `/campaign`, `/imagine`, `/debrief`, `/dangerroom`, `/cultivation`, `/grow`, `/current`, `/treasury`, `/portfolio`, `/ai`
 - **13-phase build protocol** — PRD to production with verification gates
 - **18 specialist agent protocols** — Each lead has behavioral directives and a sub-agent roster
 - **Named characters** — From Tolkien, Marvel, DC, Star Wars, Star Trek, Dune, Anime, Cosmere, and Foundation — each materialized as a subagent definition in `.claude/agents/`
@@ -429,6 +429,8 @@ Analyzes coverage gaps (Oracle + Alfred in parallel), reviews test architecture 
 
 > Renamed from `/security` in v23.8.13 (ADR-050) to avoid collision with Claude Code's native `/security-review` skill. `/security` remains as a permanent alias — both names invoke Kenobi's OWASP audit.
 
+**Hit a gate block?** See `scripts/surfer-gate/README.md` for the enforcement contract, or add `--light` to skip the Silver Surfer pre-scan.
+
 Phase 1 runs parallel scans (Leia: secrets, Chewie: dependencies, Rex: infrastructure, Maul: red-team). Phase 2 runs sequential deep audits (auth, input, access control, data). Critical/high findings are fixed. Phase 3: Maul re-probes all remediations to verify fixes hold.
 
 #### `/ux` — Galadriel's Review
@@ -461,7 +463,7 @@ Full architecture review with parallel analysis: Spock (schema) + Uhura (integra
 #### `/void` — Bombadil's Forge Sync
 **When:** You want to update your VoidForge methodology to the latest version.
 
-Old Tom Bombadil tends the forge itself. He checks for the latest VoidForge methodology (via `npx thevoidforge update` or git fetch as fallback), compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). If you're already on the latest, Tom tells you so and goes back to singing.
+Old Tom Bombadil tends the forge itself. He checks for the latest VoidForge methodology (via `npx voidforge update` or git fetch as fallback), compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). If you're already on the latest, Tom tells you so and goes back to singing.
 
 #### `/thumper` — Chani's Worm Rider
 **When:** You want to control Claude Code from your phone via Telegram.
@@ -802,7 +804,7 @@ If Phase 12 or a deploy script fails:
 | Deploy script hangs | Check SSH connectivity, verify key permissions (0600) |
 | Test runner not found | Phase 1 should set it up — re-run scaffold if missing |
 | Context fills mid-phase | Checkpoint to journal, new session, continue |
-| npm install fails on Windows | node-pty needs C++ tools. Use `--ignore-scripts` or `npx thevoidforge init --headless` |
+| npm install fails on Windows | node-pty needs C++ tools. Use `--ignore-scripts` or `npx voidforge init --headless` |
 
 ---
 

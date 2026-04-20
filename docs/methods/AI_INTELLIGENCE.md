@@ -260,7 +260,7 @@ When a project uses AI, the PRD frontmatter should include:
 ```yaml
 ai: yes                           # Activates Seldon's review
 ai_provider: "anthropic"          # anthropic | openai | local | multi
-ai_models: ["claude-sonnet-4-7"]  # Models used
+ai_models: ["claude-sonnet-4-7"]  # Models used — update to current runtime model
 ai_features: ["classification", "generation", "tool-use", "routing"]
 ```
 

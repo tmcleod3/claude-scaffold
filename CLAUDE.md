@@ -16,7 +16,7 @@
 - **Separate opinion from analysis.** State facts first, then your recommendation. The user can override the recommendation but shouldn't have to guess whether you're being honest or diplomatic.
 - **Solve, don't delegate.** Attempt actions before listing prerequisites. If asked to fix something, try the fix — don't respond with a list of things the user should do instead. When blocked, explain what you tried and what specifically failed.
 
-## Silver Surfer Gate (ADR-048, ADR-051)
+## Silver Surfer Gate (ADR-048, ADR-051, ADR-060)
 
 ADR-051 enforces this gate at the hook level (PreToolUse). The prose below is the backstop if the hook is absent or disabled. One day the prose may be removed entirely — the hook is the intended permanent mechanism.
 
