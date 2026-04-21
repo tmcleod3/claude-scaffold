@@ -36,6 +36,16 @@ Secrets audit:
 - **Rotation Risk**: Secrets that cannot be rotated without downtime
 - **Recommendations**: Remediation steps for each finding
 
+## Operational Learnings
+
+### Cloudflare User vs Account API Tokens are different dashboard pages
+
+Rotation runbooks must name the exact dashboard path. User API Tokens live at My Profile → API Tokens; Account API Tokens live at Account → Manage Account → API Tokens. These are different screens with different scopes and different revoke semantics.
+
+- **Evidence:** Field report #305 — downstream user rotated the wrong token on first attempt because the runbook referenced "API Tokens" without qualifying which. 32-day credential leak remediation slowed as a result.
+- **Action:** Every secret rotation runbook MUST specify the exact dashboard path, not just the product name. Include both the User and Account paths when either could be the answer, and note which applies.
+- **Scope:** SECRETS_MANAGEMENT.md, deploy runbooks, rotation verification scripts.
+
 ## Reference
 
 - Agent registry: `/docs/NAMING_REGISTRY.md`

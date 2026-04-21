@@ -263,3 +263,30 @@ Before clearing, deleting, or modifying database fields to "fix" missing files o
 5. **NEVER clear a DB field to work around a missing file.** Restore the file first, or confirm the regeneration cost is acceptable BEFORE deleting the reference.
 
 (Field report #103: 251 avatarUrl fields cleared to "fix" missing files, triggering ~$10 in DALL-E regeneration + 50 minutes downtime. The files existed on the VPS — they were deleted by `rsync --delete`, not lost. Restoring from backup would have been free.)
+
+---
+
+## Cloudflare / Wrangler Gotchas
+
+### `wrangler pages deploy` in Direct Upload mode ignores `.gitignore`
+
+`.gitignore` semantics differ between Git-integrated and Direct Upload Pages projects. Direct Upload uploads EVERY file in the target directory, including `.env`, `.pem`, `.key`, and anything else `.gitignore` would normally hide. Always deploy from a dedicated subdirectory (`dist/`, `public/`, `site/`) — never repo root. See `docs/methods/DEVOPS_ENGINEER.md` §Deploy Surface Boundary.
+
+Evidence: field report #305 — 32-day live credential leak via `wrangler pages deploy .` from repo root.
+
+### `wrangler pages deployment delete --force` doesn't force aliased deployments
+
+For aliased deployments (preview URLs attached to branch names), the CLI's `--force` flag does NOT pass `force=true` to the underlying API. Result: error code 8000035 "deployment is aliased and cannot be deleted." Workaround: call the Cloudflare API directly with `force=true` in the request body.
+
+### Cloudflare Pages Dev Mode + Purge Everything may not evict all cache
+
+Dev Mode and Purge Everything are both best-effort across Cloudflare's PoP network. For time-critical evictions (e.g., post-credential-rotation):
+
+1. Purge Everything in the dashboard.
+2. Run Custom Purge by URL for the specific asset.
+3. Enable Dev Mode.
+4. Wait at least TTL + 60 seconds before asserting eviction.
+
+If the stale content persists after step 4, a second Custom Purge + TTL wait is often required. Do not assume a single purge is sufficient.
+
+Evidence: field report #305 — credential-leak remediation required multiple purge passes before all PoPs served the rotated content.

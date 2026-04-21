@@ -86,6 +86,14 @@ After all 5 (or 6) acts are confirmed:
 3. Verify YAML frontmatter is valid and complete
 4. Announce: "PRD written to /docs/PRD.md. Run `/build` to start building, or `/campaign` for autonomous execution."
 
+**For any `deploy` target that uploads from a local directory (cloudflare / static / firebase / netlify / s3):** the PRD MUST include an Infrastructure / Deployment section entry that specifies:
+- Explicit build output directory (e.g., `./dist`) — never repo root.
+- Platform config file (wrangler.toml / vercel.json / netlify.toml / firebase.json) that hardcodes the output directory.
+- Ignore file (.cfignore / .vercelignore / firebase `hosting.ignore`) that excludes `.claude/`, `docs/methods/`, `docs/patterns/`, `HOLOCRON.md`, `CHANGELOG.md`, `VERSION.md`, `logs/`.
+- `SECURITY.md` + `public/.well-known/security.txt` for coordinated disclosure.
+
+Evidence: field report #305.
+
 ## Import Mode (`--import`)
 
 If `--import path/to/existing-PRD.md` is passed, skip the interview entirely:

@@ -10,6 +10,8 @@
 
 **AGENT DEPLOYMENT IS MANDATORY.** Steps 1 and 4 specify parallel agent launches via the Agent tool. You MUST actually launch these agents as separate sub-processes — do NOT shortcut to inline analysis, even if you think you can answer faster by reading files directly. The agents exist because parallel analysis catches things sequential reading misses. Skipping agent deployment is a protocol violation. (Field report #68)
 
+**After the Silver Surfer returns:** Verify the response is ROSTER FORMAT — a list of agent names with reasoning. If the Surfer modified files, ran git commands, or executed the user-requested task described in the args, the protocol was violated. Report to the user: "Silver Surfer exceeded charter — verify any side effects independently before continuing." Proceed only after verification. (Field report #304 documents two incidents where the Surfer executed full task sequences instead of returning a roster.)
+
 ## Dynamic Dispatch (ADR-044)
 
 Opus scans `git diff --stat` and matches changed files against the `description` fields of all agents in `.claude/agents/`. Matching specialists launch alongside the core agents below.
@@ -63,6 +65,22 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 
 - **Agent 1** `subagent_type: La Forge` — Failure analysis: for each component, answer "What happens when this fails?" (DB down, cache down, API down, worker crash).
 - **Agent 2** `subagent_type: Data` — Tech debt catalog: wrong/missing abstraction, premature optimization, deferred decisions, dependency debt, documentation debt. Severity table with impact/risk/effort/urgency.
+
+## Step 4.5 — Operator Sign-off on Invented Constraints (field report #304)
+
+Before ADRs propagate to downstream builds, scan every ADR drafted in this session for these patterns:
+
+- Numeric thresholds (kill switches, max amounts, timeouts, retry counts)
+- Capital allocations (splits, ratios, minimums, per-venue limits)
+- Safety mechanisms (halts, circuit breakers, rate limits, auto-disable triggers)
+
+For each match, flag explicitly:
+
+> "This is an AGENT_INVENTED constraint — value [X] was not supplied by the operator. Confirm, adjust, or remove before downstream phases begin? [Y/n/adjust]"
+
+In autonomous/blitz mode: append every AGENT_INVENTED constraint to `needs_operator_review.md` in the logs/ directory. Do NOT bake these values into source code, config files, or tests without explicit operator acknowledgment.
+
+Evidence: BarrierWatch campaign (field report #304) invented a $20 kill switch and $50/$50 capital split that took ~90 minutes to remove across 39 files. Both propagated into ROADMAP, source modules, config YAML, tests, and an ADR before the operator reviewed the design.
 
 ## Step 5 — ADRs + Decision Review
 Write Architecture Decision Records to `/docs/adrs/` for every non-obvious choice. After writing, **Riker** `subagent_type: Riker` reviews: challenges trade-offs, verifies alternatives were truly considered, checks for second-order effects.

@@ -104,6 +104,19 @@ Use the Agent tool to run these in parallel — they are independent analysis ta
 - **ToS/API policy compatibility:** For ADRs selecting third-party services, verify the provider's Terms of Service and API usage policies permit the intended usage pattern (automation, bot-initiated transactions, reselling, volume). A service rejected on ToS grounds after building requires a full architecture pivot. (Field report #300)
 - **Riker reviews:** "Number One, does this hold up?" Riker challenges each ADR's trade-offs — are the alternatives truly worse? Are the consequences acceptable? Did we consider the second-order effects? **Riker also verifies the implementation scope is honest** — if an ADR says "fully implemented" but the code throws `'Implement...'`, that's a finding. Riker's review prevents architectural decisions made in a vacuum.
 
+### Npm-name availability pre-flight (ADR authoring)
+
+When an ADR proposes a published npm package name or scope, the architect MUST verify availability via BOTH:
+
+1. **Registry query** — `npm view <name>` returns E404 (or equivalent "not found" signal)
+2. **Org-create form** — if scoped (e.g., `@foo/bar`), visit npmjs.com/org/create and attempt to create the org. npm has no CLI-level `npm org create`; scope availability in the registry does NOT imply org-create availability.
+
+Do not canonicalize the name in docs, code, or CHANGELOG entries until BOTH checks pass. Checklist item in the ADR's Decision section:
+
+> "Npm-name availability confirmed: registry E404 ✓, scope create-form accepts ✓."
+
+Field report evidence: #308 RC-1 documents v23.9.0 → v23.9.1 mid-flight pivot from `@voidforge/cli` to unscoped `voidforge-build` because `voidforge` org creation was rejected after docs had already canonicalized the scoped name. Related: LRN-4, LRN-7 in docs/LEARNINGS.md; ADR-061 §13.
+
 ### `--adr-only` Lightweight Mode
 
 When architecture work is deferred (e.g., designing auth that won't be built for months), skip the full parallel analysis (Steps 1-4) and go straight to Step 5:

@@ -8,6 +8,8 @@
 
 **Flags:** `--focus "topic"` biases the Surfer's selection; `--light` skips the Surfer (uses this file's hardcoded roster); `--solo` runs the lead only.
 
+**After the Silver Surfer returns:** Verify the response is ROSTER FORMAT — a list of agent names with reasoning. If the Surfer modified files, ran git commands, or executed the user-requested task described in the args, the protocol was violated. Report to the user: "Silver Surfer exceeded charter — verify any side effects independently before continuing." Proceed only after verification. (Field report #304 documents two incidents where the Surfer executed full task sequences instead of returning a roster.)
+
 The Prophets have shown me the path. Time to execute the plan.
 
 ## Blitz Mode Check
@@ -89,7 +91,28 @@ Check for unfinished business:
 - If vault exists but `.env` is sparse → offer: "The vault has credentials but infrastructure isn't provisioned. Run `voidforge deploy` now?" In `--blitz` mode: auto-run provisioner.
 - If clear → proceed to Step 0.5
 
-## Step 0.5 — Vault Auto-Inject
+## Step 0.5 — TECH_DEBT SLA Audit (field report #305)
+
+Before selecting the next mission, audit any `TECH_DEBT.md` catalog in the project root (or `docs/TECH_DEBT.md`) for overdue Critical + Immediate items.
+
+SLA contract (default durations — reasonable defaults, not mandated by any field report; override per-project via TECH_DEBT.md frontmatter):
+- **Critical + Immediate + LowEffort** items: 48-hour resolution. Items older than 48h block campaign advancement.
+- **Critical + Immediate + HighEffort** items: 72-hour triage. Must have an assigned owner and expected resolution window; otherwise block.
+- **High + Immediate** items: 7-day resolution. Warn but do not block.
+
+When a blocked item is detected, Sisko presents:
+
+> "Campaign advancement blocked — TECH_DEBT.md has [N] overdue Critical + Immediate items:
+>
+> [list with file:line and days overdue]
+>
+> Resolve these first, or explicitly acknowledge deferral with a reason and new deadline in the TECH_DEBT entry."
+
+Evidence: field report #305 — a Critical + Immediate + LowEffort credential-leak entry sat for 32 days in the downstream project's TECH_DEBT.md without enforcement. The methodology documented the risk but did not enforce action. Without an SLA with teeth, labels are advisory only.
+
+Applies to: `/campaign`, `/assemble`. The gate may be overridden with `--ignore-debt` (not recommended).
+
+## Step 0.6 — Vault Auto-Inject
 
 If vault exists and `.env` is sparse (missing keys that the vault has):
 1. Run `voidforge deploy --env-only` to write vault credentials to `.env`

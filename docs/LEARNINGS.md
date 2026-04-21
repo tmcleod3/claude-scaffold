@@ -1,7 +1,7 @@
 # Project Operational Learnings
 
 Persistent knowledge from live operations. Things code reviews can't catch.
-Updated: 2026-04-20 | Entries: 8/50
+Updated: 2026-04-20 | Entries: 14/50
 
 ---
 
@@ -58,6 +58,24 @@ The Agent tool resolves `.claude/agents/*.md` frontmatter (including the `name:`
 - **evidence:** WandaSeldon rename attempt mid-session; Agent tool rejected dispatch with cached-name error despite on-disk frontmatter already updated. Field report #306.
 - **context:** Any rename touching the `name:` field requires a fresh-session validation step before merge/release. Related: ADR-055.
 
+### LRN-5: `stat -f %m` is not portable between BSD/macOS and GNU/Linux
+On BSD/macOS `stat -f %m FILE` returns the file's mtime in epoch seconds. On GNU/Linux `stat -f` means `--file-system` and `%m` means mount point — so the command succeeds silently with wrong output, and any `||` fallback to `stat -c %Y` never fires because exit status is 0. Use `date -r FILE +%s` for portable mtime-read in shell scripts.
+
+- **category:** tooling-gotcha
+- **verified:** 2026-04-20
+- **scope:** `scripts/surfer-gate/check.sh` and any shell script needing mtime
+- **evidence:** Field report #308; latent since v23.8.18, surfaced when CI `npm test` moved to root and exercised the Linux path.
+- **context:** Surfer-gate state timeout checks require mtime comparison; the silent-success failure mode defeated the intended `||` portability fallback.
+
+### LRN-8: CI workspace-scoped test invocation bypasses root pretest hooks
+CI running `npm run test -w @voidforge/cli` skips the root `pretest` hook. Root-level validators (agent-ref checker, gate tests, consistency checks) are silently ignored. If the monorepo has a root `pretest`, CI MUST invoke `npm test` at repo root to exercise it.
+
+- **category:** tooling-gotcha
+- **verified:** 2026-04-20
+- **scope:** `.github/workflows/*.yml` in monorepos with root pretest hooks
+- **evidence:** Field report #308; `stat -f %m` non-portability (LRN-5) was masked for releases because CI used workspace-scoped test invocation.
+- **context:** The workspace form is a legitimate npm feature; combining it with root pretests hides bugs. Pair LRN-5 and LRN-8 — one created the bug, the other concealed it.
+
 ## Bash Patterns
 
 ### LRN-2: Shell-escape fixes at the destination corrupt legitimate input
@@ -80,6 +98,15 @@ ADR-056 amended the Gate event schema, but the old field name `roster_json` pers
 - **evidence:** ADR-056 `roster_json` ghost persisted 3 releases; code shipped `roster` / `roster_text` / `roster_parsed`. Ghost also present at `BUILD_JOURNAL.md:46`.
 - **context:** Every ADR schema amendment requires a repo-wide grep for the old field name(s) as part of the reconciliation step. No reconciliation claim is valid without that grep being clean.
 
+### LRN-10: Marketing-site scalar counts drift silently from scaffold truth
+Scalar counts on sibling repos (`totalADRs`, `totalMethodDocs`, `totalScaffoldTests`, agent counts) drift silently from the scaffold. The `/void` sync touches methodology files but not the marketing site's TypeScript data constants. Either auto-sync via a CI-produced `stats.json` artifact consumed at site build time, or document the manual sync as a release task.
+
+- **category:** docs-maintenance
+- **verified:** 2026-04-20
+- **scope:** Any sibling repo that imports counts from VoidForge methodology
+- **evidence:** Field report #308; site was 12 ADRs + 9 versions behind at audit time. A 3-agent audit caught it.
+- **context:** The sync protocol should make scalar parity mechanical, not manual. See also `docs/methods/SPEC_HANDOFF.md` for the cross-session offload pattern used in the v23.9.x audit.
+
 ## Distribution Gotchas
 
 ### LRN-4: Published npm package name must match install instructions
@@ -90,6 +117,24 @@ ADR-056 amended the Gate event schema, but the old field name `roster_json` pers
 - **scope:** `package.json` (both `packages/voidforge/` and `packages/methodology/`) vs. every doc that includes an install command
 - **evidence:** Gauntlet 41 surfaced the drift. Docs said `npx voidforge init`; published manifests said `thevoidforge`. Resolved in ADR-061 / v23.9.0.
 - **context:** Keep ONE canonical install command location (CLAUDE.md Distribution section) and link everywhere else — do not copy install commands across 20+ docs. Every name change in docs requires `package.json` diff verification before `npm publish`. Related: ADR-061.
+
+### LRN-6: `npm ci` / `npm install` with existing lockfile skips cross-OS optional deps
+Both `npm ci` and `npm install` with an existing lockfile fail to install platform-specific optional dependencies (e.g. `@rollup/rollup-linux-x64-gnu`) when the lockfile was generated on a different OS. Documented npm bug #4828. CI workflows must `rm -f package-lock.json && npm install` if the committed lockfile came from a different OS than the CI runner.
+
+- **category:** distribution-gotcha
+- **verified:** 2026-04-20
+- **scope:** `.github/workflows/publish.yml`, any cross-platform CI reading a committed lockfile
+- **evidence:** v23.9.2 publish workflow failed with missing Linux rollup binary; macOS-authored lockfile did not resolve the Linux optional dependency.
+- **context:** The fix in v23.9.2 removes `package-lock.json` before `npm install` on CI. Don't rely on `npm ci` to paper over this — the bug is upstream.
+
+### LRN-7: npm scope registry-availability does not imply org-create availability
+`@voidforge/*` namespace was empty on the npm registry, but the `npm create-org` web UI rejected "voidforge" as an org name (squatter-adjacent / reserved). There is no `npm org create` CLI — scope creation is web-UI-only. Verify BOTH registry query AND the create-org form before canonicalizing a scoped name.
+
+- **category:** distribution-gotcha
+- **verified:** 2026-04-20
+- **scope:** Any ADR proposing a scoped npm package
+- **evidence:** Field report #308; v23.9.0 → v23.9.1 pivot from `@voidforge/cli` to unscoped `voidforge-build` after web-UI rejection.
+- **context:** Companion to LRN-4. Registry probe and org-create probe are different checks — do both before committing to a name.
 
 ## Decisions
 
@@ -106,6 +151,15 @@ ADR-056 amended the Gate event schema, but the old field name `roster_json` pers
 ## Workflow
 
 <!-- Process discoveries, agent coordination patterns, build order dependencies -->
+
+### LRN-9: Cross-session spec-doc handoff works reliably
+Cross-session spec-doc handoff works reliably: Session A produces a numbered spec with file:line citations and phases; Session B executes with a copy-pasteable prompt referencing the spec. 23/26 items executed without supervision in the v23.9.x marketing-site pass. Use when the executor session is in a different repo, or when preserving the orchestrator's context budget matters.
+
+- **category:** workflow
+- **verified:** 2026-04-20
+- **scope:** Multi-repo or multi-session campaigns
+- **evidence:** Field report #308; SITE_UPDATE_SPEC.md executed across 5 phases, 23/26 items without back-and-forth.
+- **context:** See `docs/methods/SPEC_HANDOFF.md` for the formalized pattern. Executor may optimize for literal compliance over holistic UX — orchestrator must run a review pass on the output.
 
 ## Archived
 

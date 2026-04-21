@@ -51,6 +51,14 @@ Severity: CRITICAL (blocks ship) > HIGH (must fix before prod) > MEDIUM (fix soo
 - **Stubs ship as features:** When stubs are committed "to be implemented later," they almost never are. The codebase grows around them, tests don't cover them, and users encounter stubs as production failures. If a feature can't be fully implemented, don't create the file -- document it in ROADMAP.md.
 - **CLAUDE.md is a contract:** Every entry in the slash command table, agent table, and docs reference table must have a corresponding file. Audit table entries against actual files. (Field report #108: `/dangerroom` listed for 30 versions with no backing file.)
 
+### Agent-invented constraints require operator confirmation
+
+When designing executive constraints (kill switches, capital limits, safety thresholds, daily maxes, circuit breakers), tag them as AGENT_INVENTED in the ADR/design output and flag for operator confirmation before they propagate to downstream builds. Do not present agent defaults as decided.
+
+- **Evidence:** BarrierWatch campaign (field report #304) invented a $20 kill switch + $50/$50 capital split that took ~90 minutes to remove across 39 files. Neither value came from operator requirements; both got baked into ROADMAP, source modules, config, tests, and an ADR before the operator reviewed.
+- **Action:** Every numeric threshold, capital allocation, or safety mechanism in an architecture output gets an `AGENT_INVENTED — requires operator confirmation` annotation. Never present them as operator-approved.
+- **Scope:** `/architect` outputs, ADR drafts, design docs before build begins.
+
 ## Required Context
 
 For the full operational protocol, load: `/docs/methods/SYSTEMS_ARCHITECT.md`

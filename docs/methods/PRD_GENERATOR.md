@@ -132,6 +132,21 @@ Ask the user: "Does your product use AI or LLM features? If yes: What models? Wh
 - Backup strategy
 - Complete environment variable list
 
+### Cloudflare Pages deploy safety (required for `deploy: cloudflare` projects)
+
+Projects with `deploy: "cloudflare"` (or the static-site variant) MUST include:
+
+1. **`wrangler.toml`** with `pages_build_output_dir = "./dist"` (or the project's actual build output directory). This makes the deploy surface explicit.
+2. **Deploy command uses the output directory, not `.`** — always `wrangler pages deploy ./dist`, never `wrangler pages deploy .`. The dot path uploads the entire repo root including `.env`, `.claude/`, `docs/methods/`, `logs/`. `.gitignore` is IGNORED in Direct Upload mode.
+3. **`.cfignore`** (repo root) that excludes `.claude/`, `docs/methods/`, `docs/patterns/`, `HOLOCRON.md`, `CHANGELOG.md`, `VERSION.md`, `logs/`. Defense in depth.
+4. **`SECURITY.md`** (repo root) with a coordinated-disclosure contact.
+5. **`public/.well-known/security.txt`** pointing at the same contact.
+6. **Dedicated build output directory** — `dist/`, `build/`, `out/`, or `site/`. Never repo root.
+
+The PRD generator MUST emit these files / entries in the Infrastructure / Deployment section for any Cloudflare Pages target.
+
+Evidence: field report #305 documents a 32-day live credential leak caused by `wrangler pages deploy .` from repo root. Affects ALL VoidForge-generated projects that deploy to Cloudflare Pages via Direct Upload, and structurally similar situations with Netlify CLI, Vercel CLI, Firebase CLI, and `aws s3 sync`. See `docs/methods/DEVOPS_ENGINEER.md` §Deploy Surface Boundary.
+
 ## 16. Launch Sequence
 - Phased build plan (what gets built in what order)
 - Each phase has: scope, dependencies, and "done" criteria

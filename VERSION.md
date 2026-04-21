@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 23.9.2
+**Current:** 23.10.0
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 23.10.0 | 2026-04-20 | Field Report Triage — 6 reports closed (#303-#308). 33 approved fixes: SPEC_HANDOFF.md (new method doc), deploy-preflight.ts + post-deploy-probe.sh (new patterns), LEARNINGS LRN-5..10, Deploy Surface Boundary + Deployment Hygiene (field report #305 remediation), Step 2.5 pre-deploy secret scan + Step 4.5 post-deploy probe, TECH_DEBT SLA, npm-name pre-flight, ADR-050 Rename Verification Checklist, Silver Surfer HARD CONSTRAINT + 4 agent operational learnings. |
 | 23.9.2 | 2026-04-20 | CI workflow idempotency + provenance baseline — `publish.yml` guards each publish with "already-published" check so re-runs skip cleanly. Tag-push re-publishes via CI to attach npm provenance attestation (absent on v23.9.1's manual publish). |
 | 23.9.1 | 2026-04-20 | ADR-061 pivot — `@voidforge` npm org unavailable (squat-adjacent). Rebranded publish target to `voidforge-build` / `voidforge-build-methodology` matching the voidforge.build domain. Migration banner for legacy `thevoidforge` / `@voidforge/cli` installs. Farewell releases + npm deprecate for smooth transition. |
 | 23.9.0 | 2026-04-20 | Campaign 42 — @voidforge scoped npm rename (ADR-061), gauntlet --fast 3-round mandate, README value-prop + first-command pointer, LEARNINGS.md 4 entries. Victory Gauntlet 3 fix batches: methodology runtime dep, registry-pin + env-stripping, BLOCK absolute paths. Publish gated on user scope claim + NPM_TOKEN rotation. |

@@ -148,6 +148,48 @@ If a process manager (PM2, systemd, Docker, supervisord) owns the application po
 
 **Detection rule:** When writing CLAUDE.md "How to Run" sections or session restart commands, check if the project uses a process manager (`ecosystem.config.js`, `docker-compose.yml`, `*.service` files). If yes, the restart command MUST go through the PM — not through port killing.
 
+### CI runs `npm test` at repo root
+
+In monorepo CI workflows, run `npm test` at the repository root — NOT `npm run test -w <workspace-name>`. The workspace-scoped form skips the root `pretest` hook, silently bypassing any root-level validators (agent-ref checkers, gate tests, consistency checks).
+
+Evidence: field report #308 RC-3 — the `stat -f %m` portability bug in surfer-gate was latent for multiple releases because CI used `npm test -w @voidforge/cli`, which bypassed the root pretest that ran gate tests. Surfaced only when v23.9.0 switched CI to root `npm test`. See LRN-8 in docs/LEARNINGS.md.
+
+### Post-push live-URL fingerprint (platform auto-deploy integrity)
+
+The health-endpoint build-fingerprint (above) catches processes serving stale code. It does NOT catch the case where the platform auto-deploy integration is broken and no new deploy happened at all. To catch that:
+
+After every `git push` to a branch that auto-deploys, wait ~60 seconds, then hit a known endpoint on the live URL. Compare a content fingerprint (a string from the just-pushed commit, or the `last-modified` header age) against expected. If the fingerprint didn't change, the auto-deploy integration is broken — run the platform-specific manual deploy (`vercel --prod`, `flyctl deploy`, `wrangler pages deploy ./dist`, `firebase deploy`, etc.) and flag the hook as needing reconnection.
+
+Evidence: field report #307 — voidforge-marketing-site Vercel auto-deploy silently failed for 8 days after the repo was renamed (`voidforge-marketing-site` → `voidforge-site`). Eight days of unbuilt pushes went live as April-15 stale content until a `/assess` caught it. A post-push fingerprint check would have caught it on day one.
+
+Canonical check snippet (note: `Last-Modified` header is optional on some CDNs — fallback is the content-hash grep on the second line):
+```bash
+EXPECTED_SHA="$(git rev-parse --short HEAD)"
+sleep 60
+FINGERPRINT="$(curl -sI https://$DEPLOY_URL | grep -i '^last-modified:')"
+if [[ -z "$FINGERPRINT" ]] || ! curl -s https://$DEPLOY_URL | grep -q "$EXPECTED_SHA"; then
+  echo "AUTO-DEPLOY FAILED — running manual deploy"
+  # platform-specific manual deploy here
+fi
+```
+
+Applies to: Vercel Git Integration, Cloudflare Pages Git Integration, Netlify Git Integration, Firebase web-hook auto-deploys.
+
+### Methodology-exposure check (static-host deploys)
+
+After deploying to a static CDN (Cloudflare Pages, Vercel, Netlify, Firebase, S3+CloudFront), curl a known methodology path and assert 404 / denied:
+
+```bash
+for path in /.claude/agents/silver-surfer-herald.md /docs/methods/FORGE_KEEPER.md /HOLOCRON.md /CHANGELOG.md /VERSION.md; do
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://$DEPLOY_URL$path")
+  [[ "$status" == "200" ]] && echo "LEAK: $path returned $status"
+done
+```
+
+If any path returns 200, add a `.cfignore` / `.vercelignore` / `firebase.json ignore` entry that excludes `.claude/`, `docs/methods/`, `docs/patterns/`, `HOLOCRON.md`, `CHANGELOG.md`, `VERSION.md`, `logs/`. Methodology files must not be publicly served.
+
+Evidence: field report #303 — saltwater.com was serving 264 agent files, 37 patterns, method docs, HOLOCRON, CHANGELOG, and VERSION publicly on its Cloudflare CDN. Affects every VoidForge-generated project deployed to a static host until an ignore file is added. Companion: FORGE_KEEPER.md §Deployment Hygiene.
+
 ## E2E CI Architecture
 
 E2E tests run as a separate CI job, parallel with unit tests. Browser binaries cached via `actions/cache` (GitHub Actions) or equivalent CI cache. E2E failures are informational for the first release (v18.0-v18.1), then enforced as blocking. Playwright uses Chromium only in CI to minimize binary size (~250MB cached). Configuration:
@@ -285,6 +327,28 @@ Platform-hosted static sites serve the entire project from root. Subdomain-to-su
 **Subdomain cross-navigation rule:** When two sites share a codebase but serve on different domains (e.g., `example.com` and `labs.example.com`), ALL cross-navigation links must use full absolute URLs (`https://example.com/page`). Relative paths and bare `/` paths resolve to whichever domain the browser is currently on — `<a href="/">` on `labs.example.com` goes to `labs.example.com/`, not `example.com/`. (Field report #120)
 
 **Always test routing before announcing a subdomain.** Curl the subdomain and verify it serves the expected content, not the root index.html.
+
+## Deploy Surface Boundary
+
+**Invariant:** the repository root is NEVER the deploy surface. Physical separation between "all files tracked in the repo" and "files uploaded to the CDN / server" is enforced by tool configuration, not by `.gitignore`.
+
+Why this matters: most deploy tools (wrangler Direct Upload, `aws s3 sync`, Firebase `firebase deploy --only hosting`) do NOT honor `.gitignore`. Deploying from repo root uploads `.env`, `.claude/`, `docs/methods/`, `logs/`, test fixtures, and any other sensitive or non-production file.
+
+### Required configuration per platform
+
+| Platform | Enforcement |
+|----------|------------|
+| Cloudflare Pages | `wrangler.toml` with `pages_build_output_dir = "./dist"` (or similar). Deploy command: `wrangler pages deploy ./dist` — never `wrangler pages deploy .` |
+| Vercel | `vercel.json` with `outputDirectory`. Never point at repo root |
+| Netlify | `netlify.toml` with `publish = "dist"` or similar |
+| Firebase Hosting | `firebase.json` `hosting.public = "dist"` + `hosting.ignore` list with methodology paths |
+| AWS S3 + CloudFront | `aws s3 sync ./dist s3://bucket` — never `aws s3 sync . s3://bucket` |
+
+### Verification
+
+The methodology-exposure check above (curl denylist) is the runtime assertion that enforcement holds. Run it after every deploy. If any path returns 200 that should not, the deploy surface boundary is breached — stop and fix the ignore/output-dir configuration before continuing.
+
+Evidence: field report #305 documents a 32-day credential leak caused by `wrangler pages deploy .` (dot path) uploading `.env` to production. The `.gitignore` entry was present — wrangler Direct Upload ignored it. Field report #303 documents methodology files publicly served on Cloudflare CDN for all VoidForge static-host deploys lacking `.cfignore`.
 
 ## Deliverables
 

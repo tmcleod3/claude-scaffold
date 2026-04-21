@@ -72,6 +72,8 @@ VERSION.md                         ← Only sync the "Current:" line. If the pro
 
 **CLAUDE.md path detection:** Some projects use `.claude/CLAUDE.md` instead of root `CLAUDE.md`. Before syncing, check both locations. If `.claude/CLAUDE.md` exists and root `CLAUDE.md` does not, sync to `.claude/CLAUDE.md`. If both exist, warn the user — do not create a duplicate. (Field report #58)
 
+**CHANGELOG.md identity check:** Before syncing `CHANGELOG.md`, read the local file's first non-title heading. If it references non-methodology versions (e.g., `Site v2.x`, `App v1.x`) or a semver that does not match `VERSION.md`'s `Current:` line, the local `CHANGELOG.md` belongs to the downstream project — not to VoidForge methodology. Treat `CHANGELOG.md` as **skipped** for this project and print the reason in the sync plan. Never clobber a project's own changelog with the methodology changelog. (Field report #307 F1)
+
 **Never touched by Bombadil:**
 ```
 .claude/settings.json              ← User's permissions and hooks (review new permissions manually)
@@ -95,7 +97,8 @@ Orient to the current state:
 1. Read `VERSION.md` — identify the current VoidForge version
 2. Check which shared methodology files exist locally — determines if this is a VoidForge project
 3. Note any locally modified shared files via `git status` or file timestamps
-4. Announce: *"Old Tom is listening... you're running VoidForge vX.Y.Z. Let's see what the river brings."*
+4. **Parallel-session detect.** Before starting the sync, run `git log --since="1 hour ago" --all`. If commits exist that weren't authored in this session, warn: *"Another session may have committed recently: [SHA] [subject]. Review before proceeding."* Resolve with the user — never race another session's writes against Bombadil's. (Field report #307 F5)
+5. Announce: *"Old Tom is listening... you're running VoidForge vX.Y.Z. Let's see what the river brings."*
 
 ### Step 1 — Listen to the River (Goldberry)
 
@@ -231,7 +234,11 @@ Apply the updates:
 
 ### Step 4.5 — Preview Deploy Verification
 
-After syncing methodology files, if the project has a deploy target, run a preview build (`npm run build`) to verify the sync didn't break anything. For Vercel projects: `vercel` (without `--prod`) to create a preview URL and verify it loads. Only promote to production after preview passes. This prevents the scenario where synced .md files trigger Tailwind v4 content scanning failures that only manifest in platform build environments.
+After syncing methodology files, if the project has a deploy target, run `npm test` **first**, then a preview build (`npm run build`) to verify the sync didn't break anything. For Vercel projects: `vercel` (without `--prod`) to create a preview URL and verify it loads. Only promote to production after both pass.
+
+Run `npm test` before `npm run build` because content drift from the sync (new commands, agents, patterns) surfaces as consistency-check failures in tests — not in build output. Build-only verification misses them. If root `pretest` is absent the test invocation is cheap; if present, it catches agent-reference drift, orphan patterns, and dead links before they ship. (Field report #307 F2)
+
+This also prevents the scenario where synced `.md` files trigger Tailwind v4 content scanning failures that only manifest in platform build environments.
 
 ### Step 4 — The Song Continues (Bombadil)
 
@@ -250,7 +257,7 @@ Verify and celebrate:
 4. Check for handoffs — if new commands or agents were added, mention them
 5. **Content drift check:** If the sync changed methodology counts (agent counts, command counts, pattern counts) AND the project has a data layer that displays VoidForge metadata (e.g., `releases.ts`, `commands.ts`, site content), flag: "The sync changed [N] agents/commands/patterns. If your project displays these counts, update the data layer to match." This prevents stale counts on marketing sites and docs pages after version bumps. (Field report #113)
 5b. **Description accuracy check (Radagast):** For projects that display command descriptions (marketing sites, docs sites, README generators), compare each command's user-facing description against the upstream method doc's actual steps. If the upstream method doc gained new steps, flags, or capabilities in this sync that aren't reflected in the site's description, flag: "Command /X gained [capability] in this sync but the site description doesn't mention it. Update the description in [data file]." Count-based checks catch missing entries; this catches stale descriptions on existing entries. The most common void sync change is adding capabilities to existing commands, not adding new commands. (Field report #267: 9 commands had outdated descriptions after a sync that added capabilities to 12 agents — the biggest feature was invisible on the site.)
-5. **Version history check:** If VERSION.md was updated, compare the version table entries against any project pages that display release history (roadmap pages, changelog displays, "shipped versions" sections). Flag versions present in VERSION.md that are missing from site content. This prevents version drift between the methodology's version history and user-facing release pages.
+5c. **Version history check:** If VERSION.md was updated, compare the version table entries against any project pages that display release history (roadmap pages, changelog displays, "shipped versions" sections). Flag versions present in VERSION.md that are missing from site content. This prevents version drift between the methodology's version history and user-facing release pages.
 6. Announce: *"Hey dol! merry dol! The forge burns bright! VoidForge vA.B.C — all tools sharp, all songs true. The world is good."*
 
 ## Deliverables
@@ -268,3 +275,55 @@ Verify and celebrate:
 - **Network failure:** Bombadil announces the failure cheerfully and stops. No retries, no partial state.
 - **Full-tier users:** Bombadil only syncs methodology files. For wizard updates, tell the user to run `npx voidforge-build update --self`.
 - **Rollback:** All updates are applied to the working tree (not committed). If anything goes wrong, `git checkout -- .` restores every file to its last committed state. Bombadil should mention this safety net before applying updates.
+- **Two-pass sync from scaffold-era `/void` (pre-v20.2):** Projects upgrading from the old scaffold-era `/void` implementation require two runs. The first sync rewrites `.claude/commands/void.md` to point at `main` (npm-transport) instead of the legacy scaffold branch; the second sync, now using the new `void.md`, fetches main's full content. This is self-resolving but can look confusing — announce up front that a second run may be needed. (Field report #303)
+
+## Deployment Hygiene
+
+After syncing methodology to a project that deploys to a static CDN (Cloudflare Pages, Vercel static, Netlify, Firebase Hosting, GitHub Pages), methodology files MUST be excluded from the public deploy. Add a platform-appropriate ignore file that excludes:
+
+```
+.claude/
+docs/methods/
+docs/patterns/
+HOLOCRON.md
+CHANGELOG.md
+VERSION.md
+logs/
+```
+
+Per-platform file names:
+- Cloudflare Pages → `.cfignore`
+- Vercel → `.vercelignore`
+- Netlify → publish-ignore rules in `netlify.toml` or `_headers` / build config
+- Firebase → `firebase.json` `hosting.ignore` array
+
+**Verification (run after the next deploy):**
+
+```bash
+curl -sI "$DEPLOY_URL/.claude/agents/silver-surfer-herald.md" | head -1
+```
+
+If status is `200`, the exclusion is missing — methodology files are being publicly served. Expected status: `404`. Repeat for a representative sample: `docs/methods/FORGE_KEEPER.md`, `HOLOCRON.md`, `CHANGELOG.md`. Methodology files leaking to the public origin is an information-disclosure finding and a hygiene failure. (Field report #303)
+
+## Cross-Repo Scalar Sync
+
+Methodology consumers (marketing sites, docs sites, dashboards) often hardcode scalar counts — agent count, method-doc count, pattern count, test count, ADR count — in TypeScript data constants. These drift silently when `/void` runs, because `/void` touches methodology files but not sibling-repo data layers.
+
+**Target state (auto-sync):** Scaffold CI produces a `stats.json` artifact on every release:
+
+```json
+{
+  "version": "vX.Y.Z",
+  "agents": 42,
+  "methodDocs": 37,
+  "patterns": 41,
+  "scaffoldTests": 128,
+  "adrs": 61
+}
+```
+
+Sibling repos import `stats.json` at build time rather than hardcoding. A failed fetch falls back to the last-known-good committed copy.
+
+**Current state (manual sync):** Until the artifact ships, `docs/methods/RELEASE_MANAGER.md` release checklist MUST include a step: *"Sync scalar counts to sibling repos (marketing site, docs site) — update `totalADRs`, `totalMethodDocs`, `totalPatterns`, `totalScaffoldTests`, agent count."* Omission is how the marketing site landed 12 ADRs and 9 versions behind in field report #308 PF-6.
+
+Any sibling repo that displays these counts is in-scope for this sync, not just the primary marketing site.

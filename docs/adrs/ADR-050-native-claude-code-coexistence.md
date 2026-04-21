@@ -89,3 +89,25 @@ Breaks user muscle memory and existing scripts. Adolin's brand analysis: there i
 
 - **v23.9.0 (minor):** ship `/engage` and `/sentinel` as primary. `/review` and `/security` become aliases. No deprecation warnings.
 - **Never:** no alias removal is planned.
+
+## Rename Verification Checklist
+
+After any slash-command rename (e.g., `/review` → `/engage`), `grep -l` at one depth misses variant forms. Run all six patterns and fix each hit before declaring the rename complete:
+
+| Pattern | What it catches |
+|---------|-----------------|
+| `"/NAME"` | Quoted bare references in docs and prose |
+| `` `/NAME` `` | Backtick-wrapped inline code references |
+| `(/NAME)` | Parenthesized command mentions |
+| `→ Agent (/NAME)` | Handoff arrows in method docs and team tables |
+| `Run /NAME` | Imperative instructions in READMEs and tutorials |
+| `/NAME protocol` | Protocol references in agent definitions and ADRs |
+
+Plus:
+- Table cells with the bare command text (no backticks, no slashes) — common in method doc team tables and `docs/NAMING_REGISTRY.md`.
+- CHANGELOG entries citing the old name.
+- Error messages emitted by scripts (`scripts/surfer-gate/check.sh` and similar).
+
+Evidence: field report #306 RC-9 documents 20+ missed references after `/review` → `/engage` and `/security` → `/sentinel` renames despite initial `grep -l` claiming the rename complete. Two follow-up gauntlets (40, 40b) were needed to catch all variants. This checklist makes the hunt systematic.
+
+Future rename ADRs reference this checklist by pointing at this section.

@@ -57,6 +57,14 @@ Structure all findings as:
 - **Run test suite before deploy, not just build:** `npm test` (or equivalent) is a mandatory pre-flight check alongside `npm run build`. Broken tests can ship silently if only the build is verified — 4 broken tests shipped across 3 commits before being caught by a review agent. (Field report #298.)
 - **CronCreate `durable` flag silently fails:** The cron appears created but doesn't survive session end. For persistent operations, use OS-level crons (launchd on macOS, systemd timers on Linux) calling the `claude` CLI directly.
 
+### Cloudflare Pages Dev Mode + Purge Everything may not evict all cache
+
+For time-critical cache evictions (post-credential-rotation, post-content-correction), combine Purge Everything + Custom Purge by URL + Dev Mode, then wait at least TTL + 60 seconds. A single purge is often insufficient across Cloudflare's PoP network; second Custom Purge + wait is frequently required.
+
+- **Evidence:** Field report #305 — credential-leak remediation required multiple purge passes before all PoPs served rotated content.
+- **Action:** Time-critical evictions: Purge Everything → Custom Purge URL → Dev Mode on → wait TTL+60s → re-verify. If stale, repeat Custom Purge + wait.
+- **Scope:** Any Cloudflare Pages or Cloudflare CDN deploy where stale content has real cost (security, correctness).
+
 ## Required Context
 
 For the full operational protocol, load: `/docs/methods/DEVOPS_ENGINEER.md`

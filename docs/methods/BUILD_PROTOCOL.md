@@ -304,6 +304,25 @@ After running any build command (`build:workers`, `tsc --build`, webpack, etc.),
 2. Complete first-deploy pre-flight checklist (see `/devops` command)
 3. **Route registration check:** Verify all new API/route files are imported in the server entry point. Grep the entry point (e.g., `server.ts`, `app.ts`, `urls.py`) for imports of every new route file created during this build. An exported handler that isn't imported is a silent 404. (Field report #258: blueprint API routes exported but never registered via `addRoute()` in `server.ts` — wizard UI silently 404'd.)
 4. **Docker smoke test (field report #147):** If the project uses Docker/docker-compose, verify the container entrypoint runs the NEW code, not a legacy file. Run `docker compose up --build` (or equivalent) and confirm the process that starts is the architecture you just built. A 39-mission campaign once shipped with the legacy entrypoint because nobody checked what `CMD` pointed to.
+
+### External API integrations require live smoke tests (field report #304)
+
+Unit tests, protocol parser reviews, and SDK verification can all pass while a real API call fails. Signing bugs, wire-format encoding mismatches, and domain-field errors only surface when a live request is made.
+
+**Scope.** This applies to components that PRODUCE data for external consumption — custom signing, custom wire-format encoding, request serialization, or transport-layer framing. Read-only API clients that use a provider SDK with no custom signing (e.g., a Stripe balance read via `stripe-node`, a Supabase query via `@supabase/supabase-js`) are out of scope — their integration tests and the SDK's own test coverage provide adequate verification.
+
+For any in-scope component:
+
+1. Build a `src/tools/smoke-<service>.ts` (or equivalent, language-appropriate) harness IMMEDIATELY AFTER the client builds — before Gauntlet review.
+2. Run it against real credentials (paper mode, testnet, or sandbox at minimum; live if reversible).
+3. Document the exit criteria: what response or observable state counts as "working."
+4. Re-run smoke after every signing or wire-format change.
+
+**Credentials unavailable?** In regulated domains (banking APIs, government data APIs), sandbox access may take weeks to provision. Do NOT block Gauntlet indefinitely. Instead: document the exit criteria as an inline comment in the harness (`// SMOKE-TEST BLOCKED: awaiting <provider> sandbox credentials — target <date>`) and run the smoke test at the earliest CI checkpoint that has credentials. Phase log must name the blocker and the unblock target.
+
+BarrierWatch campaign (field report #304) shipped three signing bugs past 206 unit tests, a 44-agent gauntlet, and a 3-agent contract review. All three were caught on the first live API call. Code-review agents cannot see what only a live call reveals.
+
+Corollary: when reviewing external API clients, prefer agents that can fetch the SDK source (WebFetch, dependency audit) over agents that read docs alone. See thufir-protocol-parsing.md Operational Learnings.
 5. **Schema.sql sync gate:** After applying any migrations, regenerate `schema.sql` from the live database (e.g., `sqlite3 db.sqlite3 .schema > schema.sql`). Post-process the output: add `IF NOT EXISTS` to all `CREATE TABLE` and `CREATE INDEX` statements, remove `sqlite_sequence` (cannot be created manually). Commit the updated schema.sql. Stale schema.sql files cause false findings in `/assess` and mislead downstream consumers. (Field reports #232, #242)
 6. **Reference file freshness:** Before running `/assess` on an existing codebase, regenerate reference files (schema.sql, API docs, type exports) from the live system. Stale reference files generate false findings that waste triage time — the v7.0 assessment over-reported multi-tenant gaps because schema.sql showed 20 tables vs 52 actual. (Field report #232)
 7. Log to `/logs/phase-12-deploy.md`

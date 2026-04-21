@@ -6,6 +6,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.10.0] - 2026-04-20
+
+### Field Report Triage — 6 reports closed (#303–#308)
+
+Wave-based triage across all open field reports. 33 approved fixes applied; 5 already-shipped confirmed; 3 deferred (MONITORING.md consolidated into DEVOPS_ENGINEER.md + FORGE_KEEPER.md per Batch E decision; #306 PF-8 hook-victory note already captured in ADR-051; #308 PF-8 TerminalCommand component is downstream marketing-site work).
+
+### Added
+
+- **`docs/methods/SPEC_HANDOFF.md` (NEW)** — method doc formalizing cross-session implementation hand-off. Includes `verified-against-commit: <SHA>` stamping convention and nav-order requirements for new pages. Evidence: 23/26 execution rate on v23.9.x marketing-site pass (#307 F4, #308 PF-4/PF-7).
+- **`docs/patterns/deploy-preflight.ts` (NEW)** — TypeScript reference implementation of pre-deploy secret + sensitive-path scan. Called from `.claude/commands/deploy.md` Step 2.5 (#305 P1-e).
+- **`docs/patterns/post-deploy-probe.sh` (NEW)** — Bash reference implementation of post-deploy denylist probe. Called from Step 4.5 (#305 P1-f).
+- **`docs/LEARNINGS.md`** — six new entries (8/50 → 14/50): LRN-5 `stat -f %m` non-portability, LRN-6 npm ci lockfile drift (npm#4828), LRN-7 npm org vs scope availability, LRN-8 CI workspace-scoped test bypasses root pretest, LRN-9 spec-handoff pattern, LRN-10 marketing-site scalar count drift (#308).
+- **`docs/methods/FORGE_KEEPER.md`** — new `## Deployment Hygiene` section (`.cfignore`/`.vercelignore` guidance for static-host deploys); new `## Cross-Repo Scalar Sync` section (stats.json CI artifact target; manual sync fallback).
+- **`docs/methods/DEVOPS_ENGINEER.md`** — new `## Deploy Surface Boundary` section (repo root ≠ deploy surface; per-platform enforcement table for Cloudflare/Vercel/Netlify/Firebase/S3). New subsections: "CI runs `npm test` at repo root" (#308 PF-5, RC-3); "Post-push live-URL fingerprint" (broken auto-deploy integration detection, #307 F3); "Methodology-exposure check" (curl denylist, #303).
+- **`docs/methods/TROUBLESHOOTING.md`** — new `## Cloudflare / Wrangler Gotchas` section (`.gitignore` ignored in Direct Upload; aliased `--force` bug; Dev Mode + Purge cache eviction).
+- **`docs/methods/BUILD_PROTOCOL.md`** — Phase 12 external-API live smoke-test mandate with scope clarification (custom signing/serialization only; read-only SDK clients exempt) and credentials-unavailable escape hatch (#304 Fix 2).
+- **`docs/methods/SYSTEMS_ARCHITECT.md`** — npm-name availability pre-flight (ADR authoring) — mandates dual-check of registry query AND org-create form before canonicalizing a package name (#308 PF-1).
+- **`docs/methods/PRD_GENERATOR.md`** + **`.claude/commands/prd.md`** — Cloudflare Pages deploy safety: `wrangler.toml` with `pages_build_output_dir`, `.cfignore`, `SECURITY.md`, `public/.well-known/security.txt`, dedicated output directory. Explicitly forbids `wrangler pages deploy .` (#305 P0-c).
+- **`docs/methods/CAMPAIGN.md`** + **`.claude/commands/campaign.md`** — Step 0.5 TECH_DEBT SLA Audit: Critical+Immediate+LowEffort 48h, Critical+Immediate+HighEffort 72h, High+Immediate 7d (reasonable defaults, override per-project) (#305 P1-a). Post-Surfer format verification (#304 Fix 3b).
+- **`.claude/commands/deploy.md`** — Step 2.5 Pre-Deploy Secret Scan (Leia); Step 4.5 Post-Deploy Sensitive-Path Probe (Levi) (#305 P0-a, P0-b).
+- **`.claude/commands/architect.md`** — Step 4.5 Operator Sign-off on Invented Constraints (flag agent-invented thresholds/capital/safety values) (#304 Fix 1). Post-Surfer format verification.
+- **`docs/adrs/ADR-050-native-claude-code-coexistence.md`** — Rename Verification Checklist appendix: 6-pattern grep table (`"/NAME"`, `` `/NAME` ``, `(/NAME)`, `→ Agent (/NAME)`, `Run /NAME`, `/NAME protocol`) plus table-cell/CHANGELOG/error-message supplementary checks (#306 PF-2, RC-9).
+- **`.claude/agents/silver-surfer-herald.md`** — `## HARD CONSTRAINT — ROSTER ONLY` section (Surfer must refuse task execution even with Write/Edit/Bash tools); small-codebase scaling note (#304 Fix 3a, #303 Fix 3).
+- **`.claude/agents/picard-architecture.md`** — Operational Learning: agent-invented executive constraints require operator confirmation (#304).
+- **`.claude/agents/thufir-protocol-parsing.md`** — Operational Learning: "verified against SDK" requires source code, not docs (#304).
+- **`.claude/agents/leia-secrets.md`** — Operational Learning: Cloudflare User vs Account API Tokens are different dashboard pages (#305 P1-c).
+- **`.claude/agents/kusanagi-devops.md`** — Operational Learning: Cloudflare Pages Dev Mode + Purge Everything may not evict all cache in one pass (#305 P1-d).
+
+### Changed
+
+- **`docs/methods/FORGE_KEEPER.md`** — Step 4.5 preview deploy now runs `npm test` before `npm run build` (content drift from sync surfaces as test failures, not build failures) (#307 F2). Step 0 adds parallel-session commit detection (`git log --since="1 hour ago" --all`) (#307 F5). §Shared Methodology Files adds CHANGELOG.md identity check (skip if site/app versions, not methodology) (#307 F1). §Edge Cases adds two-pass scaffold-era `/void` sync note (#303 Fix 1). §Step 4 numbering fix (duplicate `5.` → `5c.`).
+
+### Security
+
+- **Deploy hardening end-to-end** — Motivated by field report #305 (32-day Cloudflare Pages `.env` credential leak). Structural protections: pre-deploy secret scan + sensitive-path probe, Deploy Surface Boundary invariant with per-platform enforcement, PRD_GENERATOR now emits safety configs by default, TROUBLESHOOTING documents wrangler gotchas (`.gitignore` ignored in Direct Upload). Every VoidForge-generated project that deploys to a static host inherits these protections. Methodology-exposure check (from #303) folded into the same deploy phase.
+
+### Release notes
+
+- No breaking changes. Strictly additive to method-doc structure, agent naming, and build-protocol phases.
+- All changes are documentation/methodology; no source-code changes. Tests and gate tests unaffected.
+- Downstream work deferred: `voidforge-marketing-site` `TerminalCommand` component refactor (#308 PF-8); cross-repo `stats.json` auto-sync (#308 PF-6 target-state; manual sync documented in FORGE_KEEPER.md until auto-sync lands).
+
+---
+
 ## [23.9.2] - 2026-04-20
 
 ### CI workflow idempotency + provenance baseline

@@ -51,6 +51,14 @@ Autonomous campaign execution: read the PRD, figure out what's next, build it, v
 12. **Log deviations.** When the build deviates from PRD architecture, update the PRD or log it in campaign-state.md. Never leave a silent contradiction.
 13. **Operational verification after deploy.** After deploying to a live environment, wait for 1 full operational cycle (1 trade cycle, 1 cron job, 1 polling interval) and check logs for errors, halts, and successful operations before marking the mission complete. "It deployed" ≠ "it works." (Field report #152)
 
+### TECH_DEBT SLA enforcement
+
+`/campaign` and `/assemble` audit `TECH_DEBT.md` before every mission selection. Critical + Immediate + LowEffort items overdue by 48h BLOCK campaign advancement. Critical + Immediate + HighEffort items overdue by 72h without owner + deadline BLOCK. High + Immediate items overdue by 7 days WARN.
+
+See `.claude/commands/campaign.md` Step 0.5 for the full gate.
+
+Evidence: field report #305. A Critical + Immediate + LowEffort credential-leak entry sat for 32 days because TECH_DEBT had labels but no contract.
+
 ## Two Modes
 
 ### Planning Mode (`--plan`)
