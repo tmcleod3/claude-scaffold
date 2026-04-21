@@ -27,13 +27,13 @@ Then open the folder in VS Code: **File > Open Folder > select `my-project`**.
 
 | Branch | What You Get | Install |
 |--------|-------------|---------|
-| `npx @voidforge/cli init` | Full — wizard server, dashboard, everything | May need build tools for node-pty |
-| `npx @voidforge/cli init --headless` | Methodology only — all commands, patterns, agents | No native deps needed |
+| `npx voidforge-build init` | Full — wizard server, dashboard, everything | May need build tools for node-pty |
+| `npx voidforge-build init --headless` | Methodology only — all commands, patterns, agents | No native deps needed |
 
 **Recommended for most Windows users:** Use headless mode to avoid native module issues:
 
 ```powershell
-npx @voidforge/cli init --headless my-project
+npx voidforge-build init --headless my-project
 ```
 
 If you want the full wizard and `npm install` fails with a `node-pty` error, see [Troubleshooting](#npm-install-fails-with-node-pty-error) below.
@@ -244,7 +244,7 @@ This is a native C++ module for the browser terminal. Four options:
 
 **Option A — Use headless mode (fastest)**
 ```powershell
-npx @voidforge/cli init --headless my-project
+npx voidforge-build init --headless my-project
 ```
 Full methodology, all commands, no native dependencies.
 
@@ -318,7 +318,7 @@ Opens **http://localhost:3141**:
 ## The Quick Path
 
 1. Install prerequisites (VS Code, Node.js, Git, Claude Code extension + CLI).
-2. Create project: `npx @voidforge/cli init --headless my-project` (or full: `npx @voidforge/cli init my-project`).
+2. Create project: `npx voidforge-build init --headless my-project` (or full: `npx voidforge-build init my-project`).
 3. Open folder in VS Code.
 4. Open Claude in the integrated terminal: `claude`.
 5. `/prd` — describe what you want to build.

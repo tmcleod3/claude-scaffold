@@ -6,6 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.9.1] - 2026-04-20
+
+### Publish-target pivot — `voidforge-build` supersedes `@voidforge/cli`
+
+During the attempted v23.9.0 first-publish, the `@voidforge` npm scope was unavailable (create-org rejected the name). See ADR-061 §13 for full rationale. Switched to unscoped `voidforge-build` / `voidforge-build-methodology` matching the `voidforge.build` domain.
+
+### Changed
+- **Package names (published):** `voidforge-build` + `voidforge-build-methodology`. Unscoped. Bin name stays `voidforge` — post-install UX unchanged.
+- **Runtime self-upgrade paths** (`packages/voidforge/scripts/voidforge.ts`, `packages/voidforge/wizard/lib/updater.ts`) now target `voidforge-build@latest`. `npm view`, `npm install -g`, `npx ... update` all updated.
+- **`require.resolve('voidforge-build-methodology/package.json')`** replaces the scoped form in `project-init.ts:60` and `updater.ts:43`.
+- **Workflow `-w` selectors** updated to `-w voidforge-build` in `publish.yml`, `validate-branches.yml`, and root `package.json` scripts.
+- **`.npmrc`** simplified to `provenance=true` only (scope pin removed — no scope).
+- **Docs sweep** (~25 files): active install-command and package-name references swapped from `@voidforge/cli` / `@voidforge/methodology` to `voidforge-build` / `voidforge-build-methodology`. Historical references (CHANGELOG, ROADMAP, PRD-wizard-extraction, ADR-038/039) preserved.
+- **`/void` command** (`.claude/commands/void.md`) gained a "Migrating from thevoidforge or @voidforge/cli" section with explicit commands.
+
+### Added
+- **ADR-061 §13 pivot amendment** documenting the scope-unavailable finding, options considered, and the `voidforge-build` decision.
+- **Legacy-install migration banner** in `voidforge.ts:40-50`. Runs on every CLI invocation when `pkg.name === 'thevoidforge' || '@voidforge/cli'`, printing the uninstall + reinstall commands on stderr. Unobtrusive for normal use; visible enough to prompt migration.
+
+### Release strategy
+- **Manual publish from maintainer laptop** (authenticated as `tomatreides`). SEC-001 scope-claim no longer applicable (unscoped); SEC-002 NPM_TOKEN rotation still relevant for CI but publish itself happens locally.
+- **Farewell releases** to be published after this: `thevoidforge@23.8.20` + `thevoidforge-methodology@23.8.20`. Minimal packages whose bin prints the migration banner — catches users whose self-upgrade fires on stale legacy installs.
+- **npm deprecate** on legacy names follows farewell publish.
+
+### Verification
+- `npm test` — 1384/1384 pass
+- `bash scripts/surfer-gate/test.sh` — 20/20 pass
+- `grep -rn '@voidforge/' .` in active docs (excluding historical) — clean except for legacy-defense line in `voidforge.ts:40` and one historical reference in LEARNINGS.md LRN-4 entry (describing the prior state).
+
+---
+
 ## [23.9.0] - 2026-04-20
 
 ### Campaign 42 — @voidforge scoped npm rename + methodology hardening

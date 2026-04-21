@@ -79,13 +79,13 @@ The command file gets shorter. The agent definition is canonical, persistent, an
 ### Methodology package distribution
 
 ```
-@voidforge/methodology
+voidforge-build-methodology
 ├── .claude/
 │   ├── commands/     ← 28 slash commands
 │   └── agents/       ← 259 subagent definitions (NEW)
 ```
 
-Ships via `npx @voidforge/cli init`. Every project gets the full roster.
+Ships via `npx voidforge-build init`. Every project gets the full roster.
 
 ## Consequences
 

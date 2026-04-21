@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Type check
-        run: npm run typecheck -w @voidforge/cli
+        run: npm run typecheck -w voidforge-build
 
       - name: Run tests (root — includes pretest agent-ref + gate validators)
         run: npm test
@@ -44,7 +44,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build -w @voidforge/cli
+        run: npm run build -w voidforge-build
 
       - name: Publish voidforge
         run: npm publish -w packages/voidforge --provenance --access public
@@ -68,7 +68,7 @@ jobs:
       - name: Prepack methodology
         run: npm run prepack -w packages/methodology
 
-      - name: Publish @voidforge/methodology
+      - name: Publish voidforge-build-methodology
         run: npm publish -w packages/methodology --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

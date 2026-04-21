@@ -37,7 +37,17 @@ async function getPackageVersion(): Promise<string> {
     try {
       const raw = await readFile(pkgPath, 'utf-8');
       const pkg = JSON.parse(raw) as { version?: string; name?: string };
-      if ((pkg.name === '@voidforge/cli' || pkg.name === 'thevoidforge' || pkg.name === 'voidforge') && pkg.version) return pkg.version;
+      if ((pkg.name === 'voidforge-build' || pkg.name === '@voidforge/cli' || pkg.name === 'thevoidforge' || pkg.name === 'voidforge') && pkg.version) {
+        // Migration banner for legacy installs — printed on every run until user migrates.
+        if (pkg.name === 'thevoidforge' || pkg.name === '@voidforge/cli') {
+          process.stderr.write(
+            `\n[VoidForge] You are running the legacy \`${pkg.name}\` CLI. Migrate:\n` +
+            `  npm uninstall -g ${pkg.name}\n` +
+            `  npm install -g voidforge-build@latest\n\n`
+          );
+        }
+        return pkg.version;
+      }
     } catch {
       continue;
     }
@@ -444,7 +454,7 @@ async function main(): Promise<void> {
             for (const [k, v] of Object.entries(process.env)) {
               if (v !== undefined && !/^npm_config_/i.test(k)) safeEnv[k] = v;
             }
-            const npmLatest = execSync('npm view @voidforge/cli version --registry=https://registry.npmjs.org/ 2>/dev/null', { encoding: 'utf-8', env: safeEnv }).trim();
+            const npmLatest = execSync('npm view voidforge-build version --registry=https://registry.npmjs.org/ 2>/dev/null', { encoding: 'utf-8', env: safeEnv }).trim();
             const localVersion = await getPackageVersion();
             if (npmLatest && localVersion && localVersion !== 'unknown' && npmLatest !== localVersion) {
               const [nMaj, nMin, nPatch] = npmLatest.split('.').map(Number);
@@ -459,7 +469,7 @@ async function main(): Promise<void> {
                   console.log(`  Upgraded to v${npmLatest}. Re-running update with new version...\n`);
                   // Re-exec with the new version — the new binary has the updated methodology
                   try {
-                    execSync('npx @voidforge/cli update --no-self-update', { stdio: 'inherit' });
+                    execSync('npx voidforge-build update --no-self-update', { stdio: 'inherit' });
                   } catch { /* exit code propagated */ }
                   process.exit(0);
                 } else {

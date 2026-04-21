@@ -54,7 +54,7 @@ See `/docs/templates/PRD-TEMPLATE.md` for the frontmatter format and field refer
 The methodology without the tooling. CLAUDE.md, all 30 slash commands, all agent protocols, all code patterns. No wizard UI, no npm runtime dependencies.
 
 ```bash
-npx @voidforge/cli init --headless my-app
+npx voidforge-build init --headless my-app
 cd my-app
 # Write your PRD in docs/PRD.md
 # Open in Claude Code
@@ -68,7 +68,7 @@ The lightest possible version. CLAUDE.md, all 30 slash commands, full agent prot
 
 ```bash
 # Drop into an existing project
-npx @voidforge/cli init --headless --target your-project/
+npx voidforge-build init --headless --target your-project/
 ```
 
 Or manually: copy CLAUDE.md, .claude/, and docs/ from the npm package into your project.
@@ -160,10 +160,10 @@ This is interactive. Claude works through each phase, verifies gates, and logs e
 
 ```bash
 # Option A: Browser wizard
-npx @voidforge/cli deploy
+npx voidforge-build deploy
 
 # Option B: Headless (from terminal / Claude Code — no browser needed)
-npx @voidforge/cli deploy --headless
+npx voidforge-build deploy --headless
 ```
 
 **Haku** scans your project, loads your PRD, and provisions infrastructure for your chosen target. The browser wizard shows a visual UI with SSE progress streaming; the `--headless` flag runs the same provisioner code from the terminal (used by `/build` Phase 12 so you never leave Claude Code). For AWS VPS, that means:
@@ -199,7 +199,7 @@ Your app is live. The deploy script ran a health check. SSL is auto-provisioned 
 
 ### Methodology-Only Users
 
-If you're using the methodology package (`@voidforge/methodology`) without the wizard, skip Steps 1 and 3. Write your PRD manually in `docs/PRD.md`, run `/build`, and handle your own infrastructure. The methodology is the same — only the automation layer differs.
+If you're using the methodology package (`voidforge-build-methodology`) without the wizard, skip Steps 1 and 3. Write your PRD manually in `docs/PRD.md`, run `/build`, and handle your own infrastructure. The methodology is the same — only the automation layer differs.
 
 ---
 
@@ -463,7 +463,7 @@ Full architecture review with parallel analysis: Spock (schema) + Uhura (integra
 #### `/void` — Bombadil's Forge Sync
 **When:** You want to update your VoidForge methodology to the latest version.
 
-Old Tom Bombadil tends the forge itself. He checks for the latest VoidForge methodology (via `npx @voidforge/cli update` or git fetch as fallback), compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). If you're already on the latest, Tom tells you so and goes back to singing.
+Old Tom Bombadil tends the forge itself. He checks for the latest VoidForge methodology (via `npx voidforge-build update` or git fetch as fallback), compares every shared methodology file against your local copies, shows you exactly what changed, and sings the updates into place — all while preserving your project-specific customizations (PRD, logs, code, CLAUDE.md project section). If you're already on the latest, Tom tells you so and goes back to singing.
 
 #### `/thumper` — Chani's Worm Rider
 **When:** You want to control Claude Code from your phone via Telegram.
@@ -804,7 +804,7 @@ If Phase 12 or a deploy script fails:
 | Deploy script hangs | Check SSH connectivity, verify key permissions (0600) |
 | Test runner not found | Phase 1 should set it up — re-run scaffold if missing |
 | Context fills mid-phase | Checkpoint to journal, new session, continue |
-| npm install fails on Windows | node-pty needs C++ tools. Use `--ignore-scripts` or `npx @voidforge/cli init --headless` |
+| npm install fails on Windows | node-pty needs C++ tools. Use `--ignore-scripts` or `npx voidforge-build init --headless` |
 
 ---
 

@@ -40,7 +40,7 @@ export interface ProjectResult {
 /**
  * Resolves the methodology source directory.
  * In development: monorepo root (where CLAUDE.md lives).
- * In production: the installed @voidforge/methodology package.
+ * In production: the installed voidforge-build-methodology package.
  */
 async function resolveMethodologyRoot(): Promise<string> {
   // Development: walk up from this file to find CLAUDE.md at monorepo root
@@ -53,11 +53,11 @@ async function resolveMethodologyRoot(): Promise<string> {
     current = resolve(current, '..');
   }
 
-  // Production: try to resolve from @voidforge/methodology
+  // Production: try to resolve from voidforge-build-methodology
   try {
     const { createRequire } = await import('node:module');
     const require_ = createRequire(import.meta.url);
-    const methodologyPkg = require_.resolve('@voidforge/methodology/package.json');
+    const methodologyPkg = require_.resolve('voidforge-build-methodology/package.json');
     return resolve(methodologyPkg, '..');
   } catch {
     // Package not installed — expected in development
@@ -65,7 +65,7 @@ async function resolveMethodologyRoot(): Promise<string> {
 
   throw new Error(
     'Cannot find methodology source. Checked: CLAUDE.md walkup (development), ' +
-    '@voidforge/methodology package (production). Ensure VoidForge is installed correctly.',
+    'voidforge-build-methodology package (production). Ensure VoidForge is installed correctly.',
   );
 }
 

@@ -268,14 +268,14 @@ VoidForge distributes via npm (v21.0+). The monorepo produces two packages:
 
 | Package | npm Name | Contains |
 |---------|----------|----------|
-| Wizard + CLI | `@voidforge/cli` | Server, API, UI, lib, CLI, templates, tests |
-| Methodology | `@voidforge/methodology` | CLAUDE.md, commands, methods, patterns, agents, Holocron |
+| Wizard + CLI | `voidforge-build` | Server, API, UI, lib, CLI, templates, tests |
+| Methodology | `voidforge-build-methodology` | CLAUDE.md, commands, methods, patterns, agents, Holocron |
 
-**Install path:** `npx @voidforge/cli init` creates a new project with methodology. `npx @voidforge/cli` launches the wizard UI.
+**Install path:** `npx voidforge-build init` creates a new project with methodology. `npx voidforge-build` launches the wizard UI.
 
 **Monorepo structure:** `packages/voidforge/` (wizard+CLI) and `packages/methodology/` (npm package config). Methodology source files live at the repo root (CLAUDE.md, .claude/, docs/, etc.) and are copied into the methodology package at publish time via prepack script.
 
-**Update path:** `npx @voidforge/cli update` replaces the old `/void` git-fetch. Same Bombadil UX, npm transport instead of git.
+**Update path:** `npx voidforge-build update` replaces the old `/void` git-fetch. Same Bombadil UX, npm transport instead of git.
 
 The agents, characters, and personality are VoidForge's identity — they ship in every package.
 

@@ -19,14 +19,14 @@ Starts the VoidForge wizard server and opens the Danger Room dashboard in your b
 Start the wizard server and open the Danger Room:
 
 1. Check if the wizard server is already running (check port 3141)
-2. If not running: start with `node wizard/server.js` or `npx @voidforge/cli start`
+2. If not running: start with `node wizard/server.js` or `npx voidforge-build start`
 3. Open `http://localhost:3141/danger-room` in the default browser
 4. If Cultivation is installed: opens to `#growth` tab by default
 5. **Remote server:** If running on EC2/VPS where port 3141 is not publicly exposed, guide the user to use an SSH tunnel: `ssh -i your-key.pem -L 3141:localhost:3141 user@host` — then open `http://localhost:3141/danger-room` in their local browser. (Field report #122)
 
 ### `/dangerroom install`
 
-Alias for starting the wizard server. Ensures the server is running and the Danger Room is accessible. If `packages/voidforge/wizard/server.ts` does not exist, report: "The Danger Room requires the full VoidForge wizard. Install with `npx @voidforge/cli init` or run `npx @voidforge/cli install danger-room`."
+Alias for starting the wizard server. Ensures the server is running and the Danger Room is accessible. If `packages/voidforge/wizard/server.ts` does not exist, report: "The Danger Room requires the full VoidForge wizard. Install with `npx voidforge-build init` or run `npx voidforge-build install danger-room`."
 
 ### `/dangerroom status`
 

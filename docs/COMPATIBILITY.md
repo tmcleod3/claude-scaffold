@@ -57,7 +57,7 @@ The `engines` field in `package.json` defines the supported Node.js range:
 
 **When to update:**
 1. When node-pty and ws both ship prebuilt binaries for a new Node.js major version
-2. Test: run `npx @voidforge/cli init`, open Avengers Tower, verify terminal works
+2. Test: run `npx voidforge-build init`, open Avengers Tower, verify terminal works
 3. Update the upper bound to include the new version
 4. Update this document with the test results
 

@@ -16,7 +16,7 @@ Inside: 30 slash commands, 34 code patterns, 260+ specialist agents across 9 fic
 
 ```bash
 # Create a new project with VoidForge methodology
-npx @voidforge/cli init my-app
+npx voidforge-build init my-app
 cd my-app
 
 # Open Claude Code in the project:
@@ -28,9 +28,9 @@ claude
 #   /assess      ← evaluate an existing codebase first
 ```
 
-Or launch the browser wizard for vault, credentials, and guided PRD generation: `npx @voidforge/cli`.
+Or launch the browser wizard for vault, credentials, and guided PRD generation: `npx voidforge-build`.
 
-VoidForge distributes via npm as two scoped packages: `@voidforge/cli` (wizard + CLI, bin name `voidforge`) and `@voidforge/methodology` (agents, commands, methods, patterns). Projects contain methodology only — zero VoidForge runtime dependencies.
+VoidForge distributes via npm as two scoped packages: `voidforge-build` (wizard + CLI, bin name `voidforge`) and `voidforge-build-methodology` (agents, commands, methods, patterns). Projects contain methodology only — zero VoidForge runtime dependencies.
 
 ---
 
@@ -164,7 +164,7 @@ voidforge/
     │       ├── __tests__/        ← 675 vitest tests
     │       └── lib/              ← Vault, auth, provisioners, dashboards, growth, financial
     │
-    └── methodology/              ← npm: "@voidforge/methodology"
+    └── methodology/              ← npm: "voidforge-build-methodology"
         ├── package.json          ← Metadata + prepack script
         └── scripts/prepack.sh    ← Copies methodology from root at publish time
 ```
@@ -233,8 +233,8 @@ voidforge/
 
 | Wizard | Command | Purpose |
 |--------|---------|---------|
-| **Gandalf** | `npx @voidforge/cli init` | Setup: vault, credentials, PRD generation, scaffolding |
-| **Haku** | `npx @voidforge/cli deploy` | Deploy: provisions infrastructure for 6 targets |
+| **Gandalf** | `npx voidforge-build init` | Setup: vault, credentials, PRD generation, scaffolding |
+| **Haku** | `npx voidforge-build deploy` | Deploy: provisions infrastructure for 6 targets |
 
 ### Deploy Targets
 

@@ -339,6 +339,44 @@ This ADR is **not** "fully implemented" until:
 - [ ] Post-publish verification (§6.4) passes all checks, including `npx @voidforge/cli init` end-to-end against the live registry.
 - [ ] `grep -rn "thevoidforge" .` returns only historical references (CHANGELOG entries for prior versions, ROADMAP history, VERSION.md v23.5.1 line, and this ADR's "old name" mentions).
 
+## 13. Post-implementation pivot (v23.9.1) — `voidforge-build` over `@voidforge/*`
+
+**Status:** Amendment. Supersedes §2.2's decision to target the `@voidforge` scope.
+
+During the attempted first publish of `@voidforge/cli@23.9.0` (v23.9.0 release), the npm scope claim failed. `npm` CLI has no `org create` command — organization creation is web-only via `npmjs.com/org/create`. On the create-org page, the name `voidforge` was reported as **not available** (likely a squatter-adjacent claim by the same account holding unscoped `voidforge@0.0.1`).
+
+**Path considered:**
+- Dispute the squat — slow (~3 weeks), uncertain outcome.
+- Try `voidforge-hq` / `voidforge-io` / other scope variants — requires web UI iteration with no programmatic verification.
+- Rename to `vforge` (unscoped, available) — user's original suggestion; rejected earlier for brand preservation.
+- **Chose: `voidforge-build` (unscoped)** — mirrors the product's domain `voidforge.build` exactly; available today; no org creation needed.
+
+**Final published names:**
+
+| Package | Published Name |
+|---------|----------------|
+| Wizard + CLI | `voidforge-build` |
+| Methodology | `voidforge-build-methodology` |
+
+**Bin name unchanged:** `voidforge`. `npx voidforge-build init` still invokes the `voidforge` binary.
+
+**Legacy compatibility:**
+- `packages/voidforge/scripts/voidforge.ts:40` accepts `voidforge-build`, `@voidforge/cli` (never actually published but defended against), `thevoidforge` (legacy publish v21.0-v23.8.12), and unscoped `voidforge` (the squat — unreachable in practice but defensively included).
+- Runs with legacy name detection print a migration banner on stderr.
+
+**Migration plan — manual + farewell hybrid (per user authorization 2026-04-20):**
+
+1. Publish `voidforge-build@23.9.1` and `voidforge-build-methodology@23.9.1` (this release).
+2. Publish **farewell** `thevoidforge@23.8.20` and `thevoidforge-methodology@23.8.20` — minimal packages whose `bin` prints a migration banner and exits 1. Users with stale `thevoidforge@23.8.12` installs whose self-upgrade fires (because `npm view thevoidforge` returns 23.8.20) will get the banner instead of a new functional CLI.
+3. Run `npm deprecate 'thevoidforge@*' "..."` and `npm deprecate 'thevoidforge-methodology@*' "..."` pointing users at `voidforge-build`.
+4. `/void` command documents the manual migration as a one-time action (see `.claude/commands/void.md` — "Migrating from thevoidforge or @voidforge/cli" section added in this release).
+
+**Rejected alternative:** publishing `@voidforge/cli` anyway via a workaround. Not possible — scope must exist before publish, and `@voidforge` scope remains unavailable.
+
+**Lessons adjacent to LRN-4:** Published npm name must match install instructions — AND the name must be one you can actually claim. Available for publish is a prerequisite check that should happen BEFORE docs canonicalize a name. Adding to LEARNINGS.md as LRN-5 in a follow-up pass.
+
+---
+
 ## 12. Known gaps deferred beyond this ADR
 
 The Victory Gauntlet identified these issues as out-of-scope for v23.9.0. They warrant their own remediation:

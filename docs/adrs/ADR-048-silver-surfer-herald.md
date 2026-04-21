@@ -16,7 +16,7 @@ Additionally, the Herald has no character identity. Every other VoidForge system
 
 2. **Add `voidforge herald` CLI subcommand** — the invocation bridge. When a command file says "run the Herald," Claude executes:
    ```bash
-   npx @voidforge/cli herald --command /review --focus "security" --json
+   npx voidforge-build herald --command /review --focus "security" --json
    ```
    This calls `runHerald()` via the CLI, outputs a JSON roster, and Claude uses that roster to launch agents.
 

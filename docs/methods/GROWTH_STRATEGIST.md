@@ -86,7 +86,7 @@ This separation means the user can install Cultivation in 5 minutes (vault + tre
 
 ## Headless / Methodology-Only Users
 
-Projects created with `npx @voidforge/cli init --headless` do not include the `wizard/` directory. This affects which parts of the growth protocol are available:
+Projects created with `npx voidforge-build init --headless` do not include the `wizard/` directory. This affects which parts of the growth protocol are available:
 
 **Fully functional without wizard (Phases 1-3):**
 - Phase 1 — Reconnaissance: PRD audit, analytics audit, competitive scan

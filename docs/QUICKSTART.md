@@ -12,13 +12,13 @@ Get from zero to building in 5 minutes.
 
 ### Recommended: npm (v21.0+)
 ```bash
-npx @voidforge/cli init my-project
+npx voidforge-build init my-project
 cd my-project
 ```
 
 ### Alternative: Headless (methodology only — no wizard UI)
 ```bash
-npx @voidforge/cli init --headless my-project
+npx voidforge-build init --headless my-project
 cd my-project
 ```
 
@@ -74,7 +74,7 @@ Sisko reads the PRD, plans the missions, and builds everything autonomously. Eac
 
 **npm install fails on Windows**
 The `node-pty` package (browser terminal) requires C++ build tools on Windows. Either:
-- Use headless mode: `npx @voidforge/cli init --headless my-project`
+- Use headless mode: `npx voidforge-build init --headless my-project`
 - Install Visual Studio Build Tools: `npm install -g windows-build-tools`
 - Or use WSL2 (recommended for Claude Code on Windows)
 
@@ -85,4 +85,4 @@ Make sure you're in the project directory when you run `claude`. It reads `CLAUD
 Run `/campaign --resume` to pick up where you left off. VoidForge saves state to `logs/` after every phase.
 
 **How do I update VoidForge?**
-Run `/void` inside Claude Code, or `npx @voidforge/cli update` from the terminal.
+Run `/void` inside Claude Code, or `npx voidforge-build update` from the terminal.

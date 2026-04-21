@@ -121,7 +121,7 @@
 ### Orphaned AWS Resources
 
 ```bash
-npx @voidforge/cli deploy
+npx voidforge-build deploy
 # Haku will show orphaned runs on step 1
 
 # Or via API
@@ -143,7 +143,7 @@ GCM auth tag will detect corruption. Same recovery as lost password.
 
 If the restart banner appears in the Lobby:
 1. Click "Restart Now" — server gracefully shuts down and restarts
-2. Or manually: kill the VoidForge process and restart with `npx @voidforge/cli init`
+2. Or manually: kill the VoidForge process and restart with `npx voidforge-build init`
 
 ## v11.0+ Subsystems (added post-v8.0)
 

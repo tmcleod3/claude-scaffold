@@ -7,9 +7,9 @@
   },
   "workspaces": ["packages/*"],
   "scripts": {
-    "typecheck": "npm run typecheck -w @voidforge/cli",
-    "test": "npm run test -w @voidforge/cli",
-    "test:e2e": "npm run test:e2e -w @voidforge/cli",
+    "typecheck": "npm run typecheck -w voidforge-build",
+    "test": "npm run test -w voidforge-build",
+    "test:e2e": "npm run test:e2e -w voidforge-build",
     "validate:agents": "bash scripts/validate-agent-refs.sh",
     "test:surfer-gate": "bash scripts/surfer-gate/test.sh",
     "pretest": "bash scripts/validate-agent-refs.sh && bash scripts/surfer-gate/test.sh"

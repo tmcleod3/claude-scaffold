@@ -50,7 +50,7 @@ Keep your VoidForge installation current without breaking your project. Every up
 
 ## Shared Methodology Files
 
-These are the files Bombadil watches. They are distributed via the @voidforge/methodology npm package:
+These are the files Bombadil watches. They are distributed via the voidforge-build-methodology npm package:
 
 ```
 CLAUDE.md                          ← Methodology sections only (not Project block)
@@ -102,9 +102,9 @@ Orient to the current state:
 Fetch the latest from the source:
 
 1. Determine the fetch method:
-   - If `npx @voidforge/cli` is installed → use `npx @voidforge/cli update` (npm transport)
+   - If `npx voidforge-build` is installed → use `npx voidforge-build update` (npm transport)
    - If the VoidForge remote exists under a different name → use that remote
-   - If not installed → `npm install -g @voidforge/cli` then `npx @voidforge/cli update`
+   - If not installed → `npm install -g voidforge-build` then `npx voidforge-build update`
 2. Read the bundled `VERSION.md` to get the latest version from the installed methodology package
 3. Compare versions numerically (parse major.minor.patch as integers — "3.10.0" is newer than "3.9.0"):
    - If already current → *"The river brings no new songs today. You're running the latest — vX.Y.Z. The forge burns bright!"* → Stop.
@@ -222,7 +222,7 @@ Unchanged (N files) — skipped
 
 Apply the updates:
 
-1. **For each New file:** Copy from the upstream ref using `npx @voidforge/cli update`
+1. **For each New file:** Copy from the upstream ref using `npx voidforge-build update`
 2. **For each Updated file (no local modifications):** Replace with upstream version
 3. **For each Locally modified file:**
    - For `CLAUDE.md`: Preserve the Project section and any user-added Coding Standards. Update methodology sections (Slash Commands table, Team table, Docs Reference, Release Tiers, etc.)
@@ -266,5 +266,5 @@ Verify and celebrate:
 - **User is ahead of upstream:** Possible if user contributes back. Bombadil notes it and doesn't downgrade.
 - **Merge conflicts in CLAUDE.md:** The Project section (name, one-liner, domain, repo) is always preserved. Methodology sections are always updated. If the user added custom sections, Bombadil preserves those too.
 - **Network failure:** Bombadil announces the failure cheerfully and stops. No retries, no partial state.
-- **Full-tier users:** Bombadil only syncs methodology files. For wizard updates, tell the user to run `npx @voidforge/cli update --self`.
+- **Full-tier users:** Bombadil only syncs methodology files. For wizard updates, tell the user to run `npx voidforge-build update --self`.
 - **Rollback:** All updates are applied to the working tree (not committed). If anything goes wrong, `git checkout -- .` restores every file to its last committed state. Bombadil should mention this safety net before applying updates.

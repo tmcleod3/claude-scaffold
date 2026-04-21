@@ -1,6 +1,6 @@
 # /void — Bombadil's Forge Sync
 
-> **Note:** This branch is a tombstone redirect. Running `/void` here upgrades your methodology to the latest from `main`. For the best experience, install the VoidForge CLI: `npm install -g @voidforge/cli`
+> **Note:** This branch is a tombstone redirect. Running `/void` here upgrades your methodology to the latest from `main`. For the best experience, install the VoidForge CLI: `npm install -g voidforge-build`
 
 ## Context Setup
 1. Read `/docs/methods/FORGE_KEEPER.md`
@@ -34,18 +34,36 @@ Orient to the current state:
 ## Step 1 — Listen to the River (Goldberry)
 Fetch the latest from upstream. Two transports supported:
 
-**Transport A (npm — v21.0+):** If `npx @voidforge/cli` is available:
-1. Check: run `npx @voidforge/cli --version` to get the installed CLI version
-2. **CLI freshness check (MANDATORY):** Run `npm view @voidforge/cli version` to get the latest npm version. Compare the two:
-   - If the CLI version is BEHIND npm latest → run `npm install -g @voidforge/cli@latest` FIRST. This is critical: old CLIs (pre-v23.1.1) compare against their own bundled methodology and will falsely report "up to date." The upgrade must happen BEFORE `npx @voidforge/cli update`.
-   - If the install fails (permissions) → try `sudo npm install -g @voidforge/cli@latest` or suggest the user run it manually
-   - After upgrading, verify with `npx @voidforge/cli --version` that the new version is active
-3. Run `npx @voidforge/cli update` — now using the latest CLI, which has the full methodology including `.claude/agents/`
+### Migrating from `thevoidforge` or `@voidforge/cli` (v23.9.1+ rename)
+
+Per ADR-061, the npm package was renamed to `voidforge-build` in v23.9.1. If the user's global install is on `thevoidforge`, `@voidforge/cli`, or unscoped `voidforge` (the squatted name), they need a ONE-TIME manual migration:
+
+```bash
+# Check current state
+voidforge --version  # prints a migration banner if on legacy name
+
+# Migrate
+npm uninstall -g thevoidforge @voidforge/cli voidforge 2>/dev/null
+npm install -g voidforge-build@latest
+
+# Verify
+voidforge --version  # banner should be gone; version >= 23.9.1
+```
+
+Bin name `voidforge` is preserved — post-install UX is identical. After migration, normal `/void` flow continues via Transport A below. Do NOT edit a project's `package.json` to switch dependency names — projects consume methodology via `npx`, not direct deps.
+
+**Transport A (npm — v21.0+):** If `npx voidforge-build` is available:
+1. Check: run `npx voidforge-build --version` to get the installed CLI version
+2. **CLI freshness check (MANDATORY):** Run `npm view voidforge-build version` to get the latest npm version. Compare the two:
+   - If the CLI version is BEHIND npm latest → run `npm install -g voidforge-build@latest` FIRST. This is critical: old CLIs (pre-v23.1.1) compare against their own bundled methodology and will falsely report "up to date." The upgrade must happen BEFORE `npx voidforge-build update`.
+   - If the install fails (permissions) → try `sudo npm install -g voidforge-build@latest` or suggest the user run it manually
+   - After upgrading, verify with `npx voidforge-build --version` that the new version is active
+3. Run `npx voidforge-build update` — now using the latest CLI, which has the full methodology including `.claude/agents/`
 4. If no changes → "The forge burns bright! You're on the latest." → Stop
 5. If changes applied → skip to Step 4 (npm transport handles Steps 2-3)
 
-**Transport B (git — legacy):** If `npx @voidforge/cli` is NOT available:
-1. Offer to install: "Install VoidForge CLI for one-pass updates: `npm install -g @voidforge/cli`. Or continue with git transport (may require two passes for new file categories)."
+**Transport B (git — legacy):** If `npx voidforge-build` is NOT available:
+1. Offer to install: "Install VoidForge CLI for one-pass updates: `npm install -g voidforge-build`. Or continue with git transport (may require two passes for new file categories)."
 2. If user declines or npm unavailable, proceed with git:
 3. Run `git remote -v` — look for a remote pointing to `tmcleod3/voidforge`
 4. If no VoidForge remote exists:

@@ -330,8 +330,8 @@ After build completes and before launch, Wong logs which patterns were used in t
 If this build introduces a new shared file category (e.g., `.claude/agents/`, a new patterns subdirectory, a new config format), verify ALL consumption paths include it before publishing:
 1. `prepack.sh` — included in npm package build
 2. `copy-assets.sh` — included in local build copy
-3. `project-init.ts` — copied during `npx @voidforge/cli init`
-4. `updater.ts` — synced during `npx @voidforge/cli update`
+3. `project-init.ts` — copied during `npx voidforge-build init`
+4. `updater.ts` — synced during `npx voidforge-build update`
 5. `FORGE_KEEPER.md` — listed in Bombadil's shared file manifest
 6. `void.md` — listed in user-facing sync checklist
 Missing even one path means some users silently miss the feature. This gate is mandatory after any structural addition to the methodology. (Field report #297: .claude/agents/ was added to packaging but missed in 3 of 6 delivery paths.)

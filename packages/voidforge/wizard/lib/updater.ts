@@ -40,7 +40,7 @@ async function resolveMethodologySource(): Promise<string> {
   try {
     const { createRequire } = await import('node:module');
     const require_ = createRequire(import.meta.url);
-    const pkgPath = require_.resolve('@voidforge/methodology/package.json');
+    const pkgPath = require_.resolve('voidforge-build-methodology/package.json');
     const { resolve } = await import('node:path');
     return resolve(pkgPath, '..');
   } catch {
@@ -219,7 +219,7 @@ export function selfUpdate(): { success: boolean; message: string } {
     for (const [k, v] of Object.entries(process.env)) {
       if (v !== undefined && !/^npm_config_/i.test(k)) safeEnv[k] = v;
     }
-    execSync('npm install -g @voidforge/cli@latest --registry=https://registry.npmjs.org/', {
+    execSync('npm install -g voidforge-build@latest --registry=https://registry.npmjs.org/', {
       stdio: 'pipe',
       env: safeEnv,
     });

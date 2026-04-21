@@ -16,8 +16,8 @@ The prepack script correctly bundles `.claude/agents/` into the npm package. But
 
 | Path | Copies Agents? |
 |------|---------------|
-| `project-init.ts` (npx @voidforge/cli init) | **No** |
-| `updater.ts` (npx @voidforge/cli update) | **No** |
+| `project-init.ts` (npx voidforge-build init) | **No** |
+| `updater.ts` (npx voidforge-build update) | **No** |
 | FORGE_KEEPER.md (/void shared file list) | **No** |
 
 Note: `new-project.sh` and `copy-assets.sh` were updated in v23.0 M8, but the TypeScript init/update paths were not.

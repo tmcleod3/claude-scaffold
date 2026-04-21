@@ -274,7 +274,7 @@ The old simple/advanced toggle is eliminated. Every user gets the same flow — 
 
 | Tier | Branch | Contents | Use Case |
 |------|--------|----------|----------|
-| **Full** | `main` | Everything: wizards, provisioners, vault, thumper | `npx @voidforge/cli init` |
+| **Full** | `main` | Everything: wizards, provisioners, vault, thumper | `npx voidforge-build init` |
 | **Scaffold** | `scaffold` | Methodology only: commands, methods, patterns, HOLOCRON | Clone, add PRD, `/build` |
 | **Core** | `core` | Ultra-light: commands, methods, patterns, registry | Drop into any project |
 

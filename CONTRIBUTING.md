@@ -46,11 +46,11 @@ Runtime code lives in `wizard/` (main branch only). Fixes should:
 |--------|-------------|-------------|
 | `main` | Everything — methodology + wizard + CLI | All users (v21.0+) |
 
-> **Note:** The `scaffold` and `core` branches were deprecated in v21.1 and will be deleted on 2026-05-08. All distribution now goes through npm: `npx @voidforge/cli init`.
+> **Note:** The `scaffold` and `core` branches were deprecated in v21.1 and will be deleted on 2026-05-08. All distribution now goes through npm: `npx voidforge-build init`.
 
-**If your change is to a shared file** (commands, methods, patterns, CLAUDE.md, naming registry), it ships via the `@voidforge/methodology` npm package.
+**If your change is to a shared file** (commands, methods, patterns, CLAUDE.md, naming registry), it ships via the `voidforge-build-methodology` npm package.
 
-**If your change is to runtime code** (`wizard/`), it ships via the `@voidforge/cli` npm package.
+**If your change is to runtime code** (`wizard/`), it ships via the `voidforge-build` npm package.
 
 ## Pull Request Process
 
