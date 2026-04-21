@@ -164,7 +164,10 @@ fi
 
 # -------- Rule 3: Fresh roster present --------
 if [ -f "$ROSTER_FILE" ]; then
-    ROSTER_MTIME="$(stat -f %m "$ROSTER_FILE" 2>/dev/null || stat -c %Y "$ROSTER_FILE" 2>/dev/null || echo 0)"
+    # Portable mtime: `stat -f %m` (BSD/macOS) returns mtime; `stat -f %m` on GNU means
+    # something different (mount point) and succeeds silently with wrong output — so we
+    # can't rely on `||` fallback. `date -r FILE +%s` works on both BSD and GNU.
+    ROSTER_MTIME="$(date -r "$ROSTER_FILE" +%s 2>/dev/null || echo 0)"
     ROSTER_AGE=$(( $(date +%s) - ROSTER_MTIME ))
     if [ "$ROSTER_AGE" -lt "$ROSTER_TTL_SECONDS" ]; then
         _allow "roster present (age=${ROSTER_AGE}s)"
