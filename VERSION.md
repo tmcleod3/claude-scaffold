@@ -1,6 +1,6 @@
 # Version
 
-**Current:** 23.11.0
+**Current:** 23.11.1
 
 ## Versioning Scheme
 
@@ -14,6 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/):
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 23.11.1 | 2026-05-10 | `/git` release-discipline patch — Step 4.5 (auto-tag, default-on) and Step 7 (`--npm` opt-in publish). Closes the silent-release gap that stranded v23.10.0 and v23.11.0 between GitHub and npm. Tag-push triggers the existing `publish.yml` workflow; `--npm` is a same-session fallback. Documents the `latest` dist-tag race when multiple tags are pushed simultaneously. RELEASE_MANAGER.md mirrored. |
 | 23.11.0 | 2026-05-10 | Field Report Triage — 18 reports closed (#313-#320, #322-#330). Two combined batches across multi-tenant retrofit campaigns (#313-#320) and autonomous-mode + AI-execution campaigns (#322-#330). 9 new patterns: adr-verification-gate.md, audit-log.ts, multi-tenant-{pool-bypass,property-test}.ts, rls-test-fixture.py, structural-sql-sentinel.py, refactor-extraction.md, ai-prompt-safety.ts, llm-state-dedup.ts. ai-eval.ts extended with Claude-prompt-eval template. middleware.ts extended with hot-path logging gate. 18 method-doc sections across CAMPAIGN, SYSTEMS_ARCHITECT, SECURITY_AUDITOR, QA_ENGINEER, SUB_AGENTS, BACKEND_ENGINEER, RELEASE_MANAGER, GAUNTLET, AI_INTELLIGENCE, DEVOPS_ENGINEER, FORGE_KEEPER, TESTING, TIME_VAULT. Surfer Gate now ships via npm methodology package + wizard project-init (closes ADR-051 distribution gap #317). Operational learnings added to Picard, Sisko, Coulson, Bashir, Loki, Irulan, Silver Surfer. |
 | 23.10.0 | 2026-04-20 | Field Report Triage — 6 reports closed (#303-#308). 33 approved fixes: SPEC_HANDOFF.md (new method doc), deploy-preflight.ts + post-deploy-probe.sh (new patterns), LEARNINGS LRN-5..10, Deploy Surface Boundary + Deployment Hygiene (field report #305 remediation), Step 2.5 pre-deploy secret scan + Step 4.5 post-deploy probe, TECH_DEBT SLA, npm-name pre-flight, ADR-050 Rename Verification Checklist, Silver Surfer HARD CONSTRAINT + 4 agent operational learnings. |
 | 23.9.2 | 2026-04-20 | CI workflow idempotency + provenance baseline — `publish.yml` guards each publish with "already-published" check so re-runs skip cleanly. Tag-push re-publishes via CI to attach npm provenance attestation (absent on v23.9.1's manual publish). |

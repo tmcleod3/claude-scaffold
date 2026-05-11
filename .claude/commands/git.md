@@ -65,6 +65,14 @@ Stage and commit:
 4. Present the full commit message and staged file list to the user
 5. On user approval, execute the commit
 
+## Step 4.5 — Tag (Coulson)
+Annotate the commit with the version tag (default-on; opt out via `--no-tag`):
+1. Run `git tag -a vX.Y.Z -m "vX.Y.Z: <one-line summary>"` against HEAD
+2. Verify: `git tag --list vX.Y.Z` returns the tag
+3. If a tag with that name already exists on a different commit, stop and surface the conflict — do not force-overwrite without user instruction.
+
+Tags are local until pushed (Step 6). Why default-on: a release commit without a tag is invisible to `git describe`, GitHub releases, and most release tooling. **Field report: v23.10.0 and v23.11.0 shipped without tags in May 2026, blocking npm publish discovery downstream — exactly the kind of silent omission this step prevents.**
+
 ## Step 5 — Verify (Barton)
 Confirm everything is consistent:
 1. Run `git log -1 --format="%H %s"` — verify the commit exists and message is correct
@@ -73,6 +81,7 @@ Confirm everything is consistent:
    - `package.json` version matches
    - The **active changelog** (PROJECT_VERSION.md if present, else CHANGELOG.md) has an entry for this version
    - Commit message starts with the correct version tag
+   - `git tag --list vX.Y.Z` returns the tag (unless `--no-tag` was used)
    - **ROADMAP.md cross-check (field report #309 Fix 4):** if `ROADMAP.md` exists, grep it for the new version string. If milestones in ROADMAP.md reference a higher version than `package.json`, that's drift — surface it and offer to bump. If ROADMAP claims a milestone is "DONE" at a version that doesn't match the just-committed bump, surface that too. Drift between ROADMAP and package.json typically goes unnoticed for weeks.
 3. Run `git status` — verify working tree is clean (no forgotten files)
 4. If any inconsistency found, flag it and offer to fix
@@ -81,8 +90,28 @@ Confirm everything is consistent:
 Only if the user explicitly requests:
 1. Check remote: `git remote -v`
 2. Check if branch tracks upstream: `git status -sb`
-3. Push: `git push`
-4. Verify: `git log --oneline -1` matches remote
+3. Push branch: `git push`
+4. Push tags (if Step 4.5 ran): `git push origin vX.Y.Z` (or `git push --tags` if multiple new tags exist)
+5. Verify: `git log --oneline -1` matches remote, `git ls-remote --tags origin vX.Y.Z` shows the tag on remote
+
+## Step 7 — Publish to npm (Dockson) [--npm only]
+Only runs when the user passes `--npm`. Publishing is irreversible (npm forbids re-using version numbers) and broadcasts to every consumer, so explicit opt-in is required.
+
+**Read this first.** If `.github/workflows/publish.yml` (or equivalent) is configured to publish on tag push, the canonical publish path is the CI workflow — pushing the tag in Step 6 already triggers it. Use `--npm` when CI is unreachable, broken, or when you need a same-session publish without waiting for the workflow. Running both in parallel is safe (the workflow's "already published" check will skip the duplicate) but wastes a CI minute.
+
+**Tag-push ordering caveat.** If you push multiple tags in one `git push --tags` call and CI publishes them in parallel, npm's `latest` dist-tag lands on whichever finished last — not the highest semver. After a multi-tag push, verify with `npm view <name> dist-tags` and run `npm dist-tag add <name>@vX.Y.Z latest` to repoint if needed. (This bit us when v23.10.0 + v23.11.0 were pushed together in May 2026.)
+
+1. **Preflight.** Run `npm whoami` — if not logged in, stop and tell the user to run `npm login`. Run `git status` — if working tree is dirty, stop (publishing from a dirty tree creates packages that don't match the tagged commit).
+2. **Discover publishable packages.** Build the list:
+   - If `package.json` at repo root has no `"private": true`, include it.
+   - If a workspaces array exists, walk each workspace package; include those without `"private": true`.
+   - For monorepos without workspaces (e.g., `packages/*/package.json`), glob and filter the same way.
+   - Skip any package whose `version` field doesn't match the version just committed in Step 4 — surface the mismatch instead of publishing inconsistent versions.
+3. **Confirm.** Print the list (`name@version`) and the registry (`npm config get registry`), then ask for confirmation. Include a note when `publishConfig.access` is `public` vs scoped.
+4. **Publish in dependency order.** If one package depends on another in the list, publish the dependency first. For VoidForge specifically: `voidforge-build-methodology` publishes before `voidforge-build`.
+5. **Run `npm publish` per package** from each package's own directory. Surface the tarball summary line (`+ name@version`) on success. On `EPUBLISHCONFLICT` (version already published), stop — the user needs to bump and re-run.
+6. **Verify.** For each published package, run `npm view <name> version` and confirm it returns the new version. There is sometimes a few-second registry propagation lag — retry once after 5s if mismatched.
+7. **Final summary.** Print which packages were published and at what version. This is the line that closes the release.
 
 ## Step 5.5 — Command↔Doc Sync Check (Friday)
 If any `docs/methods/*.md` file was modified, verify the paired `.claude/commands/*.md` file reflects the same additions:
@@ -106,9 +135,13 @@ If any `docs/methods/*.md` file was modified, verify the paired `.claude/command
 If a method doc gained a new section, flag, or checklist item — flag it: "Method doc X changed but command file Y may need matching update." The user decides whether the command file needs updating.
 
 ## Arguments
-- `--dry-run` → Show version bump, changelog entry, and commit message without executing.
+- `--dry-run` → Show version bump, changelog entry, commit message, tag, and (if `--npm`) the package list that would publish — without executing any of it.
+- `--major` / `--minor` / `--patch` → Override the Step 2 recommendation.
+- `--no-tag` → Skip Step 4.5. Use sparingly; tagless release commits are the bug that produced this flag.
+- `--npm` → Run Step 7 after push: publish every non-private package whose version matches the bump. Requires `npm whoami` to succeed. For monorepos, publishes all matching packages in dependency order.
 
 ## Handoffs
 - If changes include security fixes → note for Kenobi (`/sentinel`)
 - If changes include infrastructure → note for Kusanagi (`/devops`)
 - If version is MAJOR → recommend Picard review (`/architect`)
+- If `--npm` was used → the release is now public on npm; any rollback requires a new patch version (npm forbids unpublishing within 72h for security)

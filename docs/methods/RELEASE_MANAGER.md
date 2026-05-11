@@ -116,8 +116,10 @@ After every commit, Barton verifies:
 - [ ] `VERSION.md` history table has new row with correct date
 - [ ] `package.json` "version" field matches
 - [ ] `CHANGELOG.md` has `[X.Y.Z]` section with correct date
+- [ ] `git tag --list vX.Y.Z` returns the tag (unless `--no-tag`)
 - [ ] `git status` shows clean working tree
 - [ ] No untracked files that should have been included
+- [ ] If `--npm` was used: every published package returns the new version from `npm view <name> version`
 
 ## CLAUDE.md Command Table Integrity Check
 
@@ -135,6 +137,30 @@ When the user passes `--deploy` to `/git`, run `/deploy` automatically after the
 4. Log the deploy result in the commit's campaign-state entry
 
 This enables one-command commit-and-deploy for ad-hoc changes outside of campaigns.
+
+## `/git --npm` Flag
+
+When the user passes `--npm` to `/git`, run npm publish after the commit + tag + push succeeds. Publishing is irreversible (npm forbids re-using version numbers; unpublish blocked within 72h) — explicit opt-in is required.
+
+**Why this flag exists.** VoidForge distributes via npm. Before this flag existed, Coulson's workflow ended at `git push`, leaving every release stranded between GitHub and the registry. Field report: v23.10.0 and v23.11.0 were committed, tagged with version strings in `package.json`, and pushed to origin/main — but never published. Downstream consumers running `npx voidforge-build update` saw nothing new for two release cycles until the gap was caught manually. Tagging defaults to on (Step 4.5); npm publish is opt-in because broadcast actions deserve a deliberate trigger.
+
+**Procedure (Dockson handles the publish; Coulson orchestrates):**
+
+1. **Preflight.** `npm whoami` must succeed. Working tree must be clean. Tag must exist (Step 4.5 result).
+2. **Discover.** Enumerate publishable packages — root `package.json` and any workspace/`packages/*` packages that don't have `"private": true`. Skip any whose version field doesn't match the version just bumped.
+3. **Confirm.** Print the list (`name@version`) and registry, ask for go-ahead.
+4. **Order.** Resolve internal dependencies — if package B depends on package A inside the same monorepo, publish A first. For VoidForge: `voidforge-build-methodology` before `voidforge-build`.
+5. **Publish.** Run `npm publish` from each package's own directory. Capture the `+ name@version` line.
+6. **Verify.** `npm view <name> version` must return the new version for each published package. Retry once after 5s on lag.
+7. **Report.** Final summary line: which packages shipped, at what version, to which registry.
+
+**Hard rules:**
+
+- Never publish from a dirty working tree.
+- Never publish if `npm whoami` fails — surface the error and stop.
+- Never `--force` or `--ignore-scripts`. If `prepack` fails, the package is broken; fix it.
+- On `EPUBLISHCONFLICT` (version exists), stop. The user must bump and re-run; do not attempt to dist-tag around it.
+- Scoped/private packages are skipped silently unless the user explicitly names them.
 
 ## Per-Commit CHANGELOG Discipline
 

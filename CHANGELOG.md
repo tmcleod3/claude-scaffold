@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
+## [23.11.1] - 2026-05-10
+
+### `/git` release-discipline patch — close the silent-release gap
+
+v23.10.0 and v23.11.0 reached `origin/main` with bumped `package.json` versions but no git tags and no npm publish. The `publish.yml` workflow fires on `v*` tag push, so without tags the release pipeline never ran — both versions sat stranded for a full release cycle until a downstream `/void` returned nothing. Coulson now tags by default and exposes `--npm` for same-session manual publishing.
+
+### Added
+
+- **`.claude/commands/git.md` — Step 4.5 (Tag).** Default-on. After commit, annotate HEAD with `git tag -a vX.Y.Z -m "<summary>"`. Skippable via `--no-tag`. Conflict detection on existing tags.
+- **`.claude/commands/git.md` — Step 7 (Publish to npm).** Opt-in via `--npm`. Preflight (`npm whoami`, clean tree), discover non-private packages whose version matches the bump, confirm + publish in dependency order (methodology before voidforge-build for VoidForge specifically), verify via `npm view ... version` with one retry. Notes the `latest` dist-tag race when multiple tags are pushed in one batch.
+- **`.claude/commands/git.md` — Push tags in Step 6.** Branch push now also pushes new tags, verified against `git ls-remote --tags origin`.
+- **`.claude/commands/git.md` — Arguments.** `--no-tag` and `--npm` documented in the flags block; handoff note covers npm's 72h unpublish lockout.
+- **`docs/methods/RELEASE_MANAGER.md` — `/git --npm` Flag section.** Mirrors the command-file spec: when CI is the canonical path, when `--npm` is the fallback, hard rules (no dirty publish, no `--force`, no `--ignore-scripts`, stop on `EPUBLISHCONFLICT`).
+- **`docs/methods/RELEASE_MANAGER.md` — Verification Checklist.** Adds `git tag --list vX.Y.Z` and post-publish `npm view <name> version` checks.
+
+### Why this exists
+
+Field-report context lives inline in both files so the lesson survives without an external citation. Tag step is default-on because tagless release commits are invisible to `git describe`, GitHub releases, and (critically) the tag-triggered publish workflow. Publish is opt-in because broadcast actions deserve a deliberate trigger, and the CI workflow remains the canonical path when reachable.
+
+---
+
 ## [23.11.0] - 2026-05-10
 
 ### Field Report Triage — 18 reports closed (#313–#320, #322–#330)
